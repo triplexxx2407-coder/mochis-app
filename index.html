@@ -1839,7 +1839,7 @@ function vSeguimiento(){
    <div class="card"><span class="small muted">Tu número de pedido</span><div class="code num">#${esc(p.id)}</div>
      <div class="row"><span class="pill" style="color:${ESTADOS[p.estado].c}">${ESTADOS[p.estado].l}</span><span class="small muted">${fecha(p.creado)}</span></div>${timeline(p)}
      ${p.modo!=='reparto' && p.codigo && !['entregado','rechazado','cancelado'].includes(p.estado)?`<div class="codebox"><span>Tu código de entrega</span><b class="num">${esc(p.codigo)}</b><small>${p.modo==='recoger'?'Dáselo en la tienda al recoger tu pedido.':'Dáselo a quien te entregue, solo cuando tengas tu pedido en la mano.'}</small></div>`:''}
-     <div class="note">Prototipo: cambia a la cuenta del negocio (menú Más → Cambiar de cuenta) para aceptar el pedido${p.modo==='reparto'?', y usa el modo <b>Repartidor</b> (arriba) para tomarlo':''}. Vuelve aquí para ver el avance.</div></div>
+     <div class="note">Prototipo: toca <b>Comercio</b> arriba para aceptar el pedido${p.modo==='reparto'?' y <b>Repartidor</b> para tomarlo':''}. Luego vuelve a <b>Cliente</b> → Perfil → Mis pedidos para ver el avance.</div></div>
    <div class="stack">${p.modo==='reparto'?repCliente(p):''}<div class="card"><div class="row">${avatar(perfilDe(n.id),40)}<h2>${esc(n.nombre)}</h2></div>
       <div class="small"><b>Teléfono:</b> ${n.telefono?esc(n.telefono):todoTag()}</div><div class="small"><b>Dirección:</b> ${n.direccion?esc(n.direccion):todoTag()}</div>
       <div class="small muted">Si necesitas hablar con el negocio, menciona tu pedido #${esc(p.id)}.</div></div>
@@ -1870,7 +1870,7 @@ function vMiNegocio(){
   if (!soyNegocio()) return `<div class="empty"><h2>No estás usando una cuenta de negocio</h2><button class="btn pri" data-a="cuentas">Cambiar de cuenta</button></div>`;
   const n = neg(S.yo);
   const nuevos = S.pedidos.filter(p=>p.neg===n.id&&!['entregado','rechazado','cancelado'].includes(p.estado)).length;
-  return `<div class="stack"><div class="row between"><div class="row">${avatar(perfilDe(n.id),48)}<div><span class="small muted">Mi negocio</span><h1 style="font-size:24px">${nombreV(perfilDe(n.id))}</h1></div></div><button class="btn soft sm" data-a="neg" data-x="${n.id}">Ver como cliente</button></div>
+  return `<div class="stack"><div class="row between"><div class="row">${avatar(perfilDe(n.id),48)}<div><span class="small muted">Mi negocio</span><h1 style="font-size:24px">${nombreV(perfilDe(n.id))}</h1></div></div><button class="btn soft sm" data-a="neg" data-x="${n.id}">Ver como cliente</button><label class="small muted" style="display:flex;align-items:center;gap:6px">Prototipo: negocio<select data-ch="negDemo" style="width:auto;padding:6px 8px;font-size:13px">${S.negocios.map(x=>`<option value="${x.id}" ${x.id===n.id?'selected':''}>${esc(x.nombre)}</option>`).join('')}</select></label></div>
   ${n.estado!=='activo'?`<div class="note warn">Tu negocio está <b>${esc(n.estado)}</b>. Puedes preparar tu catálogo, pero los clientes aún no lo ven.</div>`:''}
   <div class="ptabs">${[['pedidos',`Pedidos${nuevos?` (${nuevos})`:''}`],['catalogo','Catálogo'],['publicaciones','Publicaciones'],['seguidores','Seguidores'],['perfil','Perfil y envíos'],['ventas','Ventas y cargos']].map(([k,l])=>`<button class="${ui.pTab===k?'on':''}" data-a="bizTab" data-x="${k}">${l}</button>`).join('')}</div>
   ${ {pedidos:pPedidos, catalogo:pCatalogo, publicaciones:pPublicaciones, seguidores:pSeguidores, perfil:pPerfil, ventas:pVentas}[ui.pTab](n) }</div>`;
@@ -1895,7 +1895,7 @@ function pedidoCard(p){
 }
 function pPedidos(n){
   const ps = S.pedidos.filter(p=>p.neg===n.id);
-  if(!ps.length) return `<div class="empty"><h2>Sin pedidos todavía</h2><p class="muted">Cambia a tu cuenta personal, haz un pedido de prueba a este negocio y aparecerá aquí.</p></div>`;
+  if(!ps.length) return `<div class="empty"><h2>Sin pedidos todavía</h2><p class="muted">Toca <b>Cliente</b> arriba, haz un pedido de prueba a este negocio y vuelve a <b>Comercio</b>: aparecerá aquí.</p></div>`;
   const g = {nuevos:ps.filter(p=>p.estado==='recibido'), proc:ps.filter(p=>['aceptado','preparando','listo','en_camino'].includes(p.estado)), fin:ps.filter(p=>['entregado','rechazado','cancelado'].includes(p.estado))};
   return `<div class="cols">${[['nuevos','Nuevos'],['proc','En proceso'],['fin','Terminados']].map(([k,l])=>`<div class="col"><h3>${l} · ${g[k].length}</h3>${g[k].map(pedidoCard).join('')||'<p class="small muted">Nada aquí.</p>'}</div>`).join('')}</div>`;
 }
@@ -2153,7 +2153,7 @@ function repInicio(r, activo){
     ${activo?`<button class="ractive" data-a="rTab" data-x="pedido"><b>Tienes un pedido activo</b><span>#${esc(activo.id)} · ${esc(REP_EST[activo.rep.estado])} →</span></button>`:''}
     <div class="row between"><h2 style="margin:0">Pedidos disponibles</h2><span class="small muted">${disp.length}</span></div>
     ${!S.repOnline?`<div class="empty" style="padding:30px 10px"><h2>Estás desconectado</h2><p class="muted">Conéctate para ver pedidos de Los Mochis.</p></div>`
-     : disp.length ? disp.map(p=>repOfertaCard(p,r,!!activo)).join('') : `<div class="empty" style="padding:30px 10px"><h2>Sin pedidos por ahora</h2><p class="muted">Prototipo: en la App, pide algo a Tacos El Güero con "Repartidor de la app", acéptalo como negocio y aparecerá aquí.</p></div>`}
+     : disp.length ? disp.map(p=>repOfertaCard(p,r,!!activo)).join('') : `<div class="empty" style="padding:30px 10px"><h2>Sin pedidos por ahora</h2><p class="muted">Prototipo: en <b>Cliente</b> pide algo a Tacos El Güero con "Repartidor de la app", acéptalo en <b>Comercio</b> y aparecerá aquí.</p></div>`}
     <div class="note small">La app no te cobra comisión: el envío completo es para ti. La cuota de seguro la paga el cliente y cubre tus accidentes de trabajo.</div></div>`;
 }
 function repOfertaCard(p, r, ocupado){
@@ -2411,9 +2411,13 @@ function aSeguridad(){
 /* ---------- render ---------- */
 const VISTAS = {home:vHome, buscar:vBuscar, inicio:vInicio, notifs:vNotifs, negocio:vNegocio, carrito:vCarrito, checkout:vCheckout, seguimiento:vSeguimiento, pedidos:vPedidos, vende:vVende, post:vPost, perfil:vPerfil, usuario:vUsuario, mensajes:vMensajes, ajustes:vAjustes, minegocio:vMiNegocio};
 const historial = [];
+function modosNav(){
+  const act = ui.mode==='app' ? (soyNegocio()?'comercio':'app') : ui.mode;
+  return `<nav class="modes" aria-label="Vista del prototipo">${[['app','Cliente'],['comercio','Comercio'],['rep','Repartidor'],['admin','Admin']].map(([k,l])=>`<button class="${act===k?'on':''}" data-a="modo2" data-x="${k}">${l}</button>`).join('')}</nav>`;
+}
 function protoBar(){
   return `<div class="protobar"><b>Prototipo</b><span>Datos de ejemplo · sin pagos ni cuentas reales</span>
-    <nav class="modes" aria-label="Vista del prototipo">${[['app','App'],['rep','Repartidor'],['admin','Admin']].map(([k,l])=>`<button class="${ui.mode===k?'on':''}" data-a="mode" data-x="${k}">${l}</button>`).join('')}</nav></div>`;
+    ${modosNav()}</div>`;
 }
 function render(){
   if (ui.mode==='rep'){
@@ -2421,7 +2425,7 @@ function render(){
   }
   if (ui.mode==='admin'){
     $('#app').innerHTML = `<header class="top"><div class="top-in wrap gut"><button class="logo2" style="padding:0;font-size:20px" data-a="mode" data-x="app"><span class="mark">${esc(inits(S.cfg.marca))}</span><span style="display:inline">${esc(S.cfg.marca)}</span></button>
-      <nav class="modes" aria-label="Vista del prototipo">${[['app','App'],['rep','Repartidor'],['admin','Admin']].map(([k,l])=>`<button class="${ui.mode===k?'on':''}" data-a="mode" data-x="${k}">${l}</button>`).join('')}</nav>
+      ${modosNav()}
       <button class="ibtn" data-a="toggleTema" aria-label="Cambiar tema">${temaActual()==='oscuro'?ico.sun:ico.moon}</button></div></header>
       <main class="wrap gut" style="padding-block:18px 60px">${vAdmin()}</main>`;
     renderLayer(); return;
@@ -2490,6 +2494,12 @@ const cerrarHoja = () => { ui.sheet=null; ui.err=''; renderLayer(); };
 const A = {
   go: x => { go(x); if(x==='notifs'){ misNotifs().forEach(n=>n.leida=true); save(); } },
   atras: () => { const h=historial.pop(); if(!h) return go('home',true); Object.assign(ui,{post:h.post, perfil:h.perfil, neg:h.neg}); go(h.view,true); },
+  modo2: x => {
+    if (x==='comercio'){ ui.mode='app'; const b = (ui.ultNeg && esNeg(ui.ultNeg)) ? ui.ultNeg : (S.misNegocios[0]||'b1'); S.yo=b; ui.pTab='pedidos'; ui.sheet=null; save(); go('minegocio',true); toast(`Estás como comercio: ${perfilDe(b).nombre}`); return; }
+    if (x==='app'){ const era=ui.mode; ui.mode='app'; if (soyNegocio()){ ui.ultNeg=S.yo; S.yo=S.personal; save(); toast('Estás como cliente: '+perfilDe(S.yo).nombre); } ui.sheet=null; if(era!=='app'||ui.view==='minegocio') go('home',true); else render(); return; }
+    A.mode(x);
+  },
+  negDemo: v => { S.yo=v; ui.ultNeg=v; ui.pTab='pedidos'; save(); go('minegocio',true); toast(`Ahora eres ${perfilDe(v).nombre}`); },
   mode: x => { ui.mode=x; ui.err=''; ui.edit=null; ui.delAsk=null; ui.sheet=null; render(); window.scrollTo(0,0); },
   toggleTema: () => { PREF.tema = temaActual()==='oscuro'?'claro':'oscuro'; aplicarPref(); rerender(); },
   tema: x => { PREF.tema=x; aplicarPref(); rerender(); },
