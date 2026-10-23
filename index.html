@@ -519,6 +519,60 @@ details.set .bd{padding:0 18px 18px;display:flex;flex-direction:column;gap:12px}
 mark{background:color-mix(in srgb,var(--accent) 35%,transparent);color:inherit;border-radius:3px;padding:0 1px}
 .notaver{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
 .notabig{font-size:20px;font-weight:700;background:var(--surface-2);border-radius:20px;padding:14px 18px;max-width:420px;line-height:1.35}
+
+/* ---------- v11: color por función ---------- */
+:root{--c-like:#E11D48;--c-com:#2563EB;--c-send:#0D9488;--c-rep:#F5B301;--c-save:#D97706;--c-msg:#2563EB;--c-pedir:#EA580C;--c-ok:#16A34A;--c-cart:#EA580C;--c-ped:#7C3AED;--c-bell:#D97706;--c-tienda:#EA580C;--c-crear:#16A34A}
+:root[data-theme="dark"]{--c-like:#FB7185;--c-com:#60A5FA;--c-send:#2DD4BF;--c-save:#FBBF24;--c-msg:#60A5FA;--c-pedir:#FB923C;--c-ok:#4ADE80;--c-cart:#FB923C;--c-ped:#A78BFA;--c-bell:#FBBF24;--c-tienda:#FB923C;--c-crear:#4ADE80}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--c-like:#FB7185;--c-com:#60A5FA;--c-send:#2DD4BF;--c-save:#FBBF24;--c-msg:#60A5FA;--c-pedir:#FB923C;--c-ok:#4ADE80;--c-cart:#FB923C;--c-ped:#A78BFA;--c-bell:#FBBF24;--c-tienda:#FB923C;--c-crear:#4ADE80}}
+.post-a .b-like{color:var(--c-like)} .post-a .b-com{color:var(--c-com)} .post-a .b-send{color:var(--c-send)} .post-a .b-save{color:var(--c-save)}
+.post-a .b-like.on{color:var(--c-like)} .post-a .b-save.on{color:var(--c-save)}
+.post-a .b-rep{padding:6px} .post-a .b-rep svg{width:26px;height:26px;transition:transform .2s} .post-a .b-rep:not(.on) svg circle{fill:transparent;stroke:var(--c-rep);stroke-width:2} .post-a .b-rep:not(.on) svg path{stroke:var(--c-rep)} .post-a .b-rep.on svg{transform:rotate(180deg)}
+.post-a button:hover{background:color-mix(in srgb,currentColor 12%,transparent)}
+.ic-rep{flex:none}
+.rphead{display:flex;align-items:center;gap:7px;background:none;border:0;padding:2px 2px 8px;color:var(--muted);font-size:13px;font-weight:600}.rphead b{color:var(--fg)}.rphead .ic-rep{width:18px;height:18px}
+.ictile{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none}.ictile.save{background:color-mix(in srgb,var(--c-save) 18%,transparent);color:var(--c-save)}
+.mention{background:none;border:0;padding:0;color:var(--c-com);font-weight:700;font-size:inherit}
+.tagchips{display:flex;align-items:center;gap:6px;flex-wrap:wrap;color:var(--muted);font-size:13px}.tagchips svg{width:16px;height:16px}
+.tagsug{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);max-height:260px;overflow-y:auto}
+.tagopt{display:flex;align-items:center;gap:10px;border:0;background:none;padding:8px 12px;text-align:left;color:var(--fg)}.tagopt:hover{background:var(--surface-2)}.tagopt span{display:flex;flex-direction:column}.tagopt small{color:var(--muted);font-size:12px}
+.chip button{border:0;background:none;padding:0 0 0 2px;font-size:16px;line-height:1;color:var(--muted)}
+.stats .stat{background:none;border:0;padding:0;color:var(--fg);text-align:center;cursor:pointer;border-radius:10px}.stats .stat:hover b{color:var(--brand)}
+.stats .stat b{display:block;font-family:var(--display)} .stats .stat span{color:var(--muted)}
+.ptabs2{display:flex;justify-content:center;gap:6px;border-top:1px solid var(--line);padding-top:6px}
+.ptabs2 button{display:flex;align-items:center;gap:7px;border:0;background:none;padding:10px 14px;border-radius:12px;font-weight:800;color:var(--muted);font-size:14px}
+.ptabs2 button svg{width:18px;height:18px}.ptabs2 button small{font-weight:700;opacity:.7}
+.ptabs2 button.on{color:var(--fg);background:var(--surface-2)}
+.storig{position:absolute;left:12px;top:64px;z-index:3;display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.55);color:#fff;border:0;border-radius:999px;padding:6px 11px;font-size:12.5px}.storig svg{width:16px;height:16px}
+.sttags{position:absolute;right:10px;top:40%;z-index:3;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.sttags button{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.92);color:#111;border:0;border-radius:999px;padding:6px 10px;font-weight:800;font-size:12.5px;box-shadow:0 2px 10px rgba(0,0,0,.25)}.sttags svg{width:14px;height:14px}
+.stshare{position:absolute;left:50%;transform:translateX(-50%);bottom:74px;z-index:3;display:flex;align-items:center;gap:8px;background:var(--c-rep);color:#111;border:0;border-radius:999px;padding:9px 14px;font-weight:800;font-size:13px;white-space:nowrap}.stshare svg{width:20px;height:20px}.stshare svg circle{fill:#fff}.stshare svg path{stroke:var(--c-rep)}
+.rpbtn{background:color-mix(in srgb,var(--c-rep) 22%,transparent)!important;border-color:transparent!important;color:var(--fg)!important}.rpbtn svg{width:18px;height:18px}
+.pthumbs{display:flex;gap:8px}.pthumbs button{width:64px;border:2px solid transparent;border-radius:12px;padding:0;overflow:hidden;background:none}.pthumbs button.on{border-color:var(--brand)}.pthumbs .ph{border-radius:10px}
+/* clima */
+.toprow{display:flex;gap:10px;align-items:stretch}.toprow .hsearch{flex:1;min-width:0}
+.clima{display:flex;align-items:center;gap:7px;border:1px solid var(--line);background:linear-gradient(135deg,color-mix(in srgb,#F59E0B 22%,var(--surface)),color-mix(in srgb,#38BDF8 18%,var(--surface)));border-radius:14px;padding:6px 14px 6px 10px;color:var(--fg);font-size:22px;flex:none}
+.clima b{font-family:var(--display);font-size:19px}.clima small{font-size:11.5px;color:var(--muted);font-weight:700;line-height:1.1;max-width:58px;text-align:left}
+@media (max-width:520px){.clima small{display:none}.clima{padding:6px 10px}}
+.clhead{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,color-mix(in srgb,#F59E0B 18%,var(--surface)),color-mix(in srgb,#38BDF8 16%,var(--surface)));border-radius:18px;padding:14px 16px}
+.clhead .big{font-size:52px;line-height:1}.clhead b{font-family:var(--display);font-size:34px;display:block}.clhead span{display:block;font-weight:700}.clhead small{color:var(--muted)}
+.clhoras{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}
+.clhoras>div{flex:0 0 58px;display:flex;flex-direction:column;align-items:center;gap:3px;background:var(--surface-2);border-radius:14px;padding:8px 4px;font-size:18px}.clhoras small{font-size:11px;color:var(--muted)}.clhoras b{font-size:14px}
+.lluv{color:#0284C7!important;font-weight:700}
+.cldias{display:flex;flex-direction:column;gap:4px}
+.cld{display:grid;grid-template-columns:62px 28px 36px 34px 1fr 34px;align-items:center;gap:6px;padding:6px 4px;border-bottom:1px solid var(--line);font-size:15px}.cld .d{font-weight:700}.cld .lo{color:var(--muted);text-align:right}
+.rng{position:relative;height:6px;border-radius:99px;background:var(--surface-2)}.rng i{position:absolute;top:0;bottom:0;border-radius:99px;background:linear-gradient(90deg,#38BDF8,#F59E0B,#EF4444)}
+/* tarjetas teñidas por la foto */
+.bcard2{--tint:var(--surface-2)}
+.bcard2 .in{background:color-mix(in srgb,var(--tint) 30%,var(--surface));transition:background .4s}
+.bcard2{border-color:color-mix(in srgb,var(--tint) 45%,var(--line))}
+/* íconos del menú con color */
+.side .nv[data-x="home"] svg{color:var(--brand)} .side .nv[data-x="inicio"] svg{color:var(--c-tienda)} .side .nv[data-x="mensajes"] svg{color:var(--c-msg)} .side .nv[data-x="notifs"] svg{color:var(--c-bell)}
+.side .nv[data-a="crear"] svg{color:var(--c-crear)} .side .nv[data-x="carrito"] svg{color:var(--c-cart)} .side .nv[data-x="pedidos"] svg{color:var(--c-ped)} .side .nv[data-x="minegocio"] svg{color:var(--c-tienda)}
+.mnav button[data-x="inicio"] svg{color:var(--c-tienda)} .mnav button[data-a="crear"] svg{color:var(--c-crear)} .mnav button[data-x="pedidos"] svg{color:var(--c-ped)} .mtop .ibtn[data-x="notifs"] svg{color:var(--c-bell)} .mtop .ibtn[data-x="mensajes"] svg{color:var(--c-msg)}
+.home-side .lk[data-a="seguir"]{background:color-mix(in srgb,var(--brand) 16%,transparent);padding:4px 10px;border-radius:999px;font-size:12.5px}
+.home-side .lk[data-a="neg"]{background:var(--c-pedir);color:#fff!important;padding:4px 12px;border-radius:999px;font-size:12.5px}
+.btn.pri[data-a="abrirChat"],.btn[data-a="abrirChat"]{background:color-mix(in srgb,var(--c-msg) 16%,var(--surface));color:var(--c-msg);border-color:transparent}
+.buy{background:color-mix(in srgb,var(--c-pedir) 14%,var(--surface))!important;border-color:color-mix(in srgb,var(--c-pedir) 40%,transparent)!important}
 </style>
 </head>
 <body>
@@ -558,7 +612,7 @@ const POOL_AVATAR = ['perro','gato','flores','atardecer','cerro','mar','cafe','p
 const hashStr = s => { let h=2166136261; for (const c of String(s)) { h^=c.charCodeAt(0); h=Math.imul(h,16777619); } return h>>>0; };
 const fotoU = (k, semilla) => { const p=POOL[k]; return p ? p[hashStr(semilla)%p.length][0] : null; };
 const urlU = (id, w=640) => `https://images.unsplash.com/photo-${id}?w=${w}&h=${w}&fit=crop&q=70&auto=format`;
-const imgU = (id, w) => id ? `<img class="uimg" data-u="1" src="${urlU(id,w)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : '';
+const imgU = (id, w) => id ? `<img class="uimg" data-u="1" crossorigin="anonymous" src="${urlU(id,w)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : '';
 const AUTOR_U = Object.fromEntries(Object.values(POOL).flat().map(([id,a])=>[id,a]));
 function creditosFotos(){
   const autores = [...new Set(Object.values(POOL).flat().map(x=>x[1]))].sort((a,b)=>a.localeCompare(b,'es'));
@@ -1137,7 +1191,7 @@ function verFoto(f){ return f && f.m ? (MEDIA[f.m]?`<img src="${esc(MEDIA[f.m])}
 const BIZK = {b2:'coctel', b7:'pizza', b14:'tenis', b15:'pastel'};
 const kNeg = n => BIZK[n.id] || TIPOS[n.tipo].k;
 const fotoCuadro = f => `<div class="ph">${verFoto(f)}</div>`;
-const fotoProd = p => { const k=p.k||TIPOS[neg(p.neg).tipo].k; return verFoto({k, a:'#F5F5F4', b:'#E7E5E4', c:'#FFFFFF', l:p.nombre, u:p.foto?null:fotoU(k,p.id)}); };
+const fotoProd = (p, i=0) => { const f = p.fotos && p.fotos[i]; if (f) return verFoto(f); const k=p.k||TIPOS[neg(p.neg).tipo].k; return verFoto({k, a:'#F5F5F4', b:'#E7E5E4', c:'#FFFFFF', l:p.nombre, u:p.foto?null:fotoU(k,p.id)}); };
 const portada = n => verFoto({k:kNeg(n), a:color2(n.color,.25), b:color2(n.color,.55), l:n.nombre, u:fotoU(kNeg(n), n.id+'c')});
 function color2(hex, k){ const h=hex.replace('#',''); const r=parseInt(h.slice(0,2),16), g=parseInt(h.slice(2,4),16), b=parseInt(h.slice(4,6),16); const m=v=>Math.round(v+(255-v)*(1-k)); return `rgb(${m(r)},${m(g)},${m(b)})`; }
 
@@ -1325,6 +1379,7 @@ const msgBloqueo = r => r.mensaje || (r.nivel>=3 ? 'No se envió: este contenido
 /* ---------- revisar = analizar + registrar + sancionar (se usa en todo lo que escribe el usuario) ---------- */
 function previosDe(para){ if(!para) return []; const c = chatCon(para); const ahora=Date.now(); return c ? c.msgs.filter(m=>m.de===S.yo && m.texto && ahora-m.t<10*60000).slice(-5).map(m=>m.texto) : []; }
 function revisar(t, lugar, ctx={}){
+  if (typeof quitarMenciones==='function') t = quitarMenciones(t);
   const yoU = !esNeg(S.yo) && usr(S.yo);
   if (yoU && yoU.suspendido) return {ok:false, bloqueos:['suspendida'], avisos:[], nivel:0, mensaje:'Tu cuenta está suspendida mientras el equipo de seguridad la revisa.'};
   if ((S.pausas[S.yo]||0) > Date.now()) { const m=Math.ceil((S.pausas[S.yo]-Date.now())/60000); return {ok:false, bloqueos:['pausa'], avisos:[], nivel:0, mensaje:`Por seguridad, no puedes publicar ni enviar mensajes durante ${m} min.`}; }
@@ -1432,10 +1487,10 @@ function columnaDerecha(){
   </aside>`;
 }
 function visibles(){ return S.posts.filter(p=>p.estado==='aprobado' && !bloq(p.autor) && (p.tipo!=='negocio'||neg(p.autor)?.estado==='activo')); }
-function postCard(p, abierto){
+function postCard(p, abierto, por){
   const a = perfilDe(p.autor); const pr = p.prod?prod(p.prod):null; const n = p.tipo==='negocio'?neg(p.autor):null;
   const cs = comsDe(p.id); const lb = (p.likedBy||[]).filter(x=>!bloq(x)).map(perfilDe)[0];
-  return `<article class="post" id="post-${p.id}">
+  return `<article class="post" id="post-${p.id}" ${por?`data-por="${por}"`:''}>${por?repostHeader(por):''}
     <div class="post-h"><button class="who" data-a="verPerfil" data-x="${p.autor}">${avatar(a,40)}<span style="min-width:0"><b>${handleV(a)}</b>${a.negocio?' <span class="pill acc">Negocio</span>':''}<span class="small muted"> · ${hace(p.t)}</span></span></button>
       ${p.autor!==S.yo && !sigue(S.yo,p.autor) ? botonSeguir(p.autor) : ''}
       <button class="ibtn" data-a="opcPost" data-x="${p.id}" aria-label="Más opciones">${ico.dots}</button></div>
@@ -1444,13 +1499,16 @@ function postCard(p, abierto){
       <span class="bigheart" id="bh-${p.id}">${I('<path d="M12 20s-7.5-4.8-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.2 12 20 12 20z"/>',90,'currentColor')}</span></div>
     <div class="dots" id="cd-${p.id}">${p.fotos.length>1?p.fotos.map((_,i)=>`<i class="${i?'':'on'}"></i>`).join(''):''}</div>
     <div class="post-a">
-      <button class="${leGusta(p.id)?'on':''}" data-a="like" data-x="${p.id}" aria-label="Me gusta" aria-pressed="${leGusta(p.id)}">${leGusta(p.id)?ico.heartF:ico.heart}</button>
-      <button data-a="${abierto?'focoComent':'coment'}" data-x="${p.id}" aria-label="Comentar">${ico.com}</button>
-      <button data-a="compartir" data-x="${p.id}" aria-label="Enviar a un amigo">${ico.send}</button>
+      <button class="b-like ${leGusta(p.id)?'on':''}" data-a="like" data-x="${p.id}" data-o="${por||''}" aria-label="Me gusta" aria-pressed="${leGusta(p.id)}" title="Me gusta">${leGusta(p.id)?ico.heartF:ico.heart}</button>
+      <button class="b-com" data-a="${abierto?'focoComent':'coment'}" data-x="${p.id}" aria-label="Comentar" title="Comentar">${ico.com}</button>
+      <button class="b-send" data-a="compartir" data-x="${p.id}" aria-label="Enviar a un amigo" title="Enviar a un amigo">${ico.send}</button>
+      ${p.autor!==S.yo?`<button class="b-rep ${reposteado(p.id)?'on':''}" data-a="repost" data-x="${p.id}" aria-label="Compartir en mi perfil" aria-pressed="${reposteado(p.id)}" title="${reposteado(p.id)?'Ya lo compartiste (toca para quitar)':'Compartir en mi perfil'}">${ico.repost}</button>`:''}
+      <span class="sp"></span>
+      <button class="b-save ${guardado(p.id)?'on':''}" data-a="guardar" data-x="${p.id}" aria-label="Guardar" aria-pressed="${guardado(p.id)}" title="${guardado(p.id)?'Guardado':'Guardar'}">${guardado(p.id)?ico.saveF:ico.save}</button>
     </div>
     <div class="post-b">
-      <b class="small" style="font-size:14px">${nlikes(p)} Me gusta${lb?` <span style="font-weight:500" class="muted">· le gusta a ${esc(lb.handle)}</span>`:''}</b>
-      <div><b>${esc(a.handle)}</b> ${esc(p.texto)}</div>
+      <b class="small" style="font-size:14px">${nlikes(p)} Me gusta${lb?` <span style="font-weight:500" class="muted">· le gusta a ${esc(lb.handle)}</span>`:''}${nGuardados(p.id)?` <span style="font-weight:500" class="muted">· ${nGuardados(p.id)} guardado${nGuardados(p.id)>1?'s':''}</span>`:''}</b>
+      <div><b>${esc(a.handle)}</b> ${textoConEtiquetas(p.texto)}</div>
       ${n?`<button class="buy" data-a="pedirPost" data-x="${p.id}"><span>${pr?esc(pr.nombre)+' · '+money(pr.precio):'Ver la tienda de '+esc(n.nombre)}</span><span>${pr?'Pedir ahora':'Ver tienda'} →</span></button>`:''}
       ${abierto ? `<div class="stack" style="gap:10px;margin-top:6px">${cs.map(c=>{ const u=perfilDe(c.autor); return `<div class="cm"><button style="background:none;border:0;padding:0" data-a="verPerfil" data-x="${c.autor}">${avatar(u,30)}</button><div class="tx"><b>${esc(u.handle)}</b> ${esc(c.texto)}<div class="small muted">${hace(c.t)}</div></div></div>`; }).join('')}</div>
         <form class="row nowrap" data-form="comentario" novalidate><input id="c-txt" type="text" maxlength="200" placeholder="Agrega un comentario…" aria-label="Comentario" autocomplete="off"><button class="btn pri" type="submit">Publicar</button></form>
@@ -1469,10 +1527,10 @@ function listaFeed(){
 function vHome(){
   const l = listaFeed(); const vis = l.slice(0, ui.feedN);
   const misPend = S.posts.filter(p=>p.autor===S.yo&&p.estado==='pendiente').length;
-  let html = ''; vis.forEach((p,i)=>{ html += postCard(p,false); if (ui.feed!=='negocios' && i%5===3) html += recomendacion(Math.floor(i/5)); });
+  let html = ''; vis.forEach((p,i)=>{ html += postCard(p,false,amigoQueCompartio(p.id)); if (ui.feed!=='negocios' && i%5===3) html += recomendacion(Math.floor(i/5)); });
   const activos = pedidosActivos();
   return `<div class="home"><div class="home-feed">
-    <label class="search hsearch">${ico.search}<input id="q" type="search" placeholder="Buscar personas, negocios o productos" value="${esc(ui.q)}" aria-label="Buscar" autocomplete="off">${ui.q?'<button type="button" class="lk" data-a="limpiarQ" aria-label="Borrar búsqueda">✕</button>':''}</label>
+    <div class="toprow">${climaBtn()}<label class="search hsearch">${ico.search}<input id="q" type="search" placeholder="Buscar personas, negocios o productos" value="${esc(ui.q)}" aria-label="Buscar" autocomplete="off">${ui.q?'<button type="button" class="lk" data-a="limpiarQ" aria-label="Borrar búsqueda">✕</button>':''}</label></div>
     <div id="results" class="stack">${ui.q.trim()?resultados():''}</div>
     ${activos.length?activos.slice(0,2).map(p=>bannerPedido(p)).join(''):''}
     ${filaHistorias()}
@@ -1512,6 +1570,7 @@ function vNotifs(){
   const fila = n => { const a = n.de?perfilDe(n.de):null; const p = n.post?post(n.post):null;
     return `<div class="nrow ${n.leida?'':'new'}">${a?`<button style="background:none;border:0;padding:0" data-a="verPerfil" data-x="${n.de}">${avatar(a,44)}</button>`:`<span class="mark" style="width:44px;height:44px;border-radius:50%">${esc(inits(S.cfg.marca))}</span>`}
       <div class="tx">${a&&n.tipo!=='pedido'?`<b>${esc(a.handle)}</b> `:''}${n.tipo==='sistema'||n.tipo==='pedido'?esc(n.texto):esc(NTXT[n.tipo]||'')}${n.tipo==='comentario'&&n.texto?` “${esc(n.texto)}”`:''} <span class="muted small">${hace(n.t)}</span></div>
+      ${['etiqueta','etiqueta_hist'].includes(n.tipo)&&!n.compartida?`<button class="btn sm rpbtn" data-a="compartirEtiqueta" data-x="${n.id}">${ico.repost} Compartir</button>`:''}
       ${n.tipo==='follow'&&n.de?botonSeguir(n.de):n.tipo==='pedido'?`<button class="btn sm pri" data-a="go" data-x="minegocio">Ver</button>`:p?`<button style="background:none;border:0;padding:0;width:46px" data-a="verPost" data-x="${p.id}">${fotoCuadro(p.fotos[0])}</button>`:''}</div>`; };
   return `<div class="feed" style="gap:4px"><div class="row between"><h1>Notificaciones</h1><button class="btn sm soft" data-a="simularAct" title="Solo en el prototipo">Simular actividad</button></div>
     ${l.length?grupos.map(([g,fn])=>{ const x=l.filter(fn); return x.length?`<div class="ngrp">${g}</div>${x.map(fila).join('')}`:''; }).join(''):'<div class="empty"><h2>Sin notificaciones</h2><p class="muted">Aquí verás quién te sigue, le da me gusta o comenta.</p></div>'}</div>`;
@@ -1523,7 +1582,7 @@ function cabPerfil(id){
   return `<div class="card pcab"><div class="prof">${avatar(a,150)}<div class="stack" style="gap:8px;min-width:0;flex:1">
       <div class="row between nowrap"><div style="min-width:0"><h1 class="pnom">${nombreV(a)}</h1><div class="muted small">@${esc(a.handle)}${!mio&&sigue(id,S.yo)?' · <span class="pill">Te sigue</span>':''}</div></div>
         ${mio?`<button class="ibtn" data-a="go" data-x="ajustes" aria-label="Configuración">${ico.gear}</button>`:`<button class="ibtn" data-a="opcPerfil" data-x="${id}" aria-label="Opciones">${ico.dots}</button>`}</div>
-      <div class="stats"><div><b>${npubs(id)}</b><span>publicaciones</span></div><div><b>${seguidores(id)}</b><span>seguidores</span></div><div><b>${siguiendo(id)}</b><span>siguiendo</span></div></div></div></div>
+      <div class="stats"><div><b>${npubs(id)}</b><span>publicaciones</span></div><button class="stat" data-a="verSeg" data-x="${id}" data-o="seguidores"><b>${seguidores(id)}</b><span>seguidores${listaVisible(id,'seguidores')?'':' 🔒'}</span></button><button class="stat" data-a="verSeg" data-x="${id}" data-o="seguidos"><b>${siguiendo(id)}</b><span>siguiendo${listaVisible(id,'seguidos')?'':' 🔒'}</span></button></div></div></div>
     ${u&&u.bio?`<div>${esc(u.bio)}</div>`:''}
     ${mio?`<div class="row"><button class="btn soft" data-a="go" data-x="ajustes">Editar perfil y configuración</button><button class="btn soft" data-a="publicar">+ Publicar</button></div>`
       :`<div class="row">${botonSeguir(id,false)}${amigos(S.yo,id)?`<button class="btn soft" data-a="abrirChat" data-x="${id}">Mensaje</button>`:`<span class="small muted">${sigue(S.yo,id)?'Cuando te siga de vuelta serán amigos y podrán escribirse.':'Síganse mutuamente para poder escribirse.'}</span>`}
@@ -1535,7 +1594,7 @@ function vPerfil(){
   if (soyNegocio()){ ui.neg=S.yo; return vNegocio(); }
   const mis = S.posts.filter(p=>p.autor===S.yo).sort((a,b)=>b.t-a.t);
   return `<div class="perfil-w">${cabPerfil(S.yo)}
-  ${mis.length?`<div class="pgrid">${mis.map(p=>{ const [l,c]=PEST[p.estado]; return miniPost(p, p.estado!=='aprobado'?`<span class="pill ${c} st">${l}</span>`:''); }).join('')}</div>
+  ${mis.length||repostsDe(S.yo).length?`${tabsPerfil(S.yo)}
     ${mis.filter(p=>['rechazado','retirado'].includes(p.estado)).map(p=>`<div class="note bad small">“${esc(p.texto.slice(0,40))}…” fue ${p.estado}: <b>${esc(MOTIVOS[p.motivo]||'')}</b></div>`).join('')}`
    :'<div class="empty"><h2>Comparte tu primera foto</h2><button class="btn pri" data-a="publicar">Publicar</button></div>'}</div>`;
 }
@@ -1545,7 +1604,7 @@ function vUsuario(){
   if (bloq(id)) return `<div class="feed"><button class="btn ghost sm" data-a="atras" style="align-self:flex-start">← Volver</button><div class="empty"><h2>Cuenta no disponible</h2><p class="muted">${bloqueePor(S.yo,id)?'Bloqueaste esta cuenta. Puedes desbloquearla en Configuración.':'No puedes ver este perfil.'}</p>${bloqueePor(S.yo,id)?`<button class="btn" data-a="desbloquear" data-x="${id}">Desbloquear</button>`:''}</div></div>`;
   const ps = S.posts.filter(p=>p.autor===id&&p.estado==='aprobado').sort((a,b)=>b.t-a.t);
   return `<div class="perfil-w"><button class="btn ghost sm" data-a="atras" style="align-self:flex-start">← Volver</button>${cabPerfil(id)}
-    ${ps.length?`<div class="pgrid">${ps.map(p=>miniPost(p)).join('')}</div>`:'<p class="muted">Sin publicaciones.</p>'}</div>`;
+    ${tabsPerfil(id)}</div>`;
 }
 function vLogin(){
   return `<div class="card" style="max-width:420px;margin:30px auto;text-align:center"><div class="mark" style="width:56px;height:56px;border-radius:16px;margin:0 auto;font-size:22px">${esc(inits(S.cfg.marca))}</div><h1>Bienvenido a ${esc(S.cfg.marca)}</h1>
@@ -1576,6 +1635,7 @@ function vAjustes(){
   </div></details>
   <details class="set"><summary>${ico.shield}<span>Privacidad y seguridad<small>Cuentas bloqueadas y protección de mensajes</small></span></summary><div class="bd">
     <div class="note">Solo tus <b>amigos</b> (personas que se siguen mutuamente) pueden escribirte. En mensajes y notas no se permiten enlaces, correos, fotos ni audios. Si alguien te pide códigos o contraseñas, verás una alerta.</div>
+    ${!soyNegocio()?`<b>Etiquetas y listas</b>${[['etiquetar','Permitir que me etiqueten','En publicaciones e historias. Si lo apagas, nadie podrá etiquetarte.'],['seguidores','Mostrar mis seguidores','Si lo apagas, los demás no verán quién te sigue (sí el número).'],['seguidos','Mostrar a quién sigo','Si lo apagas, los demás no verán a quién sigues (sí el número).']].map(([k,t,d])=>`<button class="lrow" data-a="privacidad" data-x="${k}"><div class="tx"><b>${t}</b><div class="small muted" style="white-space:normal">${d}</div></div><span class="switch ${(usr(S.yo)?.priv||{})[k]!==false?'on':''}"></span></button>`).join('')}`:''}
     <b>Cuentas bloqueadas (${bl.length})</b>
     ${bl.map(b=>{ const a=perfilDe(b.a); return `<div class="srow">${avatar(a,38)}<div class="tx"><b>${esc(a.nombre)}</b><span>@${esc(a.handle)}</span></div><button class="btn sm" data-a="desbloquear" data-x="${b.a}">Desbloquear</button></div>`; }).join('') || '<span class="small muted">No has bloqueado a nadie.</span>'}
   </div></details>
@@ -1642,7 +1702,9 @@ function hojaCompartir(){
 }
 function hojaOpcPost(){
   const p = post(ui.sheet.post); const a = perfilDe(p.autor); const mio = p.autor===S.yo;
-  return hoja('Opciones', `${mio?`<button class="lrow" data-a="borrarPost" data-x="${p.id}">${ico.block}<div class="tx"><b>Eliminar publicación</b></div></button>`:`
+  return hoja('Opciones', `<button class="lrow" data-a="guardar" data-x="${p.id}"><span class="ictile save">${guardado(p.id)?ico.saveF:ico.save}</span><div class="tx"><b>${guardado(p.id)?'Quitar de Guardados':'Guardar'}</b><div class="small muted">Solo tú ves tus guardados</div></div></button>
+    ${mio?'':`<button class="lrow" data-a="repost" data-x="${p.id}">${ico.repost}<div class="tx"><b>${reposteado(p.id)?'Dejar de compartir':'Compartir en mi perfil'}</b><div class="small muted">Aparece en tu sección Compartidos y en el inicio de tus amigos</div></div></button>`}
+    ${mio?`<button class="lrow" data-a="borrarPost" data-x="${p.id}">${ico.block}<div class="tx"><b>Eliminar publicación</b></div></button>`:`
     <button class="lrow" data-a="verPerfil" data-x="${p.autor}">${avatar(a,32)}<div class="tx"><b>Ver perfil de ${esc(a.handle)}</b></div></button>
     ${sigue(S.yo,p.autor)?`<button class="lrow" data-a="seguir" data-x="${p.autor}">${ico.user}<div class="tx"><b>Dejar de seguir</b></div></button>`:''}
     <button class="lrow" data-a="reportarPost" data-x="${p.id}">${ico.flag}<div class="tx"><b>Reportar publicación</b><div class="small muted">Nadie sabrá que fuiste tú</div></div></button>
@@ -1669,7 +1731,8 @@ function hojaPublicar(){
   return hoja('Nueva publicación', `<label class="f" for="pub-files">Fotos (hasta 10)<input id="pub-files" type="file" accept="image/*" multiple><span class="h">Se reducen antes de guardarse para que pesen poco.</span></label>
     ${ui.draft.length?`<div class="drafts">${ui.draft.map((d,i)=>`<div class="ph">${d.m?`<img src="${esc(d.m)}" alt="">`:escena(d)}<button type="button" data-a="quitarFoto" data-x="${i}" aria-label="Quitar foto">×</button></div>`).join('')}</div>`
       :`<button type="button" class="btn soft sm" data-a="fotosEjemplo">Sin fotos a la mano: usar fotos de ejemplo</button>`}
-    <label class="f" for="pub-txt">Descripción<textarea id="pub-txt" maxlength="300" placeholder="Escribe algo sobre tus fotos">${esc(ui.draftTxt)}</textarea></label>
+    <label class="f" for="pub-txt">Descripción<textarea id="pub-txt" maxlength="300" placeholder="Escribe algo sobre tus fotos. Usa @ para etiquetar personas o negocios">${esc(ui.draftTxt)}</textarea><span class="h">Escribe <b>@</b> y las primeras letras: te sugerimos cuentas para etiquetar.</span></label>
+    <div id="tag-sug"></div>
     ${n?`<label class="f" for="pub-prod">Producto para el botón “Pedir”<select id="pub-prod"><option value="">Solo enlazar a mi tienda</option>${S.productos.filter(p=>p.neg===n.id).map(p=>`<option value="${p.id}">${esc(p.nombre)} · ${money(p.precio)}</option>`).join('')}</select></label>`
       :`<div class="note small">Reglas: nada de contenido +18, ofensivo, enlaces ni teléfonos, y <b>nada de publicidad de negocios</b>. Los negocios tienen su propia cuenta. Con ${S.cfg.strikesMax} publicaciones rechazadas ya no podrás publicar.</div>`}
     <label class="chk"><input id="pub-ok" type="checkbox"> Confirmo que mis fotos respetan las reglas y tengo permiso de las personas que aparecen.</label>
@@ -1680,6 +1743,9 @@ function hojaHistoria(){
   const d = ui.draftH;
   return hoja('Nueva historia', `<label class="f" for="hist-file">Foto<input id="hist-file" type="file" accept="image/*"></label>
     ${d?`<div class="ph" style="aspect-ratio:9/16;max-height:300px;width:auto;border-radius:12px">${d.m?`<img src="${esc(d.m)}" alt="">`:escena(d)}</div>`:`<button type="button" class="btn soft sm" data-a="histEjemplo">Sin foto a la mano: usar una de ejemplo</button>`}
+    <label class="f" for="ht-q">Etiquetar personas o negocios <span class="h">Opcional. Aparecen a un costado de tu historia.</span><input id="ht-q" type="text" placeholder="Escribe un nombre…" autocomplete="off"></label>
+    <div id="ht-sug"></div>
+    ${(ui.draftHT||[]).length?`<div class="row" style="gap:6px">${ui.draftHT.map(id=>`<span class="chip">@${esc(perfilDe(id).handle)} <button type="button" data-a="untagHist" data-x="${id}" aria-label="Quitar">×</button></span>`).join('')}</div>`:''}
     <div class="note small">Dura 24 horas. Mismas reglas que las publicaciones.</div>
     <label class="chk"><input id="hist-ok" type="checkbox"> Confirmo que mi foto respeta las reglas.</label>
     ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}
@@ -1701,6 +1767,7 @@ function hojaMas(){
   return hoja('Más', `<button class="lrow" data-a="go" data-x="ajustes">${ico.gear}<div class="tx"><b>Configuración</b></div></button>
     <button class="lrow" data-a="toggleTema">${temaActual()==='oscuro'?ico.sun:ico.moon}<div class="tx"><b>Cambiar a modo ${temaActual()==='oscuro'?'claro':'oscuro'}</b></div></button>
     <button class="lrow" data-a="grande">${ico.text}<div class="tx"><b>Texto más grande</b></div><span class="switch ${PREF.grande?'on':''}"></span></button>
+    <button class="lrow" data-a="verGuardados"><span class="ictile save">${ico.saveF}</span><div class="tx"><b>Guardados</b><div class="small muted">Solo tú los ves · ${S.guardados.filter(g=>g.u===S.yo).length}</div></div></button>
     <button class="lrow" data-a="go" data-x="pedidos">${ico.list}<div class="tx"><b>Mis pedidos</b></div></button>
     <button class="lrow" data-a="cuentas">${ico.swap}<div class="tx"><b>Cambiar de cuenta</b></div></button>
     <button class="lrow" data-a="logout" style="color:var(--bad)">${ico.out}<div class="tx"><b>Cerrar sesión</b></div></button>`);
@@ -1731,6 +1798,9 @@ function renderStory(){
     <span class="brand2">${esc(S.cfg.marca)}</span><button class="x2" data-a="stClose" aria-label="Cerrar">×</button>
     ${prevs.map(prevCard).join('')}<button class="arr" data-a="stPrev" aria-label="Anterior">‹</button>
     <div class="stcard"><div class="media2">${mediaHist(h)}</div>
+      ${h.origen?`<button class="storig" data-a="stPerfil" data-x="${h.origen.autor}">${ico.repost} Historia de <b>@${esc(perfilDe(h.origen.autor).handle)}</b></button>`:''}
+      ${(h.etiq||[]).filter(id=>!bloq(id)).length?`<div class="sttags">${h.etiq.filter(id=>!bloq(id)).map(id=>`<button data-a="stPerfil" data-x="${id}">${ico.tag}@${esc(perfilDe(id).handle)}</button>`).join('')}</div>`:''}
+      ${(h.etiq||[]).includes(S.yo)&&uid!==S.yo?`<button class="stshare" data-a="compartirHist" data-x="${h.id}">${ico.repost} Te etiquetaron · Compartir en tu historia</button>`:''}
       <div class="top2"><div class="bars">${l.map((x,i)=>`<span class="${i<st.s?'done':''}"><i ${i===st.s?'id="stbar"':''}></i></span>`).join('')}</div>
         <div class="who2"><button style="padding:0;display:flex;align-items:center;gap:8px;color:#fff;font-weight:700;font-size:14px" data-a="stPerfil" data-x="${uid}">${avatar(a,32)}${handleV(a)}</button><small>${hace(h.t)}</small><span class="sp"></span>
           <button data-a="stPause" aria-label="${st.paused?'Reanudar':'Pausar'}">${st.paused?'▶':'❚❚'}</button>${uid!==S.yo?`<button data-a="reportarHist" data-x="${h.id}" aria-label="Reportar">⋯</button>`:''}</div></div>
@@ -1847,7 +1917,8 @@ function hojaProducto(){
   const err = validarSel(p, sel); const total = Math.round(precioUnitario(p, sel)*sel.qty);
   const optDisabled = (ai, opName) => { if (!p.agot.length) return false; const v = p.var.map((ax,i)=> i===ai ? opName : sel.v[i]); if (v.some(x=>!x)) return p.var.length===1 && p.agot.includes(opName); return p.agot.includes(v.join('|')); };
   return `<div class="ov" data-a="close" data-self="1"><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(p.nombre)}">
-    <div class="ph" style="border-radius:16px;aspect-ratio:16/10">${fotoProd(p)}</div>
+    <div class="ph" style="border-radius:16px;aspect-ratio:16/10">${fotoProd(p, Math.min(ui.pfoto||0, (p.fotos||[1]).length-1))}${(p.fotos||[]).length>1?`<span class="car-n">${(ui.pfoto||0)+1}/${p.fotos.length}</span>`:''}</div>
+    ${(p.fotos||[]).length>1?`<div class="pthumbs">${p.fotos.map((f,i)=>`<button class="${(ui.pfoto||0)===i?'on':''}" data-a="prodFoto" data-x="${p.id}" data-o="${i}" aria-label="Foto ${i+1}"><div class="ph">${verFoto(f)}</div></button>`).join('')}</div>`:''}
     <div class="row nowrap"><div style="flex:1;min-width:0"><h2 style="font-size:22px">${esc(p.nombre)}</h2><div class="small muted">${esc(n.nombre)}</div></div><button class="x" data-a="close" aria-label="Cerrar">×</button></div>
     <p class="muted" style="margin:0">${esc(p.desc)}</p>
     <div class="price num" style="font-size:18px">${money(p.precio)} <small>/ ${esc(p.unidad)}</small>${p.stock!=null?` <span class="pill ${p.stock===0?'bad':p.stock<=5?'warn':''}">${p.stock===0?'Agotado':p.stock<=5?'Quedan '+p.stock:'Disponible'}</span>`:''}</div>
@@ -1871,13 +1942,13 @@ function vCarrito(){
   const enC = act.length ? `<div class="stack" style="max-width:640px;margin:0 auto 18px;width:100%"><div class="row between"><h1 style="margin:0">Tus pedidos en curso</h1><button class="btn ghost sm" data-a="go" data-x="pedidos">Ver todos</button></div>${act.map(p=>tarjetaPedido(p)).join('')}</div>` : '';
   if(!c || !c.items.length) return enC + `<div class="empty">${I('<path d="M5 8h14l-1 12H6z"/><path d="M9 8a3 3 0 0 1 6 0"/>',64)}<h2>Tu carrito está vacío</h2><p class="muted">Agrega productos de un negocio para empezar tu pedido.</p><button class="btn pri" data-a="go" data-x="inicio">Ir a la tienda</button></div>`;
   const n = neg(c.neg); const sub = subtotalCarrito();
-  return enC + `<div class="stack" style="max-width:640px;margin:0 auto;width:100%"><h1>Tu carrito</h1>
+  return enC + `<div class="stack" style="max-width:640px;margin:0 auto;width:100%"><div class="row between"><h1 style="margin:0">Tu carrito</h1><button class="btn danger sm" data-a="vaciarCarrito">🗑 Vaciar carrito</button></div>
   <div class="card"><div class="row between"><div class="row">${avatar(perfilDe(n.id),36)}<b>${esc(n.nombre)}</b></div><button class="btn ghost sm" data-a="neg" data-x="${n.id}">Agregar más</button></div>
     ${c.origen?`<div class="small muted">Vienes de una publicación de ${esc(n.nombre)}.</div>`:''}
     ${c.items.map((it,i)=>{ const p=prod(it.pid); return `<div class="citem"><div class="thumb" style="width:64px;height:64px">${fotoProd(p)}</div><div class="tx"><b>${esc(p.nombre)}</b>
       ${it.det?`<div class="small muted">${esc(it.det)}</div>`:''}${it.nota?`<div class="small muted">Nota: ${esc(it.nota)}</div>`:''}
       <div class="row" style="margin-top:6px"><div class="step"><button data-a="cqty" data-x="${i}" data-o="-1" aria-label="Menos">−</button><span class="num">${qtyFmt(it.qty,p.unidad)}</span><button data-a="cqty" data-x="${i}" data-o="1" aria-label="Más">+</button></div>
-      <button class="btn ghost sm" data-a="crm" data-x="${i}">Quitar</button></div></div><b class="num">${money(Math.round(precioUnitario(p,it.sel)*it.qty))}</b></div>`; }).join('')}
+      <button class="btn danger sm" data-a="crm" data-x="${i}" title="Eliminar del carrito">🗑 Eliminar</button></div></div><b class="num">${money(Math.round(precioUnitario(p,it.sel)*it.qty))}</b></div>`; }).join('')}
     <div class="line tot"><span>Subtotal</span><span class="num">${money(sub)}</span></div>
     ${n.pedidoMin && sub<n.pedidoMin?`<div class="err">Pedido mínimo: ${money(n.pedidoMin)}. Te faltan ${money(n.pedidoMin-sub)}.</div>`:''}
     <div class="small muted">${n.envioGratis&&sub<n.envioGratis?`Agrega ${money(n.envioGratis-sub)} más para envío gratis. `:''}El envío se calcula en el siguiente paso.</div>
@@ -2038,7 +2109,9 @@ function editorProducto(n){
     <label class="f" for="e-var">Variantes (una por línea) <span class="h">Ejemplo: <code>Talla: CH, M, G</code> · con precio extra: <code>Tamaño: Chica, Grande +25</code></span><textarea id="e-var">${esc(varTxt(p))}</textarea></label>
     <label class="f" for="e-mods">Complementos (una línea por grupo) <span class="h">Ejemplo: <code>Extras (0-3): Queso +15, Aguacate +20</code> · (1-1) = elegir uno obligatorio</span><textarea id="e-mods">${esc(modTxt(p))}</textarea></label></div></details>
     <label class="chk"><input id="e-disp" type="checkbox" ${p.disp?'checked':''}> Visible para los clientes</label>
-    <div class="note small">Fotos del producto: ${todoTag('llegan con el almacenamiento en la nube')}</div>
+    <div class="f"><b>Fotos del producto (hasta 4)</b><span class="h">Varias fotos ayudan al cliente a decidir: de frente, de cerca, el tamaño, cómo se entrega.</span>
+      <div class="drafts">${(ui.draftPF||[]).map((d,i)=>`<div class="ph">${verFoto(d)}<button type="button" data-a="quitarFotoProd" data-x="${i}" aria-label="Quitar foto">×</button></div>`).join('')}</div>
+      ${(ui.draftPF||[]).length<4?`<div class="row"><input id="e-fotos" type="file" accept="image/*" multiple><button type="button" class="btn soft sm" data-a="fotosProdEjemplo">Usar fotos de ejemplo</button></div>`:'<span class="small muted">Ya tienes 4 fotos (el máximo).</span>'}</div>
     ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}<div class="row"><button class="btn pri" type="submit">Guardar producto</button></div></form>`;
 }
 function pPublicaciones(n){
@@ -2496,6 +2569,206 @@ function adelantarTiempo(){
 const misAmigosDe = id => S.sigue.filter(s=>s.de===id && !esNeg(s.a) && S.sigue.some(x=>x.de===s.a && x.a===id)).map(s=>s.a);
 function reiniciarTodo(){ try { localStorage.removeItem(KEY); } catch(e){} location.reload(); }
 
+/* ============================================================
+   v11 — GUARDAR · COMPARTIR (REPOST) · ETIQUETAS · PRIVACIDAD · CLIMA · COLORES
+   ============================================================ */
+ico.repost = `<svg class="ic-rep" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="var(--c-rep)"/><path d="M8 9.2h7.2l-1.6-1.6M16 14.8H8.8l1.6 1.6M8 9.2v2M16 14.8v-2" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+ico.save = I('<path d="M6.5 3.5h11a1 1 0 0 1 1 1v16l-6.5-4.2L5.5 20.5v-16a1 1 0 0 1 1-1z"/>');
+ico.saveF = I('<path d="M6.5 3.5h11a1 1 0 0 1 1 1v16l-6.5-4.2L5.5 20.5v-16a1 1 0 0 1 1-1z"/>',24,'currentColor');
+ico.tag = I('<path d="M3.5 12.2V4.5a1 1 0 0 1 1-1h7.7l8.3 8.3-8.7 8.7z"/><circle cx="8" cy="8" r="1.4"/>');
+Object.assign(NTXT, {like_repost:'le gustó una publicación que compartiste.', etiqueta:'te etiquetó en una publicación.', etiqueta_hist:'te etiquetó en su historia.', repost:'compartió tu publicación.'});
+
+function asegurarExtras(){
+  S.guardados = S.guardados || []; S.reposts = S.reposts || [];
+  S.usuarios.forEach(u=>{ if (!u.priv) u.priv = {etiquetar: hashStr(u.id+'t')%7!==0, seguidores: hashStr(u.id+'s')%11!==0, seguidos: hashStr(u.id+'g')%9!==0}; });
+  const me = S.usuarios.find(u=>u.id===S.personal); if (me && !me.privFix){ me.priv = {etiquetar:true, seguidores:true, seguidos:true}; me.privFix = true; }
+  if (!S.extrasSeed){
+    const gente = S.usuarios.filter(u=>u.grupo!=='spam').map(u=>u.id); const ok = S.posts.filter(p=>p.estado==='aprobado');
+    const rnd = (s,n) => hashStr(s)%n;
+    ok.forEach((p,i)=>{ const n = rnd(p.id+'g',9); for(let k=0;k<n;k++){ const u = gente[rnd(p.id+'u'+k,gente.length)]; if (u!==S.personal && !S.guardados.some(g=>g.u===u&&g.post===p.id)) S.guardados.push({u, post:p.id, t:p.t+3600e3}); } });
+    for (let k=0;k<40;k++){ const p = ok[rnd('rp'+k, ok.length)], u = gente[rnd('ru'+k, gente.length)]; if (u!==S.personal && u!==p.autor && !S.reposts.some(r=>r.u===u&&r.post===p.id)) S.reposts.push({u, post:p.id, t:Math.min(Date.now()-60000, p.t + (1+rnd('rt'+k,30))*3600e3)}); }
+    S.productos.forEach(p=>{ if (p.fotos) return; const k = p.k || TIPOS[neg(p.neg).tipo].k; const pool = POOL[k]||[]; const n = Math.min(pool.length, 2 + hashStr(p.id)%3); const ini = hashStr(p.id+'f');
+      p.fotos = Array.from({length:Math.max(1,n)},(_,j)=>({k, a:'#F5F5F4', b:'#E7E5E4', c:'#FFFFFF', l:p.nombre, u: pool.length? pool[(ini+j)%pool.length][0] : null})); });
+    S.extrasSeed = true;
+  }
+}
+asegurarExtras();
+
+/* ---------- guardados (privados) ---------- */
+const guardado = pid => S.guardados.some(g=>g.u===S.yo && g.post===pid);
+const nGuardados = pid => S.guardados.filter(g=>g.post===pid).length;
+function vGuardados(){
+  const ids = S.guardados.filter(g=>g.u===S.yo).sort((a,b)=>b.t-a.t).map(g=>post(g.post)).filter(p=>p && p.estado==='aprobado' && !bloq(p.autor));
+  return `<div class="perfil-w"><button class="btn ghost sm" data-a="atras" style="align-self:flex-start">← Volver</button>
+    <div class="row nowrap" style="gap:12px"><span class="ictile save">${ico.saveF}</span><div><h1 style="margin:0">Guardados</h1><span class="small muted">Solo tú puedes ver esta carpeta. Los demás solo ven cuántas personas guardaron una publicación, nunca quiénes.</span></div></div>
+    ${ids.length?`<div class="pgrid">${ids.map(p=>miniPost(p)).join('')}</div>`:'<div class="empty"><h2>Aún no guardas nada</h2><p class="muted">Toca el ícono de guardar en cualquier publicación para encontrarla aquí después.</p></div>'}</div>`;
+}
+
+/* ---------- compartidos (repost) ---------- */
+const reposteado = (pid, u=S.yo) => S.reposts.some(r=>r.u===u && r.post===pid);
+const repostsDe = u => S.reposts.filter(r=>r.u===u).sort((a,b)=>b.t-a.t).map(r=>post(r.post)).filter(p=>p && p.estado==='aprobado' && !bloq(p.autor));
+function amigoQueCompartio(pid){
+  const am = new Set(misAmigos());
+  const r = S.reposts.filter(r=>r.post===pid && am.has(r.u) && !bloq(r.u)).sort((a,b)=>b.t-a.t)[0];
+  return r ? r.u : null;
+}
+function repostHeader(por){ const a = perfilDe(por); return `<button class="rphead" data-a="verPerfil" data-x="${por}">${ico.repost}${avatar(a,20)}<b>${esc(a.handle)}</b> compartió</button>`; }
+
+/* ---------- etiquetas ---------- */
+const permiteEtiqueta = id => esNeg(id) ? neg(id)?.estado==='activo' : (usr(id)?.priv?.etiquetar !== false);
+const etiquetable = () => [...S.usuarios.filter(u=>u.id!==S.yo && u.grupo!=='spam' && !u.suspendido).map(u=>u.id), ...S.negocios.filter(n=>n.estado==='activo' && n.id!==S.yo).map(n=>n.id)].filter(id=>!bloq(id));
+function sugerencias(q, max=6){
+  const s = limpiarTexto(q).replace(/^@/,''); if (!s) return [];
+  return etiquetable().map(id=>({id, a:perfilDe(id)})).filter(x=>limpiarTexto(x.a.nombre+' '+x.a.handle).includes(s))
+    .sort((x,y)=> (amigos(S.yo,y.id)-amigos(S.yo,x.id)) || (sigue(S.yo,y.id)-sigue(S.yo,x.id)) || x.a.handle.localeCompare(y.a.handle)).slice(0,max);
+}
+function sugHTML(lista, accion){
+  return lista.length ? `<div class="tagsug">${lista.map(({id,a})=>`<button type="button" class="tagopt" data-a="${accion}" data-x="${id}">${avatar(a,30)}<span><b>${esc(a.handle)}</b><small>${esc(a.nombre)}${a.negocio?' · negocio':''}${!permiteEtiqueta(id)?' · no permite etiquetas':''}</small></span></button>`).join('')}</div>` : '';
+}
+function etiquetasDeTexto(t){
+  const hs = [...String(t).matchAll(/@([a-z0-9._ñáéíóú-]+)/gi)].map(m=>m[1].toLowerCase());
+  const todos = etiquetable(); const out = [], no = [];
+  for (const h of hs){ const id = todos.find(id=>perfilDe(id).handle.toLowerCase()===h); if (!id) continue; if (permiteEtiqueta(id)) { if(!out.includes(id)) out.push(id); } else no.push(perfilDe(id).handle); }
+  return {ids:out, no};
+}
+function textoConEtiquetas(t){ // pinta @usuario como botón al perfil
+  return esc(t).replace(/@([a-z0-9._ñáéíóú-]+)/gi, (m,h)=>{ const id = etiquetable().concat([S.yo]).find(id=>perfilDe(id).handle.toLowerCase()===h.toLowerCase()); return id ? `<button class="mention" data-a="verPerfil" data-x="${id}">@${esc(h)}</button>` : m; });
+}
+/* las menciones a cuentas reales (@karla.mochis) no son enlaces: se quitan antes de revisar el texto */
+/* re-dibuja sin perder lo que ya escribiste en el formulario */
+function renderConservando(){ const vals=[...document.querySelectorAll('form input[id],form textarea[id],form select[id]')].filter(e=>e.type!=='file').map(e=>[e.id, e.type==='checkbox'?e.checked:e.value]); render();
+  for (const [id,v] of vals){ const e=document.getElementById(id); if(!e) continue; if(e.type==='checkbox') e.checked=v; else e.value=v; } }
+function quitarMenciones(t){ t=String(t||''); if(!t.includes('@')) return t; const hs=new Set(S.usuarios.map(u=>u.usuario.toLowerCase()).concat(S.negocios.map(n=>slug(n.nombre).toLowerCase())));
+  return t.replace(/@([a-z0-9._ñáéíóú-]+)/gi,(m,h)=>{ const k=h.toLowerCase().replace(/[.]+$/,''); return hs.has(k) ? ' mención ' + m.slice(1+k.length) : m; }); }
+function chipsEtiquetas(ids){ return (ids||[]).filter(id=>!bloq(id)).length ? `<div class="tagchips">${ico.tag}${ids.filter(id=>!bloq(id)).map(id=>`<button class="mention" data-a="verPerfil" data-x="${id}">@${esc(perfilDe(id).handle)}</button>`).join(' ')}</div>` : ''; }
+
+/* ---------- seguidores y seguidos (con privacidad) ---------- */
+const segDe = id => S.sigue.filter(x=>x.a===id && !bloq(x.de)).map(x=>x.de);
+const sigDe = id => S.sigue.filter(x=>x.de===id && !bloq(x.a)).map(x=>x.a);
+function listaVisible(id, cual){ if (id===S.yo || esNeg(id)) return true; const p = usr(id)?.priv||{}; return p[cual] !== false; }
+function hojaSeguidores(){
+  const {id, tab} = ui.sheet; const a = perfilDe(id); const vis = listaVisible(id, tab==='seguidores'?'seguidores':'seguidos');
+  const l = tab==='seguidores' ? segDe(id) : sigDe(id);
+  return hoja(esc(a.handle), `<div class="segs">${[['seguidores',`${seguidores(id)} seguidores`],['seguidos',`${siguiendo(id)} seguidos`]].map(([k,t])=>`<button class="${tab===k?'on':''}" data-a="verSeg" data-x="${id}" data-o="${k}">${t}</button>`).join('')}</div>
+    ${!vis ? `<div class="empty" style="padding:24px 8px">${ico.shield}<h2>Lista privada</h2><p class="muted">@${esc(a.handle)} decidió no mostrar a quién ${tab==='seguidores'?'lo siguen':'sigue'}.</p></div>`
+      : l.length ? `<div class="stack" style="gap:8px">${l.map(personaRow).join('')}</div>` : '<p class="muted">Nadie por aquí todavía.</p>'}`);
+}
+
+/* ---------- pestañas del perfil ---------- */
+function tabsPerfil(id){
+  const t = ui.pfTab || 'pubs';
+  const pubs = S.posts.filter(p=>p.autor===id && (id===S.yo || p.estado==='aprobado')).sort((a,b)=>b.t-a.t);
+  const comp = repostsDe(id);
+  const etiq = S.posts.filter(p=>p.estado==='aprobado' && (p.etiq||[]).includes(id) && !bloq(p.autor)).sort((a,b)=>b.t-a.t);
+  const grid = (l, vacio) => l.length ? `<div class="pgrid">${l.map(p=>{ const [lb,c]=PEST[p.estado]; return miniPost(p, p.estado!=='aprobado'?`<span class="pill ${c} st">${lb}</span>`:''); }).join('')}</div>` : `<p class="muted" style="text-align:center;padding:30px 0">${vacio}</p>`;
+  return `<div class="ptabs2">${[['pubs','Publicaciones',pubs.length],['comp','Compartidos',comp.length],['etiq','Etiquetas',etiq.length]].map(([k,l,n])=>`<button class="${t===k?'on':''}" data-a="pfTab" data-x="${k}">${k==='comp'?ico.repost:k==='etiq'?ico.tag:ico.list}<span>${l}</span><small>${n}</small></button>`).join('')}</div>
+    ${t==='pubs' ? grid(pubs, 'Sin publicaciones.') : t==='comp' ? `<div class="small muted" style="text-align:center">Publicaciones que ${id===S.yo?'compartiste':'compartió'}. Al tocarlas ves la publicación original y a quién la subió.</div>${grid(comp,'Aún no comparte publicaciones.')}` : grid(etiq, 'Nadie lo ha etiquetado todavía.')}`;
+}
+
+/* ---------- inicio: variedad y rotación ---------- */
+const jit = (id, amp) => ui.seed ? (hashStr(id+'|'+ui.seed)%1000)/1000*amp : 0;
+const rotar = (l, salt) => { if (!ui.seed || !l.length) return l; const k = hashStr(salt+ui.seed)%l.length; return l.slice(k).concat(l.slice(0,k)); };
+function listaFeed(){
+  let l = visibles();
+  if (ui.feed==='siguiendo') l = l.filter(p=>sigue(S.yo,p.autor) || p.autor===S.yo || amigoQueCompartio(p.id));
+  if (ui.feed==='negocios') l = l.filter(p=>p.tipo==='negocio');
+  const pen = new Set(ui.penal||[]); const H = 3600e3;
+  const score = p => p.t + (sigue(S.yo,p.autor)?36*H:0) + (p.tipo==='negocio'?6*H:0) + (amigoQueCompartio(p.id)?20*H:0) + jit(p.id, 30*H) - (pen.has(p.id)?96*H:0);
+  const score2 = p => p.t + jit(p.id, 10*H) - (pen.has(p.id)?72*H:0);
+  return l.sort((a,b)=>ui.feed==='parati'?score(b)-score(a):score2(b)-score2(a));
+}
+function autoresHist(){
+  const ids = [...new Set(S.historias.filter(histVigente).map(h=>h.autor))].filter(id=>id!==S.yo && sigue(S.yo,id) && !bloq(id));
+  const visto = id => histDe(id).every(h=>vistaH(h.id));
+  return ids.sort((a,b)=> (visto(a)-visto(b)) || (ui.seed ? jit(a,1)-jit(b,1) : (histDe(b).at(-1).t - histDe(a).at(-1).t)));
+}
+function negociosDestacados(titulo='Negocios de Los Mochis'){
+  const l = rotar(activosVis().filter(n=>n.id!==S.yo).sort((a,b)=>(calif(b.id)?.avg||0)-(calif(a.id)?.avg||0)), 'dest');
+  return `<div class="sec-h"><h2>${esc(titulo)}</h2><button class="lk" data-a="go" data-x="inicio">Ver todos</button></div><div class="bizrail">${l.map(bizCard2).join('')}</div>`;
+}
+function refrescarInicio(){
+  ui.penal = listaFeed().slice(0, Math.max(6, Math.min(ui.feedN||12, 12))).map(p=>p.id);
+  ui.seed = Math.random().toString(36).slice(2,8); ui.feedN = 12; ui.homeY = 0; ui.q = '';
+  render(); window.scrollTo({top:0, behavior:'smooth'}); toast('Inicio actualizado: publicaciones, historias y negocios nuevos para ti');
+}
+
+/* ---------- clima real de Los Mochis (Open-Meteo, sin llave) ---------- */
+const CLIMA_URL = 'https://api.open-meteo.com/v1/forecast?latitude=25.79&longitude=-108.99&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,is_day&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset&timezone=America%2FMazatlan&forecast_days=7';
+const WMO = c => c===0?['☀️','Despejado']:c<=2?['🌤️','Poco nublado']:c===3?['☁️','Nublado']:c<=48?['🌫️','Niebla']:c<=57?['🌦️','Llovizna']:c<=67?['🌧️','Lluvia']:c<=77?['🌨️','Nieve']:c<=82?['🌧️','Chubascos']:c<=86?['🌨️','Nevadas']:['⛈️','Tormenta'];
+let CLIMA = null, climaEstado = 'cargando';
+async function cargarClima(forzar){
+  try { const c = JSON.parse(localStorage.getItem('lm-clima')||'null'); if (!forzar && c && Date.now()-c.t < 30*60000){ CLIMA=c.d; climaEstado='ok'; return; } } catch(e){}
+  try { const r = await fetch(CLIMA_URL); if(!r.ok) throw new Error(r.status); CLIMA = await r.json(); climaEstado='ok'; try{ localStorage.setItem('lm-clima', JSON.stringify({t:Date.now(), d:CLIMA})); }catch(e){} }
+  catch(e){ climaEstado='error'; }
+  const b = $('#clima-btn'); if (b) b.outerHTML = climaBtn(); if (ui.sheet?.t==='clima') renderLayer();
+}
+function climaBtn(){
+  if (climaEstado==='ok' && CLIMA?.current){ const c=CLIMA.current, [ic,tx]=WMO(c.weather_code); return `<button id="clima-btn" class="clima" data-a="clima" title="${tx} en Los Mochis">${ic}<b>${Math.round(c.temperature_2m)}°</b><small>Los Mochis</small></button>`; }
+  return `<button id="clima-btn" class="clima" data-a="clima" title="Clima de Los Mochis">${climaEstado==='error'?'🌡️':'⏳'}<b>--°</b><small>Clima</small></button>`;
+}
+function hojaClima(){
+  if (climaEstado!=='ok' || !CLIMA) return hoja('Clima en Los Mochis', `<p class="muted">${climaEstado==='error'?'No se pudo cargar el clima. En la vista previa de Claude se bloquean las conexiones externas; en tu página de GitHub sí funciona.':'Cargando…'}</p><button class="btn" data-a="climaRetry">Reintentar</button>`);
+  const c = CLIMA.current, [ic,tx] = WMO(c.weather_code); const H = CLIMA.hourly, D = CLIMA.daily;
+  const ahora = c.time.slice(0,13); let i0 = H.time.findIndex(t=>t.slice(0,13)===ahora); if (i0<0) i0=0;
+  const horas = H.time.slice(i0, i0+24).map((t,k)=>({h:t.slice(11,16), t:H.temperature_2m[i0+k], w:H.weather_code[i0+k], p:H.precipitation_probability[i0+k]}));
+  const dia = s => { const d = new Date(s+'T12:00:00'); return ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()]+' '+d.getDate(); };
+  const mn = Math.min(...D.temperature_2m_min), mx = Math.max(...D.temperature_2m_max);
+  return hoja('Clima en Los Mochis', `<div class="clhead"><span class="big">${ic}</span><div><b class="num">${Math.round(c.temperature_2m)}°C</b><span>${tx} · se siente ${Math.round(c.apparent_temperature)}°</span><small>Humedad ${c.relative_humidity_2m}% · viento ${Math.round(c.wind_speed_10m)} km/h</small></div></div>
+    <b>Próximas 24 horas</b><div class="clhoras">${horas.map(h=>`<div><small>${h.h}</small><span>${WMO(h.w)[0]}</span><b class="num">${Math.round(h.t)}°</b>${h.p?`<small class="lluv">${h.p}%</small>`:'<small>&nbsp;</small>'}</div>`).join('')}</div>
+    <b>Esta semana</b><div class="cldias">${D.time.map((t,k)=>{ const lo=D.temperature_2m_min[k], hi=D.temperature_2m_max[k]; return `<div class="cld"><span class="d">${k===0?'Hoy':dia(t)}</span><span>${WMO(D.weather_code[k])[0]}</span><small class="lluv">${D.precipitation_probability_max[k]?D.precipitation_probability_max[k]+'%':''}</small><span class="num lo">${Math.round(lo)}°</span><span class="rng"><i style="left:${(lo-mn)/(mx-mn||1)*100}%;right:${100-(hi-mn)/(mx-mn||1)*100}%"></i></span><span class="num">${Math.round(hi)}°</span></div>`; }).join('')}</div>
+    <span class="small muted">Datos en vivo de Open-Meteo · hora de Sinaloa · actualizado ${c.time.slice(11,16)}</span>`);
+}
+
+/* ---------- tarjetas teñidas con el color de su foto ---------- */
+function colorDominante(img){
+  try { const c = document.createElement('canvas'); c.width = c.height = 24; const x = c.getContext('2d', {willReadFrequently:true}); x.drawImage(img,0,0,24,24);
+    const d = x.getImageData(0,0,24,24).data; let r=0,g=0,b=0,w=0;
+    for (let i=0;i<d.length;i+=4){ const R=d[i],G=d[i+1],B=d[i+2]; const mx=Math.max(R,G,B), mn=Math.min(R,G,B); const sat = mx? (mx-mn)/mx : 0; const lum=(mx+mn)/2;
+      const peso = (sat*sat + .02) * (lum>235||lum<20 ? .15 : 1); r+=R*peso; g+=G*peso; b+=B*peso; w+=peso; }
+    if (!w) return null; return [Math.round(r/w), Math.round(g/w), Math.round(b/w)];
+  } catch(e){ return null; }
+}
+document.addEventListener('load', e => { const im = e.target; if (!(im instanceof HTMLImageElement) || !im.dataset.u) return; const card = im.closest('.bcard2, .ptint'); if (!card) return;
+  const col = colorDominante(im); if (col) card.style.setProperty('--tint', `rgb(${col.join(',')})`); }, true);
+
+/* ---------- acciones ---------- */
+function registrarAccionesExtras(){ Object.assign(A, {
+  guardar: x => { if(necesitaSesion()) return; const i = S.guardados.findIndex(g=>g.u===S.yo&&g.post===x);
+    if (i>=0){ S.guardados.splice(i,1); toast('Quitado de Guardados'); } else { S.guardados.push({u:S.yo, post:x, t:Date.now()}); toast('Guardado. Lo encuentras en Más → Guardados'); }
+    save(); refrescarPost(x); if (ui.sheet) cerrarHoja(); },
+  repost: x => { if(necesitaSesion()) return; const p = post(x); if (!p) return;
+    if (p.autor===S.yo) return toast('Esta publicación ya está en tu perfil');
+    const i = S.reposts.findIndex(r=>r.u===S.yo&&r.post===x);
+    if (i>=0){ S.reposts.splice(i,1); toast('Ya no aparece en tus Compartidos'); }
+    else { S.reposts.push({u:S.yo, post:x, t:Date.now()}); notif(p.autor,'repost',S.yo,{post:x}); toast('Compartido en tu perfil. Tus amigos lo verán en su inicio.'); }
+    save(); refrescarPost(x); if (ui.sheet) cerrarHoja(); },
+  verSeg: (x, el) => { ui.sheet = {t:'seguidores', id:x, tab:el?.dataset?.o||'seguidores'}; renderLayer(); },
+  pfTab: x => { ui.pfTab = x; rerender(); },
+  verGuardados: () => { ui.sheet=null; renderLayer(); go('guardados'); },
+  clima: () => { ui.sheet = {t:'clima'}; renderLayer(); if (climaEstado!=='ok') cargarClima(true); },
+  climaRetry: () => { climaEstado='cargando'; renderLayer(); cargarClima(true); },
+  privacidad: (x) => { const u = usr(S.yo); if (!u) return; u.priv = u.priv||{}; u.priv[x] = u.priv[x]===false; save(); rerender(); toast('Privacidad actualizada'); },
+  tagPub: x => { const ta = $('#pub-txt'); if (!ta) return; const v = ta.value, pos = ta.selectionStart ?? v.length; const ini = v.lastIndexOf('@', pos-1);
+    const nuevo = v.slice(0, ini>=0?ini:pos) + '@' + perfilDe(x).handle + ' ' + v.slice(pos); ta.value = nuevo; ui.draftTxt = nuevo; const s=$('#tag-sug'); if(s) s.innerHTML=''; ta.focus();
+    if (!permiteEtiqueta(x)) toast(`${perfilDe(x).nombre} no permite etiquetas: no se le avisará`); },
+  tagHist: x => { if (!permiteEtiqueta(x)) return toast(`${perfilDe(x).nombre} no permite que lo etiqueten`); ui.draftHT = [...new Set([...(ui.draftHT||[]), x])].slice(0,5); const i=$('#ht-q'); if(i) i.value=''; renderLayer(); setTimeout(()=>$('#ht-q')?.focus(),20); },
+  untagHist: x => { ui.draftHT = (ui.draftHT||[]).filter(i=>i!==x); renderLayer(); },
+  compartirHist: x => { const h = S.historias.find(h=>h.id===x); if (!h) return;
+    if (S.historias.some(o=>o.autor===S.yo && o.origen?.hist===x)) return toast('Ya la compartiste en tu historia');
+    const n = {id:'h'+Date.now().toString(36), autor:S.yo, t:Date.now(), foto:h.foto, origen:{autor:h.autor, hist:h.id}, etiq:[], estado:'aprobado', prod:null};
+    S.historias.push(n); notif(h.autor,'sistema',null,{texto:`${perfilDe(S.yo).nombre} compartió tu historia.`}); save(); toast('Compartida en tu historia (24 h). Muestra quién la subió.'); },
+  compartirEtiqueta: x => { const n = S.notifs.find(n=>n.id===x); if(!n) return;
+    if (n.post){ if (!reposteado(n.post)) { S.reposts.push({u:S.yo, post:n.post, t:Date.now()}); notif(post(n.post).autor,'repost',S.yo,{post:n.post}); } toast('Compartida en tu perfil'); }
+    else if (n.hist){ A.compartirHist(n.hist); }
+    n.compartida = true; save(); rerender(); },
+  vaciarCarrito: () => { if (!confirmarSimple('¿Vaciar el carrito?')) return; S.carrito = null; save(); render(); toast('Carrito vacío'); },
+  prodFoto: (x, el) => { ui.pfoto = +el.dataset.o; renderLayer(); },
+  quitarFotoProd: x => { ui.draftPF.splice(+x,1); renderConservando(); },
+  fotosProdEjemplo: () => { const n = neg(S.yo); const k = TIPOS[n.tipo].k; const pool = POOL[k]||[]; ui.draftPF = pool.slice(0,4).map(([u])=>({k, a:'#F5F5F4', b:'#E7E5E4', c:'#fff', u})); renderConservando(); }
+}); }
+function refrescarPost(x){ const art = $('#post-'+x); if (art){ const tmp=document.createElement('div'); tmp.innerHTML=postCard(post(x), ui.view==='post', art.dataset.por||null); art.replaceWith(tmp.firstElementChild); } else rerender(); }
+cargarClima();
+
 
 /* ---------- PANEL DEL ADMINISTRADOR ---------- */
 function vAdmin(){
@@ -2641,7 +2914,7 @@ function aSeguridad(){
 
 
 /* ---------- render ---------- */
-const VISTAS = {home:vHome, buscar:vBuscar, inicio:vInicio, notifs:vNotifs, negocio:vNegocio, carrito:vCarrito, checkout:vCheckout, seguimiento:vSeguimiento, pedidos:vPedidos, vende:vVende, post:vPost, perfil:vPerfil, usuario:vUsuario, mensajes:vMensajes, ajustes:vAjustes, minegocio:vMiNegocio};
+const VISTAS = {guardados:vGuardados, home:vHome, buscar:vBuscar, inicio:vInicio, notifs:vNotifs, negocio:vNegocio, carrito:vCarrito, checkout:vCheckout, seguimiento:vSeguimiento, pedidos:vPedidos, vende:vVende, post:vPost, perfil:vPerfil, usuario:vUsuario, mensajes:vMensajes, ajustes:vAjustes, minegocio:vMiNegocio};
 const historial = [];
 function modosNav(){
   const act = ui.mode==='app' ? (soyNegocio()?'comercio':'app') : ui.mode;
@@ -2710,7 +2983,7 @@ function renderLayer(){
   if (ui.mode==='app'){
     if (ui.pend) h = avisoOtroComercio();
     else if (ui.sel) h = hojaProducto();
-    else if (ui.sheet) h = ({coment:hojaComentarios, compartir:hojaCompartir, opcPost:hojaOpcPost, reportar:hojaReportar, opcPerfil:hojaOpcPerfil, publicar:hojaPublicar, nota:hojaNota, crear:hojaCrear, historia:hojaHistoria, cuentas:hojaCuentas, mas:hojaMas, verNota:hojaVerNota}[ui.sheet.t]||(()=>''))();
+    else if (ui.sheet) h = ({coment:hojaComentarios, compartir:hojaCompartir, opcPost:hojaOpcPost, reportar:hojaReportar, opcPerfil:hojaOpcPerfil, publicar:hojaPublicar, nota:hojaNota, crear:hojaCrear, historia:hojaHistoria, cuentas:hojaCuentas, mas:hojaMas, verNota:hojaVerNota, seguidores:hojaSeguidores, clima:hojaClima}[ui.sheet.t]||(()=>''))();
   }
   $('#layer').innerHTML = h;
   if (!ui.story) document.body.style.overflow = h ? 'hidden' : '';
@@ -2718,14 +2991,19 @@ function renderLayer(){
 function go(view, keep){
   if(!keep && ui.view!==view) historial.push({view:ui.view, post:ui.post, perfil:ui.perfil, neg:ui.neg});
   if (view==='chat') view='mensajes';
-  ui.view=view; ui.err=''; ui.sel=null; ui.sheet=null; if(view!=='home') ui.feedN=12; render(); window.scrollTo(0,0);
+  if (ui.view==='home' && view!=='home') ui.homeY = window.scrollY;
+  const aHome = view==='home' && ui.view!=='home';
+  ui.view=view; ui.err=''; ui.sel=null; ui.sheet=null; render(); window.scrollTo(0, aHome ? (ui.homeY||0) : 0);
 }
 function rerender(){ const y=window.scrollY; render(); window.scrollTo(0,y); }
 const cerrarHoja = () => { ui.sheet=null; ui.err=''; renderLayer(); };
 
 /* ---------- acciones ---------- */
 const A = {
-  go: x => { go(x); if(x==='notifs'){ misNotifs().forEach(n=>n.leida=true); save(); } },
+  go: x => {
+    if (x==='home' && ui.view==='home'){ const ahora=Date.now(); if (ahora-(ui.lastHome||0) < 450){ ui.lastHome=0; return refrescarInicio(); } ui.lastHome=ahora; window.scrollTo({top:0, behavior:'smooth'}); return; }
+    if (x==='home') ui.lastHome=Date.now();
+    go(x); if(x==='notifs'){ misNotifs().forEach(n=>n.leida=true); save(); } },
   atras: () => { const h=historial.pop(); if(!h) return go('home',true); Object.assign(ui,{post:h.post, perfil:h.perfil, neg:h.neg}); go(h.view,true); },
   verNota: x => { ui.err=''; ui.sheet={t:'verNota', id:x}; renderLayer(); setTimeout(()=>$('#nr-txt')?.focus(),30); },
   limpiarQ: () => { ui.q=''; rerender(); },
@@ -2752,7 +3030,7 @@ const A = {
   cat: x => { ui.cat=x; rerender(); },
   neg: x => { ui.neg=x; ui.secF='todas'; ui.soloDisp=false; ui.estrellas=5; ui.sheet=null; go('negocio'); },
   sec: x => { ui.secF=x; rerender(); },
-  ver: x => { const p=prod(x); ui.sel={pid:x, v:p.var.map(()=>null), m:p.mods.map(()=>[]), qty:p.paso>=1?1:p.paso, note:''};
+  ver: x => { ui.pfoto=0; const p=prod(x); ui.sel={pid:x, v:p.var.map(()=>null), m:p.mods.map(()=>[]), qty:p.paso>=1?1:p.paso, note:''};
     p.mods.forEach((g,i)=>{ if(g.min===1&&g.max===1) ui.sel.m[i]=[g.o[0].n]; }); renderLayer(); },
   pedirProd: x => { const p=prod(x); A.neg(p.neg); A.ver(x); },
   close: (x,el,e) => { if(el.dataset.self && e.target!==el) return; ui.sel=null; ui.origen=null; renderLayer(); },
@@ -2779,10 +3057,10 @@ const A = {
   feed: x => { ui.feed=x; ui.feedN=12; rerender(); },
   masFeed: () => { ui.feedN+=12; rerender(); },
   verPost: x => { ui.post=x; go('post'); },
-  verPerfil: x => { ui.sheet=null; if(esNeg(x)) return A.neg(x); if(x===S.yo) return go('perfil'); ui.perfil=x; go('usuario'); },
+  verPerfil: x => { ui.sheet=null; ui.pfTab='pubs'; if(esNeg(x)) return A.neg(x); if(x===S.yo) return go('perfil'); ui.perfil=x; go('usuario'); },
   like: (x, el) => { if(necesitaSesion()) return; const k=likeKey(x); S.likes[k]=!S.likes[k]; const p=post(x);
-    if (S.likes[k]) notif(p.autor,'like',S.yo,{post:x}); save();
-    const art = $('#post-'+x); if (art){ const tmp=document.createElement('div'); tmp.innerHTML=postCard(p, ui.view==='post'); art.replaceWith(tmp.firstElementChild); if(S.likes[k]){ const bh=$('#bh-'+x); if(bh){ bh.classList.remove('go'); void bh.offsetWidth; bh.classList.add('go'); } } } },
+    if (S.likes[k]) notif(p.autor,'like',S.yo,{post:x}); const por = el?.dataset?.o; if (S.likes[k] && por && por!==S.yo && por!==p.autor) notif(por,'like_repost',S.yo,{post:x}); save();
+    const art = $('#post-'+x); if (art){ const tmp=document.createElement('div'); tmp.innerHTML=postCard(p, ui.view==='post', art.dataset.por||null); art.replaceWith(tmp.firstElementChild); if(S.likes[k]){ const bh=$('#bh-'+x); if(bh){ bh.classList.remove('go'); void bh.offsetWidth; bh.classList.add('go'); } } } },
   carMove: (x, el) => { const tr=document.querySelector(`[data-car="${x}"]`); if(tr) tr.scrollBy({left:(+el.dataset.o)*tr.clientWidth, behavior:'smooth'}); },
   coment: x => { ui.err=''; ui.sheet={t:'coment', post:x}; renderLayer(); setTimeout(()=>$('#c-txt')?.focus(),50); },
   focoComent: () => $('#c-txt')?.focus(),
@@ -2858,7 +3136,7 @@ const A = {
     notif(p.cuenta,'sistema',null,{texto:`Tu pedido #${p.id} en ${neg(p.neg).nombre}: ${ESTADOS[to].l}.`});
     log(neg(p.neg).nombre,'Cambio de estado',`#${p.id} → ${ESTADOS[to].l}`); save(); render(); toast(`#${p.id}: ${ESTADOS[to].l}`); },
   toggleDisp: x => { const p=prod(x); p.disp=!p.disp; log(neg(p.neg).nombre,'Disponibilidad',`${p.nombre}: ${p.disp?'visible':'oculto'}`); save(); rerender(); },
-  edit: x => { ui.edit=x; ui.err=''; render(); window.scrollTo(0,0); },
+  edit: x => { ui.edit=x; ui.err=''; ui.draftPF = x==='new' ? [] : (prod(x)?.fotos||[]).map(f=>({...f})); render(); window.scrollTo(0,0); },
   editNo: () => { ui.edit=null; ui.err=''; render(); },
   del: x => { ui.delAsk=x; rerender(); }, delNo: () => { ui.delAsk=null; rerender(); },
   delSi: x => { const p=prod(x); S.productos=S.productos.filter(q=>q.id!==x); ui.delAsk=null; log(neg(p.neg).nombre,'Producto eliminado',p.nombre); save(); rerender(); toast('Producto eliminado'); },
@@ -2929,9 +3207,12 @@ const F = {
     if (!ui.draft.length) return err('Agrega al menos una foto.');
     if (!$('#pub-ok').checked) return err('Confirma que tus fotos respetan las reglas.');
     const r = revisar(texto,'publico'); if (!r.ok) return err(msgBloqueo(r));
-    const p = {id:'q'+Date.now().toString(36), autor:S.yo, tipo:soyNegocio()?'negocio':'usuario', texto, likes:0, likedBy:[], t:Date.now(), prod:$('#pub-prod')?.value||null};
+    const et = etiquetasDeTexto(texto);
+    const p = {id:'q'+Date.now().toString(36), autor:S.yo, tipo:soyNegocio()?'negocio':'usuario', texto, likes:0, likedBy:[], t:Date.now(), prod:$('#pub-prod')?.value||null, etiq:et.ids};
     try { p.fotos = []; for (const d of ui.draft) p.fotos.push(await guardarFoto(d)); } catch(e){ return err('Este navegador no permitió guardar las fotos. Prueba con fotos de ejemplo.'); }
     S.posts.push(p); const est = moderarNuevo(p,'post');
+    if (est==='aprobado') et.ids.forEach(id=>notif(id,'etiqueta',S.yo,{post:p.id}));
+    if (et.no.length) setTimeout(()=>toast(`No se etiquetó a ${et.no.map(h=>'@'+h).join(', ')}: no permite etiquetas`), 2600);
     log('@'+u.usuario, 'Publicación', `${est} · ${texto.slice(0,60)}`); ui.draft=[]; ui.draftTxt=''; cerrarHoja(); save();
     if (soyNegocio()){ ui.pTab='publicaciones'; go('minegocio',true); } else go('perfil',true);
     toast(est==='aprobado'?'¡Publicado!':est==='pendiente'?'Tu publicación está en revisión':'Tu publicación no cumple las reglas: '+MOTIVOS[p.motivo]);
@@ -2939,9 +3220,9 @@ const F = {
   historia: async () => {
     const err=m=>{ ui.err=m; renderLayer(); };
     if (!ui.draftH) return err('Elige una foto.'); if (!$('#hist-ok').checked) return err('Confirma que tu foto respeta las reglas.');
-    const h = {id:'h'+Date.now().toString(36), autor:S.yo, t:Date.now()};
+    const h = {id:'h'+Date.now().toString(36), autor:S.yo, t:Date.now(), etiq:(ui.draftHT||[]).filter(permiteEtiqueta)};
     try { h.foto = await guardarFoto(ui.draftH); } catch(e){ return err('Este navegador no permitió guardar la foto. Usa una de ejemplo.'); }
-    S.historias.push(h); const est = moderarNuevo(h,'hist'); ui.draftH=null; cerrarHoja(); save(); rerender();
+    S.historias.push(h); const est = moderarNuevo(h,'hist'); if (est==='aprobado') h.etiq.forEach(id=>notif(id,'etiqueta_hist',S.yo,{hist:h.id})); ui.draftH=null; ui.draftHT=[]; cerrarHoja(); save(); rerender();
     toast(est==='aprobado'?'Historia publicada por 24 horas':est==='pendiente'?'Tu historia está en revisión':'Tu historia no cumple las reglas');
   },
   nota: () => {
@@ -2983,7 +3264,7 @@ const F = {
     const r=revisar(t,'publico'); if(!r.ok){ ui.err=msgBloqueo(r); return rerender(); }
     S.resenas.push({neg:ui.neg, autor:S.yo, est:ui.estrellas, texto:t, t:Date.now()}); ui.err=''; save(); rerender(); toast('Reseña publicada');
   },
-  producto: () => {
+  producto: async () => {
     const n = neg(S.yo); const nombre=$('#e-nombre').value.trim(); if(nombre.length<2) return fail('El producto necesita nombre.');
     let vars, mods; try { vars=parseVar($('#e-var').value); mods=parseMods($('#e-mods').value); } catch(e){ return fail(e.message); }
     const r=revisar(nombre+' '+$('#e-desc').value,'publico'); if(!r.ok) return fail(msgBloqueo(r));
@@ -2991,6 +3272,8 @@ const F = {
     const st = $('#e-stock').value.trim();
     const data = {nombre, desc:$('#e-desc').value.trim(), sec, precio:Math.round((+$('#e-precio').value||0)*100), unidad:$('#e-unidad').value,
       paso:Math.max(0.1,+$('#e-paso').value||1), stock: st===''?null:Math.max(0,Math.round(+st)), disp:$('#e-disp').checked, var:vars, mods};
+    try { data.fotos = []; for (const d of (ui.draftPF||[]).slice(0,4)) data.fotos.push(d.m && String(d.m).startsWith('data:') ? await guardarFoto(d) : d); } catch(e){ return fail('No se pudieron guardar las fotos en este navegador.'); }
+    if (!data.fotos.length) delete data.fotos;
     if (ui.edit==='new'){ S.productos.push({id:'p'+Date.now().toString(36), neg:n.id, agot:[], k:TIPOS[n.tipo].k, ...data}); log(n.nombre,'Producto creado',nombre); }
     else { const p=prod(ui.edit); const antes=p.precio; Object.assign(p,data); log(n.nombre,'Producto editado', antes!==p.precio?`${nombre}: precio ${money(antes)} → ${money(p.precio)}`:nombre); }
     ui.edit=null; ui.err=''; save(); render(); toast('Producto guardado');
@@ -3015,14 +3298,15 @@ const F = {
 
 /* ---------- eventos ---------- */
 document.addEventListener('click', e => { const el = e.target.closest('[data-a]'); if(!el) return; const fn = A[el.dataset.a]; if(fn) fn(el.dataset.x, el, e); });
-document.addEventListener('dblclick', e => { const c = e.target.closest('[data-dbl]'); if(!c) return; const id=c.dataset.dbl; if(!leGusta(id)) A.like(id); else { const bh=$('#bh-'+id); if(bh){ bh.classList.remove('go'); void bh.offsetWidth; bh.classList.add('go'); } } });
+document.addEventListener('dblclick', e => { const c = e.target.closest('[data-dbl]'); if(!c) return; const id=c.dataset.dbl; if(!leGusta(id)) A.like(id, {dataset:{o:c.closest('article')?.dataset.por||''}}); else { const bh=$('#bh-'+id); if(bh){ bh.classList.remove('go'); void bh.offsetWidth; bh.classList.add('go'); } } });
 document.addEventListener('submit', e => { const f=e.target.dataset.form; if(f){ e.preventDefault(); F[f](); } });
 document.addEventListener('focusin', e => { if(e.target.id==='st-resp' && ui.story) ui.story.paused=true; });
 document.addEventListener('input', e => {
   if (e.target.id==='q'){ ui.q=e.target.value; const r=$('#results'); if(r) r.innerHTML = (ui.view==='buscar' || ui.q.trim()) ? resultados() : ''; }
   if (e.target.id==='qm'){ ui.qm=e.target.value; const busca=!!ui.qm.trim(); const r=$('#dm-res'); if(r) r.innerHTML=resultadosMsg(); document.querySelectorAll('.dm-list .notes, .dm-list .dm-sub:not(.dm-res .dm-sub)').forEach(el=>el.hidden=busca); document.querySelectorAll('.dm-list > .crow').forEach(el=>el.hidden=busca); if(!busca && !document.querySelector('.dm-list > .crow')){ render(); const i=$('#qm'); if(i){ i.focus(); } } }
   if (e.target.id==='sheet-note' && ui.sel) ui.sel.note=e.target.value;
-  if (e.target.id==='pub-txt') ui.draftTxt=e.target.value;
+  if (e.target.id==='pub-txt'){ ui.draftTxt=e.target.value; const ta=e.target, pos=ta.selectionStart, m=ta.value.slice(0,pos).match(/@([^\s@]{1,30})$/); const s=$('#tag-sug'); if(s) s.innerHTML = m ? sugHTML(sugerencias(m[1]),'tagPub') : ''; }
+  if (e.target.id==='ht-q'){ const s=$('#ht-sug'); if(s) s.innerHTML = sugHTML(sugerencias(e.target.value),'tagHist'); }
   if (e.target.id==='f-oferta') actualizarTotales();
 });
 document.addEventListener('change', async e => {
@@ -3031,6 +3315,7 @@ document.addEventListener('change', async e => {
   if (t.dataset && t.dataset.ch && A[t.dataset.ch]) A[t.dataset.ch](t.value);
   if (t.name==='modo' || t.id==='f-col' || t.id==='f-oferta') actualizarTotales();
   if (t.id==='pub-files'){ guardarBorrador(); try { const nuevas = await leerFotos(t, 10-ui.draft.length); ui.draft.push(...nuevas.slice(0,10-ui.draft.length)); ui.err=''; } catch(err){ ui.err='No se pudo leer una de las fotos.'; } renderLayer(); }
+  if (t.id==='e-fotos'){ try { const nuevas = await leerFotos(t, 4-(ui.draftPF||[]).length); ui.draftPF = (ui.draftPF||[]).concat(nuevas).slice(0,4); } catch(err){ ui.err='No se pudieron leer las fotos.'; } renderConservando(); }
   if (t.id==='hist-file' && t.files[0]){ try { ui.draftH={m:await redimensionar(t.files[0],1080,false)}; ui.err=''; } catch(err){ ui.err='No se pudo leer la foto.'; } renderLayer(); }
 });
 document.addEventListener('scroll', e => {
@@ -3053,7 +3338,7 @@ Object.assign(A, {
   termAdd: () => { const t=$('#term-t').value.trim().toLowerCase(), c=$('#term-c').value; if(t.length<3) return toast('Escribe al menos 3 letras'); S.cfg.terminos.push({t:limpiarTexto(t), cat:c}); CACHE_RE.clear(); log('Admin','Agregó término al Escudo',c); save(); rerender(); },
   termDel: x => { S.cfg.terminos.splice(+x,1); save(); rerender(); }
 });
-registrarAccionesReparto();
+registrarAccionesReparto(); registrarAccionesExtras();
 aplicarPref();
 render();
 cargarFotos();
