@@ -470,6 +470,55 @@ details.set .bd{padding:0 18px 18px;display:flex;flex-direction:column;gap:12px}
 .m-nota{position:absolute;left:8px;bottom:6px;font-size:10.5px;font-weight:700;background:rgba(255,255,255,.85);color:#333;border-radius:6px;padding:2px 6px}
 .ofer{border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:6px;margin-top:10px;background:var(--surface-2)}
 @media (max-width:520px){.rwrap{padding:0}.rapp{border-radius:0;border:0;min-height:100vh}.rwrap .protobar{margin:0;border-radius:0}}
+
+/* ---------- v10: más amplio y centrado ---------- */
+.igin{max-width:1180px}
+.home{gap:40px}
+.home-feed{max-width:640px}
+.feed{max-width:640px}
+.home-side{width:290px;gap:10px}
+@media (min-width:1180px){.home-side{display:none}}
+@media (min-width:1280px){.home-side{display:flex}}
+.home-side .srow{gap:10px}
+.home-side .srow .tx b{font-size:13.5px}
+.home-side .sec-h b,.home-side>b{color:var(--fg)!important;font-size:13.5px!important;letter-spacing:.01em}
+.hsearch{margin-bottom:2px}
+.hsearch input{font-size:15px}
+#results:empty{display:none}
+#results{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px}
+.stories .avatar{--s:68px!important}
+.stb{width:82px}.stb .nm{max-width:82px}
+.pbanner{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--brand);background:var(--brand-soft);color:var(--fg);border-radius:16px;padding:12px 14px}
+.pbanner .tx{flex:1;min-width:0;display:flex;flex-direction:column}.pbanner .tx span{font-size:12.5px;color:var(--muted)}.pbanner .go{font-weight:800;color:var(--brand)}
+.pdot{width:12px;height:12px;border-radius:50%;background:var(--brand);flex:none;box-shadow:0 0 0 0 var(--brand);animation:latido 1.6s infinite}
+@keyframes latido{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--brand) 60%,transparent)}100%{box-shadow:0 0 0 10px transparent}}
+.ptrack{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.ptrack.fin{opacity:.85}
+.pbar{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden}.pbar i{display:block;height:100%;background:var(--brand);border-radius:99px;transition:width .4s}
+.expl{display:flex;flex-direction:column;gap:2px;background:var(--surface-2);border-radius:14px;padding:10px 12px}.expl span{font-size:13.5px;color:var(--muted)}
+/* perfiles grandes */
+.perfil-w{max-width:935px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.pcab{padding:26px}
+.pcab .prof{gap:44px}
+.prof>.avatar{--s:clamp(86px,15vw,150px)!important}
+.pnom{font-size:clamp(22px,2.4vw,30px)}
+.pcab .stats{gap:34px}.pcab .stats b{font-size:22px}.pcab .stats span{font-size:14px}
+.perfil-w .pgrid{gap:4px;border-radius:14px}
+@media (max-width:620px){.pcab{padding:16px}.pcab .prof{gap:16px}.pcab .stats{gap:16px}.pcab .stats b{font-size:18px}}
+/* mensajes grandes */
+.dm{height:calc(100dvh - 96px);min-height:600px}
+@media (min-width:860px){.dm{grid-template-columns:400px 1fr}}
+.msearch{margin:8px 14px 0}
+.notes{padding:62px 18px 14px;gap:10px}
+.nt{width:104px}
+.nt .bub{top:-54px;max-width:108px;font-size:12.5px;-webkit-line-clamp:3;padding:7px 10px}
+.nt .nm{font-size:12.5px;max-width:100px}
+.crow{padding:12px 18px}
+.crow b{font-size:15px}
+.dm-res{padding-bottom:10px}
+mark{background:color-mix(in srgb,var(--accent) 35%,transparent);color:inherit;border-radius:3px;padding:0 1px}
+.notaver{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.notabig{font-size:20px;font-weight:700;background:var(--surface-2);border-radius:20px;padding:14px 18px;max-width:420px;line-height:1.35}
 </style>
 </head>
 <body>
@@ -1112,7 +1161,27 @@ S.alertas = S.alertas || []; S.intentos = S.intentos || {}; S.pausas = S.pausas 
 
 const HOMO = {'а':'a','в':'b','е':'e','ё':'e','к':'k','м':'m','н':'h','о':'o','р':'p','с':'c','т':'t','у':'y','х':'x','і':'i','ї':'i','ј':'j','ѕ':'s','ԁ':'d','ԛ':'q','ԝ':'w','ɡ':'g','ⅼ':'l','α':'a','β':'b','ε':'e','η':'n','ι':'i','κ':'k','ν':'v','ο':'o','ρ':'p','τ':'t','υ':'u','χ':'x','ß':'ss','æ':'ae','ø':'o','ł':'l','đ':'d','ħ':'h','ı':'i','г':'r','п':'n','ӏ':'l','ʀ':'r','ɴ':'n','ᴏ':'o','ᴀ':'a','ᴇ':'e','ɪ':'i','ᴜ':'u','ᴛ':'t','ꜱ':'s','ᴘ':'p','ᴄ':'c','ᴅ':'d','ʜ':'h','ᴋ':'k','ᴍ':'m','ᴠ':'v','ᴡ':'w','ʏ':'y','ᴢ':'z','ʙ':'b','ɢ':'g','ꜰ':'f','ᴊ':'j','ʟ':'l'};
 const LEET = {'0':'o','1':'i','3':'e','4':'a','5':'s','7':'t','8':'b','@':'a','$':'s','!':'i','|':'l','€':'e','¡':'i','+':'t'};
-const NUM_PAL = {cero:0,uno:1,una:1,dos:2,tres:3,cuatro:4,cinco:5,seis:6,siete:7,ocho:8,nueve:9};
+const NUM_PAL = {cero:0,uno:1,un:1,una:1,dos:2,tres:3,cuatro:4,cinco:5,seis:6,siete:7,ocho:8,nueve:9};
+const NUM_ESP = {diez:10,once:11,doce:12,trece:13,catorce:14,quince:15,dieciseis:16,diecisiete:17,dieciocho:18,diecinueve:19,veinte:20,veintiuno:21,veintiun:21,veintiuna:21,veintidos:22,veintitres:23,veinticuatro:24,veinticinco:25,veintiseis:26,veintisiete:27,veintiocho:28,veintinueve:29};
+const NUM_DEC = {treinta:30,cuarenta:40,cincuenta:50,sesenta:60,setenta:70,ochenta:80,noventa:90};
+const NUM_CEN = {cien:100,ciento:100,doscientos:200,doscientas:200,trescientos:300,trescientas:300,cuatrocientos:400,cuatrocientas:400,quinientos:500,quinientas:500,seiscientos:600,seiscientas:600,setecientos:700,setecientas:700,ochocientos:800,ochocientas:800,novecientos:900,novecientas:900};
+// "seis seis ocho ciento cuarenta y cinco..." → "6 6 8 145 ..." (números dictados con palabras para esconder teléfonos)
+function numerosEnPalabras(s){
+  const out = []; let cur = null, place = 9, esp = '';
+  const flush = () => { if (cur!=null){ out.push(String(cur)); cur=null; place=9; } };
+  for (const w of s.split(/(\s+)/)){
+    if (!w) continue;
+    if (/^\s+$/.test(w)){ if (cur==null) out.push(w); else esp = w; continue; }
+    let v=null, pl=0;
+    if (w in NUM_CEN){ v=NUM_CEN[w]; pl=3; } else if (w in NUM_DEC){ v=NUM_DEC[w]; pl=2; } else if (w in NUM_ESP){ v=NUM_ESP[w]; pl=1.5; } else if (w in NUM_PAL){ v=NUM_PAL[w]; pl=1; }
+    else if (w==='y' && cur!=null && place===2) continue;
+    else if (w==='mil' && cur!=null){ cur*=1000; place=3.5; continue; }
+    if (v==null){ flush(); out.push(esp, w); esp=''; continue; }
+    if (cur!=null && pl < place){ cur += v; place = pl; } else { flush(); out.push(esp); esp=''; cur = v; place = pl; }
+  }
+  flush(); return out.join('');
+}
+
 function letrasEmoji(s){ // 🅰-🆉, 🅐-🅩, 🇦-🇿 → letras
   return s.replace(/[\u{1F170}-\u{1F189}]/gu, c=>String.fromCharCode(97+c.codePointAt(0)-0x1F170))
           .replace(/[\u{1F150}-\u{1F169}]/gu, c=>String.fromCharCode(97+c.codePointAt(0)-0x1F150))
@@ -1138,7 +1207,7 @@ function vistas(t){
   const palND = leet(sinLeet);                                        // l33t → letras
   const pal = dedup(palND);                                           // letras repetidas → una
   const pegado = pal.replace(/[^a-zñ]/g,'');                           // todo pegado (solo términos largos)
-  const numerica = base.replace(/\b(cero|uno|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve)\b/g, w=>NUM_PAL[w])
+  const numerica = numerosEnPalabras(base)
                        .replace(/(\d)[\s.\-_,*/|()]+(?=\d)/g,'$1');  // 6 6 8-1 2 3 → 668123
   const emojis = [...String(t||'').replace(/️/g,'')].filter(c=>/\p{Extended_Pictographic}/u.test(c));
   return {crudo, base, sinLeet, palND, pal, pegado, numerica, sinEsp:base.replace(/\s+/g,''), emojis:new Set(emojis)};
@@ -1285,6 +1354,7 @@ const ico = {
   search:I('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'),
   shop:I('<path d="M4 10v10h16V10M3 6l2-3h14l2 3v2a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0z"/>'),
   msg:I('<path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.6A8.5 8.5 0 1 1 21 12z"/>'),
+  bell:I('<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.6 2.2H4.4z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/>'),
   heart:I('<path d="M12 20s-7.5-4.8-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.2 12 20 12 20z"/>'),
   heartF:I('<path d="M12 20s-7.5-4.8-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.2 12 20 12 20z"/>',24,'currentColor'),
   plus:I('<rect x="3" y="3" width="18" height="18" rx="5"/><path d="M12 8v8M8 12h8"/>'),
@@ -1349,15 +1419,15 @@ function recomendacion(i){
 }
 function columnaDerecha(){
   const me = perfilDe(S.yo);
-  const negs = activosVis().filter(n=>n.id!==S.yo).sort((a,b)=>(sigue(S.yo,a.id)-sigue(S.yo,b.id)) || ((calif(b.id)?.avg||0)-(calif(a.id)?.avg||0))).slice(0,6);
+  const negs = activosVis().filter(n=>n.id!==S.yo).sort((a,b)=>(sigue(S.yo,a.id)-sigue(S.yo,b.id)) || ((calif(b.id)?.avg||0)-(calif(a.id)?.avg||0))).slice(0,4);
   const amigosDeAmigos = [...new Set(misAmigos().flatMap(a=>S.sigue.filter(x=>x.de===a&&!esNeg(x.a)).map(x=>x.a)))].filter(id=>id!==S.yo&&!sigue(S.yo,id)&&!bloq(id)&&usr(id)?.grupo!=='spam').slice(0,3);
   return `<aside class="home-side">
     <div class="srow">${avatar(me,48)}<div class="tx"><b>${handleV(me)}</b><span>${esc(me.nombre)}</span></div><button class="lk" data-a="cuentas">Cambiar</button></div>
     <div class="sec-h"><b class="small muted" style="font-size:14px">Negocios para pedir hoy</b><button class="lk" data-a="go" data-x="inicio" style="color:var(--fg)">Ver todos</button></div>
-    ${negs.map(n=>{ const c=calif(n.id); return `<div class="srow"><button style="background:none;border:0;padding:0" data-a="neg" data-x="${n.id}" aria-label="${esc(n.nombre)}">${avatar(perfilDe(n.id),44)}</button>
+    ${negs.map(n=>{ const c=calif(n.id); return `<div class="srow"><button style="background:none;border:0;padding:0" data-a="neg" data-x="${n.id}" aria-label="${esc(n.nombre)}">${avatar(perfilDe(n.id),38)}</button>
       <div class="tx"><b>${nombreV(perfilDe(n.id))}</b><span>${c?'★ '+c.avg.toFixed(1)+' · ':''}${esc(TIPOS[n.tipo].uno)}${n.tiempo?' · '+esc(n.tiempo):''}</span></div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">${sigue(S.yo,n.id)?'':`<button class="lk" data-a="seguir" data-x="${n.id}">Seguir</button>`}<button class="lk" data-a="neg" data-x="${n.id}" style="color:var(--accent)">Pedir</button></div></div>`; }).join('')}
-    ${amigosDeAmigos.length?`<b class="small muted" style="font-size:14px;margin-top:6px">Quizá conoces</b>${amigosDeAmigos.map(id=>{ const a=perfilDe(id); const comun=misAmigos().filter(m=>sigue(m,id)).length; return `<div class="srow"><button style="background:none;border:0;padding:0" data-a="verPerfil" data-x="${id}">${avatar(a,40)}</button><div class="tx"><b>${esc(a.handle)}</b><span>${comun} amigo(s) en común</span></div><button class="lk" data-a="seguir" data-x="${id}">Seguir</button></div>`; }).join('')}`:''}
+    ${amigosDeAmigos.length?`<b class="small muted" style="font-size:14px;margin-top:6px">Quizá conoces</b>${amigosDeAmigos.map(id=>{ const a=perfilDe(id); const comun=misAmigos().filter(m=>sigue(m,id)).length; return `<div class="srow"><button style="background:none;border:0;padding:0" data-a="verPerfil" data-x="${id}">${avatar(a,34)}</button><div class="tx"><b>${esc(a.handle)}</b><span>${comun} amigo(s) en común</span></div><button class="lk" data-a="seguir" data-x="${id}">Seguir</button></div>`; }).join('')}`:''}
     <div class="foot">Información · Ayuda · Privacidad ${todoTag()} · Términos · <button class="lk mut" data-a="go" data-x="vende" style="font-size:11.5px">Vende con nosotros</button><br>© 2026 ${esc(S.cfg.marca.toUpperCase())} · ${esc(S.cfg.ciudad)}, Sinaloa</div>
   </aside>`;
 }
@@ -1400,7 +1470,11 @@ function vHome(){
   const l = listaFeed(); const vis = l.slice(0, ui.feedN);
   const misPend = S.posts.filter(p=>p.autor===S.yo&&p.estado==='pendiente').length;
   let html = ''; vis.forEach((p,i)=>{ html += postCard(p,false); if (ui.feed!=='negocios' && i%5===3) html += recomendacion(Math.floor(i/5)); });
+  const activos = pedidosActivos();
   return `<div class="home"><div class="home-feed">
+    <label class="search hsearch">${ico.search}<input id="q" type="search" placeholder="Buscar personas, negocios o productos" value="${esc(ui.q)}" aria-label="Buscar" autocomplete="off">${ui.q?'<button type="button" class="lk" data-a="limpiarQ" aria-label="Borrar búsqueda">✕</button>':''}</label>
+    <div id="results" class="stack">${ui.q.trim()?resultados():''}</div>
+    ${activos.length?activos.slice(0,2).map(p=>bannerPedido(p)).join(''):''}
     ${filaHistorias()}
     <div class="segs" role="tablist">${[['parati','Para ti'],['siguiendo','Siguiendo'],['negocios','Negocios']].map(([k,t])=>`<button role="tab" aria-selected="${ui.feed===k}" class="${ui.feed===k?'on':''}" data-a="feed" data-x="${k}">${t}</button>`).join('')}</div>
     <button class="compose" data-a="publicar">${avatar(perfilDe(S.yo),36)}<span class="t">¿Qué está pasando en ${esc(S.cfg.ciudad)}?</span><span class="btn pri sm">Publicar</span></button>
@@ -1446,8 +1520,8 @@ function vNotifs(){
 /* ---------- perfiles ---------- */
 function cabPerfil(id){
   const a = perfilDe(id); const u = esNeg(id)?null:usr(id); const mio = id===S.yo;
-  return `<div class="card"><div class="prof">${avatar(a,mio?86:80)}<div class="stack" style="gap:8px;min-width:0;flex:1">
-      <div class="row between nowrap"><div style="min-width:0"><h1 style="font-size:22px">${nombreV(a)}</h1><div class="muted small">@${esc(a.handle)}${!mio&&sigue(id,S.yo)?' · <span class="pill">Te sigue</span>':''}</div></div>
+  return `<div class="card pcab"><div class="prof">${avatar(a,150)}<div class="stack" style="gap:8px;min-width:0;flex:1">
+      <div class="row between nowrap"><div style="min-width:0"><h1 class="pnom">${nombreV(a)}</h1><div class="muted small">@${esc(a.handle)}${!mio&&sigue(id,S.yo)?' · <span class="pill">Te sigue</span>':''}</div></div>
         ${mio?`<button class="ibtn" data-a="go" data-x="ajustes" aria-label="Configuración">${ico.gear}</button>`:`<button class="ibtn" data-a="opcPerfil" data-x="${id}" aria-label="Opciones">${ico.dots}</button>`}</div>
       <div class="stats"><div><b>${npubs(id)}</b><span>publicaciones</span></div><div><b>${seguidores(id)}</b><span>seguidores</span></div><div><b>${siguiendo(id)}</b><span>siguiendo</span></div></div></div></div>
     ${u&&u.bio?`<div>${esc(u.bio)}</div>`:''}
@@ -1460,7 +1534,7 @@ function vPerfil(){
   if (!S.sesion) return vLogin();
   if (soyNegocio()){ ui.neg=S.yo; return vNegocio(); }
   const mis = S.posts.filter(p=>p.autor===S.yo).sort((a,b)=>b.t-a.t);
-  return `<div class="feed" style="gap:14px">${cabPerfil(S.yo)}
+  return `<div class="perfil-w">${cabPerfil(S.yo)}
   ${mis.length?`<div class="pgrid">${mis.map(p=>{ const [l,c]=PEST[p.estado]; return miniPost(p, p.estado!=='aprobado'?`<span class="pill ${c} st">${l}</span>`:''); }).join('')}</div>
     ${mis.filter(p=>['rechazado','retirado'].includes(p.estado)).map(p=>`<div class="note bad small">“${esc(p.texto.slice(0,40))}…” fue ${p.estado}: <b>${esc(MOTIVOS[p.motivo]||'')}</b></div>`).join('')}`
    :'<div class="empty"><h2>Comparte tu primera foto</h2><button class="btn pri" data-a="publicar">Publicar</button></div>'}</div>`;
@@ -1470,7 +1544,7 @@ function vUsuario(){
   const id = ui.perfil; if (id===S.yo) return vPerfil(); if (esNeg(id)){ ui.neg=id; return vNegocio(); }
   if (bloq(id)) return `<div class="feed"><button class="btn ghost sm" data-a="atras" style="align-self:flex-start">← Volver</button><div class="empty"><h2>Cuenta no disponible</h2><p class="muted">${bloqueePor(S.yo,id)?'Bloqueaste esta cuenta. Puedes desbloquearla en Configuración.':'No puedes ver este perfil.'}</p>${bloqueePor(S.yo,id)?`<button class="btn" data-a="desbloquear" data-x="${id}">Desbloquear</button>`:''}</div></div>`;
   const ps = S.posts.filter(p=>p.autor===id&&p.estado==='aprobado').sort((a,b)=>b.t-a.t);
-  return `<div class="feed" style="gap:14px"><button class="btn ghost sm" data-a="atras" style="align-self:flex-start">← Volver</button>${cabPerfil(id)}
+  return `<div class="perfil-w"><button class="btn ghost sm" data-a="atras" style="align-self:flex-start">← Volver</button>${cabPerfil(id)}
     ${ps.length?`<div class="pgrid">${ps.map(p=>miniPost(p)).join('')}</div>`:'<p class="muted">Sin publicaciones.</p>'}</div>`;
 }
 function vLogin(){
@@ -1526,13 +1600,15 @@ function vMensajes(){
   const cs = am.map(id=>({id, c:chatCon(id)})).sort((a,b)=>(b.c?.msgs.at(-1)?.t||0)-(a.c?.msgs.at(-1)?.t||0));
   const conNota = am.filter(id=>notaDe(id));
   const lista = `<div class="dm-list">
-    <div class="dm-h"><h2 style="font-size:20px">${esc(me.handle)}</h2></div>
-    <div class="notes">
-      <button class="nt" data-a="nota">${mia?`<span class="bub">${esc(mia.texto)}</span>`:`<span class="bub muted">Comparte una nota…</span>`}${avatar(me,64)}<span class="nm">Tu nota</span></button>
-      ${conNota.map(id=>{ const a=perfilDe(id), n=notaDe(id); return `<button class="nt" data-a="abrirChat" data-x="${id}"><span class="bub">${esc(n.texto)}</span>${avatar(a,64)}<span class="nm">${esc(a.handle)}</span></button>`; }).join('')}
+    <div class="dm-h"><h2 style="font-size:22px">${esc(me.handle)}</h2></div>
+    <label class="search msearch">${ico.search}<input id="qm" type="search" placeholder="Buscar en tus mensajes y amigos" value="${esc(ui.qm||'')}" aria-label="Buscar en mensajes" autocomplete="off"></label>
+    <div id="dm-res">${(ui.qm||'').trim()?resultadosMsg():''}</div>
+    <div class="notes" ${(ui.qm||'').trim()?'hidden':''}>
+      <button class="nt" data-a="nota">${mia?`<span class="bub">${esc(mia.texto)}</span>`:`<span class="bub muted">Comparte una nota…</span>`}${avatar(me,72)}<span class="nm">Tu nota</span></button>
+      ${conNota.map(id=>{ const a=perfilDe(id), n=notaDe(id); return `<button class="nt" data-a="verNota" data-x="${id}"><span class="bub">${esc(n.texto)}</span>${avatar(a,72)}<span class="nm">${esc(a.handle)}</span></button>`; }).join('')}
     </div>
-    <div class="dm-sub"><span>Mensajes</span><span class="small muted">Solo amigos</span></div>
-    ${cs.map(({id,c})=>{ const a=perfilDe(id), m=c?.msgs.at(-1); const nuevo = m && m.de!==S.yo && !m.leido; return `<button class="crow ${ui.chat===id?'on':''}" data-a="abrirChat" data-x="${id}">${avatar(a,52)}<div class="tx"><b style="${nuevo?'':'font-weight:600'}">${nombreV(a)}</b><div style="${nuevo?'color:var(--fg);font-weight:700':''}">${m?(m.de===S.yo?'Tú: ':'')+(m.post?'Envió una publicación':m.hist?'Respondió a una historia':esc(m.texto)):'Toca para escribir'}${m?' · '+hace(m.t):''}</div></div>${nuevo?'<span style="width:9px;height:9px;border-radius:50%;background:var(--brand);flex:none"></span>':''}</button>`; }).join('') || '<p class="muted small" style="padding:0 16px">Aún no tienes amigos. Síganse mutuamente para poder escribirse.</p>'}
+    <div class="dm-sub" ${(ui.qm||'').trim()?'hidden':''}><span>Mensajes</span><span class="small muted">Solo amigos</span></div>
+    ${(ui.qm||'').trim()?'':cs.map(({id,c})=>{ const a=perfilDe(id), m=c?.msgs.at(-1); const nuevo = m && m.de!==S.yo && !m.leido; return `<button class="crow ${ui.chat===id?'on':''}" data-a="abrirChat" data-x="${id}">${avatar(a,52)}<div class="tx"><b style="${nuevo?'':'font-weight:600'}">${nombreV(a)}</b><div style="${nuevo?'color:var(--fg);font-weight:700':''}">${m?(m.de===S.yo?'Tú: ':'')+(m.post?'Envió una publicación':m.hist?'Respondió a una historia':esc(m.texto)):'Toca para escribir'}${m?' · '+hace(m.t):''}</div></div>${nuevo?'<span style="width:9px;height:9px;border-radius:50%;background:var(--brand);flex:none"></span>':''}</button>`; }).join('') || '<p class="muted small" style="padding:0 16px">Aún no tienes amigos. Síganse mutuamente para poder escribirse.</p>'}
   </div>`;
   return `<div class="dm ${ui.chat?'has-chat':''}">${lista}<div class="dm-chat">${ui.chat?panelChat(ui.chat):`<div class="empty" style="margin:auto">${I('<path d="M21 12a8.5 8.5 0 0 1-12.4 7.6L3 21l1.4-5.6A8.5 8.5 0 1 1 21 12z"/>',64)}<h2>Tus mensajes</h2><p class="muted">Escribe a tus amigos o envíales publicaciones.</p></div>`}</div></div>`;
 }
@@ -1543,7 +1619,7 @@ function panelChat(id){
   const c = chatCon(id) || {msgs:[]}; c.msgs.forEach(m=>{ if(m.de!==S.yo) m.leido=true; });
   return `<div class="chat-h"><button class="ibtn" data-a="cerrarChat" aria-label="Volver">←</button><button class="row nowrap" style="background:none;border:0;padding:0;color:var(--fg);flex:1;min-width:0" data-a="verPerfil" data-x="${id}">${avatar(a,40)}<span style="text-align:left;min-width:0"><b>${nombreV(a)}</b><br><span class="small muted">@${esc(a.handle)}</span></span></button><button class="ibtn" data-a="opcPerfil" data-x="${id}" aria-label="Opciones">${ico.dots}</button></div>
   <div class="chat-b" id="chat-b"><div class="safety">${ico.shield.replace('width="24" height="24"','width="14" height="14"')} Nunca compartas contraseñas ni códigos. ${esc(S.cfg.marca)} nunca te los pedirá.${esMenor(S.yo)?' Nunca mandes fotos tuyas ni tu dirección, y no aceptes verte con alguien que solo conoces por internet.':''}</div>
-    ${c.msgs.map(m=>{ const p=m.post?post(m.post):null; const h=m.hist?S.historias.find(x=>x.id===m.hist):null; return `<div class="msg ${m.de===S.yo?'me':''}">${h?`<div class="rep">${m.de===S.yo?'Respondiste a su historia':'Respondió a tu historia'}</div>`:''}${m.texto?esc(m.texto):''}${p&&!bloq(p.autor)?`<button class="shared" data-a="verPost" data-x="${p.id}">${fotoCuadro(p.fotos[0])}<div class="tx"><b>${esc(perfilDe(p.autor).handle)}</b><br>${esc(p.texto.slice(0,50))}${p.texto.length>50?'…':''}</div></button>`:''}${m.de!==S.yo&&m.texto?alertaMsg(m.texto):''}<time>${hora(m.t)}</time></div>`; }).join('') || '<p class="muted small" style="text-align:center">Escribe el primer mensaje.</p>'}</div>
+    ${c.msgs.map(m=>{ const p=m.post?post(m.post):null; const h=m.hist?S.historias.find(x=>x.id===m.hist):null; return `<div class="msg ${m.de===S.yo?'me':''}">${h?`<div class="rep">${m.de===S.yo?'Respondiste a su historia':'Respondió a tu historia'}</div>`:''}${m.nota?`<div class="rep">${m.de===S.yo?'Respondiste a su nota':'Respondió a tu nota'}: “${esc(m.nota)}”</div>`:''}${m.texto?esc(m.texto):''}${p&&!bloq(p.autor)?`<button class="shared" data-a="verPost" data-x="${p.id}">${fotoCuadro(p.fotos[0])}<div class="tx"><b>${esc(perfilDe(p.autor).handle)}</b><br>${esc(p.texto.slice(0,50))}${p.texto.length>50?'…':''}</div></button>`:''}${m.de!==S.yo&&m.texto?alertaMsg(m.texto):''}<time>${hora(m.t)}</time></div>`; }).join('') || '<p class="muted small" style="text-align:center">Escribe el primer mensaje.</p>'}</div>
   <div class="chat-f"><form data-form="msg" novalidate><input id="m-txt" type="text" maxlength="500" placeholder="Escribe un mensaje…" aria-label="Mensaje" autocomplete="off"><button class="btn pri sm" type="submit">Enviar</button></form>
     ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}
     <span class="small muted">Solo texto y publicaciones de la app. Sin enlaces, correos, fotos ni audios.</span></div>`;
@@ -1683,6 +1759,29 @@ function abrirStory(uid){
 }
 function cerrarStory(){ clearInterval(stTimer); ui.story=null; $('#story').innerHTML=''; document.body.style.overflow=''; save(); rerender(); }
 
+/* ---------- búsqueda en mensajes y visor de notas ---------- */
+function resultadosMsg(){
+  const q = limpiarTexto(ui.qm||'').trim(); if (!q) return '';
+  const am = misAmigos();
+  const personas = am.filter(id=>{ const a=perfilDe(id); return limpiarTexto(a.nombre+' '+a.handle).includes(q); });
+  const msgs = [];
+  for (const id of am){ const c = chatCon(id); if (!c) continue; for (const m of c.msgs) if (m.texto && limpiarTexto(m.texto).includes(q)) msgs.push({id, m}); }
+  msgs.sort((a,b)=>b.m.t-a.m.t);
+  const marca = t => { const i = limpiarTexto(t).indexOf(q); if (i<0) return esc(t); return esc(t.slice(0,i))+'<mark>'+esc(t.slice(i,i+q.length))+'</mark>'+esc(t.slice(i+q.length)); };
+  return `<div class="dm-res">
+    ${personas.length?`<div class="dm-sub"><span>Amigos</span><span class="small muted">${personas.length}</span></div>${personas.map(id=>{ const a=perfilDe(id); return `<button class="crow" data-a="abrirChat" data-x="${id}">${avatar(a,44)}<div class="tx"><b>${nombreV(a)}</b><div>@${esc(a.handle)}</div></div></button>`; }).join('')}`:''}
+    ${msgs.length?`<div class="dm-sub"><span>Mensajes</span><span class="small muted">${msgs.length}</span></div>${msgs.slice(0,30).map(({id,m})=>{ const a=perfilDe(id); return `<button class="crow" data-a="abrirChat" data-x="${id}">${avatar(a,44)}<div class="tx"><b>${nombreV(a)}</b><div>${m.de===S.yo?'Tú: ':''}${marca(m.texto)} · ${hace(m.t)}</div></div></button>`; }).join('')}`:''}
+    ${!personas.length&&!msgs.length?`<p class="muted small" style="padding:10px 16px">Sin coincidencias para “${esc(ui.qm)}”.</p>`:''}</div>`;
+}
+function hojaVerNota(){
+  const id = ui.sheet.id, a = perfilDe(id), n = notaDe(id);
+  if (!n) return hoja('Nota', '<p class="muted">Esta nota ya expiró.</p>');
+  return hoja(`Nota de ${esc(a.nombre)}`, `<div class="notaver">${avatar(a,96)}<div class="notabig">${esc(n.texto)}</div><div class="small muted">@${esc(a.handle)} · hace ${hace(n.t)} · se borra en ${Math.max(1,Math.ceil((n.t+H20-Date.now())/3600e3))} h</div></div>
+    <label class="f" for="nr-txt">Responder a su nota<input id="nr-txt" type="text" maxlength="200" placeholder="Escribe tu respuesta…" autocomplete="off"></label>
+    ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}
+    <div class="row"><button class="btn pri" type="submit">Enviar respuesta</button><button class="btn" type="button" data-a="abrirChat" data-x="${id}">Ir al chat</button></div>`, 'respNota');
+}
+
 
 /* ---------- TIENDA ---------- */
 function prodRow(p, conNeg){
@@ -1768,10 +1867,11 @@ function avisoOtroComercio(){
     <div class="row"><button class="btn" data-a="pendNo">Mantener mi carrito</button><button class="btn acc" data-a="pendSi">Vaciar y agregar</button></div></div></div>`;
 }
 function vCarrito(){
-  const c = S.carrito;
-  if(!c || !c.items.length) return `<div class="empty">${I('<path d="M5 8h14l-1 12H6z"/><path d="M9 8a3 3 0 0 1 6 0"/>',64)}<h2>Tu carrito está vacío</h2><p class="muted">Agrega productos de un negocio para empezar tu pedido.</p><button class="btn pri" data-a="go" data-x="inicio">Ir a la tienda</button></div>`;
+  const c = S.carrito; const act = pedidosActivos();
+  const enC = act.length ? `<div class="stack" style="max-width:640px;margin:0 auto 18px;width:100%"><div class="row between"><h1 style="margin:0">Tus pedidos en curso</h1><button class="btn ghost sm" data-a="go" data-x="pedidos">Ver todos</button></div>${act.map(p=>tarjetaPedido(p)).join('')}</div>` : '';
+  if(!c || !c.items.length) return enC + `<div class="empty">${I('<path d="M5 8h14l-1 12H6z"/><path d="M9 8a3 3 0 0 1 6 0"/>',64)}<h2>Tu carrito está vacío</h2><p class="muted">Agrega productos de un negocio para empezar tu pedido.</p><button class="btn pri" data-a="go" data-x="inicio">Ir a la tienda</button></div>`;
   const n = neg(c.neg); const sub = subtotalCarrito();
-  return `<div class="stack" style="max-width:640px;margin:0 auto;width:100%"><h1>Tu carrito</h1>
+  return enC + `<div class="stack" style="max-width:640px;margin:0 auto;width:100%"><h1>Tu carrito</h1>
   <div class="card"><div class="row between"><div class="row">${avatar(perfilDe(n.id),36)}<b>${esc(n.nombre)}</b></div><button class="btn ghost sm" data-a="neg" data-x="${n.id}">Agregar más</button></div>
     ${c.origen?`<div class="small muted">Vienes de una publicación de ${esc(n.nombre)}.</div>`:''}
     ${c.items.map((it,i)=>{ const p=prod(it.pid); return `<div class="citem"><div class="thumb" style="width:64px;height:64px">${fotoProd(p)}</div><div class="tx"><b>${esc(p.nombre)}</b>
@@ -1837,7 +1937,10 @@ function vSeguimiento(){
   const p = S.pedidos.find(x=>x.id===ui.pedido); if(!p) return vPedidos(); const n = neg(p.neg);
   return `<div class="stack"><button class="btn ghost sm" data-a="go" data-x="pedidos" style="align-self:flex-start">← Mis pedidos</button><div class="cols">
    <div class="card"><span class="small muted">Tu número de pedido</span><div class="code num">#${esc(p.id)}</div>
-     <div class="row"><span class="pill" style="color:${ESTADOS[p.estado].c}">${ESTADOS[p.estado].l}</span><span class="small muted">${fecha(p.creado)}</span></div>${timeline(p)}
+     <div class="row"><span class="pill" style="color:${ESTADOS[p.estado].c}">${ESTADOS[p.estado].l}</span><span class="small muted">${fecha(p.creado)}</span></div>
+     <div class="expl"><b>${esc(explicarPedido(p).t)}</b><span>${esc(explicarPedido(p).d)}</span></div>
+     ${puedeCancelar(p)?`<button class="btn danger" data-a="cancelarPedido" data-x="${p.id}">Cancelar pedido</button><span class="small muted">Puedes cancelar mientras ningún repartidor lo haya tomado y el negocio no lo esté preparando.</span>`:''}
+     ${timeline(p)}
      ${p.modo!=='reparto' && p.codigo && !['entregado','rechazado','cancelado'].includes(p.estado)?`<div class="codebox"><span>Tu código de entrega</span><b class="num">${esc(p.codigo)}</b><small>${p.modo==='recoger'?'Dáselo en la tienda al recoger tu pedido.':'Dáselo a quien te entregue, solo cuando tengas tu pedido en la mano.'}</small></div>`:''}
      <div class="note">Prototipo: toca <b>Comercio</b> arriba para aceptar el pedido${p.modo==='reparto'?' y <b>Repartidor</b> para tomarlo':''}. Luego vuelve a <b>Cliente</b> → Perfil → Mis pedidos para ver el avance.</div></div>
    <div class="stack">${p.modo==='reparto'?repCliente(p):''}<div class="card"><div class="row">${avatar(perfilDe(n.id),40)}<h2>${esc(n.nombre)}</h2></div>
@@ -1850,8 +1953,12 @@ function vSeguimiento(){
 }
 function vPedidos(){
   const ps = S.pedidos.filter(p=>p.cuenta===S.yo);
-  if(!ps.length) return `<div class="empty">${I('<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>',64)}<h2>Aún no tienes pedidos</h2><p class="muted">Cuando hagas uno, aquí podrás seguir su estado.</p><button class="btn pri" data-a="go" data-x="inicio">Ir a la tienda</button></div>`;
-  return `<div class="stack" style="max-width:640px;margin:0 auto;width:100%"><h1>Mis pedidos</h1>${ps.map(p=>`<button class="prow" data-a="track" data-x="${p.id}"><div class="tx"><h4>#${esc(p.id)} · ${esc(neg(p.neg).nombre)}</h4><p>${p.items.length} producto(s) · ${fecha(p.creado)}</p><div class="row"><span class="price num">${money(p.total)}</span><span class="pill" style="color:${ESTADOS[p.estado].c}">${ESTADOS[p.estado].l}</span></div></div>${avatar(perfilDe(p.neg),44)}</button>`).join('')}</div>`;
+  if(!ps.length) return `<div class="empty">${I('<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>',64)}<h2>Aún no tienes pedidos</h2><p class="muted">Cuando hagas uno, aquí verás en qué va: si ya lo aceptaron, si lo están preparando, quién lo lleva y cuándo llega.</p><button class="btn pri" data-a="go" data-x="inicio">Ir a la tienda</button></div>`;
+  const act = ps.filter(enCurso), ant = ps.filter(p=>!enCurso(p));
+  return `<div class="stack" style="max-width:720px;margin:0 auto;width:100%"><h1>Mis pedidos</h1>
+    <p class="muted" style="margin:0">Aquí ves en qué va cada pedido. Toca uno para ver el detalle, el mapa del repartidor y tu código de entrega.</p>
+    ${act.length?`<h2 style="margin-top:6px">En curso <span class="muted small">${act.length}</span></h2>${act.map(p=>tarjetaPedido(p)).join('')}`:'<div class="note">No tienes pedidos en curso.</div>'}
+    ${ant.length?`<h2 style="margin-top:10px">Anteriores</h2>${ant.map(p=>tarjetaPedido(p,true)).join('')}`:''}</div>`;
 }
 function vVende(){
   return `<div class="stack" style="max-width:640px;margin:0 auto;width:100%"><button class="btn ghost sm" data-a="atras" style="align-self:flex-start">← Volver</button>
@@ -1973,6 +2080,50 @@ function pVentas(n){
   ${ps.map(p=>`<tr><td>#${esc(p.id)}</td><td>${fecha(p.creado)}</td><td>${p.origen?'Publicación':'Catálogo'}</td><td>${ESTADOS[p.estado].l}</td><td class="r num">${money(p.subtotal)}</td><td class="r num">${p.estado==='entregado'?money(p.comision):'—'}</td></tr>`).join('') || '<tr><td colspan="6" class="muted">Sin pedidos.</td></tr>'}</tbody></table></div>`;
 }
 
+/* ---------- pedidos: estado explicado en palabras sencillas ---------- */
+const enCurso = p => !['entregado','rechazado','cancelado'].includes(p.estado);
+const pedidosActivos = () => S.pedidos.filter(p=>p.cuenta===S.yo && enCurso(p));
+function puedeCancelar(p){
+  if (p.cuenta!==S.yo || !['recibido','aceptado'].includes(p.estado)) return false;
+  if (p.rep && p.rep.rep) return false;
+  return true;
+}
+function explicarPedido(p){
+  const n = neg(p.neg).nombre, R = p.rep;
+  if (p.estado==='cancelado') return R && R.estado==='sin_repartidor' ? {t:'Cancelado: no hubo repartidor', d:'Nadie tomó el pedido a tiempo. No se te cobró nada. Puedes volver a pedir ofreciendo un poco más o recogerlo tú.'} : {t:'Pedido cancelado', d:p.canceladoPor==='cliente'?'Tú lo cancelaste. No se te cobró nada.':'Este pedido se canceló. No se te cobró nada.'};
+  if (p.estado==='rechazado') return {t:'El negocio no pudo aceptarlo', d:`${n} no pudo atender tu pedido. No se te cobró nada.`};
+  if (p.estado==='entregado') return {t:'Entregado', d:'¡Listo! Gracias por pedir en negocios de Los Mochis.'};
+  if (p.estado==='recibido') return {t:`Esperando a que ${n} lo acepte`, d:'El negocio ya recibió tu pedido. En cuanto lo acepte te avisamos. Todavía puedes cancelarlo.'};
+  if (R){
+    if (R.estado==='buscando') return {t:'Buscando repartidor', d:`${n} ya aceptó. Ahora un repartidor tiene que tomarlo; si te piden más, puedes aceptar su oferta. Si nadie lo toma en ${RC().espera} min se cancela solo y no pagas nada.`};
+    if (R.estado==='asignado') return {t:'Tu repartidor va a la tienda', d:`${nombrePila(rep(R.rep).nombre)} ya tomó tu pedido y ${n} lo está preparando.`};
+    if (R.estado==='en_tienda') return {t:'Tu repartidor está en la tienda', d:'Recoge tu pedido en cuanto esté listo.'};
+    if (R.estado==='en_camino') return {t:'Va en camino a tu casa', d:'Mira el mapa en el detalle. Ten listo tu código de entrega.'};
+    if (R.estado==='llego') return {t:'¡Tu repartidor llegó!', d:'Recibe tu pedido y después dale tu código de entrega.'};
+  }
+  if (p.estado==='aceptado') return {t:`${n} aceptó tu pedido`, d:'Pronto empezarán a prepararlo.'};
+  if (p.estado==='preparando') return {t:'Lo están preparando', d:p.modo==='recoger'?'Te avisamos cuando esté listo para recoger.':'En cuanto esté listo sale hacia tu casa.'};
+  if (p.estado==='listo') return {t:p.modo==='recoger'?'¡Listo para recoger!':'Listo, esperando al repartidor', d:p.modo==='recoger'?'Ve a la tienda y da tu código de entrega para recibirlo.':'El repartidor lo recoge en un momento.'};
+  if (p.estado==='en_camino') return {t:'Va en camino', d:'Ten listo tu código de entrega.'};
+  return {t:ESTADOS[p.estado].l, d:''};
+}
+function avancePedido(p){
+  const pasos = p.modo==='reparto' ? ['recibido','aceptado','preparando','listo','en_camino','entregado'] : ['recibido','aceptado','preparando', p.modo==='entrega'?'en_camino':'listo','entregado'];
+  let i = pasos.indexOf(p.estado); if (p.rep && p.rep.estado==='llego') i = pasos.length-1.5;
+  return Math.max(0.06, (i+1)/pasos.length);
+}
+function tarjetaPedido(p, corto){
+  const e = explicarPedido(p), n = neg(p.neg), act = enCurso(p);
+  return `<div class="ptrack ${act?'':'fin'}"><div class="row between nowrap"><div class="row nowrap">${avatar(perfilDe(n.id),40)}<div><b>${esc(n.nombre)}</b><div class="small muted">#${esc(p.id)} · ${fecha(p.creado)} · ${money(p.total)}</div></div></div><span class="pill" style="color:${ESTADOS[p.estado].c}">${ESTADOS[p.estado].l}</span></div>
+    ${act?`<div class="pbar"><i style="width:${Math.round(avancePedido(p)*100)}%"></i></div>`:''}
+    ${corto?'':`<div><b>${esc(e.t)}</b><div class="small muted">${esc(e.d)}</div></div>`}
+    <div class="row"><button class="btn ${act?'pri':''} sm" data-a="track" data-x="${p.id}">${act?'Ver seguimiento':'Ver detalle'}</button>${act&&p.codigo&&p.modo!=='entrega'?`<span class="small muted">Código: <b class="num">${esc(p.codigo)}</b></span>`:''}${puedeCancelar(p)?`<button class="btn danger sm" data-a="cancelarPedido" data-x="${p.id}">Cancelar</button>`:''}</div></div>`;
+}
+function bannerPedido(p){
+  const e = explicarPedido(p);
+  return `<button class="pbanner" data-a="track" data-x="${p.id}"><span class="pdot"></span><span class="tx"><b>${esc(e.t)}</b><span>Pedido #${esc(p.id)} · ${esc(neg(p.neg).nombre)}</span></span><span class="go">Ver →</span></button>`;
+}
+
 /* ============================================================
    REPARTO estilo "oferta y contraoferta" + APP DEL REPARTIDOR
    En el prototipo vive como un tercer modo ("Repartidor") para poder probar todo junto.
@@ -1996,7 +2147,7 @@ const nombrePila = n => String(n||'').trim().split(/\s+/)[0] || 'Cliente';
 const genCodigo = () => { const a=new Uint32Array(1); (crypto||window.crypto).getRandomValues(a); return String(a[0]%10000).padStart(4,'0'); };
 const mmss = ms => { const s=Math.max(0,Math.ceil(ms/1000)); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; };
 const califRep = r => r.calif ? r.calif.toFixed(1) : 'Nuevo';
-const REP_EST = {esperando_tienda:'Esperando a que la tienda acepte', buscando:'Buscando repartidor', asignado:'Repartidor va a la tienda', en_tienda:'Repartidor en la tienda', en_camino:'En camino a tu casa', llego:'Tu repartidor llegó', entregado:'Entregado', sin_repartidor:'Sin repartidor disponible'};
+const REP_EST = {esperando_tienda:'Esperando a que la tienda acepte', buscando:'Buscando repartidor', asignado:'Repartidor va a la tienda', en_tienda:'Repartidor en la tienda', en_camino:'En camino a tu casa', llego:'Tu repartidor llegó', entregado:'Entregado', sin_repartidor:'Sin repartidor disponible', cancelado_cliente:'Cancelado por el cliente'};
 
 function seedRepartidores(){
   const R0 = (id,nombre,veh,placa,calif,entregas,extra={}) => ({id,nombre,vehiculo:veh,placa,calif,entregas,faltas:0,estado:'aprobado',ver:{ine:true,selfie:true,vehiculo:true},ganado:0,color:COLORES[+id.slice(1)%COLORES.length],...extra});
@@ -2011,7 +2162,8 @@ function seedRepartidores(){
   ];
 }
 function asegurarReparto(){
-  S.cfg.reparto = S.cfg.reparto || {base:2500, porKm:600, seguroPct:3, espera:10, noShowMin:15, ejemplo:true};
+  S.cfg.reparto = S.cfg.reparto || {base:2500, porKm:600, seguroPct:3, espera:5, noShowMin:15, ejemplo:true};
+  if (!S.cfg.reparto.migr5){ S.cfg.reparto.espera = 5; S.cfg.reparto.migr5 = true; }
   if (!S.repartidores) S.repartidores = seedRepartidores();
   if (!S.yoRep) S.yoRep = 'r1';
   if (S.repOnline==null) S.repOnline = true;
@@ -2265,12 +2417,92 @@ setInterval(()=>{ const c = tickReparto(); const escribiendo = ['INPUT','TEXTARE
   const visible = ui.mode==='rep' || ui.view==='seguimiento' || ui.view==='minegocio' || ui.mode==='admin';
   if (c && visible && !escribiendo && !ui.sheet) render(); else moverPuntos(); }, 1500);
 
+/* ============================================================
+   "ADELANTAR EL TIEMPO" (solo prototipo, panel Admin)
+   Simula que pasa un día: todo lo anterior envejece 24 h y aparece actividad nueva:
+   pedidos entregados (con comisión, envío y repartidor), mensajes para ti, historias,
+   publicaciones (algunas a revisión), notas, notificaciones y reseñas.
+   "Reiniciar" borra todo y vuelve a los datos de ejemplo.
+   ============================================================ */
+const rr = { n:(a,b)=>a+Math.floor(Math.random()*(b-a+1)), p:a=>a[Math.floor(Math.random()*a.length)], c:x=>Math.random()<x,
+  mix:a=>{ const b=[...a]; for(let i=b.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [b[i],b[j]]=[b[j],b[i]]; } return b; } };
+const MSGS_SIM = ['¿Vas a ir mañana?','Jajaja no manches','Ya llegué','¿Viste lo que publicó Karla?','Te mando la tarea al rato','¿Pedimos unos tacos?','Qué onda, ¿cómo estás?','Mañana hay partido a las 5','Gracias por lo de ayer','¿A qué hora sales?','Está bien bonito el atardecer hoy','Mi mamá dice que vengas a comer el domingo','¿Ya viste el nuevo café del centro?','Te debo una','Ando en el Parque Sinaloa'];
+const RES_SIM = ['Llegó rapidísimo y calientito','Muy buena atención','Todo bien, volveré a pedir','El repartidor muy amable','Excelente calidad','Buen precio'];
+
+function envejecer(ms){
+  const mv = x => { if (x && typeof x.t==='number') x.t -= ms; };
+  [S.posts,S.comentarios,S.historias,S.notas,S.notifs,S.resenas,S.alertas,S.decisiones,S.bitacora].forEach(a=>(a||[]).forEach(mv));
+  S.chats.forEach(c=>c.msgs.forEach(mv));
+  S.pedidos.forEach(p=>{ p.creado-=ms; p.hist.forEach(mv); if(p.rep){ p.rep.pasos.forEach(mv); if(p.rep.expira) p.rep.expira-=ms; if(p.rep.asignado) p.rep.asignado-=ms; if(p.rep.inicio) p.rep.inicio-=ms; (p.rep.ofertas||[]).forEach(mv); } });
+}
+function pedidoSimulado(n, cuenta, t0){
+  const ps = S.productos.filter(p=>p.neg===n.id && p.disp && !p.var.length && !p.mods.some(m=>m.min>0)).concat(S.productos.filter(p=>p.neg===n.id && p.disp)).slice(0,6);
+  if (!ps.length) return null;
+  const items = rr.mix(ps).slice(0, rr.n(1,3)).map(p=>{ const qty = rr.n(1,3); return {nombre:p.nombre, det:'', nota:'', qty, unidad:p.unidad, unit:p.precio, total:p.precio*qty}; });
+  const subtotal = items.reduce((a,b)=>a+b.total,0);
+  const modos = n.repartoApp ? ['reparto','reparto','recoger'].concat(n.entrega?['entrega']:[]) : (n.entrega?['entrega','recoger']:['recoger']);
+  const modo = rr.p(modos); const u = esNeg(cuenta)?null:usr(cuenta); const col = rr.p(COLONIAS.slice(0,6));
+  let envio = modo==='entrega' ? (costoEnvio(n,col,subtotal)||0) : 0, rep = null;
+  const id = 'LM-' + (++S.seq); const t = t0; const paso = m => t + m*60000;
+  let estado = 'entregado';
+  if (modo==='reparto'){
+    const km = kmDe(col), min = minimoEnvio(km); envio = min + rr.p([0,0,500,1000]);
+    const reps = S.repartidores.filter(r=>r.estado==='aprobado'); const sin = rr.c(0.07) || !reps.length;
+    rep = {km, minimo:min, oferta:envio, seguro:seguroDe(envio), ofertas:[], sim:2, pasos:[{s:'esperando_tienda',t:paso(0)},{s:'buscando',t:paso(2)}], rep:null, estado:'buscando', inicio:paso(2), expira:paso(2+RC().espera)};
+    if (sin){ rep.pasos.push({s:'sin_repartidor',t:paso(2+RC().espera)}); rep.estado='sin_repartidor'; estado='cancelado'; }
+    else { const r = rr.p(reps); rep.rep=r.id; rep.asignado=paso(4); ['asignado','en_tienda','en_camino','llego','entregado'].forEach((s,i)=>rep.pasos.push({s,t:paso(4+i*6)})); rep.estado='entregado'; r.entregas++; r.ganado=(r.ganado||0)+envio; }
+  } else if (rr.c(0.05)) estado = 'cancelado';
+  const hist = estado==='entregado' ? (modo==='reparto'?['recibido','aceptado','preparando','listo','en_camino','entregado']:['recibido','aceptado','preparando',modo==='entrega'?'en_camino':'listo','entregado']).map((s,i)=>({s,t:paso(i*7)})) : [{s:'recibido',t:paso(0)},{s:'cancelado',t:paso(12)}];
+  const ped = {id, neg:n.id, items, subtotal, envio, total:subtotal+envio+(rep?rep.seguro:0), comision:comision(subtotal), modo, pago:'efectivo', cambio:0,
+    cliente:{nombre:u?u.nombre:'Cliente', tel:'', calle:'Calle '+rr.n(1,40)+' #'+rr.n(10,999), colonia:col, ref:''}, nota:'', origen:rr.c(.3)?(S.posts.find(p=>p.autor===n.id)?.id||null):null,
+    cuenta, estado, hist, creado:t, rep, codigo:genCodigo(), sim:true};
+  if (estado==='entregado' && rr.c(.35) && u) S.resenas.push({neg:n.id, autor:u.id, est:rr.p([5,5,5,4,4,3]), texto:rr.p(RES_SIM), t:paso(60), demo:true});
+  return ped;
+}
+function adelantarTiempo(){
+  const DIA = 24*3600e3; envejecer(DIA);
+  const ahora = Date.now(), hace = min => ahora - min*60000; const res = {pedidos:0, ventas:0, mensajes:0, historias:0, posts:0, notifs:0};
+  const gente = S.usuarios.filter(u=>u.id!==S.personal && u.grupo!=='spam' && !u.suspendido);
+  // pedidos del día
+  for (const n of S.negocios.filter(n=>n.estado==='activo')){
+    for (let i=0;i<rr.n(1,5);i++){ const p = pedidoSimulado(n, rr.p(gente).id, hace(rr.n(40, 22*60))); if (p){ S.pedidos.unshift(p); res.pedidos++; if(p.estado==='entregado') res.ventas+=p.subtotal; } }
+  }
+  for (let i=0;i<rr.n(1,2);i++){ const n = rr.p(S.negocios.filter(n=>n.estado==='activo' && n.id!==S.personal)); const p = pedidoSimulado(n, S.personal, hace(rr.n(60, 20*60))); if (p){ S.pedidos.unshift(p); res.pedidos++; if(p.estado==='entregado') res.ventas+=p.subtotal; } }
+  S.pedidos.sort((a,b)=>b.creado-a.creado);
+  // mensajes de tus amigos
+  const am = rr.mix(misAmigosDe(S.personal)).slice(0, rr.n(3,5));
+  for (const id of am){ let c = S.chats.find(c=>c.p.includes(S.personal)&&c.p.includes(id)); if(!c){ c={id:'c'+Date.now().toString(36)+id, p:[S.personal,id], msgs:[]}; S.chats.push(c); } c.msgs.push({de:id, texto:rr.p(MSGS_SIM), t:hace(rr.n(5, 300)), demo:true}); res.mensajes++; }
+  // historias, publicaciones y notas
+  const sigoA = gente.filter(u=>sigue(S.personal,u.id)); const autores = rr.mix(sigoA.length?sigoA:gente).slice(0, rr.n(8,13));
+  for (const u of autores){ const k = rr.p(KPERSONA[u.grupo]||['parque']); S.historias.push({id:'h'+Date.now().toString(36)+u.id, autor:u.id, foto:foto(k), t:hace(rr.n(10, 900)), estado:'aprobado', demo:true}); res.historias++; }
+  for (const n of rr.mix(S.negocios.filter(n=>n.estado==='activo')).slice(0,3)){ const p = rr.p(S.productos.filter(x=>x.neg===n.id&&x.disp)); if(p){ S.historias.push({id:'h'+Date.now().toString(36)+n.id, autor:n.id, foto:foto(p.k,p.nombre), t:hace(rr.n(10,600)), estado:'aprobado', demo:true, prod:p.id}); res.historias++; } }
+  for (const u of rr.mix(sigoA.length?sigoA:gente).slice(0, rr.n(4,7))){ const k = rr.p(KPERSONA[u.grupo]||['parque']); const cap = (rr.p(CAPS[k]||['Un día en Los Mochis'])).replace('{m}', rr.p(MASCOTAS));
+    const p = {id:'q'+Date.now().toString(36)+u.id, autor:u.id, tipo:'usuario', fotos:[foto(k,cap)], texto:cap, likes:rr.n(3,45), likedBy:[], estado:'aprobado', t:hace(rr.n(20, 1200)), demo:true}; S.posts.push(p); res.posts++;
+    if (rr.c(.6)) S.comentarios.push({id:'k'+Date.now().toString(36)+u.id, post:p.id, autor:rr.p(gente).id, texto:rr.p(COMENTS), t:p.t+rr.n(5,90)*60000, demo:true}); }
+  for (const n of rr.mix(S.negocios.filter(n=>n.estado==='activo')).slice(0,2)){ const pr = rr.p(S.productos.filter(x=>x.neg===n.id&&x.disp)); if(!pr) continue;
+    S.posts.push({id:'q'+Date.now().toString(36)+n.id, autor:n.id, tipo:'negocio', fotos:[foto(pr.k,pr.nombre)], texto:`${pr.nombre} a ${money(pr.precio)}. ¡Pídelo desde la app!`, likes:rr.n(5,60), likedBy:[], estado:'aprobado', t:hace(rr.n(30,900)), demo:true, prod:pr.id}); res.posts++; }
+  const pend = [['u5','Paseo con '+rr.p(MASCOTAS)+' en el parque','perro'],['u50','Vendo fundas, mándame mensaje al seis seis ocho uno dos tres cuatro cinco seis siete','celular']];
+  for (const [a,tx,k] of pend){ S.posts.push({id:'q'+Date.now().toString(36)+a, autor:a, tipo:'usuario', fotos:[foto(k)], texto:tx, likes:0, likedBy:[], estado:'pendiente', t:hace(rr.n(5,120)), demo:true}); res.posts++; }
+  for (const u of rr.mix(misAmigosDe(S.personal).map(usr)).slice(0,4)){ S.notas = S.notas.filter(n=>n.autor!==u.id); S.notas.push({autor:u.id, texto:rr.p(NOTAS), t:hace(rr.n(10,600)), demo:true}); }
+  // notificaciones para ti
+  const mios = S.posts.filter(p=>p.autor===S.personal && p.estado==='aprobado');
+  for (let i=0;i<rr.n(3,6);i++){ const de = rr.p(gente).id; const tipo = mios.length ? rr.p(['like','like','comentario','follow']) : 'follow';
+    if (tipo==='follow' && sigue(de,S.personal)) continue; if (tipo==='follow') S.sigue.push({de, a:S.personal});
+    S.notifs.unshift({id:'n'+Date.now().toString(36)+i, para:S.personal, tipo, de, t:hace(rr.n(5,800)), leida:false, demo:true, ...(tipo!=='follow'&&mios.length?{post:rr.p(mios).id}:{}), ...(tipo==='comentario'?{texto:rr.p(COMENTS)}:{})}); res.notifs++; }
+  S.dias = (S.dias||0)+1;
+  log('Admin', 'Adelantó el tiempo 1 día', `${res.pedidos} pedidos · ${money(res.ventas)} en ventas · ${res.mensajes} mensajes · ${res.historias} historias · ${res.posts} publicaciones`);
+  save(); return res;
+}
+const misAmigosDe = id => S.sigue.filter(s=>s.de===id && !esNeg(s.a) && S.sigue.some(x=>x.de===s.a && x.a===id)).map(s=>s.a);
+function reiniciarTodo(){ try { localStorage.removeItem(KEY); } catch(e){} location.reload(); }
+
 
 /* ---------- PANEL DEL ADMINISTRADOR ---------- */
 function vAdmin(){
   const pend = S.posts.filter(p=>p.estado==='pendiente').length + S.historias.filter(h=>h.estado==='pendiente').length;
   const rep = S.posts.filter(p=>p.estado==='aprobado'&&S.reportes.some(r=>r.post===p.id)).length;
-  return `<div class="stack"><div class="row between"><div><span class="small muted">Panel del administrador</span><h1>${esc(S.cfg.marca)}</h1></div><span class="pill ${S.cfg.autoMod?'ok':''}">Revisión automática: ${S.cfg.autoMod?'activada':'desactivada'}</span></div>
+  return `<div class="stack"><div class="row between"><div><span class="small muted">Panel del administrador</span><h1>${esc(S.cfg.marca)}</h1></div><div class="row" style="gap:8px"><span class="pill ${S.cfg.autoMod?'ok':''}">Revisión automática: ${S.cfg.autoMod?'activada':'desactivada'}</span><button class="btn pri sm" data-a="adelantar" title="Simula que pasa un día">⏩ Adelantar 1 día</button><button class="btn danger sm" data-a="reiniciar">↺ Reiniciar</button></div></div>
+  ${S.dias?`<div class="note small">Simulación: han pasado <b>${S.dias}</b> día(s). Revisa Pedidos, Comisiones, Repartidores y la App para ver la actividad.</div>`:''}
   <div class="ptabs">${[['moderacion',`Por revisar (${pend})`],['seguridad',`Seguridad (${S.alertas.filter(a=>a.estado==='nueva').length})`],['reportes',`Reportes (${rep})`],['automaticas','Decisiones automáticas'],['comercios','Negocios'],['repartidores','Repartidores'],['usuarios','Usuarios'],['pedidos','Pedidos'],['comisiones','Comisiones'],['bitacora','Bitácora'],['ajustes','Ajustes']].map(([k,l])=>`<button class="${ui.aTab===k?'on':''}" data-a="atab" data-x="${k}">${l}</button>`).join('')}</div>
   ${ {moderacion:aModeracion, seguridad:aSeguridad, reportes:aReportes, automaticas:aAutomaticas, comercios:aComercios, repartidores:aRepartidores, usuarios:aUsuarios, pedidos:aPedidos, comisiones:aComisiones, bitacora:aBitacora, ajustes:aAjustes}[ui.aTab]() }</div>`;
 }
@@ -2434,16 +2666,17 @@ function render(){
   const me = perfilDe(S.yo); const cartN = S.carrito?S.carrito.items.length:0; const nN = sinLeer();
   const nMsg = misAmigos().filter(id=>{ const m=chatCon(id)?.msgs.at(-1); return m && m.de!==S.yo && !m.leido; }).length;
   const nPed = soyNegocio() ? S.pedidos.filter(p=>p.neg===S.yo&&p.estado==='recibido').length : 0;
+  const nAct = soyNegocio() ? 0 : pedidosActivos().length;
   const badge = n => n?`<span class="badge">${n>9?'9+':n}</span>`:'';
   const items = [
     ['go','home','Inicio',ico.home,['home','post','usuario'],0],
-    ['go','buscar','Buscar',ico.search,['buscar'],0],
     ['go','inicio','Tienda',ico.shop,['inicio','negocio','vende'],0],
     ['go','mensajes','Mensajes',ico.msg,['mensajes'],nMsg],
-    ['go','notifs','Notificaciones',ico.heart,['notifs'],nN],
+    ['go','notifs','Notificaciones',ico.bell,['notifs'],nN],
     ['crear','','Crear',ico.plus,[],0],
     ...(soyNegocio()?[['go','minegocio','Mi negocio',ico.biz,['minegocio'],nPed]]:[]),
     ['go','carrito','Carrito',ico.bag,['carrito','checkout'],cartN],
+    ...(soyNegocio()?[]:[['go','pedidos','Mis pedidos',ico.list,['pedidos','seguimiento'],nAct]]),
     ['go','perfil','Perfil',avatar(me,26),['perfil','ajustes'],0]
   ];
   const showBar = cartN && ['inicio','negocio','home'].includes(v);
@@ -2457,16 +2690,16 @@ function render(){
   </nav>
   <header class="mtop"><button class="logo2" data-a="go" data-x="home"><span class="mark">${esc(inits(S.cfg.marca))}</span><span class="txt">${esc(S.cfg.marca)}</span></button><span class="sp"></span>
     <button class="ibtn" data-a="toggleTema" aria-label="Cambiar tema">${temaActual()==='oscuro'?ico.sun:ico.moon}</button>
-    <button class="ibtn" data-a="go" data-x="notifs" aria-label="Notificaciones">${ico.heart}${badge(nN)}</button>
+    <button class="ibtn" data-a="go" data-x="notifs" aria-label="Notificaciones">${ico.bell}${badge(nN)}</button>
     <button class="ibtn" data-a="go" data-x="mensajes" aria-label="Mensajes">${ico.msg}${badge(nMsg)}</button>
     ${soyNegocio()?`<button class="ibtn" data-a="go" data-x="minegocio" aria-label="Mi negocio">${ico.biz}${badge(nPed)}</button>`:`<button class="ibtn" data-a="go" data-x="carrito" aria-label="Carrito">${ico.bag}${badge(cartN)}</button>`}</header>
   <main class="igmain"><div class="igin stack">${protoBar()}${VISTAS[v]()}</div></main>
   ${showBar?`<button class="cartfloat" data-a="go" data-x="carrito"><span>${cartN} producto(s) · ${esc(neg(S.carrito.neg).nombre)}</span><span class="num">${money(subtotalCarrito())} →</span></button>`:''}
   <nav class="mnav" aria-label="Navegación">
     <button class="${on(['home','post','usuario'])}" data-a="go" data-x="home">${ico.home}Inicio</button>
-    <button class="${on(['buscar'])}" data-a="go" data-x="buscar">${ico.search}Buscar</button>
-    <button data-a="crear">${ico.plus}Crear</button>
     <button class="${on(['inicio','negocio','vende'])}" data-a="go" data-x="inicio">${ico.shop}Tienda</button>
+    <button data-a="crear">${ico.plus}Crear</button>
+    ${soyNegocio()?`<button class="${on(['minegocio'])}" data-a="go" data-x="minegocio">${ico.biz}${badge(nPed)}Negocio</button>`:`<button class="${on(['pedidos','seguimiento','carrito','checkout'])}" data-a="go" data-x="pedidos">${ico.list}${badge(nAct)}Pedidos</button>`}
     <button class="${on(['perfil','ajustes'])}" data-a="go" data-x="perfil">${avatar(me,24)}Perfil</button>
   </nav>`;
   renderLayer();
@@ -2477,7 +2710,7 @@ function renderLayer(){
   if (ui.mode==='app'){
     if (ui.pend) h = avisoOtroComercio();
     else if (ui.sel) h = hojaProducto();
-    else if (ui.sheet) h = ({coment:hojaComentarios, compartir:hojaCompartir, opcPost:hojaOpcPost, reportar:hojaReportar, opcPerfil:hojaOpcPerfil, publicar:hojaPublicar, nota:hojaNota, crear:hojaCrear, historia:hojaHistoria, cuentas:hojaCuentas, mas:hojaMas}[ui.sheet.t]||(()=>''))();
+    else if (ui.sheet) h = ({coment:hojaComentarios, compartir:hojaCompartir, opcPost:hojaOpcPost, reportar:hojaReportar, opcPerfil:hojaOpcPerfil, publicar:hojaPublicar, nota:hojaNota, crear:hojaCrear, historia:hojaHistoria, cuentas:hojaCuentas, mas:hojaMas, verNota:hojaVerNota}[ui.sheet.t]||(()=>''))();
   }
   $('#layer').innerHTML = h;
   if (!ui.story) document.body.style.overflow = h ? 'hidden' : '';
@@ -2494,6 +2727,14 @@ const cerrarHoja = () => { ui.sheet=null; ui.err=''; renderLayer(); };
 const A = {
   go: x => { go(x); if(x==='notifs'){ misNotifs().forEach(n=>n.leida=true); save(); } },
   atras: () => { const h=historial.pop(); if(!h) return go('home',true); Object.assign(ui,{post:h.post, perfil:h.perfil, neg:h.neg}); go(h.view,true); },
+  verNota: x => { ui.err=''; ui.sheet={t:'verNota', id:x}; renderLayer(); setTimeout(()=>$('#nr-txt')?.focus(),30); },
+  limpiarQ: () => { ui.q=''; rerender(); },
+  cancelarPedido: x => { const p=S.pedidos.find(o=>o.id===x); if(!p||!puedeCancelar(p)) return toast('Este pedido ya no se puede cancelar');
+    if (!confirmarSimple('¿Cancelar el pedido #'+p.id+'? No se te cobrará nada.')) return;
+    p.estado='cancelado'; p.canceladoPor='cliente'; p.hist.push({s:'cancelado',t:Date.now()}); if(p.rep){ repEvento(p,'cancelado_cliente'); }
+    notif(p.neg,'sistema',null,{texto:`El cliente canceló el pedido #${p.id}. No lo prepares.`}); log('Cliente','Canceló pedido','#'+p.id); save(); rerender(); toast('Pedido cancelado. No se te cobra nada.'); },
+  adelantar: () => { const r=adelantarTiempo(); rerender(); toast(`Pasó 1 día: ${r.pedidos} pedidos, ${r.mensajes} mensajes, ${r.historias} historias y ${r.posts} publicaciones nuevas`); },
+  reiniciar: () => { if (confirmarSimple('¿Reiniciar todo? Se borran tus pedidos, publicaciones y cambios, y vuelven los datos de ejemplo.')) reiniciarTodo(); },
   modo2: x => {
     if (x==='comercio'){ ui.mode='app'; const b = (ui.ultNeg && esNeg(ui.ultNeg)) ? ui.ultNeg : (S.misNegocios[0]||'b1'); S.yo=b; ui.pTab='pedidos'; ui.sheet=null; save(); go('minegocio',true); toast(`Estás como comercio: ${perfilDe(b).nombre}`); return; }
     if (x==='app'){ const era=ui.mode; ui.mode='app'; if (soyNegocio()){ ui.ultNeg=S.yo; S.yo=S.personal; save(); toast('Estás como cliente: '+perfilDe(S.yo).nombre); } ui.sheet=null; if(era!=='app'||ui.view==='minegocio') go('home',true); else render(); return; }
@@ -2660,6 +2901,11 @@ async function guardarFoto(d){ if(!d.m) return d; const id='f'+Date.now().toStri
 /* ---------- formularios ---------- */
 function fail(m){ ui.err=m; rerender(); setTimeout(()=>document.querySelector('[role=alert]')?.scrollIntoView({block:'center'}),0); }
 const F = {
+  respNota: () => { const id=ui.sheet.id, t=($('#nr-txt')?.value||'').trim(); if(!t) return;
+    if (!amigos(S.yo,id)) { ui.err='Solo puedes responder a tus amigos.'; return renderLayer(); }
+    const r=revisar(t,'privado',{para:id,donde:'respuesta a nota'}); if(!r.ok){ ui.err=msgBloqueo(r); return renderLayer(); }
+    if (!permitirEnvio()){ ui.err='Vas muy rápido. Espera unos segundos.'; return renderLayer(); }
+    const n=notaDe(id); chatNuevo(id).msgs.push({de:S.yo, texto:t, nota:n?n.texto:'', t:Date.now()}); save(); cerrarHoja(); toast('Respuesta enviada a su chat'); },
   checkout: () => {
     const v = id => ($('#'+id)?.value||'').trim(); const modo = document.querySelector('input[name=modo]:checked')?.value;
     const d = {nombre:v('f-nombre'), tel:v('f-tel').replace(/\D/g,''), modo, pago:'efectivo', calle:v('f-calle'), colonia:v('f-col'), ref:v('f-ref'), nota:v('f-nota'), cambio: v('f-cambio')?Math.round(+v('f-cambio')*100):0, oferta: Math.round(+(v('f-oferta')||0)*100)};
@@ -2773,7 +3019,8 @@ document.addEventListener('dblclick', e => { const c = e.target.closest('[data-d
 document.addEventListener('submit', e => { const f=e.target.dataset.form; if(f){ e.preventDefault(); F[f](); } });
 document.addEventListener('focusin', e => { if(e.target.id==='st-resp' && ui.story) ui.story.paused=true; });
 document.addEventListener('input', e => {
-  if (e.target.id==='q'){ ui.q=e.target.value; $('#results').innerHTML=resultados(); }
+  if (e.target.id==='q'){ ui.q=e.target.value; const r=$('#results'); if(r) r.innerHTML = (ui.view==='buscar' || ui.q.trim()) ? resultados() : ''; }
+  if (e.target.id==='qm'){ ui.qm=e.target.value; const busca=!!ui.qm.trim(); const r=$('#dm-res'); if(r) r.innerHTML=resultadosMsg(); document.querySelectorAll('.dm-list .notes, .dm-list .dm-sub:not(.dm-res .dm-sub)').forEach(el=>el.hidden=busca); document.querySelectorAll('.dm-list > .crow').forEach(el=>el.hidden=busca); if(!busca && !document.querySelector('.dm-list > .crow')){ render(); const i=$('#qm'); if(i){ i.focus(); } } }
   if (e.target.id==='sheet-note' && ui.sel) ui.sel.note=e.target.value;
   if (e.target.id==='pub-txt') ui.draftTxt=e.target.value;
   if (e.target.id==='f-oferta') actualizarTotales();
