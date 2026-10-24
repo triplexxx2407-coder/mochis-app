@@ -778,6 +778,19 @@ body.vivo .todo{display:none!important}
 .who2 .stx{font-size:30px;line-height:1}
 @media (min-width:900px){.who2 .stx{display:none}}
 @media (max-width:899px){.stv .x2{display:none}.stcard .top2{padding-top:calc(10px + env(safe-area-inset-top,0px))}}
+.ictile.like{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
+.clk{flex:none;display:flex;flex-direction:column;align-items:center;gap:1px;background:none;border:0;padding:4px 2px;min-width:32px;color:var(--muted);cursor:pointer}
+.clk svg{width:16px;height:16px}.clk span{font-size:11px;font-weight:700;min-height:13px}.clk.on{color:var(--bad)}.clk.on svg{fill:currentColor}
+.nlike svg{width:18px;height:18px}.nlike[aria-pressed="true"] svg{fill:currentColor}.nlike-h{width:100%;text-align:center}
+.nlikers{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--line);padding-top:10px}.nlikers>b{display:flex;align-items:center;gap:6px;color:var(--bad)}.nlikers>b svg{width:16px;height:16px;fill:currentColor}
+.sugbox{display:flex;flex-direction:column;gap:8px;min-width:0}.sugbox .sec-h h2{font-size:16px}
+.sugrail{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.sugc{position:relative;flex:none;width:148px;scroll-snap-align:start;border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:28px 10px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.sugc .sugp{background:none;border:0;padding:0;color:var(--fg);display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;width:100%;cursor:pointer}
+.sugc .sugp b{font-size:14px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sugc .sugp span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sugc .sugr{min-height:16px;font-size:12px}.sugc .btn{width:100%;justify-content:center}
+.sugc .sugx{position:absolute;top:2px;right:2px;width:28px;height:28px;font-size:18px}
+.dm-list .sugbox{padding:0 16px 6px}
 .rltabs{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--line)}.rltabs button{flex:1;border:0;background:none;padding:9px;border-radius:9px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer}.rltabs button.on{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}.rlogin form{text-align:left}
 </style>
 </head>
@@ -1777,16 +1790,17 @@ function vBuscar(){
     <label class="search">${ico.search}<input id="q" type="search" placeholder="Personas, negocios o productos" value="${esc(ui.q)}" aria-label="Buscar" autocomplete="off"></label>
     <div id="results" class="stack">${resultados()}</div></div>`;
 }
-const NTXT = {follow:'comenzó a seguirte.', like:'le gustó tu publicación.', like_hist:'le gustó tu historia.', comentario:'comentó:', resp_hist:'respondió a tu historia.', pedido:''};
+const NTXT = {like_nota:'le gustó tu nota:', like_com:'le gustó tu comentario:', follow:'comenzó a seguirte.', like:'le gustó tu publicación.', like_hist:'le gustó tu historia.', comentario:'comentó:', resp_hist:'respondió a tu historia.', pedido:''};
 function vNotifs(){
   const l = misNotifs();
   const grupos = [['Hoy',n=>Date.now()-n.t<H24],['Esta semana',n=>{const d=Date.now()-n.t; return d>=H24 && d<7*H24;}],['Antes',n=>Date.now()-n.t>=7*H24]];
   const fila = n => { const a = n.de?perfilDe(n.de):null; const p = n.post?post(n.post):null;
     return `<div class="nrow ${n.leida?'':'new'}">${a?`<button style="background:none;border:0;padding:0" data-a="verPerfil" data-x="${n.de}">${avatar(a,44)}</button>`:`<span class="mark" style="width:44px;height:44px;border-radius:50%">${esc(inits(S.cfg.marca))}</span>`}
-      <div class="tx">${a&&n.tipo!=='pedido'?`<b>${esc(a.handle)}</b> `:''}${n.tipo==='sistema'||n.tipo==='pedido'?esc(n.texto):esc(NTXT[n.tipo]||'')}${n.tipo==='comentario'&&n.texto?` “${esc(n.texto)}”`:''} <span class="muted small">${hace(n.t)}</span></div>
+      <div class="tx">${a&&n.tipo!=='pedido'?`<b>${esc(a.handle)}</b> `:''}${n.tipo==='sistema'||n.tipo==='pedido'?esc(n.texto):esc(NTXT[n.tipo]||'')}${['comentario','like_com','like_nota'].includes(n.tipo)&&n.texto?` “${esc(n.texto)}”`:''} <span class="muted small">${hace(n.t)}</span></div>
       ${['etiqueta','etiqueta_hist'].includes(n.tipo)&&!n.compartida?`<button class="btn sm rpbtn" data-a="compartirEtiqueta" data-x="${n.id}">${ico.repost} Compartir</button>`:''}
       ${n.tipo==='follow'&&n.de?botonSeguir(n.de):n.tipo==='pedido'?`<button class="btn sm pri" data-a="go" data-x="minegocio">Ver</button>`:p?`<button style="background:none;border:0;padding:0;width:46px" data-a="verPost" data-x="${p.id}">${miniFoto(p)}</button>`:''}</div>`; };
   return `<div class="feed" style="gap:4px"><div class="row between"><h1>Notificaciones</h1><button class="btn sm soft" data-a="simularAct" title="Solo en el prototipo">Simular actividad</button></div>
+    ${bloqueSugeridos('notifs')}
     ${l.length?grupos.map(([g,fn])=>{ const x=l.filter(fn); return x.length?`<div class="ngrp">${g}</div>${x.map(fila).join('')}`:''; }).join(''):'<div class="empty"><h2>Sin notificaciones</h2><p class="muted">Aquí verás quién te sigue, le da me gusta o comenta.</p></div>'}</div>`;
 }
 
@@ -1807,7 +1821,7 @@ function vPerfil(){
   if (!S.sesion) return vLogin();
   if (soyNegocio()){ ui.neg=S.yo; return vNegocio(); }
   const mis = S.posts.filter(p=>p.autor===S.yo).sort((a,b)=>b.t-a.t);
-  return `<div class="perfil-w">${cabPerfil(S.yo)}
+  return `<div class="perfil-w">${cabPerfil(S.yo)}${bloqueSugeridos('perfil')}
   ${mis.length||repostsDe(S.yo).length?`${tabsPerfil(S.yo)}
     ${mis.filter(p=>['rechazado','retirado'].includes(p.estado)).map(p=>`<div class="note bad small">“${esc(p.texto.slice(0,40))}…” fue ${p.estado}: <b>${esc(MOTIVOS[p.motivo]||'')}</b></div>`).join('')}`
    :'<div class="empty"><h2>Comparte tu primera foto</h2><button class="btn pri" data-a="publicar">Publicar</button></div>'}</div>`;
@@ -1883,6 +1897,7 @@ function vMensajes(){
       <button class="nt" data-a="nota">${mia?`<span class="bub">${esc(mia.texto)}</span>`:`<span class="bub muted">Comparte una nota…</span>`}${avatar(me,72)}<span class="nm">Tu nota</span></button>
       ${conNota.map(id=>{ const a=perfilDe(id), n=notaDe(id); return `<button class="nt" data-a="verNota" data-x="${id}"><span class="bub">${esc(n.texto)}</span>${avatar(a,72)}<span class="nm">${esc(a.handle)}</span></button>`; }).join('')}
     </div>
+    ${(ui.qm||'').trim()?'':bloqueSugeridos('mensajes')}
     <div class="dm-sub" ${(ui.qm||'').trim()?'hidden':''}><span>Mensajes</span><span class="small muted">Solo amigos</span></div>
     ${(ui.qm||'').trim()?'':cs.map(({id,c})=>{ const a=perfilDe(id), m=c?.msgs.at(-1); const nuevo = m && m.de!==S.yo && !m.leido; return `<button class="crow ${ui.chat===id?'on':''}" data-a="abrirChat" data-x="${id}">${avatar(a,52)}<div class="tx"><b style="${nuevo?'':'font-weight:600'}">${nombreV(a)}</b><div style="${nuevo?'color:var(--fg);font-weight:700':''}">${m?(m.de===S.yo?'Tú: ':'')+(m.post?'Envió una publicación':m.hist?'Respondió a una historia':esc(m.texto)):'Toca para escribir'}${m?' · '+hace(m.t):''}</div></div>${nuevo?'<span style="width:9px;height:9px;border-radius:50%;background:var(--brand);flex:none"></span>':''}</button>`; }).join('') || '<p class="muted small" style="padding:0 16px">Aún no tienes amigos. Síganse mutuamente para poder escribirse.</p>'}
   </div>`;
@@ -1984,6 +1999,7 @@ function hojaMas(){
   return hoja('Más', `<button class="lrow" data-a="go" data-x="ajustes">${ico.gear}<div class="tx"><b>Configuración</b></div></button>
     <button class="lrow" data-a="toggleTema">${temaActual()==='oscuro'?ico.sun:ico.moon}<div class="tx"><b>Cambiar a modo ${temaActual()==='oscuro'?'claro':'oscuro'}</b></div></button>
     <button class="lrow" data-a="grande">${ico.text}<div class="tx"><b>Texto más grande</b></div><span class="switch ${PREF.grande?'on':''}"></span></button>
+    <button class="lrow" data-a="misLikes"><span class="ictile like">${ico.heartF}</span><div class="tx"><b>Mis likes</b><div class="small muted">Publicaciones, comentarios y notas que te gustaron · solo tú las ves</div></div></button>
     <button class="lrow" data-a="verGuardados"><span class="ictile save">${ico.saveF}</span><div class="tx"><b>Guardados</b><div class="small muted">Solo tú los ves · ${S.guardados.filter(g=>g.u===S.yo).length}</div></div></button>
     <button class="lrow" data-a="go" data-x="pedidos">${ico.list}<div class="tx"><b>Mis pedidos</b></div></button>
     <button class="lrow" data-a="cuentas">${ico.swap}<div class="tx"><b>Cambiar de cuenta</b></div></button>
@@ -3703,7 +3719,7 @@ function hojaComentarios(){
     return `<div class="cm" data-lp="k:${c.id}"><button class="cav" data-a="verPerfil" data-x="${c.autor}" aria-label="Ver perfil">${avatar(u,36)}</button><div class="tx">
       ${r?`<div class="resp-q"><b>@${esc(perfilDe(r.autor).handle)}</b><span>${r.eliminado?'Comentario eliminado':esc(cortar(r.texto,60))}</span></div>`:''}
       <b>${esc(u.handle)}</b> <span class="small muted">${hace(c.t)}</span><div>${esc(c.texto)}</div>
-      <button class="lk small cresp" data-a="responderCom" data-x="${c.id}">Responder</button></div></div>`; };
+      <button class="lk small cresp" data-a="responderCom" data-x="${c.id}">Responder</button></div>${botonLikeCom(c)}</div>`; };
   return `<div class="ov" data-a="closeSheet" data-self="1"><div class="sheet comsheet" role="dialog" aria-modal="true" aria-label="Comentarios">
     <div class="comh"><span class="grab" aria-hidden="true"></span><h2>Comentarios <span class="muted">${vivos}</span></h2><button type="button" class="x" data-a="closeSheet" aria-label="Cerrar">×</button></div>
     <div class="comlist" id="comlist">${p.texto&&p.fotos.length?`<div class="cm cap">${avatar(a,36)}<div class="tx"><b>${esc(a.handle)}</b> ${textoConEtiquetas(p.texto)}<div class="small muted">${hace(p.t)}</div></div></div>`:''}
@@ -3885,6 +3901,149 @@ function aReportes(){
 }
 
 /* ============================================================
+   v18 — likes a notas (privados) y a comentarios (con contador),
+   "Mis likes", botón "Mi negocio" fijo, inicio con lo más reciente
+   y "Personas que quizás conoces".
+   ============================================================ */
+function asegurarV18(){
+  if (!S) return;
+  S.likesNota = S.likesNota || {};   // 'cuenta|t' → true (los que yo di)
+  S.notaLikers = S.notaLikers || {}; // 'cuenta|t' → [ids] (quién le dio like a MIS notas)
+  S.likesCom = S.likesCom || {};     // id comentario → true (los que yo di)
+  S.nLikesCom = S.nLikesCom || {};   // id comentario → número total
+}
+const notaKey = n => n ? n.autor + '|' + (n.ts || n.t) : '';
+const comKey = c => c ? (c.sid ? 'k'+c.sid : c.id) : '';
+const tieneNegocio = () => !!(S && S.misNegocios && S.misNegocios.length);
+
+/* ---------- notas ---------- */
+function likersNotaHTML(n){
+  asegurarV18(); const l = (S.notaLikers[notaKey(n)]||[]).filter(id=>!bloq(id));
+  if (!l.length) return `<p class="small muted" style="margin:0">Cuando a tus amigos les guste tu nota, aquí lo verás. Solo tú lo ves.</p>`;
+  return `<div class="nlikers"><b class="small">${ico.heartF} Les gustó tu nota</b><span class="small muted">Solo tú lo ves</span>
+    ${l.map(id=>{ const a=perfilDe(id); return `<button class="srow" style="background:none;border:0;padding:4px 0;text-align:left;color:var(--fg)" data-a="verPerfil" data-x="${id}">${avatar(a,32)}<div class="tx"><b>${esc(a.handle)}</b></div></button>`; }).join('')}</div>`;
+}
+function hojaNotaV18(){
+  const h = hojaNota(); const n = notaDe(S.yo); if (!n) return h;
+  const i = h.lastIndexOf('</form>'); if (i<0) return h;
+  return h.slice(0,i) + likersNotaHTML(n) + h.slice(i);
+}
+function hojaVerNotaV18(){
+  const id = ui.sheet.id, n = notaDe(id); let h = hojaVerNota(); if (!n) return h;
+  asegurarV18();
+  const puede = id!==S.yo && !soyNegocio() && !esNeg(id) && amigos(S.yo, id);
+  if (!puede) return h;
+  const on = !!S.likesNota[notaKey(n)];
+  const btn = `<button type="button" class="btn ${on?'pri':'soft'} nlike" data-a="likeNota" data-x="${id}" aria-pressed="${on}">${on?ico.heartF:ico.heart} ${on?'Te gusta':'Me gusta'}</button><span class="small muted nlike-h">Solo tú y @${esc(perfilDe(id).handle)} ven este me gusta.</span>`;
+  return h.replace(/(<div class="small muted">@[^<]*<\/div><\/div>)/, `$1<div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap">${btn}</div>`);
+}
+
+/* ---------- comentarios ---------- */
+function botonLikeCom(c){
+  asegurarV18(); if (!c || c.eliminado) return '';
+  const k = comKey(c), on = !!S.likesCom[k], n = S.nLikesCom[k]||0;
+  return `<button type="button" class="clk ${on?'on':''}" data-a="likeCom" data-x="${c.id}" aria-label="Me gusta el comentario" aria-pressed="${on}">${on?ico.heartF:ico.heart}<span>${n||''}</span></button>`;
+}
+
+/* ---------- mis likes ---------- */
+function vMisLikes(){
+  asegurarV18(); const tab = ui.mlTab || 'posts';
+  const me = S.personal;
+  const ps = Object.keys(S.likes).filter(k=>S.likes[k] && k.startsWith(me+'|')).map(k=>post(k.slice(me.length+1))).filter(p=>p && p.estado==='aprobado' && !bloq(p.autor)).sort((a,b)=>b.t-a.t);
+  const cs = S.comentarios.filter(c=>S.likesCom[comKey(c)] && !c.eliminado && !bloq(c.autor) && post(c.post)).sort((a,b)=>b.t-a.t);
+  const ns = S.notas.filter(n=>S.likesNota[notaKey(n)] && notaVigente(n));
+  const tabs = [['posts','Publicaciones',ps.length],['coms','Comentarios',cs.length],['notas','Notas',ns.length]];
+  let cuerpo = '';
+  if (tab==='posts') cuerpo = ps.length ? `<div class="pgrid">${ps.map(p=>miniPost(p)).join('')}</div>` : '<div class="empty"><h2>Aún no le das me gusta a nada</h2><p class="muted">Toca el corazón en una publicación y aparecerá aquí.</p></div>';
+  if (tab==='coms') cuerpo = cs.length ? `<div class="stack" style="gap:8px">${cs.map(c=>{ const u=perfilDe(c.autor); return `<button class="lrow" data-a="verPost" data-x="${c.post}">${avatar(u,40)}<div class="tx"><b>${esc(u.handle)}</b><div class="small">${esc(cortar(c.texto,90))}</div><div class="small muted">${hace(c.t)}</div></div>${ico.heartF}</button>`; }).join('')}</div>` : '<div class="empty"><h2>Sin comentarios</h2><p class="muted">Los comentarios que te gusten aparecen aquí.</p></div>';
+  if (tab==='notas') cuerpo = ns.length ? `<div class="stack" style="gap:8px">${ns.map(n=>{ const a=perfilDe(n.autor); return `<button class="lrow" data-a="verNota" data-x="${n.autor}">${avatar(a,40)}<div class="tx"><b>${esc(a.handle)}</b><div class="small">“${esc(n.texto)}”</div></div>${ico.heartF}</button>`; }).join('')}</div>` : '<div class="empty"><h2>Sin notas</h2><p class="muted">Las notas duran 20 horas.</p></div>';
+  return `<div class="feed"><div class="row between"><button class="btn back" data-a="atras">${ico.back}Volver</button></div>
+    <h1>Mis likes</h1><p class="small muted" style="margin:0">Solo tú ves esta lista.</p>
+    <div class="segs" role="tablist">${tabs.map(([k,t,n])=>`<button role="tab" aria-selected="${tab===k}" class="${tab===k?'on':''}" data-a="mlTab" data-x="${k}">${t} <span class="muted">${n}</span></button>`).join('')}</div>
+    ${cuerpo}</div>`;
+}
+
+/* ---------- personas que quizás conoces ---------- */
+function listaSugeridos(){
+  const ya = id => id===S.yo || id===S.personal || sigue(S.yo,id) || bloq(id) || esNeg(id);
+  if (VIVO && Array.isArray(S.sugeridos)) return S.sugeridos.filter(s=>!ya(s.id) && perfilDe(s.id) && !(ui.sugOcultos||[]).includes(s.id));
+  // demo: amigos de amigos y quien te sigue
+  const am = misAmigos();
+  return S.usuarios.filter(u=>!ya(u.id) && u.grupo!=='spam' && !(ui.sugOcultos||[]).includes(u.id)).map(u=>{ const c = am.filter(m=>sigue(m,u.id)).length; const te = sigue(u.id,S.yo);
+    return {id:u.id, comunes:c, te, razon: te?'Te sigue':c?`${c} ${c===1?'seguido':'seguidos'} en común`:'De '+S.cfg.ciudad, s: te*5 + c*3}; }).sort((a,b)=>b.s-a.s).slice(0,40);
+}
+function bloqueSugeridos(lugar){
+  if (!S.sesion || soyNegocio()) return '';
+  const l = listaSugeridos().slice(0, 8); if (!l.length) return '';
+  return `<div class="sugbox" data-lugar="${lugar}"><div class="sec-h"><h2>Personas que quizás conoces</h2><button class="lk" data-a="go" data-x="sugeridos">Ver más</button></div>
+    <div class="sugrail">${l.map(s=>{ const a=perfilDe(s.id); return `<div class="sugc"><button type="button" class="x sugx" data-a="ocultarSug" data-x="${s.id}" aria-label="Quitar sugerencia">×</button>
+      <button class="sugp" data-a="verPerfil" data-x="${s.id}">${avatar(a,64)}<b>${esc(a.nombre||a.handle)}</b><span class="small muted">@${esc(a.handle)}</span></button>
+      <span class="small muted sugr">${esc(s.razon||'')}</span>${botonSeguir(s.id)}</div>`; }).join('')}</div></div>`;
+}
+function vSugeridos(){
+  const l = listaSugeridos();
+  return `<div class="feed"><button class="btn back" data-a="atras">${ico.back}Volver</button><h1>Personas que quizás conoces</h1>
+    <p class="small muted" style="margin:0">Según a quién siguen tú y tus amigos. Solo te sugerimos personas de tu mismo grupo de edad.</p>
+    <div class="stack" style="gap:8px">${l.map(s=>{ const a=perfilDe(s.id); return `<div class="lrow"><button class="row nowrap" style="flex:1;min-width:0;background:none;border:0;padding:0;text-align:left;color:var(--fg)" data-a="verPerfil" data-x="${s.id}">${avatar(a,48)}<div class="tx"><b>${nombreV(a)}</b><div class="small muted">@${esc(a.handle)} · ${esc(s.razon||'')}</div></div></button>${botonSeguir(s.id)}</div>`; }).join('') || '<div class="empty"><h2>Por ahora no hay sugerencias</h2><p class="muted">Vuelve pronto: cada día se une más gente de Los Mochis.</p></div>'}</div></div>`;
+}
+
+/* ---------- inicio: lo más reciente primero ---------- */
+function listaFeed(){
+  let l = visibles();
+  if (ui.feed==='siguiendo') l = l.filter(p=>sigue(S.yo,p.autor) || p.autor===S.yo || amigoQueCompartio(p.id));
+  if (ui.feed==='negocios') l = l.filter(p=>p.tipo==='negocio');
+  const pen = new Set(ui.penal||[]); const H = 3600e3;
+  if (VIVO){ // en vivo: lo más nuevo arriba, de todos (sigas o no), con una mezcla ligera
+    const sc = p => p.t + (sigue(S.yo,p.autor)?0.15*H:0) + (amigoQueCompartio(p.id)?0.1*H:0) + jit(p.id, 0.1*H) - (pen.has(p.id)?3*H:0);
+    return l.sort((a,b)=>sc(b)-sc(a));
+  }
+  const score = p => p.t + (sigue(S.yo,p.autor)?36*H:0) + (p.tipo==='negocio'?6*H:0) + (amigoQueCompartio(p.id)?20*H:0) + jit(p.id, 30*H) - (pen.has(p.id)?96*H:0);
+  const score2 = p => p.t + jit(p.id, 10*H) - (pen.has(p.id)?72*H:0);
+  return l.sort((a,b)=>ui.feed==='parati'?score(b)-score(a):score2(b)-score2(a));
+}
+function refrescarInicio(){
+  const hacer = () => {
+    ui.penal = listaFeed().slice(0, Math.max(6, Math.min(ui.feedN||12, 12))).map(p=>p.id);
+    ui.seed = Math.random().toString(36).slice(2,8); ui.feedN = 12; ui.homeY = 0; ui.q = '';
+    render(); window.scrollTo({top:0, behavior:'smooth'}); toast(VIVO?'Inicio actualizado: lo más nuevo primero':'Inicio actualizado: publicaciones, historias y negocios nuevos para ti'); };
+  if (VIVO && typeof vRecargar==='function'){ toast('Buscando lo más nuevo…'); vRecargar(true).then(hacer, hacer); } else hacer();
+}
+
+/* ---------- acciones ---------- */
+function registrarAccionesV18(){
+  window.HOJAS_EXTRA = Object.assign(window.HOJAS_EXTRA||{}, {nota:hojaNotaV18, verNota:hojaVerNotaV18});
+  Object.assign(VISTAS, {mislikes:vMisLikes, sugeridos:vSugeridos});
+  Object.assign(A, {
+    likeNota: async x => { asegurarV18(); const n = notaDe(x); if (!n) return toast('Esta nota ya expiró.');
+      if (soyNegocio()) return toast('Cambia a tu cuenta personal para dar me gusta.');
+      const k = notaKey(n), on = !S.likesNota[k]; S.likesNota[k] = on; renderLayer();
+      if (VIVO){ const sb = RV.sb; let r;
+        if (on) r = await sb.from('nota_likes').upsert({cuenta:n.autor, nota_t:n.ts, usuario:vUid(), activo:true}, {onConflict:'cuenta,nota_t,usuario'});
+        else r = await sb.from('nota_likes').update({activo:false}).eq('cuenta', n.autor).eq('nota_t', n.ts).eq('usuario', vUid());
+        if (r.error){ S.likesNota[k] = !on; renderLayer(); return toast(vMsgError(r.error)); } }
+      else save(); },
+    likeCom: async x => { asegurarV18(); const c = comPorId(x); if (!c || c.eliminado) return;
+      if (soyNegocio()) return toast('Cambia a tu cuenta personal para dar me gusta.');
+      const k = comKey(c), on = !S.likesCom[k]; S.likesCom[k] = on; S.nLikesCom[k] = Math.max(0, (S.nLikesCom[k]||0) + (on?1:-1));
+      const pintar = () => { const b = document.querySelector(`.clk[data-x="${CSS.escape(x)}"]`); if (b) b.outerHTML = botonLikeCom(c); else renderLayer(); };
+      pintar();
+      if (VIVO){ if (!c.sid) return; const sb = RV.sb; let r;
+        if (on) r = await sb.from('comment_likes').upsert({comentario:c.sid, usuario:vUid(), activo:true}, {onConflict:'comentario,usuario'});
+        else r = await sb.from('comment_likes').update({activo:false}).eq('comentario', c.sid).eq('usuario', vUid());
+        if (r.error){ S.likesCom[k] = !on; S.nLikesCom[k] = Math.max(0,(S.nLikesCom[k]||0) + (on?-1:1)); pintar(); return toast(vMsgError(r.error)); } }
+      else save(); },
+    misLikes: () => { ui.sheet = null; renderLayer(); ui.mlTab = 'posts'; go('mislikes'); },
+    mlTab: x => { ui.mlTab = x; render(); },
+    ocultarSug: x => { ui.sugOcultos = [...(ui.sugOcultos||[]), x]; render(); },
+    irMiNegocio: () => { if (!tieneNegocio()) return go('vende');
+      if (VIVO) return A.modo2('vcomercio');
+      S.yo = S.misNegocios[0]; ui.pTab = 'pedidos'; save(); go('minegocio', true); }
+  });
+  const goO = window.go; // si ya tiene negocio, "vende" lleva a su negocio
+  if (typeof goO==='function') window.go = function(v, ...r){ if (v==='vende' && VIVO && tieneNegocio()) return A.irMiNegocio(); return goO(v, ...r); };
+}
+
+/* ============================================================
    EN VIVO — la demo completa conectada al servidor (Supabase)
    Las pantallas son exactamente las de la demo. Aquí:
    1) se cargan los datos reales y se arma el mismo "S" que usa la demo,
@@ -3934,6 +4093,10 @@ async function vCargar(){
       guard: sb.from('guardados').select('post,created_at'),
       msgs: sb.from('messages').select('id,de,para,texto,post,hist,nota,estado,leido,created_at,responde,borrado,hist_comp').order('created_at').limit(3000),
       ocultos: sb.from('msg_ocultos').select('mensaje').limit(5000),
+      clikes: sb.from('comment_likes').select('comentario').eq('activo', true).limit(5000),
+      clc: sb.rpc('likes_comentarios2'),
+      nlikes: sb.from('nota_likes').select('cuenta,nota_t,usuario').eq('activo', true).limit(3000),
+      sug: sb.rpc('sugeridos', {lim:40}),
       notifs: sb.from('notifs').select('*').order('created_at',{ascending:false}).limit(200),
       res: sb.from('resenas').select('*').limit(5000),
       peds: sb.from('pedidos').select(PEDCOLS).order('created_at',{ascending:false}).limit(400),
@@ -4002,7 +4165,15 @@ function vArmar(D, E, admin, conteos, promCli){
     prod:h.prod?'p'+h.prod:null, etiq:h.etiq||[], origen:h.origen_hist?{autor:h.origen_autor||'', hist:'h'+h.origen_hist}:null, mod:h.mod||null}));
   historias.filter(h=>h.mod && h.mod.por==='auto').forEach(h=>decisiones.push({tipo:'hist', id:h.id, d:h.estado, razon:h.mod.razon||'', t:h.mod.t||h.t, revisarFoto:!!h.mod.revisarFoto}));
   decisiones.sort((a,b)=>b.t-a.t);
-  const notas = D.notas.map(n=>({autor:n.cuenta, texto:n.texto, t:vMs(n.created_at)}));
+  const notas = D.notas.map(n=>({autor:n.cuenta, texto:n.texto, t:vMs(n.created_at), ts:n.created_at}));
+  const ntKey = (c, ts) => c + '|' + ts;
+  const misNotaTs = new Set(D.notas.filter(n=>n.autor===uid).map(n=>ntKey(n.cuenta, n.created_at)));
+  const likesNota = {}, notaLikers = {};
+  (D.nlikes||[]).forEach(l=>{ const nn = D.notas.find(n=>n.cuenta===l.cuenta && vMs(n.created_at)===vMs(l.nota_t)); if (!nn) return; const k = ntKey(nn.cuenta, nn.created_at);
+    if (l.usuario===uid) likesNota[k] = true; if (misNotaTs.has(k) && l.usuario!==uid) (notaLikers[k] = notaLikers[k]||[]).push('u'+l.usuario); });
+  const likesCom = {}; (D.clikes||[]).forEach(l=>likesCom['k'+l.comentario] = true);
+  const nLikesCom = {}; (D.clc||[]).forEach(l=>nLikesCom['k'+l.comentario] = l.n);
+  const sugeridos = (D.sug||[]).map(s=>({id:'u'+s.id, comunes:s.comunes, te:s.te_sigue, razon:s.razon}));
   // seguir, bloqueos, guardados, compartidos
   const sigue = D.fol.map(f=>({de:'u'+f.de, a:'u'+f.a})).concat(D.sneg.map(f=>({de:'u'+f.de, a:negDe(f.negocio)})));
   const bloqueos = D.blo.map(b=>({de:'u'+b.de, a:'u'+b.a}));
@@ -4041,7 +4212,7 @@ function vArmar(D, E, admin, conteos, promCli){
   // carrito (solo en este teléfono)
   let carrito = null; try { carrito = JSON.parse(localStorage.getItem('lm-vivo-carrito-'+uid)||'null'); } catch(e){}
   if (carrito && (!carrito.items || !carrito.items.every(it=>productos.some(p=>p.id===it.pid)))) carrito = null;
-  const yoAntes = prev ? prev.yo : (sessionStorage.getItem('lm-vivo-yo-'+uid) || me);
+  const yoAntes = prev ? prev.yo : (((()=>{ try { return localStorage.getItem('lm-vivo-yo-'+uid); } catch(e){ return null; } })()) || me);
   const misNegIds = misNeg.map(n=>n.id);
   const S2 = {
     ts:Date.now(), vivo:true, esAdmin:admin,
@@ -4049,6 +4220,7 @@ function vArmar(D, E, admin, conteos, promCli){
       terminos:Array.isArray(aj.terminos)?aj.terminos:[], protegidos:(Array.isArray(aj.protegidos)&&aj.protegidos.length)?aj.protegidos:PROTEGIDOS_BASE.slice(), reparto:SDEMO.cfg.reparto},
     negocios, productos, usuarios, yo:(yoAntes===me || misNegIds.includes(yoAntes)) ? yoAntes : me, personal:me, misNegocios:misNegIds, sesion:'correo',
     sigue, bloqueos, posts, comentarios, likes, historias, vistas, likesHist, notas, chats:Object.values(chats), notifs, resenas, reportes, decisiones, pedidos, carrito,
+    likesNota, notaLikers, likesCom, nLikesCom, sugeridos,
     bitacora, seq:0, intentos:prev?prev.intentos:{}, pausas:prev?prev.pausas:{}, alertas, guardados, reposts, verifs, apelaciones, calif,
     repartidores:[], yoRep:null, repOnline:false, extrasSeed:true, v12:true, dias:0
   };
@@ -4089,7 +4261,7 @@ function vFoto(s){
 function vGuardar(){
   if (!S || S===SDEMO || !SNAP) return;
   try { if (S.carrito) localStorage.setItem('lm-vivo-carrito-'+vUid(), JSON.stringify(S.carrito)); else localStorage.removeItem('lm-vivo-carrito-'+vUid()); } catch(e){}
-  try { sessionStorage.setItem('lm-vivo-yo-'+vUid(), S.yo); } catch(e){}
+  try { localStorage.setItem('lm-vivo-yo-'+vUid(), S.yo); } catch(e){}
   const antes = SNAP, ahora = vFoto(S); SNAP = ahora;
   const ops = vDiff(antes, ahora);
   if (!ops.length) return;
@@ -4326,7 +4498,7 @@ async function vEntrar(){
     $('#app').innerHTML = `<div class="rwrapv"><div class="protobar rprotobar"><b>En vivo</b><span>Cargando tu cuenta…</span></div><div class="rcentro"><div class="rspin"></div><p class="muted">Conectando…</p></div></div>`;
     try { await vCargar(); } catch(e){ console.error(e); RV.fase='sinred'; return renderReal(); }
     VQ.listo = true; vCanal(true);
-    clearInterval(VQ.intervalo); VQ.intervalo = setInterval(()=>{ if (VIVO && document.visibilityState==='visible' && Date.now()-VQ.ultimaCarga>60000) vRecargar(); }, 20000);
+    clearInterval(VQ.intervalo); VQ.intervalo = setInterval(()=>{ if (VIVO && document.visibilityState==='visible' && Date.now()-VQ.ultimaCarga>240000) vRecargar(); }, 30000);
   }
   if (ui.mode!=='real' && ui.mode!=='app' && ui.mode!=='admin') return; // está viendo la demo
   VIVO = true; S = SV; document.body.classList.add('vivo');
@@ -4341,7 +4513,17 @@ async function vRecargar(forzar){
   const era = S===SV; try { await vCargar(); } catch(e){ console.warn(e); return; }
   if (VIVO && era){ S = SV; vRefrescar(forzar); }
 }
-let vPronto = null; function vRecargarPronto(){ clearTimeout(vPronto); vPronto = setTimeout(()=>vRecargar(), 1200); }
+let vPronto = null; function vRecargarPronto(){ clearTimeout(vPronto); const falta = Math.max(1200, 20000 - (Date.now() - VQ.ultimaCarga)); vPronto = setTimeout(()=>vRecargar(), falta); }
+// aviso nuevo sin volver a descargar todo (likes, comentarios, seguidores…)
+function vAvisoLigero(n){
+  if (!VIVO || !SV || !n) return false;
+  if (['pedido','sistema','follow_neg'].includes(n.tipo)) return false;
+  if (SV.notifs.some(x=>x.sid===n.id)) return true;
+  SV.notifs.unshift({id:'n'+n.id, sid:n.id, para:SV.personal, tipo:n.tipo, de:n.de?'u'+n.de:null, post:n.post?'q'+n.post:undefined, hist:n.hist?'h'+n.hist:undefined, texto:n.texto, t:vMs(n.created_at), leida:!!n.leida, compartida:!!n.compartida});
+  if (n.de && !SV.usuarios.some(u=>u.id==='u'+n.de)) return false; // alguien nuevo: hace falta su perfil
+  if (n.tipo==='follow') SV.sigue.push({de:'u'+n.de, a:SV.personal});
+  SNAP = vFoto(SV); vRefrescar(); return true;
+}
 function vRefrescar(forzar){
   if (!VIVO) return;
   const a = document.activeElement; const escribiendo = a && (a.tagName==='INPUT' || a.tagName==='TEXTAREA') && a.type!=='checkbox' && a.type!=='radio' && a.value;
@@ -4360,8 +4542,7 @@ function vCanal(on){
   VQ.canal = RV.sb.channel('vivo-'+uid)
     .on('postgres_changes', {event:'UPDATE', schema:'public', table:'messages', filter:`para=eq.${uid}`}, ()=>vRecargarPronto())
     .on('postgres_changes', {event:'INSERT', schema:'public', table:'messages', filter:`para=eq.${uid}`}, p=>{ const m = p.new; if (m.estado==='ok' && !(ui.view==='mensajes' && ui.chat==='u'+m.de)) toast('💬 Nuevo mensaje'); vRecargarPronto(); })
-    .on('postgres_changes', {event:'INSERT', schema:'public', table:'notifs', filter:`para=eq.${uid}`}, p=>{ const n = p.new; if (n.tipo==='pedido') toast('🛍️ '+(n.texto||'Nuevo pedido')); else if (n.tipo==='sistema' && /pedido/i.test(n.texto||'')) toast(n.texto); vRecargarPronto(); })
-    .on('postgres_changes', {event:'INSERT', schema:'public', table:'historias'}, ()=>vRecargarPronto())
+    .on('postgres_changes', {event:'INSERT', schema:'public', table:'notifs', filter:`para=eq.${uid}`}, p=>{ const n = p.new; if (n.tipo==='pedido') toast('🛍️ '+(n.texto||'Nuevo pedido')); else if (n.tipo==='sistema' && /pedido/i.test(n.texto||'')) toast(n.texto); if (!vAvisoLigero(n)) vRecargarPronto(); })
     .subscribe();
 }
 
@@ -4429,6 +4610,7 @@ function vLimpiar(root){
   root.querySelectorAll('label[for="f-tel"],label[for="a-com"],label[for="a-plan"]').forEach(el=>el.remove());
   root.querySelectorAll('.card').forEach(el=>{ if (el.querySelector('[data-a="resetSi"]') || /Datos de prueba/.test(el.querySelector('h2')?.textContent||'')) el.remove(); });
   root.querySelectorAll('.kpi').forEach(el=>{ if (/Comisión/.test(el.textContent)) el.remove(); });
+  if (S && S.misNegocios && S.misNegocios.length) root.querySelectorAll('[data-a="go"][data-x="vende"], [data-a="irVende"]').forEach(el=>{ const c = el.closest('.card'); if (c && c.querySelectorAll('button').length===1 && /negocio/i.test(c.textContent)) c.remove(); else el.remove(); });
   root.querySelectorAll('.verif.bot').forEach(el=>el.title='Cuenta automática (bot)');
   root.querySelectorAll('.vlabel.bot').forEach(el=>el.textContent='Bot · cuenta automática del equipo');
   if (ui.view==='ajustes' && !root.querySelector('#vp-pass')){ const d = root.querySelector('details.set'); if (d){ d.insertAdjacentHTML('afterend', `<details class="set"><summary>${ico.shield}<span>Contraseña<small>Pon o cambia tu contraseña para entrar</small></span></summary><div class="bd">
@@ -4480,7 +4662,7 @@ function render(){
     ['go','mensajes','Mensajes',ico.msg,['mensajes'],nMsg],
     ['go','notifs','Notificaciones',ico.bell,['notifs'],nN],
     ['crear','','Crear',ico.plus,[],0],
-    ...(soyNegocio()?[['go','minegocio','Mi negocio',ico.biz,['minegocio'],nPed]]:[]),
+    ...(soyNegocio()?[['go','minegocio','Mi negocio',ico.biz,['minegocio'],nPed]]:tieneNegocio()?[['irMiNegocio','','Mi negocio',ico.biz,[],0]]:[]),
     ['go','carrito','Carrito',ico.bag,['carrito','checkout'],cartN],
     ...(soyNegocio()?[]:[['go','pedidos','Mis pedidos',ico.list,['pedidos','seguimiento'],nAct]]),
     ['go','perfil','Perfil',avatar(me,26),['perfil','ajustes'],0],
@@ -4499,6 +4681,7 @@ function render(){
     ${VIVO&&S.esAdmin?`<button class="ibtn" data-a="modo2" data-x="vadmin" aria-label="Administrar">${ico.shield}</button>`:`<button class="ibtn" data-a="toggleTema" aria-label="Cambiar tema">${temaActual()==='oscuro'?ico.sun:ico.moon}</button>`}
     <button class="ibtn" data-a="go" data-x="notifs" aria-label="Notificaciones">${ico.bell}${badge(nN)}</button>
     <button class="ibtn" data-a="go" data-x="mensajes" aria-label="Mensajes">${ico.msg}${badge(nMsg)}</button>
+    ${!soyNegocio()&&tieneNegocio()?`<button class="ibtn" data-a="irMiNegocio" aria-label="Mi negocio">${ico.biz}</button>`:''}
     ${soyNegocio()?`<button class="ibtn" data-a="go" data-x="minegocio" aria-label="Mi negocio">${ico.biz}${badge(nPed)}</button>`:`<button class="ibtn" data-a="go" data-x="carrito" aria-label="Carrito">${ico.bag}${badge(cartN)}</button>`}</header>
   <main class="igmain"><div class="igin stack">${protoBar()}${VISTAS[v]()}</div></main>
   ${showBar?`<button class="cartfloat" data-a="go" data-x="carrito"><span>${cartN} producto(s) · ${esc(neg(S.carrito.neg).nombre)}</span><span class="num">${money(subtotalCarrito())} →</span></button>`:''}
@@ -4876,7 +5059,7 @@ Object.assign(A, {
   termAdd: () => { const t=$('#term-t').value.trim().toLowerCase(), c=$('#term-c').value; if(t.length<3) return toast('Escribe al menos 3 letras'); S.cfg.terminos.push({t:limpiarTexto(t), cat:c}); CACHE_RE.clear(); log('Admin','Agregó término al Escudo',c); save(); rerender(); },
   termDel: x => { S.cfg.terminos.splice(+x,1); save(); rerender(); }
 });
-registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal(); registrarAccionesV17(); registrarAccionesVivo();
+registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal(); registrarAccionesV17(); registrarAccionesV18(); registrarAccionesVivo();
 aplicarPref();
 const EN_VIVO_OK = /github\.io$/.test(location.host) || /[?&]vivo=1/.test(location.search);
 try { if (EN_VIVO_OK && (localStorage.getItem('lm-modo')||'real')==='real') ui.mode='real'; } catch(e){ if (EN_VIVO_OK) ui.mode='real'; }
