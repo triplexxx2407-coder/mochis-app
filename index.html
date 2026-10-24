@@ -72,7 +72,7 @@ code{background:var(--surface-2);padding:0 4px;border-radius:4px;font-size:12.5p
 /* formularios */
 label.f{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px}
 label.f span.h{font-weight:400;color:var(--muted);font-size:12.5px}
-input[type=text],input[type=tel],input[type=email],input[type=number],input[type=search],select,textarea{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 13px;font-size:15px;transition:border-color .15s}
+input[type=text],input[type=tel],input[type=email],input[type=password],input[type=number],input[type=search],select,textarea{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 13px;font-size:15px;transition:border-color .15s}
 input:focus,select:focus,textarea:focus{border-color:var(--brand);outline:none}
 input[type=file]{font-size:13.5px;max-width:100%}
 input[type=checkbox],input[type=radio]{accent-color:var(--brand);width:18px;height:18px;flex:none}
@@ -737,6 +737,7 @@ html,body,button,a,.car,input,textarea,select{touch-action:manipulation}
 .rmain .post .car .ph img{width:100%;height:100%;object-fit:cover}
 .pgrid .ph img{width:100%;height:100%;object-fit:cover}
 .rcentro .card{text-align:left}.rchat .who{border:0;background:none;padding:0;gap:10px;display:flex;align-items:center;color:var(--fg)}.rmain .segs{flex-wrap:wrap}
+.rltabs{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--line)}.rltabs button{flex:1;border:0;background:none;padding:9px;border-radius:9px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer}.rltabs button.on{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}.rlogin form{text-align:left}
 </style>
 </head>
 <body>
@@ -3568,15 +3569,26 @@ function rVApp(){
     <nav class="rnav-bot">${RNAV.map(([k,l,i])=>`<button class="${on(k)}" data-a="rGo" data-x="${k}">${ico[i]}<span>${l}</span>${k==='mensajes'&&RV.noLeidos?`<i class="rbadge">${RV.noLeidos>9?'9+':RV.noLeidos}</i>`:''}</button>`).join('')}</nav>`;
 }
 function rVLogin(){
-  const env = RV.enviado && Date.now()-RV.enviado < 60000;
-  return `<div class="rcentro rlogin"><span class="mark big">${esc(inits(S.cfg.marca))}</span><h1>${esc(S.cfg.marca)}</h1>
-    <p class="muted">La red social y tienda de ${esc(S.cfg.ciudad)}. Entra con tu correo: te mandamos un enlace, sin contraseñas.</p>
-    ${env?`<div class="note ok"><b>¡Listo! Revisa tu correo</b><br>Te mandamos un enlace para entrar. Ábrelo <b>en este mismo teléfono o computadora</b>. Si no lo ves, busca en "Spam" o "Promociones".</div>`:''}
-    <form class="stack" data-form="rLogin" novalidate style="width:100%;max-width:380px;gap:10px">
+  const t = RV.ltab||'entrar', env = RV.enviado && Date.now()-RV.enviado < 60000;
+  const tab = (k,l)=>`<button type="button" class="${t===k?'on':''}" data-a="rLTab" data-x="${k}" aria-pressed="${t===k}">${l}</button>`;
+  let form;
+  if (t==='enlace') form = `${env?`<div class="note ok"><b>¡Listo! Revisa tu correo</b><br>Ábrelo <b>en este mismo teléfono o computadora</b>. Si no lo ves, busca en "Spam".</div>`:''}
+    <form class="stack" data-form="rLogin" novalidate style="gap:10px">
       <label class="f" for="rl-mail">Tu correo<input id="rl-mail" type="email" autocomplete="email" inputmode="email" placeholder="tucorreo@gmail.com" value="${esc(RV.mail||'')}"></label>
       ${RV.err?`<div class="err" role="alert">${esc(RV.err)}</div>`:''}
-      <button class="btn pri block lg" type="submit" ${env?'disabled':''}>${env?'Enlace enviado (espera 1 min para pedir otro)':'Mandarme el enlace'}</button></form>
-    <p class="small muted" style="max-width:380px">Debes tener al menos 13 años. Al entrar aceptas las reglas: nada de contenido +18, ofensivo, enlaces, teléfonos ni publicidad sin permiso.</p></div>`;
+      <button class="btn pri block lg" type="submit" ${env?'disabled':''}>${env?'Enlace enviado':'Mandarme el enlace'}</button>
+      <p class="small muted" style="margin:0">Úsalo si olvidaste tu contraseña: entras con el enlace y luego pones una nueva en "Editar perfil".</p></form>`;
+  else form = `<form class="stack" data-form="rPassLogin" novalidate style="gap:10px">
+      <label class="f" for="rl-mail">Tu correo<input id="rl-mail" type="email" autocomplete="email" inputmode="email" placeholder="tucorreo@gmail.com" value="${esc(RV.mail||'')}"></label>
+      <label class="f" for="rl-pass">Contraseña<input id="rl-pass" type="password" autocomplete="${t==='crear'?'new-password':'current-password'}" minlength="8" placeholder="${t==='crear'?'Mínimo 8 caracteres':'Tu contraseña'}"></label>
+      ${t==='crear'?`<label class="f" for="rl-pass2">Repite la contraseña<input id="rl-pass2" type="password" autocomplete="new-password"></label>`:''}
+      ${RV.err?`<div class="err" role="alert">${esc(RV.err)}</div>`:''}
+      <button class="btn pri block lg" type="submit">${t==='crear'?'Crear mi cuenta':'Entrar'}</button></form>`;
+  return `<div class="rcentro rlogin"><span class="mark big">${esc(inits(S.cfg.marca))}</span><h1>${esc(S.cfg.marca)}</h1>
+    <p class="muted">La red social y tienda de ${esc(S.cfg.ciudad)}.</p>
+    <div style="width:100%;max-width:380px" class="stack"><div class="seg rltabs">${tab('entrar','Entrar')}${tab('crear','Crear cuenta')}</div>${form}
+    ${t!=='enlace'?`<button type="button" class="btn ghost sm" data-a="rLTab" data-x="enlace">¿Olvidaste tu contraseña? Entrar con enlace al correo</button>`:''}</div>
+    <p class="small muted" style="max-width:380px">Debes tener al menos 13 años. Nunca compartas tu contraseña con nadie, ni con el equipo. Al entrar aceptas las reglas: nada de contenido +18, ofensivo, enlaces, teléfonos ni publicidad sin permiso.</p></div>`;
 }
 function rVRegistro(){
   return `<div class="rcentro"><div class="card stack" style="max-width:440px;width:100%;gap:12px"><h1 style="margin:0">Crea tu perfil</h1>
@@ -3675,7 +3687,14 @@ function rVEditar(){
       <label class="f" for="re-usr">Usuario<input id="re-usr" type="text" maxlength="24" autocapitalize="off" value="${esc(p.usuario)}"></label>
       <label class="f" for="re-bio">Descripción<textarea id="re-bio" maxlength="150">${esc(p.bio||'')}</textarea><span class="h">Sin enlaces, correos ni teléfonos.</span></label>
       ${RV.err?`<div class="err" role="alert">${esc(RV.err)}</div>`:''}
-      <button class="btn pri block" type="submit">Guardar</button></form>`;
+      <button class="btn pri block" type="submit">Guardar</button></form>
+    <h2 style="margin-top:22px">Contraseña</h2>
+    <form class="stack" data-form="rPass" novalidate style="gap:12px">
+      <p class="small muted" style="margin:0">Ponla o cámbiala aquí. No se la digas a nadie.</p>
+      <label class="f" for="rp-pass">Nueva contraseña<input id="rp-pass" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres"></label>
+      <label class="f" for="rp-pass2">Repítela<input id="rp-pass2" type="password" autocomplete="new-password"></label>
+      ${RV.errp?`<div class="err" role="alert">${esc(RV.errp)}</div>`:''}
+      <button class="btn block" type="submit">Guardar contraseña</button></form>`;
 }
 function rVAdmin(){
   if (!RV.est || RV.est.rol!=='admin') return '<p class="muted">Solo para el equipo.</p>';
@@ -3768,12 +3787,34 @@ function registrarAccionesReal(){
       if (sinLeer.length){ await RV.sb.from('messages').update({leido:true}).in('id', sinLeer); rCargarChats().then(rBadges); } setTimeout(()=>$('#rm-txt')?.focus(), 50); },
     rQuitarFoto: x => { const d=RV.draft.splice(+x,1)[0]; if (d) URL.revokeObjectURL(d.url); RV.draftTxt=$('#rc-txt')?.value||''; renderReal(); },
     rAdm: x => { RV.adm=x; renderReal(); },
+    rLTab: x => { RV.ltab=x; RV.err=''; renderReal(); },
     rDecidir: async (x, el) => { const est = el.dataset.o; const mot = est==='rechazado' ? $('#rmot-'+x)?.value : null; const {error} = await RV.sb.from('posts').update({estado:est, motivo:mot}).eq('id', x); if (error) return toast(rErr(error)); RV.admDatos.pend = RV.admDatos.pend.filter(p=>p.id!==x); renderReal(); toast(est==='aprobado'?'Aprobada':'Rechazada'); },
     rRepListo: async x => { await RV.sb.from('reportes').update({estado:'revisado'}).eq('id', x); RV.admDatos.rep = RV.admDatos.rep.filter(r=>r.id!==x); renderReal(); },
     rSuspender: async (x, el) => { const s = el.dataset.o==='1'; if (s && !confirmarSimple('¿Suspender esta cuenta?')) return; const {error} = await RV.sb.from('profiles').update({suspendido:s}).eq('id', x); if (error) return toast(rErr(error)); RV.admDatos=null; renderReal(); toast(s?'Cuenta suspendida':'Suspensión quitada'); },
     rSalir: async () => { rCanal(false); await RV.sb.auth.signOut(); RV.user=null; RV.me=null; RV.perfiles={}; RV.posts=[]; RV.fase='login'; RV.view='feed'; renderReal(); }
   });
   Object.assign(F, {
+    rPassLogin: async () => { const crear = RV.ltab==='crear'; const mail = ($('#rl-mail').value||'').trim().toLowerCase(), pw = $('#rl-pass').value||''; RV.mail = mail; RV.err='';
+      const fail = m => { RV.err=m; renderReal(); };
+      if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(mail)) return fail('Escribe un correo válido.');
+      if (pw.length<8) return fail('La contraseña debe tener al menos 8 caracteres.');
+      if (crear && pw !== $('#rl-pass2').value) return fail('Las contraseñas no coinciden.');
+      const btn = $('[data-form="rPassLogin"] button[type=submit]'); if (btn){ btn.disabled=true; btn.textContent='Un momento…'; }
+      const r = crear ? await RV.sb.auth.signUp({email:mail, password:pw, options:{emailRedirectTo: location.origin + location.pathname}}) : await RV.sb.auth.signInWithPassword({email:mail, password:pw});
+      if (r.error){ const m = r.error.message||'';
+        if (/invalid login/i.test(m)) return fail('Correo o contraseña incorrectos. Si tu cuenta la creaste con enlace, usa "¿Olvidaste tu contraseña?".');
+        if (/already registered|already exists/i.test(m)) { RV.ltab='entrar'; return fail('Ese correo ya tiene cuenta. Entra con tu contraseña.'); }
+        if (/not confirmed/i.test(m)) return fail('Tu correo aún no está confirmado. Revisa tu bandeja.');
+        if (/rate|seconds|security purposes/i.test(m)) return fail('Demasiados intentos. Espera un momento y vuelve a intentar.');
+        if (/weak|pwned|leaked/i.test(m)) return fail('Esa contraseña es muy fácil de adivinar. Usa otra más larga.');
+        return fail(rErr(r.error)); }
+      if (crear && !r.data.session){ RV.ltab='entrar'; return fail('Cuenta creada. Revisa tu correo para confirmarla y luego entra.'); }
+    },
+    rPass: async () => { const pw=$('#rp-pass').value||''; RV.errp='';
+      if (pw.length<8){ RV.errp='Mínimo 8 caracteres.'; return renderReal(); }
+      if (pw!==$('#rp-pass2').value){ RV.errp='Las contraseñas no coinciden.'; return renderReal(); }
+      const {error} = await RV.sb.auth.updateUser({password:pw}); if (error){ RV.errp = /weak|pwned|leaked/i.test(error.message)?'Esa contraseña es muy fácil de adivinar.':rErr(error); return renderReal(); }
+      RV.errp=''; $('#rp-pass').value=''; $('#rp-pass2').value=''; toast('Contraseña guardada'); },
     rLogin: async () => { const mail = ($('#rl-mail').value||'').trim().toLowerCase(); RV.mail = mail; RV.err='';
       if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(mail)){ RV.err='Escribe un correo válido.'; return renderReal(); }
       const {error} = await RV.sb.auth.signInWithOtp({email:mail, options:{emailRedirectTo: location.origin + location.pathname, shouldCreateUser:true}});
