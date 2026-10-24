@@ -791,6 +791,15 @@ body.vivo .todo{display:none!important}
 .sugc .sugr{min-height:16px;font-size:12px}.sugc .btn{width:100%;justify-content:center}
 .sugc .sugx{position:absolute;top:2px;right:2px;width:28px;height:28px;font-size:18px}
 .dm-list .sugbox{padding:0 16px 6px}
+.legal-ov{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center}
+@media (min-width:700px){.legal-ov{align-items:center}}
+.legal-box{background:var(--surface);color:var(--fg);width:100%;max-width:680px;max-height:92vh;border-radius:18px 18px 0 0;display:flex;flex-direction:column;overflow:hidden}
+@media (min-width:700px){.legal-box{border-radius:18px}}
+.legal-h{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}.legal-h h2{margin:0;font-size:20px}
+.legal-nav{flex:none;display:flex;gap:6px;overflow-x:auto;padding:10px 16px;border-bottom:1px solid var(--line)}.legal-nav button{flex:none;border:1px solid var(--line);background:none;color:var(--fg);border-radius:999px;padding:7px 12px;font-size:13px;line-height:1.2;white-space:nowrap;cursor:pointer}.legal-nav button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.legal-body{overflow-y:auto;padding:14px 16px 24px;line-height:1.55;font-size:15px;overscroll-behavior:contain}.legal-body h3{font-size:16px;margin:16px 0 4px}.legal-body ul,.legal-body ol{padding-left:20px;margin:6px 0}.legal-body li{margin:4px 0}
+.legal-body .chk{margin:10px 0}.lph{background:#fde68a;color:#111;border-radius:4px;padding:0 3px}
+.leglinks a{color:inherit;text-decoration:underline;cursor:pointer}
 .rltabs{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--line)}.rltabs button{flex:1;border:0;background:none;padding:9px;border-radius:9px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer}.rltabs button.on{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}.rlogin form{text-align:left}
 </style>
 </head>
@@ -1516,7 +1525,7 @@ const GROOM = {
   otraApp: ['pasame tu whats','tu whatsapp','tu numero','telegram','snapchat','snap$','tu insta','agregame en','hablemos por otro lado','por privado en','discord','pasame tu cel'],
   fotos: ['mandame una foto','mandame foto','pasame una foto','pasame foto','manda foto','foto de tu cuerpo','foto de cuerpo completo','como andas vestid','que traes puesto','en ropa interior','sin ropa','en tu cuarto','manda video','mandame video','una foto tuya'],
   regalo: ['te regalo','te doy recargas','te hago una recarga','te deposito','te compro lo que','te pago si','te doy dinero','te mando dinero'],
-  verse: ['nos vemos a solas','paso por ti','donde vives','a que hora sales','estas sola','estas solo','vienes sola','vienes solo','nadie se va a enterar']
+  verse: ['nos vemos a solas','paso por ti','donde vives','a que hora sales','estas sola','estas solo','vienes sola','vienes solo','nadie se va a enterar','nos vemos','vernos','te recojo','te veo en','videollamada','en que colonia vives','tu direccion','te invito']
 };
 const EMO = { droga:'❄🍃🍁🌿💊💉🧊🍄💨', venta:'💰💵💸🤑📦🚚🛵🔌💲', sexo:'🍆🍑💦👅🔞🥵', menor:'🍭🧸👧👦🍼🎒🏫🚸👶', arma:'🔫💣' };
 const emoCuenta = (set, grupo) => [...set].filter(e=>EMO[grupo].includes(e)).length;
@@ -1545,10 +1554,15 @@ const RE_MAIL = /[a-z0-9._%+-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}/;
 const RE_IP = /\b\d{1,3}(\.\d{1,3}){3}\b/;
 const RE_TEL = /(\+?52[\s.-]?)?(\(?\d{3}\)?[\s.-]?)\d{3}[\s.-]?\d{4}\b/;
 const RE_TEL_NUM = /(^|\D)(52)?\d{10}(\D|$)/;
+const RE_APPS = /(^|[^a-z0-9ñ])(whats\s*app|whats|whatsap+|guats?ap+|wats?ap+|was+ap+|guasap+|wsp|wpp|wasa|telegram|telegrama|snap\s*chat|snap|instagram|insta|ig|tik\s*tok|facebook|fb|messenger|discord|kik|signal|threads|onlyfans)(?![a-z0-9ñ])/;
+const RE_APPS2 = /(whatsapp|whatsap|watsap|guasap|wasap|telegram|snapchat|instagram|tiktok|facebook|discord)/;
+const RE_PIDE = /(^|[^a-z0-9ñ])(mi|tu)\s+(numero|num|telefono|tel|correo|mail|whats|contacto)(?![a-z0-9ñ])/;
+const RE_PIDE2 = /(^|[^a-z0-9ñ])(pasame|pasa|dame|manda|mandame|enviame|envia|cual es|anota|apunta)\s+(\S+\s+){0,2}(numero|num|cel|celular|telefono|tel|contacto|correo|mail|whats)(?![a-z0-9ñ])/;
+const RE_FUERA = /(^|[^a-z0-9ñ])(llamame|marcame|textea|agregame|agregue|buscame en|sigueme en|siganme en|hablemos por otro lado|por otra app|por otro lado|por fuera de aqui)(?![a-z0-9ñ])/;
 const RIESGO = ['tu codigo','el codigo','codigo de verificacion','codigo de seguridad','codigo que te llego','codigo que te mandaron','contrasena','password','clave','nip$','cvv','tarjeta','transfer','deposit','premio','ganaste','gana dinero','regalo gratis','verifica tu cuenta','inicia sesion','soporte tecnico','bloquearemos','cuenta suspendida','urgente'];
 
-const NIVEL = {menores:4, explotacion:4, grooming:4, drogas:3, armas:3, violencia:3, adulto:2, ofensivo:1, enlace:1, correo:1, 'dirección IP':1, 'teléfono':1};
-const ETIQ = {menores:'riesgo para menores', grooming:'acoso a menores (grooming)', explotacion:'explotación sexual', drogas:'drogas', armas:'armas', violencia:'violencia o extorsión', adulto:'+18', ofensivo:'ofensivo', enlace:'enlace', correo:'correo', 'dirección IP':'dirección IP', 'teléfono':'teléfono', reparto:'problema de reparto'};
+const NIVEL = {menores:4, explotacion:4, grooming:4, drogas:3, armas:3, violencia:3, adulto:2, ofensivo:1, enlace:1, correo:1, 'dirección IP':1, 'teléfono':1, contacto:1};
+const ETIQ = {menores:'riesgo para menores', grooming:'acoso a menores (grooming)', explotacion:'explotación sexual', drogas:'drogas', armas:'armas', violencia:'violencia o extorsión', adulto:'+18', ofensivo:'ofensivo', enlace:'enlace', correo:'correo', 'dirección IP':'dirección IP', 'teléfono':'teléfono', contacto:'otra app o datos de contacto', reparto:'problema de reparto'};
 const esMenor = id => { const u = !esNeg(id) && usr(id); return !!(u && ((u.edad && u.edad<18) || u.menor)); };
 
 /* ---------- análisis puro (no registra nada) ---------- */
@@ -1561,7 +1575,11 @@ function analizarTexto(t, lugar, ctx={}){
   if (RE_MAIL.test(v.base) || RE_MAIL.test(v.sinEsp)) marca('correo', {hit:'correo', oculto:!RE_MAIL.test(v.crudo)});
   if (RE_IP.test(v.base)) marca('dirección IP');
   const tel = RE_TEL.test(v.base) || RE_TEL_NUM.test(v.numerica);
-  if (tel){ const res={hit:'teléfono', oculto:!RE_TEL.test(v.crudo)}; (lugar==='publico' || res.oculto || ctx.paraMenor) ? marca('teléfono',res) : marca('teléfono',null,avisos); }
+  if (tel){ marca('teléfono', {hit:'teléfono', oculto:!RE_TEL.test(v.crudo)}); }
+  else if (RE_TEL_NUM.test(v.numerica.replace(/(\d)[^\da-z]{1,3}(?=\d)/g,'$1'))) marca('teléfono', {hit:'teléfono separado', oculto:true});
+  // otras apps o pedir datos de contacto: todo se habla dentro de la app
+  const conts = [v.base, v.sinLeet, v.palND];
+  if (conts.some(x=>RE_APPS.test(x)) || RE_APPS2.test(v.pegado) || conts.some(x=>RE_PIDE.test(x) || RE_PIDE2.test(x) || RE_FUERA.test(x))) marca('contacto', {hit:'contacto', oculto:!(RE_APPS.test(v.crudo)||RE_PIDE.test(v.crudo)||RE_PIDE2.test(v.crudo))});
   // diccionarios fijos + términos que agregó el admin
   for (const [cat, lista] of Object.entries(DIC)){ const r = busca(v, lista.concat(S.cfg.terminos.filter(x=>x.cat===cat).map(x=>x.t))); if (r) marca(cat, r); }
   // contexto
@@ -1586,7 +1604,7 @@ function analizarTexto(t, lugar, ctx={}){
   const grupos = Object.entries(GROOM).filter(([g,l]) => hay(v,l) || previos.some(pv=>hay(pv,l))).map(([g])=>g);
   if (grupos.length){
     const conMenor = ctx.paraMenor;
-    if (grupos.includes('fotos') && (conMenor || grupos.length>=2) || grupos.length>=3 || (conMenor && grupos.length>=2)) marca('grooming', {hit:grupos.join('+'), oculto:false});
+    if (conMenor || grupos.includes('fotos') && grupos.length>=2 || grupos.length>=3) marca('grooming', {hit:grupos.join('+'), oculto:false});
     else avisos.push('riesgo');
   }
   // mensajes partidos: juntar los últimos del mismo autor
@@ -1599,7 +1617,11 @@ function analizarTexto(t, lugar, ctx={}){
   const nivel = Math.max(0, ...bloqueos.map(b=>NIVEL[b]||1));
   return {bloqueos, avisos, ok:!bloqueos.length, oculto, nivel, pistas};
 }
-const msgBloqueo = r => r.mensaje || (r.nivel>=3 ? 'No se envió: este contenido no está permitido y quedó registrado para revisión.' : r.bloqueos.some(b=>['enlace','correo','teléfono','dirección IP'].includes(b)) ? 'No se envió: no se permiten enlaces ni datos de contacto.' : 'No se envió: el contenido no cumple las reglas de la comunidad.');
+const MSG_CONTACTO = 'No se envió: en MOCHI no se comparten teléfonos, correos, enlaces ni cuentas de otras apps (WhatsApp, Instagram, TikTok, etc.). Todo se platica aquí adentro.';
+const MSG_GROOM = 'No se envió. Por seguridad, entre personas adultas y menores no se puede preguntar la edad, la escuela o dónde viven, pedir fotos, guardar secretos, ofrecer regalos ni quedar de verse.';
+const msgBloqueo = r => { if (r.mensaje) return r.mensaje; const b = r.bloqueos||[]; const leves = ['contacto','grooming','teléfono','enlace','correo','dirección IP'];
+  if (b.every(x=>leves.includes(x))){ if (b.some(x=>x!=='grooming')) return MSG_CONTACTO; return MSG_GROOM; }
+  return r.nivel>=3 ? 'No se envió: este contenido no está permitido y quedó registrado para revisión.' : 'No se envió: el contenido no cumple las reglas de la comunidad.'; };
 
 /* ---------- revisar = analizar + registrar + sancionar (se usa en todo lo que escribe el usuario) ---------- */
 function previosDe(para){ if(!para) return []; const c = chatCon(para); const ahora=Date.now(); return c ? c.msgs.filter(m=>m.de===S.yo && m.texto && ahora-m.t<10*60000).slice(-5).map(m=>m.texto) : []; }
@@ -1609,14 +1631,17 @@ function revisar(t, lugar, ctx={}){
   if (yoU && yoU.suspendido) return {ok:false, bloqueos:['suspendida'], avisos:[], nivel:0, mensaje: yoU.suspHasta ? `Tu cuenta está suspendida hasta el ${new Date(yoU.suspHasta).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}. Si crees que es un error, apela en Configuración → Estado de tu cuenta.` : 'Tu cuenta está suspendida mientras una persona del equipo la revisa. Si crees que es un error, apela en Configuración → Estado de tu cuenta.'};
   if ((S.pausas[S.yo]||0) > Date.now()) { const m=Math.ceil((S.pausas[S.yo]-Date.now())/60000); return {ok:false, bloqueos:['pausa'], avisos:[], nivel:0, mensaje:`Por seguridad, no puedes publicar ni enviar mensajes durante ${m} min.`}; }
   const c = {...ctx}; if (c.para){ c.previos = previosDe(c.para); c.paraMenor = esMenor(c.para) && !esMenor(S.yo); }
+  if (c.post && !c.para){ const pp = post(c.post); const au = pp && (pp.autorU || pp.autor); if (au && !esNeg(au) && au!==S.yo) c.paraMenor = esMenor(au) && !esMenor(S.yo); }
   const r = analizarTexto(t, lugar, c);
   if (r.ok) return r;
   const intentos = (S.intentos[S.yo] = (S.intentos[S.yo]||[]).filter(x=>Date.now()-x.t<15*60000));
   intentos.push({t:Date.now(), oculto:r.oculto, nivel:r.nivel});
   const evasiones = intentos.filter(x=>x.oculto).length;
   let accion = '';
-  if (r.nivel>=4){ if (yoU){ yoU.suspendido = true; yoU.suspHasta = null; yoU.susp = {t:Date.now(), motivo:r.bloqueos, auto:true}; } accion='Cuenta suspendida hasta revisión humana'; r.mensaje = 'No se envió. Este contenido está prohibido. Tu cuenta queda suspendida hasta que una persona del equipo la revise. Si fue un error, puedes apelar en Configuración → Estado de tu cuenta.'; }
-  else if (r.nivel===3){ if (yoU){ const n = registrarAviso(yoU, r.bloqueos[0]); if (n>=S.cfg.strikesMax) { yoU.suspendido=true; yoU.suspHasta=Date.now()+864e5; yoU.susp={t:Date.now(), motivo:r.bloqueos, auto:true}; accion='Suspensión de 24 h (avisos)'; r.mensaje='No se envió. Acumulaste varios avisos: tu cuenta queda en pausa 24 horas. Puedes apelar en Configuración → Estado de tu cuenta.'; } else accion=`Aviso ${n}/${S.cfg.strikesMax}`; } }
+  // el acoso a menores (grooming) se bloquea y avisa al equipo, pero no suspende solo (puede ser un familiar); el servidor suspende si se repite
+  const nivelS = Math.max(0, ...r.bloqueos.filter(b=>b!=='grooming').map(b=>NIVEL[b]||1));
+  if (nivelS>=4){ if (yoU){ yoU.suspendido = true; yoU.suspHasta = null; yoU.susp = {t:Date.now(), motivo:r.bloqueos, auto:true}; } accion='Cuenta suspendida hasta revisión humana'; r.mensaje = 'No se envió. Este contenido está prohibido. Tu cuenta queda suspendida hasta que una persona del equipo la revise. Si fue un error, puedes apelar en Configuración → Estado de tu cuenta.'; }
+  else if (nivelS===3){ if (yoU){ const n = registrarAviso(yoU, r.bloqueos[0]); if (n>=S.cfg.strikesMax) { yoU.suspendido=true; yoU.suspHasta=Date.now()+864e5; yoU.susp={t:Date.now(), motivo:r.bloqueos, auto:true}; accion='Suspensión de 24 h (avisos)'; r.mensaje='No se envió. Acumulaste varios avisos: tu cuenta queda en pausa 24 horas. Puedes apelar en Configuración → Estado de tu cuenta.'; } else accion=`Aviso ${n}/${S.cfg.strikesMax}`; } }
   if (!accion && (evasiones>=2 || intentos.length>=4)){ S.pausas[S.yo] = Date.now() + (evasiones>=3?60:30)*60000; accion = `Pausa de ${evasiones>=3?60:30} min por intentos repetidos`; r.mensaje = 'Detectamos varios intentos de enviar contenido no permitido. Tus publicaciones y mensajes quedan en pausa un rato.'; }
   if (r.nivel>=2 || r.oculto || accion){
     S.alertas.unshift({id:'al'+Date.now().toString(36)+Math.random().toString(36).slice(2,5), t:Date.now(), quien:S.yo, para:c.para||null, lugar:ctx.donde||lugar, texto:String(t).slice(0,280), cats:r.bloqueos, nivel:r.nivel, oculto:r.oculto, intentos:intentos.length, accion, estado:'nueva'});
@@ -1708,7 +1733,7 @@ function columnaDerecha(){
       <div class="tx"><b>${nombreV(perfilDe(n.id))}</b><span>${c?'★ '+c.avg.toFixed(1)+' · ':''}${esc(TIPOS[n.tipo].uno)}${n.tiempo?' · '+esc(n.tiempo):''}</span></div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">${sigue(S.yo,n.id)?'':`<button class="lk" data-a="seguir" data-x="${n.id}">Seguir</button>`}<button class="lk" data-a="neg" data-x="${n.id}" style="color:var(--accent)">Pedir</button></div></div>`; }).join('')}
     ${amigosDeAmigos.length?`<b class="small muted" style="font-size:14px;margin-top:6px">Quizá conoces</b>${amigosDeAmigos.map(id=>{ const a=perfilDe(id); const comun=misAmigos().filter(m=>sigue(m,id)).length; return `<div class="srow"><button style="background:none;border:0;padding:0" data-a="verPerfil" data-x="${id}">${avatar(a,34)}</button><div class="tx"><b>${esc(a.handle)}</b><span>${comun} amigo(s) en común</span></div><button class="lk" data-a="seguir" data-x="${id}">Seguir</button></div>`; }).join('')}`:''}
-    <div class="foot">Información · Ayuda · Privacidad ${todoTag()} · Términos · <button class="lk mut" data-a="go" data-x="vende" style="font-size:11.5px">Vende con nosotros</button><br>© 2026 ${esc(S.cfg.marca.toUpperCase())} · ${esc(S.cfg.ciudad)}, Sinaloa</div>
+    <div class="foot">${typeof linksLegales==='function'?linksLegales():''} · <button class="lk mut" data-a="go" data-x="vende" style="font-size:11.5px">Vende con nosotros</button><br>© 2026 ${esc(S.cfg.marca.toUpperCase())} · ${esc(S.cfg.ciudad)}, Sinaloa</div>
   </aside>`;
 }
 function visibles(){ return S.posts.filter(p=>p.estado==='aprobado' && !bloq(p.autor) && (p.tipo!=='negocio'||neg(p.autor)?.estado==='activo')); }
@@ -2003,6 +2028,7 @@ function hojaMas(){
     <button class="lrow" data-a="misLikes"><span class="ictile like">${ico.heartF}</span><div class="tx"><b>Mis likes</b><div class="small muted">Publicaciones, comentarios y notas que te gustaron · solo tú las ves</div></div></button>
     <button class="lrow" data-a="verGuardados"><span class="ictile save">${ico.saveF}</span><div class="tx"><b>Guardados</b><div class="small muted">Solo tú los ves · ${S.guardados.filter(g=>g.u===S.yo).length}</div></div></button>
     <button class="lrow" data-a="go" data-x="pedidos">${ico.list}<div class="tx"><b>Mis pedidos</b></div></button>
+    <button class="lrow" data-a="legal">${ico.shield}<div class="tx"><b>Privacidad y legal</b><div class="small muted">Aviso de privacidad, términos, reglas y tus datos</div></div></button>
     <button class="lrow" data-a="cuentas">${ico.swap}<div class="tx"><b>Cambiar de cuenta</b></div></button>
     <button class="lrow" data-a="logout" style="color:var(--bad)">${ico.out}<div class="tx"><b>Cerrar sesión</b></div></button>`);
 }
@@ -3104,6 +3130,7 @@ function aAjustes(){
       <label class="f" for="a-umbral">Reportes para ocultar automáticamente<input id="a-umbral" type="number" min="1" max="20" step="1" value="${S.cfg.umbralReportes}"></label></div>
     <label class="chk"><input id="a-revneg" type="checkbox" ${S.cfg.revisarNeg?'checked':''}> Revisar también las publicaciones de negocios (con revisión automática apagada)</label>
     <div class="row"><button class="btn pri" type="submit">Guardar ajustes</button></div></form>
+  ${typeof aLegalAdmin==='function'?aLegalAdmin():''}
   <div class="card" style="max-width:640px"><h2>Datos de prueba</h2><p class="muted small" style="margin:0">Los cambios se guardan solo en este navegador.</p>
     <div class="row">${ui.delAsk==='reset'?`<span>¿Borrar todo y volver a los datos de ejemplo?</span><button class="btn danger sm" data-a="resetSi">Sí, restaurar</button><button class="btn sm" data-a="delNo">No</button>`:`<button class="btn danger" data-a="reset">Restaurar datos de ejemplo</button>`}</div></div>`;
 }
@@ -3590,7 +3617,8 @@ function rVLogin(){
     <p class="muted">La red social y tienda de ${esc(S.cfg.ciudad)}.</p>
     <div style="width:100%;max-width:380px" class="stack"><div class="seg rltabs">${tab('entrar','Entrar')}${tab('crear','Crear cuenta')}</div>${form}
     ${t!=='enlace'?`<button type="button" class="btn ghost sm" data-a="rLTab" data-x="enlace">¿Olvidaste tu contraseña? Entrar con enlace al correo</button>`:''}</div>
-    <p class="small muted" style="max-width:380px">Debes tener al menos 13 años. Nunca compartas tu contraseña con nadie, ni con el equipo. Al entrar aceptas las reglas: nada de contenido +18, ofensivo, enlaces, teléfonos ni publicidad sin permiso.</p></div>`;
+    <p class="small muted" style="max-width:380px">Debes tener al menos 13 años. Nunca compartas tu contraseña con nadie, ni con el equipo. Al entrar aceptas las reglas: nada de contenido +18, ofensivo, enlaces, teléfonos ni publicidad sin permiso.</p>
+    <p class="small" style="max-width:380px">${linksLegales()}</p></div>`;
 }
 function rVRegistro(){
   return `<div class="rcentro"><div class="card stack" style="max-width:440px;width:100%;gap:12px"><h1 style="margin:0">Crea tu perfil</h1>
@@ -3599,7 +3627,8 @@ function rVRegistro(){
       <label class="f" for="rr-nom">Nombre<input id="rr-nom" type="text" maxlength="40" autocomplete="name" placeholder="Como te conocen"></label>
       <label class="f" for="rr-usr">Usuario<input id="rr-usr" type="text" maxlength="24" autocapitalize="off" autocomplete="username" placeholder="ej. chuy.lm"><span class="h">De 3 a 24 letras minúsculas, números, punto o guion bajo.</span></label>
       <label class="f" for="rr-nac">Fecha de nacimiento<input id="rr-nac" type="date" max="${new Date().toISOString().slice(0,10)}"><span class="h">No se muestra a nadie.</span></label>
-      <label class="chk"><input id="rr-ok" type="checkbox"> <span>Acepto las reglas de la comunidad y sé que todo lo que publico pasa por revisión de seguridad.</span></label>
+      <label class="chk"><input id="rr-ok" type="checkbox"> <span>Leí y acepto el <a href="#" data-legal="privacidad">Aviso de privacidad</a>, los <a href="#" data-legal="terminos">Términos</a> y las <a href="#" data-legal="reglas">Reglas de la comunidad</a>. Sé que todo lo que publico pasa por revisión de seguridad.</span></label>
+      <label class="chk"><input id="rr-tutor" type="checkbox"> <span><b>Si tengo menos de 18 años:</b> mi mamá, papá o tutor leyó el Aviso de privacidad y me dio permiso de usar MOCHI.</span></label>
       ${RV.err?`<div class="err" role="alert">${esc(RV.err)}</div>`:''}
       <button class="btn pri block lg" type="submit">Crear mi perfil</button>
       <button class="btn block" type="button" data-a="rSalir">Usar otro correo</button></form></div></div>`;
@@ -3650,9 +3679,12 @@ function registrarAccionesReal(){
     rRegistro: async () => { const nom=$('#rr-nom').value.trim(), usr=$('#rr-usr').value.trim().toLowerCase().replace(/^@/,''), nac=$('#rr-nac').value; RV.err='';
       const fail = m => { RV.err=m; renderReal(); };
       if (nom.length<2) return fail('Escribe tu nombre.'); if (!/^[a-z0-9._]{3,24}$/.test(usr)) return fail('El usuario debe tener de 3 a 24 letras minúsculas, números, punto o guion bajo.');
-      if (!nac) return fail('Escribe tu fecha de nacimiento.'); if (!$('#rr-ok').checked) return fail('Acepta las reglas para continuar.');
+      if (!nac) return fail('Escribe tu fecha de nacimiento.'); if (!$('#rr-ok').checked) return fail('Acepta el aviso de privacidad, los términos y las reglas para continuar.');
+      const edad = (Date.now() - new Date(nac+'T12:00:00').getTime()) / (365.25*864e5); const tutor = $('#rr-tutor').checked;
+      if (edad < 18 && !tutor) return fail('Como eres menor de 18 años, necesitas el permiso de tu mamá, papá o tutor. Pídeles que lean el Aviso de privacidad y marca la casilla.');
       const e = rTextoOk(nom,'publico'); if (e) return fail(e);
       const pr = await RV.sb.from('privado').insert({id:RV.user.id, nacimiento:nac}); if (pr.error && !/duplicate/i.test(pr.error.message)) return fail(rErr(pr.error));
+      await RV.sb.rpc('aceptar_legal', {p_version:LEGAL_VERSION, p_tutor:edad < 18 && tutor});
       const colores = ['#7C3AED','#0369A1','#B45309','#DB2777','#15803D','#C2410C','#0E7490','#4338CA','#BE123C'];
       const {error} = await RV.sb.from('profiles').insert({id:RV.user.id, usuario:usr, nombre:nom, color:colores[Math.floor(Math.random()*colores.length)]}); if (error) return fail(rErr(error));
       RV.me=null; const {data} = await RV.sb.auth.getSession(); await rSesion(data.session); toast('¡Bienvenido! Busca a tus amigos para seguirlos'); }
@@ -3864,7 +3896,7 @@ function registrarAccionesV17(){
     },
     comentario: () => {
       if (necesitaSesion()) return; const inp = (ui.sheet && $('#layer #c-txt')) || $('#c-txt'); const t=(inp?.value||'').trim(); if(!t) return; const pid = (ui.sheet && ui.sheet.post) || ui.post;
-      const r=revisar(t,'publico',{donde:'comentario'}); if (!r.ok){ ui.err=msgBloqueo(r); ui.sheet?renderLayer():rerender(); return; }
+      const r=revisar(t,'publico',{donde:'comentario', post:pid}); if (!r.ok){ ui.err=msgBloqueo(r); ui.sheet?renderLayer():rerender(); return; }
       const c = {id:nuevoId('k'), post:pid, autor:S.yo, texto:t, t:Date.now()};
       if (ui.respCom && ui.respCom.post===pid && comPorId(ui.respCom.id)){ c.resp = ui.respCom.id; const pa = comPorId(c.resp); if (pa.autor!==S.yo) notif(pa.autor,'comentario',S.yo,{post:pid,texto:'te respondió: '+t}); }
       ui.respCom = null; S.comentarios.push(c); notif(post(pid).autor,'comentario',S.yo,{post:pid,texto:t}); ui.err=''; save();
@@ -4056,6 +4088,305 @@ function barraRespIn(pid){
 }
 
 /* ============================================================
+   v19 — Escudo de fotos: antes de subir cualquier foto (publicación,
+   historia, perfil, producto) se revisa en el teléfono:
+   1) desnudos / poca ropa (modelo NSFW, nsfwjs)
+   2) texto dentro de la foto (OCR): teléfonos, enlaces, correos, otras apps
+   ============================================================ */
+const ESC_FOTO = {modelo:null, ocr:null, cargando:null};
+const EF_NSFW = 'https://cdn.jsdelivr.net/npm/nsfwjs@4.4.0/dist/';
+const EF_TESS = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/';
+function efScript(src){ return new Promise((ok, mal) => {
+  if (document.querySelector(`script[data-ef="${src}"]`)) return ok();
+  const s = document.createElement('script'); s.src = src; s.async = true; s.dataset.ef = src; s.onload = ok; s.onerror = () => { s.remove(); mal(new Error('red')); }; document.head.appendChild(s); }); }
+function prepararEscudoFoto(){
+  if (ESC_FOTO.modelo && ESC_FOTO.ocr) return Promise.resolve();
+  if (ESC_FOTO.cargando) return ESC_FOTO.cargando;
+  ESC_FOTO.cargando = (async () => {
+    if (!ESC_FOTO.modelo){
+      await efScript(EF_NSFW + 'browser/nsfwjs.min.js');
+      await efScript(EF_NSFW + 'models/mobilenet_v2/model.min.js');
+      await efScript(EF_NSFW + 'models/mobilenet_v2/group1-shard1of1.min.js');
+      ESC_FOTO.modelo = await nsfwjs.load('MobileNetV2');
+    }
+    if (!ESC_FOTO.ocr){
+      await efScript(EF_TESS + 'tesseract.min.js');
+      ESC_FOTO.ocr = await Tesseract.createWorker('spa', 1, {workerPath: EF_TESS + 'worker.min.js', corePath:'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.1',
+        langPath:'https://cdn.jsdelivr.net/npm/@tesseract.js-data/spa@1.0.0/4.0.0_best_int', logger: () => {}});
+    }
+  })();
+  ESC_FOTO.cargando.catch(() => {}).finally(() => { ESC_FOTO.cargando = null; });
+  return ESC_FOTO.cargando;
+}
+const efError = msg => { const e = new Error(msg); e.escudo = true; return e; };
+const efImg = src => new Promise((ok, mal) => { const i = new Image(); i.onload = () => ok(i); i.onerror = mal; i.src = src; });
+function efAlerta(cats, nivel, detalle){
+  try { S.alertas.unshift({id:'al'+Date.now().toString(36)+Math.random().toString(36).slice(2,5), t:Date.now(), quien:S.yo, para:null, lugar:'foto', texto:'Foto bloqueada antes de subir: '+detalle, cats, nivel, oculto:false, intentos:1, accion:'Foto no subida', estado:'nueva'}); save(); } catch(e){}
+}
+// palabras de OCR que solo cuentan si son claras (evita que basura del OCR bloquee fotos normales)
+const EF_APPS = /(whats\s*app|whatsap|wasap|watsap|guasap|telegram|instagram|tiktok|snapchat|facebook|onlyfans|discord|gmail|hotmail|outlook)/;
+async function revisarFoto(dataUrl){
+  if (!dataUrl || typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image')) return;
+  if (!ESC_FOTO.modelo || !ESC_FOTO.ocr) toast('Revisando la foto…');
+  try { await prepararEscudoFoto(); }
+  catch(e){ if (VIVO) throw efError('No pudimos revisar la foto (revisa tu internet). Por seguridad, las fotos no se suben sin revisarse. Intenta de nuevo.'); return; }
+  const img = await efImg(dataUrl);
+  // 1) desnudos o poca ropa
+  const pr = {}; (await ESC_FOTO.modelo.classify(img)).forEach(x => pr[x.className] = x.probability);
+  const sexual = (pr.Porn||0) + (pr.Hentai||0) + (pr.Sexy||0);
+  if ((pr.Porn||0) > 0.35 || (pr.Hentai||0) > 0.4 || (pr.Sexy||0) > 0.6 || sexual > 0.6){
+    efAlerta(['adulto'], 2, `posible desnudo o poca ropa (${Math.round(sexual*100)}%)`);
+    throw efError('Esta foto no se puede subir: parece mostrar desnudos o poca ropa. En MOCHI hay menores de edad y eso no está permitido.');
+  }
+  // 2) texto dentro de la foto
+  let texto = '';
+  try { const r = await ESC_FOTO.ocr.recognize(img); texto = (r.data.words||[]).filter(w => w.confidence >= 60).map(w => w.text).join(' '); } catch(e){ texto = ''; }
+  if (texto.replace(/\s/g,'').length >= 4){
+    const v = vistas(texto); const malos = [];
+    if (RE_LINK.test(v.base) || RE_LINK.test(v.sinEsp)) malos.push('enlace');
+    if (RE_MAIL.test(v.base) || RE_MAIL.test(v.sinEsp)) malos.push('correo');
+    if (RE_TEL.test(v.base) || RE_TEL_NUM.test(v.numerica.replace(/(\d)[^\da-z]{1,3}(?=\d)/g,'$1'))) malos.push('teléfono');
+    if (EF_APPS.test(v.base) || EF_APPS.test(v.pegado)) malos.push('contacto');
+    const an = analizarTexto(texto, 'publico', {}); an.bloqueos.filter(b => ['adulto','menores','drogas','armas','explotacion'].includes(b)).forEach(b => malos.push(b));
+    if (malos.length){
+      efAlerta(malos, Math.max(...malos.map(b => NIVEL[b]||1)), 'texto en la foto: ' + texto.slice(0,120));
+      throw efError(malos.some(b => ['enlace','correo','teléfono','contacto'].includes(b))
+        ? 'Esta foto tiene escrito un teléfono, correo, enlace o cuenta de otra app. En MOCHI todo se platica aquí adentro, así que no se puede subir.'
+        : 'Esta foto tiene texto que no cumple las reglas de la comunidad, así que no se puede subir.');
+    }
+  }
+}
+// empezar a descargar el revisor en cuanto tocan "elegir foto", para que esté listo
+document.addEventListener('pointerdown', e => { const t = e.target.closest && e.target.closest('input[type=file], label'); if (!t) return;
+  const inp = t.matches('input[type=file]') ? t : t.querySelector('input[type=file]') || (t.htmlFor && document.getElementById(t.htmlFor));
+  if (inp && inp.type === 'file' && !inp.dataset.doc) prepararEscudoFoto().catch(() => {}); }, true);
+
+/* ============================================================
+   Textos legales de MOCHI (México). Versión 2026-10-24.
+   Los datos del responsable se capturan en Admin → Ajustes → Datos legales.
+   Nota: es un borrador cuidadoso; conviene que un abogado lo revise antes del lanzamiento público.
+   ============================================================ */
+const LEGAL_VERSION = '2026-10-24';
+let LEGAL_DATOS = null; // {responsable, domicilio, correo}
+function legalDatos(){
+  const d = Object.assign({}, (S && S.cfg && S.cfg.legal) || {}, LEGAL_DATOS || {});
+  const f = (v, ph) => v && String(v).trim() ? esc(v) : `<mark class="lph">${ph}</mark>`;
+  return { R: f(d.responsable, '[Nombre completo de la persona responsable — mamá, papá o tutor]'), D: f(d.domicilio, '[Domicilio completo del responsable]'), C: f(d.correo, '[Correo de contacto para privacidad]') };
+}
+const LEGAL_DOCS = {
+  privacidad: { t:'Aviso de privacidad', d: () => { const {R,D,C} = legalDatos(); return `
+<p class="small muted">Última actualización: 24 de octubre de 2026 · Versión ${LEGAL_VERSION}</p>
+<h3>1. ¿Quién es responsable de tus datos?</h3>
+<p>${R}, con domicilio en ${D}, es responsable del uso y protección de tus datos personales en <b>MOCHI</b> (la app web de red social y tienda local de Los Mochis, Sinaloa). Puedes escribirnos a ${C}.</p>
+<h3>2. ¿Qué datos usamos?</h3>
+<ul>
+<li><b>Cuenta:</b> correo electrónico y contraseña (la contraseña se guarda cifrada; nadie del equipo puede verla).</li>
+<li><b>Perfil:</b> nombre, @usuario, foto de perfil, descripción y color.</li>
+<li><b>Fecha de nacimiento:</b> es privada; solo sirve para saber si eres menor de edad y protegerte.</li>
+<li><b>Lo que publicas y haces:</b> publicaciones, historias, notas, comentarios, mensajes, me gusta, guardados, a quién sigues, reportes y apelaciones.</li>
+<li><b>Tienda:</b> si tienes un negocio (solo mayores de 18): nombre, descripción, dirección, horario y productos. Si haces un pedido: el nombre para recogerlo y tus notas.</li>
+<li><b>Datos técnicos:</b> registros del servidor (como fecha, hora y dirección IP de conexión) que sirven para la seguridad y para evitar abusos.</li>
+</ul>
+<p><b>No pedimos ni guardamos</b> datos sensibles (salud, religión, origen, preferencias, etc.), datos bancarios ni tu ubicación. Antes de subir una foto, la app le quita los datos ocultos (como la ubicación GPS).</p>
+<h3>3. ¿Para qué los usamos?</h3>
+<p><b>Finalidades necesarias</b> (sin ellas no puedes usar MOCHI): crear y proteger tu cuenta; mostrar tu perfil y lo que publicas; enviar mensajes entre amigos; procesar pedidos de la tienda; revisar el contenido de forma automática y por personas para proteger a todos, en especial a los menores de edad; atender reportes, apelaciones y solicitudes; cumplir la ley.</p>
+<p><b>Finalidades opcionales:</b> por ahora <b>ninguna</b>. No vendemos tus datos, no los usamos para publicidad personalizada y no los compartimos con anunciantes.</p>
+<h3>4. Revisión automática de seguridad</h3>
+<p>Para proteger a la comunidad, los textos (mensajes, comentarios, publicaciones, notas, perfil y negocio) pasan por filtros automáticos que bloquean teléfonos, enlaces, correos, cuentas de otras apps, contenido sexual, drogas, armas y frases de acoso a menores. Las fotos se revisan en tu propio teléfono antes de subirse (desnudos y texto dentro de la imagen). Si algo se bloquea, queda un registro para que una persona del equipo lo revise, y siempre puedes <b>apelar</b> desde Configuración.</p>
+<h3>5. ¿Con quién compartimos tus datos?</h3>
+<p>Solo con proveedores que nos ayudan a que la app funcione y que actúan por nuestra cuenta: <b>Supabase</b> (base de datos, cuentas y archivos; servidores en Estados Unidos), <b>GitHub Pages</b> (donde se publica la página) y <b>jsDelivr</b> (entrega de programas de la página). La app también carga fotos de ejemplo de <b>Unsplash</b> y el clima de <b>Open-Meteo</b>, sin enviarles tus datos de cuenta. Lo que publicas lo ven las personas según las reglas de la app (por ejemplo, los mensajes solo los ven tú y tu amigo). Podremos entregar información a autoridades cuando la ley lo exija, sobre todo si hay riesgo para un menor.</p>
+<h3>6. Menores de edad</h3>
+<p>MOCHI es para personas de <b>13 años o más</b>. Si tienes entre 13 y 17 años, necesitas que tu mamá, papá o tutor lea este aviso y te dé permiso; por eso te lo pedimos al crear tu cuenta. Tu mamá, papá o tutor puede pedirnos en cualquier momento ver, corregir o borrar tus datos, o cerrar tu cuenta.</p>
+<h3>7. ¿Cuánto tiempo guardamos tus datos?</h3>
+<p>Mientras tengas tu cuenta. Si la borras, eliminamos tu información en un plazo razonable, salvo lo que debamos conservar por seguridad o por ley (por ejemplo, registros de alertas graves).</p>
+<h3>8. Tus derechos (ARCO) y cómo ejercerlos</h3>
+<p>Puedes <b>Acceder</b> a tus datos, <b>Rectificarlos</b>, <b>Cancelarlos</b> (borrarlos) u <b>Oponerte</b> a su uso, y también revocar tu consentimiento. Hazlo desde <b>Más → Privacidad y legal → Mis datos</b> (ahí puedes descargar una copia de tus datos o enviar tu solicitud) o escribiendo a ${C}. Indica tu @usuario y qué necesitas. Te respondemos en un máximo de <b>20 días</b> y, si procede, lo aplicamos dentro de los <b>15 días</b> siguientes. Es gratis. Si no estás conforme con la respuesta, puedes acudir a la autoridad de protección de datos personales (Secretaría Anticorrupción y Buen Gobierno).</p>
+<h3>9. Cómo limitar el uso de tus datos</h3>
+<p>Puedes ocultar quién te sigue y a quién sigues, desactivar que te etiqueten, bloquear cuentas y borrar tus publicaciones, comentarios y mensajes. Todo desde Configuración.</p>
+<h3>10. Almacenamiento en tu navegador</h3>
+<p>MOCHI guarda en tu navegador (almacenamiento local) tu sesión, el tema claro u oscuro, tu carrito y borradores, para que la app funcione. No usamos cookies de publicidad ni de rastreo.</p>
+<h3>11. Cambios a este aviso</h3>
+<p>Si cambiamos este aviso, te lo mostraremos dentro de la app y te pediremos aceptarlo de nuevo. La versión vigente siempre está en Más → Privacidad y legal.</p>` } },
+
+  terminos: { t:'Términos y condiciones', d: () => { const {R,C} = legalDatos(); return `
+<p class="small muted">Última actualización: 24 de octubre de 2026 · Versión ${LEGAL_VERSION}</p>
+<h3>1. Qué es MOCHI</h3>
+<p>MOCHI es una red social y tienda local para Los Mochis, Sinaloa, operada por ${R}. Al crear una cuenta o usar la app aceptas estos términos, el Aviso de privacidad y las Reglas de la comunidad.</p>
+<h3>2. Quién puede usarla</h3>
+<ul><li>Debes tener <b>13 años o más</b>. De 13 a 17 años necesitas el permiso de tu mamá, papá o tutor.</li>
+<li>Para tener un <b>negocio</b> en la tienda debes ser <b>mayor de 18 años</b>.</li>
+<li>Una persona, una cuenta personal. Los datos que des deben ser verdaderos (sobre todo tu fecha de nacimiento).</li></ul>
+<h3>3. Tu cuenta</h3>
+<p>Cuida tu contraseña: nadie del equipo te la pedirá nunca. Eres responsable de lo que se haga con tu cuenta. Avísanos si crees que alguien entró sin permiso.</p>
+<h3>4. Tu contenido</h3>
+<p>Lo que publicas sigue siendo tuyo. Nos das permiso de mostrarlo dentro de MOCHI según tus ajustes, solo para que la app funcione. Solo sube lo que es tuyo o tienes permiso de usar. Puedes borrarlo cuando quieras.</p>
+<h3>5. Seguridad y moderación</h3>
+<p>Todo lo que se escribe o sube pasa por revisión automática y puede ser revisado por personas. Podemos bloquear, ocultar o borrar contenido, poner avisos, pausar o suspender cuentas que rompan las reglas. Si crees que nos equivocamos, puedes <b>apelar</b> desde Configuración y una persona lo revisará. En casos graves, sobre todo contra menores, avisaremos a las autoridades.</p>
+<h3>6. La tienda</h3>
+<ul><li>Por ahora la tienda está en <b>modo prueba</b>: no hay pagos dentro de la app. Los pedidos se recogen y se pagan directamente en el negocio.</li>
+<li>Cada negocio es responsable de lo que vende, sus precios, la calidad, sus permisos y de cumplir la ley (incluida la de protección al consumidor). MOCHI solo es el medio para mostrar el catálogo y avisar del pedido.</li>
+<li>Prohibido vender alcohol a menores, tabaco o vapeadores, medicamentos controlados, armas, drogas, animales en riesgo, productos piratas o robados, y cualquier cosa ilegal.</li>
+<li>Los negocios se revisan antes de aparecer y pueden ser pausados si reciben reportes.</li></ul>
+<h3>7. Lo que no está permitido</h3>
+<p>Ver las Reglas de la comunidad. En resumen: nada de contenido sexual, acoso, odio, violencia, drogas, armas, estafas, spam, compartir teléfonos, correos, enlaces o cuentas de otras apps, ni intentar burlar los filtros.</p>
+<h3>8. Responsabilidad</h3>
+<p>Hacemos nuestro mejor esfuerzo para que MOCHI sea segura y funcione bien, pero puede tener fallas o pausas. No somos responsables de los tratos entre usuarios y negocios fuera de lo que la app hace, ni de lo que publiquen otras personas, aunque lo moderamos.</p>
+<h3>9. Cerrar tu cuenta</h3>
+<p>Puedes pedir que borremos tu cuenta en cualquier momento desde Más → Privacidad y legal → Mis datos. También podemos cerrar cuentas que rompan gravemente las reglas.</p>
+<h3>10. Cambios y ley aplicable</h3>
+<p>Si cambiamos estos términos te avisaremos en la app. Se rigen por las leyes de México. Contacto: ${C}.</p>` } },
+
+  reglas: { t:'Reglas de la comunidad', d: () => `
+<p>MOCHI es para convivir, apoyar a los negocios de Los Mochis y pasarla bien. Aquí hay menores de edad, así que las reglas son estrictas:</p>
+<ol>
+<li><b>Nada de datos de contacto ni enlaces.</b> No compartas teléfonos, correos, direcciones personales, enlaces ni cuentas de otras apps (WhatsApp, Instagram, TikTok, Snapchat, Telegram…). Todo se platica dentro de MOCHI. Los filtros los bloquean aunque los escribas con letras, separados o en varios mensajes.</li>
+<li><b>Cero contenido sexual</b> ni desnudos, ni pedir fotos a nadie.</li>
+<li><b>Protegemos a los menores.</b> Entre personas adultas y menores no se puede preguntar la edad o la escuela, pedir fotos, pedir que guarden secretos, ofrecer regalos o dinero, ni quedar de verse. Si alguien te incomoda, <b>bloquéalo y repórtalo</b> con el megáfono rojo. No es tu culpa y nadie sabrá que fuiste tú.</li>
+<li><b>Respeto.</b> Nada de insultos, burlas, acoso, amenazas, odio o discriminación.</li>
+<li><b>Nada ilegal:</b> drogas, armas, alcohol o tabaco a menores, estafas, piratería.</li>
+<li><b>No te hagas pasar por otra persona,</b> negocio, medio o autoridad.</li>
+<li><b>Sin spam</b> ni publicidad sin permiso (los negocios anuncian desde su perfil de negocio).</li>
+<li><b>No intentes burlar los filtros.</b> Hacerlo varias veces pausa tu cuenta.</li>
+</ol>
+<h3>Qué pasa si rompes las reglas</h3>
+<p>El contenido se bloquea y recibes un aviso. Los avisos caducan a los 90 días. Con 3 avisos tu cuenta se pausa 24 horas, con 4 una semana y con 5 o más un mes. Lo más grave (por ejemplo, explotación de menores) suspende la cuenta de inmediato y se avisa a las autoridades. Siempre puedes apelar.</p>` },
+
+  menores: { t:'Seguridad para menores y familias', d: () => { const {C} = legalDatos(); return `
+<p>Si tienes entre 13 y 17 años, MOCHI te protege de forma especial:</p>
+<ul>
+<li>Tu fecha de nacimiento nunca se muestra.</li>
+<li>Solo puedes mandar mensajes a tus <b>amigos</b> (personas que se siguen mutuamente).</li>
+<li>No se pueden mandar fotos, audios, enlaces ni teléfonos por mensaje.</li>
+<li>Las cuentas automáticas (bots) nunca interactúan con tus publicaciones.</li>
+<li>Las sugerencias de "Personas que quizás conoces" solo muestran personas de tu mismo grupo de edad.</li>
+<li>Si una persona adulta te escribe algo como pedirte fotos, tu dirección, tu escuela, que guardes un secreto o que se vean, el mensaje se bloquea y el equipo recibe una alerta.</li>
+<li>No puedes tener un negocio en la tienda hasta los 18 años.</li>
+</ul>
+<h3>Para mamás, papás y tutores</h3>
+<p>Al crear la cuenta, el menor confirma que ustedes leyeron el Aviso de privacidad y le dieron permiso. Pueden pedirnos en cualquier momento ver, corregir o borrar sus datos, o cerrar la cuenta, escribiendo a ${C}. Platiquen con sus hijos: si algo los incomoda en internet, que lo bloqueen, lo reporten y se lo cuenten a ustedes.</p>` } },
+
+  negocios: { t:'Reglas para negocios', d: () => `
+<ul>
+<li>Solo personas <b>mayores de 18 años</b> pueden registrar un negocio, y cada cuenta puede tener uno.</li>
+<li>El negocio debe ser real y estar en Los Mochis o sus alrededores. El equipo lo revisa antes de publicarlo.</li>
+<li>Tus primeros productos los revisa una persona. Fotos y textos pasan por los mismos filtros que todo lo demás: sin teléfonos, enlaces ni cuentas de otras apps (tus clientes te contactan con los pedidos de MOCHI).</li>
+<li>Eres responsable de tus precios, existencias, calidad, permisos y de cumplir la ley de protección al consumidor.</li>
+<li>Productos prohibidos: alcohol para menores, tabaco y vapeadores, medicamentos controlados, armas, drogas, animales en riesgo, piratería, productos robados o cualquier cosa ilegal.</li>
+<li>Por ahora no hay pagos dentro de la app: el cliente recoge y paga en tu negocio.</li>
+</ul>` }
+};
+function abrirLegal(doc){
+  const d = LEGAL_DOCS[doc]; if (!d) return;
+  let ov = document.getElementById('legal-ov'); if (ov) ov.remove();
+  ov = document.createElement('div'); ov.id = 'legal-ov'; ov.className = 'legal-ov';
+  ov.innerHTML = `<div class="legal-box" role="dialog" aria-modal="true" aria-label="${esc(d.t)}"><div class="legal-h"><h2>${esc(d.t)}</h2><button type="button" class="x" data-legal-cerrar aria-label="Cerrar">×</button></div>
+    <div class="legal-nav">${Object.entries(LEGAL_DOCS).map(([k,v])=>`<button type="button" class="${k===doc?'on':''}" data-legal="${k}">${esc(v.t)}</button>`).join('')}</div>
+    <div class="legal-body">${d.d()}</div></div>`;
+  document.body.appendChild(ov);
+  if (!LEGAL_DATOS && typeof RV!=='undefined' && RV.sb) RV.sb.rpc('datos_legales').then(r => { if (r.data && Object.keys(r.data).length){ LEGAL_DATOS = r.data; if (document.getElementById('legal-ov')) abrirLegal(doc); } }).catch(()=>{});
+}
+document.addEventListener('click', e => {
+  const l = e.target.closest('[data-legal]'); if (l){ e.preventDefault(); e.stopPropagation(); return abrirLegal(l.dataset.legal); }
+  if (e.target.closest('[data-legal-cerrar]') || e.target.id === 'legal-ov'){ document.getElementById('legal-ov')?.remove(); }
+}, true);
+const linksLegales = () => `<span class="leglinks"><a href="#" data-legal="privacidad">Aviso de privacidad</a> · <a href="#" data-legal="terminos">Términos</a> · <a href="#" data-legal="reglas">Reglas</a> · <a href="#" data-legal="menores">Menores</a></span>`;
+
+/* ---------- Más → Privacidad y legal (incluye Mis datos / derechos ARCO) ---------- */
+const TIPOS_SOL = {acceso:'Ver qué datos tienen de mí', rectificacion:'Corregir un dato', cancelacion:'Borrar ciertos datos', oposicion:'Que dejen de usar un dato', eliminar_cuenta:'Borrar mi cuenta', revocar_tutor:'(Mamá, papá o tutor) Retirar el permiso'};
+function hojaLegal(){
+  const sols = (S.solicitudes||[]).filter(s=>s.u===S.personal).sort((a,b)=>b.t-a.t);
+  return hoja('Privacidad y legal', `
+    <div class="stack" style="gap:6px">${Object.entries(LEGAL_DOCS).map(([k,v])=>`<button class="lrow" type="button" data-legal="${k}">${ico.list}<div class="tx"><b>${esc(v.t)}</b></div></button>`).join('')}</div>
+    <h3 style="margin:10px 0 0">Mis datos</h3>
+    <p class="small muted" style="margin:0">Tienes derecho a ver, corregir, borrar u oponerte al uso de tus datos (derechos ARCO). Te respondemos en máximo 20 días.</p>
+    <button class="btn" type="button" data-a="descargarDatos">Descargar una copia de mis datos</button>
+    <label class="f" for="sol-tipo">¿Qué necesitas?<select id="sol-tipo">${Object.entries(TIPOS_SOL).map(([k,v])=>`<option value="${k}">${esc(v)}</option>`).join('')}</select></label>
+    <label class="f" for="sol-det">Cuéntanos más (opcional)<textarea id="sol-det" maxlength="1000" placeholder="Por ejemplo: qué dato quieres corregir"></textarea></label>
+    ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}
+    <button class="btn pri" type="submit">Enviar solicitud</button>
+    ${sols.length?`<div class="stack" style="gap:6px">${sols.map(s=>`<div class="note small"><b>${esc(TIPOS_SOL[s.tipo]||s.tipo)}</b> · ${hace(s.t)} · <span class="pill ${s.estado==='atendida'?'ok':s.estado==='rechazada'?'bad':''}">${esc(s.estado)}</span>${s.resp?`<br>${esc(s.resp)}`:''}</div>`).join('')}</div>`:''}`, 'solicitud');
+}
+function descargarMisDatos(){
+  const me = S.personal, u = usr(me) || {};
+  const datos = { app:'MOCHI', generado:new Date().toISOString(), aviso_privacidad:LEGAL_VERSION,
+    perfil:{nombre:u.nombre, usuario:u.usuario, bio:u.bio, creado:u.creado?new Date(u.creado).toISOString():null},
+    publicaciones:S.posts.filter(p=>p.autorU===me||p.autor===me).map(p=>({texto:p.texto, fotos:(p.fotos||[]).length, estado:p.estado, fecha:new Date(p.t).toISOString()})),
+    comentarios:S.comentarios.filter(c=>c.autor===me).map(c=>({texto:c.texto, eliminado:!!c.eliminado, fecha:new Date(c.t).toISOString()})),
+    mensajes:S.chats.flatMap(c=>c.msgs.filter(m=>m.de===me).map(m=>({para:(perfilDe(c.p.find(x=>x!==me))||{}).handle, texto:m.texto, fecha:new Date(m.t).toISOString()}))),
+    notas:S.notas.filter(n=>n.autor===me).map(n=>({texto:n.texto, fecha:new Date(n.t).toISOString()})),
+    sigues:S.sigue.filter(x=>x.de===me).map(x=>(perfilDe(x.a)||{}).handle), te_siguen:S.sigue.filter(x=>x.a===me).map(x=>(perfilDe(x.de)||{}).handle),
+    me_gusta:Object.keys(S.likes).filter(k=>S.likes[k]&&k.startsWith(me+'|')).length,
+    pedidos:S.pedidos.filter(p=>p.cuenta===me).map(p=>({folio:p.id, estado:p.estado, total:p.total/100, fecha:new Date(p.creado).toISOString()})) };
+  const blob = new Blob([JSON.stringify(datos, null, 2)], {type:'application/json'}); const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'mis-datos-mochi.json'; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  toast('Descargamos tus datos en un archivo');
+}
+
+/* ---------- aceptar aviso y términos (cuentas nuevas y cuando cambian) ---------- */
+function modalLegal(menor){
+  if (document.getElementById('legal-acepta')) return;
+  const ov = document.createElement('div'); ov.id = 'legal-acepta'; ov.className = 'legal-ov';
+  ov.innerHTML = `<div class="legal-box" role="dialog" aria-modal="true" aria-label="Aviso de privacidad"><div class="legal-h"><h2>Antes de seguir</h2></div><div class="legal-body">
+    <p>Publicamos el <b>Aviso de privacidad</b>, los <b>Términos</b> y las <b>Reglas de la comunidad</b> de MOCHI. Léelos y acéptalos para seguir usando la app.</p>
+    <p>${linksLegales()}</p>
+    <label class="chk"><input id="lg-ok" type="checkbox"> <span>Leí y acepto el Aviso de privacidad, los Términos y las Reglas de la comunidad.</span></label>
+    ${menor?`<label class="chk"><input id="lg-tutor" type="checkbox"> <span>Tengo menos de 18 años y mi mamá, papá o tutor leyó el Aviso de privacidad y me dio permiso de usar MOCHI.</span></label>`:''}
+    <div class="err" id="lg-err" role="alert" hidden></div>
+    <button class="btn pri block lg" type="button" id="lg-acepto">Aceptar y continuar</button></div></div>`;
+  document.body.appendChild(ov);
+  ov.querySelector('#lg-acepto').onclick = async () => {
+    const err = m => { const e = ov.querySelector('#lg-err'); e.textContent = m; e.hidden = false; };
+    if (!ov.querySelector('#lg-ok').checked) return err('Marca la casilla para aceptar.');
+    if (menor && !ov.querySelector('#lg-tutor').checked) return err('Necesitas el permiso de tu mamá, papá o tutor para usar MOCHI.');
+    const {error} = await RV.sb.rpc('aceptar_legal', {p_version:LEGAL_VERSION, p_tutor:!!menor});
+    if (error) return err(rErr(error)); ov.remove(); toast('¡Gracias!');
+  };
+}
+async function revisarLegal(){
+  if (!VIVO || typeof RV==='undefined' || !RV.sb || !RV.user) return;
+  try { const {data} = await RV.sb.rpc('mi_legal'); if (!data) return;
+    if (data.version !== LEGAL_VERSION || (data.menor && !data.tutor)) modalLegal(!!data.menor); } catch(e){}
+}
+
+/* ---------- admin: datos del responsable y solicitudes ---------- */
+function aLegalAdmin(){
+  const L = S.cfg.legal || {}; const sols = (S.solicitudes||[]).slice().sort((a,b)=>(a.estado==='pendiente'?0:1)-(b.estado==='pendiente'?0:1) || b.t-a.t);
+  return `<form class="card" data-form="legalAdmin" novalidate style="max-width:640px"><h2>Datos legales</h2>
+    <p class="small muted" style="margin:0">Aparecen en el Aviso de privacidad y los Términos. Deben ser de una persona adulta (mamá, papá o tutor) que será la responsable de la app.</p>
+    <label class="f" for="lg-resp">Nombre completo del responsable<input id="lg-resp" type="text" maxlength="120" value="${esc(L.responsable||'')}"></label>
+    <label class="f" for="lg-dom">Domicilio completo<input id="lg-dom" type="text" maxlength="200" value="${esc(L.domicilio||'')}"></label>
+    <label class="f" for="lg-mail">Correo para temas de privacidad<input id="lg-mail" type="email" maxlength="120" value="${esc(L.correo||'')}"></label>
+    <div class="row"><button class="btn pri" type="submit">Guardar datos legales</button><button class="btn" type="button" data-legal="privacidad">Ver aviso</button></div></form>
+  <div class="card" style="max-width:640px"><h2>Solicitudes de datos (ARCO) <span class="muted">${sols.filter(s=>s.estado==='pendiente').length}</span></h2>
+    <p class="small muted" style="margin:0">Hay que responder en máximo 20 días.</p>
+    ${sols.map(s=>{ const a = perfilDe(s.u)||{}; const dias = Math.floor((Date.now()-s.t)/864e5); return `<div class="note small"><b>@${esc(a.handle||'')}</b> · ${esc(TIPOS_SOL[s.tipo]||s.tipo)} · hace ${dias} día(s) · <span class="pill ${s.estado==='pendiente'?(dias>=15?'bad':''):'ok'}">${esc(s.estado)}</span>
+      ${s.detalle?`<div>${esc(s.detalle)}</div>`:''}${s.resp?`<div class="muted">Respuesta: ${esc(s.resp)}</div>`:''}
+      ${s.estado==='pendiente'?`<div class="row" style="margin-top:6px"><input id="solr-${s.id}" type="text" maxlength="300" placeholder="Respuesta para la persona"><button class="btn sm pri" type="button" data-a="solResp" data-x="${s.id}" data-o="atendida">Atendida</button><button class="btn sm" type="button" data-a="solResp" data-x="${s.id}" data-o="rechazada">Rechazar</button></div>`:''}</div>`; }).join('') || '<p class="small muted">Sin solicitudes.</p>'}</div>`;
+}
+function registrarAccionesLegal(){
+  window.HOJAS_EXTRA = Object.assign(window.HOJAS_EXTRA||{}, {legal:hojaLegal});
+  Object.assign(A, {
+    legal: () => { ui.err=''; ui.sheet = {t:'legal'}; renderLayer(); },
+    descargarDatos: () => descargarMisDatos(),
+    solResp: async (x, el) => { const s = (S.solicitudes||[]).find(o=>o.id===x); if (!s) return; const est = el && el.dataset.o || 'atendida'; const resp = ($('#solr-'+x)?.value||'').trim() || (est==='atendida'?'Listo, atendimos tu solicitud.':'No pudimos atender tu solicitud.');
+      if (VIVO){ const {error} = await RV.sb.from('solicitudes').update({estado:est, resp}).eq('id', s.sid); if (error) return toast(rErr(error)); }
+      s.estado = est; s.resp = resp; save(); rerender(); toast('Solicitud actualizada'); }
+  });
+  Object.assign(F, {
+    solicitud: async () => { const tipo = $('#sol-tipo').value, det = ($('#sol-det').value||'').trim();
+      if (tipo==='eliminar_cuenta' && !confirmarSimple('¿Seguro que quieres pedir que borremos tu cuenta? Se borrarán tus publicaciones, mensajes y datos.')) return;
+      const s = {id:'so'+Date.now().toString(36), u:S.personal, tipo, detalle:det, estado:'pendiente', t:Date.now()};
+      if (VIVO){ const {data, error} = await RV.sb.from('solicitudes').insert({tipo, detalle:det}).select('id').single(); if (error){ ui.err = rErr(error); return renderLayer(); } s.sid = data.id; s.id = 'so'+data.id; }
+      S.solicitudes = (S.solicitudes||[]).concat(s); ui.err=''; save(); renderLayer(); toast('Solicitud enviada. Te responderemos en máximo 20 días.'); },
+    legalAdmin: async () => { const L = {responsable:$('#lg-resp').value.trim(), domicilio:$('#lg-dom').value.trim(), correo:$('#lg-mail').value.trim()};
+      if (L.correo && !/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(L.correo)) return toast('Revisa el correo.');
+      S.cfg.legal = L; LEGAL_DATOS = L;
+      if (VIVO){ const {error} = await RV.sb.from('ajustes').update({legal:L}).eq('id',1); if (error) return toast(rErr(error)); }
+      save(); rerender(); toast('Datos legales guardados'); }
+  });
+}
+
+/* ============================================================
    EN VIVO — la demo completa conectada al servidor (Supabase)
    Las pantallas son exactamente las de la demo. Aquí:
    1) se cargan los datos reales y se arma el mismo "S" que usa la demo,
@@ -4109,6 +4440,7 @@ async function vCargar(){
       clc: sb.rpc('likes_comentarios2'),
       nlikes: sb.from('nota_likes').select('cuenta,nota_t,usuario').eq('activo', true).limit(3000),
       sug: sb.rpc('sugeridos', {lim:40}),
+      sols: sb.from('solicitudes').select('*').order('created_at',{ascending:false}).limit(300),
       notifs: sb.from('notifs').select('*').order('created_at',{ascending:false}).limit(200),
       res: sb.from('resenas').select('*').limit(5000),
       peds: sb.from('pedidos').select(PEDCOLS).order('created_at',{ascending:false}).limit(400),
@@ -4185,6 +4517,7 @@ function vArmar(D, E, admin, conteos, promCli){
     if (l.usuario===uid) likesNota[k] = true; if (misNotaTs.has(k) && l.usuario!==uid) (notaLikers[k] = notaLikers[k]||[]).push('u'+l.usuario); });
   const likesCom = {}; (D.clikes||[]).forEach(l=>likesCom['k'+l.comentario] = true);
   const nLikesCom = {}; (D.clc||[]).forEach(l=>nLikesCom['k'+l.comentario] = l.n);
+  const solicitudes = (D.sols||[]).map(s=>({id:'so'+s.id, sid:s.id, u:'u'+s.usuario, tipo:s.tipo, detalle:s.detalle||'', estado:s.estado, resp:s.resp||'', t:vMs(s.created_at)}));
   const sugeridos = (D.sug||[]).map(s=>({id:'u'+s.id, comunes:s.comunes, te:s.te_sigue, razon:s.razon}));
   // seguir, bloqueos, guardados, compartidos
   const sigue = D.fol.map(f=>({de:'u'+f.de, a:'u'+f.a})).concat(D.sneg.map(f=>({de:'u'+f.de, a:negDe(f.negocio)})));
@@ -4229,10 +4562,10 @@ function vArmar(D, E, admin, conteos, promCli){
   const S2 = {
     ts:Date.now(), vivo:true, esAdmin:admin,
     cfg:{marca:aj.marca||'MOCHI', ciudad:aj.ciudad||'Los Mochis', comisionBps:0, planCents:0, autoMod:aj.auto_mod!==false, revisarNeg:!!aj.revisar_neg, strikesMax:aj.strikes_max||3, umbralReportes:aj.umbral_reportes||3,
-      terminos:Array.isArray(aj.terminos)?aj.terminos:[], protegidos:(Array.isArray(aj.protegidos)&&aj.protegidos.length)?aj.protegidos:PROTEGIDOS_BASE.slice(), reparto:SDEMO.cfg.reparto},
+      terminos:Array.isArray(aj.terminos)?aj.terminos:[], legal:(aj.legal && typeof aj.legal==='object')?aj.legal:{}, protegidos:(Array.isArray(aj.protegidos)&&aj.protegidos.length)?aj.protegidos:PROTEGIDOS_BASE.slice(), reparto:SDEMO.cfg.reparto},
     negocios, productos, usuarios, yo:(yoAntes===me || misNegIds.includes(yoAntes)) ? yoAntes : me, personal:me, misNegocios:misNegIds, sesion:'correo',
     sigue, bloqueos, posts, comentarios, likes, historias, vistas, likesHist, notas, chats:Object.values(chats), notifs, resenas, reportes, decisiones, pedidos, carrito,
-    likesNota, notaLikers, likesCom, nLikesCom, sugeridos,
+    likesNota, notaLikers, likesCom, nLikesCom, sugeridos, solicitudes,
     bitacora, seq:0, intentos:prev?prev.intentos:{}, pausas:prev?prev.pausas:{}, alertas, guardados, reposts, verifs, apelaciones, calif,
     repartidores:[], yoRep:null, repOnline:false, extrasSeed:true, v12:true, dias:0
   };
@@ -4509,7 +4842,7 @@ async function vEntrar(){
   if (!VQ.listo){
     $('#app').innerHTML = `<div class="rwrapv"><div class="protobar rprotobar"><b>En vivo</b><span>Cargando tu cuenta…</span></div><div class="rcentro"><div class="rspin"></div><p class="muted">Conectando…</p></div></div>`;
     try { await vCargar(); } catch(e){ console.error(e); RV.fase='sinred'; return renderReal(); }
-    VQ.listo = true; vCanal(true);
+    VQ.listo = true; vCanal(true); setTimeout(()=>{ if (typeof revisarLegal==='function') revisarLegal(); }, 800);
     clearInterval(VQ.intervalo); VQ.intervalo = setInterval(()=>{ if (VIVO && document.visibilityState==='visible' && Date.now()-VQ.ultimaCarga>240000) vRecargar(); }, 30000);
   }
   if (ui.mode!=='real' && ui.mode!=='app' && ui.mode!=='admin') return; // está viendo la demo
@@ -4901,11 +5234,13 @@ function agregar(sel){
   ui.sel=null; ui.origen=null; save(); render(); toast(`${p.nombre} agregado al carrito`);
 }
 function guardarBorrador(){ const t=$('#pub-txt'); if(t) ui.draftTxt=t.value; }
-function redimensionar(file, max, cuadrado){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>{ const img=new Image(); img.onload=()=>{ const c=document.createElement('canvas'); let sx=0,sy=0,sw=img.width,sh=img.height;
+function redimensionarBase(file, max, cuadrado){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>{ const img=new Image(); img.onload=()=>{ const c=document.createElement('canvas'); let sx=0,sy=0,sw=img.width,sh=img.height;
   if (cuadrado){ const k=Math.min(sw,sh); sx=(sw-k)/2; sy=(sh-k)/2; sw=sh=k; c.width=c.height=max; } else { const e=Math.min(1,max/Math.max(sw,sh)); c.width=Math.round(sw*e); c.height=Math.round(sh*e); }
   c.getContext('2d').drawImage(img,sx,sy,sw,sh,0,0,c.width,c.height); res(c.toDataURL('image/jpeg',.82)); }; img.onerror=()=>rej(new Error('img')); img.src=r.result; }; r.onerror=rej; r.readAsDataURL(file); }); }
 // Al redibujar la foto en un canvas se eliminan los metadatos (EXIF), incluida la ubicación GPS.
-async function leerFotos(input, limite){ const files=[...(input.files||[])].filter(f=>f.type.startsWith('image/')).slice(0,limite); const out=[]; for (const f of files){ if (f.size>25*1024*1024) continue; out.push({m:await redimensionar(f,1080,false)}); } return out; }
+// Después pasa por el escudo de fotos (desnudos y texto con teléfonos/enlaces/otras apps).
+async function redimensionar(file, max, cuadrado){ const d = await redimensionarBase(file, max, cuadrado); if (typeof revisarFoto==='function') await revisarFoto(d); return d; }
+async function leerFotos(input, limite){ leerFotos.err=''; const files=[...(input.files||[])].filter(f=>f.type.startsWith('image/')).slice(0,limite); const out=[]; for (const f of files){ if (f.size>25*1024*1024) continue; try { out.push({m:await redimensionar(f,1080,false)}); } catch(e){ if (e && e.escudo){ leerFotos.err=e.message; continue; } throw e; } } try { input.value=''; } catch(e){} return out; }
 async function guardarFoto(d){ if(!d.m) return d; const id='f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); if(!IDB.db) await IDB.open(); await IDB.put(id,d.m); MEDIA[id]=d.m; return {m:id}; }
 
 /* ---------- formularios ---------- */
@@ -4988,7 +5323,7 @@ const F = {
     if (S.usuarios.some(x=>x.id!==u.id && x.usuario.toLowerCase()===us.toLowerCase())) return fail('Ese usuario ya existe.');
     const ns = nombreSeguro(nom,us); if (ns) return fail(ns);
     const r=revisar(nom+' '+us+' '+bio,'publico'); if(!r.ok) return fail(msgBloqueo(r));
-    const f=$('#u-foto').files[0]; if (f){ try { u.foto = await redimensionar(f,200,true); } catch(e){ return fail('No se pudo leer la imagen.'); } }
+    const f=$('#u-foto').files[0]; if (f){ try { u.foto = await redimensionar(f,200,true); } catch(e){ return fail(e&&e.escudo?e.message:'No se pudo leer la imagen.'); } }
     const perdio = u.verif && (u.nombre!==nom || u.usuario!==us); if (perdio) u.verif = null;
     Object.assign(u,{nombre:nom, usuario:us, bio}); ui.err=''; save(); rerender(); toast(perdio?'Perfil guardado. Como cambiaste tu nombre, la insignia de verificación se quitó hasta revisarte de nuevo.':'Perfil guardado');
   },
@@ -5047,9 +5382,9 @@ document.addEventListener('change', async e => {
   if (t.id==='solo-disp'){ ui.soloDisp=t.checked; rerender(); }
   if (t.dataset && t.dataset.ch && A[t.dataset.ch]) A[t.dataset.ch](t.value);
   if (t.name==='modo' || t.id==='f-col' || t.id==='f-oferta') actualizarTotales();
-  if (t.id==='pub-files'){ guardarBorrador(); try { const nuevas = await leerFotos(t, 10-ui.draft.length); ui.draft.push(...nuevas.slice(0,10-ui.draft.length)); ui.err=''; } catch(err){ ui.err='No se pudo leer una de las fotos.'; } renderLayer(); }
-  if (t.id==='e-fotos'){ try { const nuevas = await leerFotos(t, 4-(ui.draftPF||[]).length); ui.draftPF = (ui.draftPF||[]).concat(nuevas).slice(0,4); } catch(err){ ui.err='No se pudieron leer las fotos.'; } renderConservando(); }
-  if (t.id==='hist-file' && t.files[0]){ try { ui.draftH={m:await redimensionar(t.files[0],1080,false)}; ui.err=''; } catch(err){ ui.err='No se pudo leer la foto.'; } renderLayer(); }
+  if (t.id==='pub-files'){ guardarBorrador(); try { const nuevas = await leerFotos(t, 10-ui.draft.length); ui.draft.push(...nuevas.slice(0,10-ui.draft.length)); ui.err=leerFotos.err||''; } catch(err){ ui.err='No se pudo leer una de las fotos.'; } renderLayer(); }
+  if (t.id==='e-fotos'){ try { const nuevas = await leerFotos(t, 4-(ui.draftPF||[]).length); ui.draftPF = (ui.draftPF||[]).concat(nuevas).slice(0,4); ui.err=leerFotos.err||''; if (ui.err) toast(ui.err); } catch(err){ ui.err='No se pudieron leer las fotos.'; } renderConservando(); }
+  if (t.id==='hist-file' && t.files[0]){ try { ui.draftH={m:await redimensionar(t.files[0],1080,false)}; ui.err=''; } catch(err){ ui.err=err&&err.escudo?err.message:'No se pudo leer la foto.'; try { t.value=''; } catch(e){} } renderLayer(); }
 });
 document.addEventListener('scroll', e => {
   const tr = e.target; if (!(tr instanceof Element) || !tr.dataset || !tr.dataset.car) return;
@@ -5071,7 +5406,7 @@ Object.assign(A, {
   termAdd: () => { const t=$('#term-t').value.trim().toLowerCase(), c=$('#term-c').value; if(t.length<3) return toast('Escribe al menos 3 letras'); S.cfg.terminos.push({t:limpiarTexto(t), cat:c}); CACHE_RE.clear(); log('Admin','Agregó término al Escudo',c); save(); rerender(); },
   termDel: x => { S.cfg.terminos.splice(+x,1); save(); rerender(); }
 });
-registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal(); registrarAccionesV17(); registrarAccionesV18(); registrarAccionesVivo();
+registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal(); registrarAccionesV17(); registrarAccionesV18(); registrarAccionesLegal(); registrarAccionesVivo();
 aplicarPref();
 const EN_VIVO_OK = /github\.io$/.test(location.host) || /[?&]vivo=1/.test(location.search);
 try { if (EN_VIVO_OK && (localStorage.getItem('lm-modo')||'real')==='real') ui.mode='real'; } catch(e){ if (EN_VIVO_OK) ui.mode='real'; }
