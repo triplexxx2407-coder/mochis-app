@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>Marketplace Los Mochis</title>
+<title>MOCHI</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700;800&display=swap">
@@ -1077,7 +1077,7 @@ function seed(){
 
   return {
     ts:now,
-    cfg:{marca:'Tu Marca', ciudad:'Los Mochis', comisionBps:200, planCents:15000, autoMod:false, revisarNeg:false, strikesMax:3, umbralReportes:3, terminos:[]},
+    cfg:{marca:'MOCHI', ciudad:'Los Mochis', comisionBps:200, planCents:15000, autoMod:false, revisarNeg:false, strikesMax:3, umbralReportes:3, terminos:[]},
     negocios, productos, usuarios,
     yo:'u1', personal:'u1', misNegocios:['b1'], sesion:'correo',
     sigue, bloqueos:[{de:'u1',a:'u51'}],
@@ -1098,6 +1098,7 @@ function seed(){
 var VIVO = false; // true cuando se usa la app en vivo (datos del servidor)
 let S;
 try { const raw = localStorage.getItem(KEY); S = raw ? JSON.parse(raw) : seed(); } catch(e){ S = seed(); }
+if (S && S.cfg && (!S.cfg.marca || S.cfg.marca==='Tu Marca')) S.cfg.marca = 'MOCHI';
 (function rejuvenecer(){
   // Los datos de ejemplo se "mueven" en el tiempo para que la demo no caduque (historias, notas).
   const d = Date.now() - (S.ts||Date.now()); if (d < 60000) return;
@@ -3762,7 +3763,7 @@ function vArmar(D, E, admin, conteos, promCli){
   const misNegIds = misNeg.map(n=>n.id);
   const S2 = {
     ts:Date.now(), vivo:true, esAdmin:admin,
-    cfg:{marca:aj.marca||'Tu Marca', ciudad:aj.ciudad||'Los Mochis', comisionBps:0, planCents:0, autoMod:aj.auto_mod!==false, revisarNeg:!!aj.revisar_neg, strikesMax:aj.strikes_max||3, umbralReportes:aj.umbral_reportes||3,
+    cfg:{marca:aj.marca||'MOCHI', ciudad:aj.ciudad||'Los Mochis', comisionBps:0, planCents:0, autoMod:aj.auto_mod!==false, revisarNeg:!!aj.revisar_neg, strikesMax:aj.strikes_max||3, umbralReportes:aj.umbral_reportes||3,
       terminos:Array.isArray(aj.terminos)?aj.terminos:[], protegidos:(Array.isArray(aj.protegidos)&&aj.protegidos.length)?aj.protegidos:PROTEGIDOS_BASE.slice(), reparto:SDEMO.cfg.reparto},
     negocios, productos, usuarios, yo:(yoAntes===me || misNegIds.includes(yoAntes)) ? yoAntes : me, personal:me, misNegocios:misNegIds, sesion:'correo',
     sigue, bloqueos, posts, comentarios, likes, historias, vistas, likesHist, notas, chats:Object.values(chats), notifs, resenas, reportes, decisiones, pedidos, carrito,
@@ -4525,7 +4526,7 @@ const F = {
     if(!n.entrega&&!n.recoger) n.recoger=true; log(n.nombre,'Perfil y envíos actualizados',''); ui.err=''; save(); render(); toast('Perfil guardado');
   },
   ajustes: () => {
-    S.cfg.marca=$('#a-marca').value.trim()||'Tu Marca'; S.cfg.ciudad=$('#a-ciudad').value.trim()||'Los Mochis';
+    S.cfg.marca=$('#a-marca').value.trim()||'MOCHI'; S.cfg.ciudad=$('#a-ciudad').value.trim()||'Los Mochis';
     S.cfg.comisionBps=Math.round((+$('#a-com').value||0)*100); S.cfg.planCents=Math.round((+$('#a-plan').value||0)*100);
     S.cfg.strikesMax=Math.max(1,Math.round(+$('#a-strikes').value||3)); S.cfg.umbralReportes=Math.max(1,Math.round(+$('#a-umbral').value||3)); S.cfg.revisarNeg=$('#a-revneg').checked;
     log('Admin','Ajustes','Actualizados'); save(); render(); toast('Ajustes guardados');
