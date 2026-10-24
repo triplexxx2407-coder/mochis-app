@@ -573,6 +573,186 @@ mark{background:color-mix(in srgb,var(--accent) 35%,transparent);color:inherit;b
 .home-side .lk[data-a="neg"]{background:var(--c-pedir);color:#fff!important;padding:4px 12px;border-radius:999px;font-size:12.5px}
 .btn.pri[data-a="abrirChat"],.btn[data-a="abrirChat"]{background:color-mix(in srgb,var(--c-msg) 16%,var(--surface));color:var(--c-msg);border-color:transparent}
 .buy{background:color-mix(in srgb,var(--c-pedir) 14%,var(--surface))!important;border-color:color-mix(in srgb,var(--c-pedir) 40%,transparent)!important}
+/* ================= v12 ================= */
+:root{--c-crear1:#8B5CF6;--c-crear2:#EC4899;--c-conv:#2563EB;--c-compra:#F97316;--c-confirm:#16A34A;--c-seguir:#0EA5E9;--c-prep:#D97706;--c-listo:#0D9488;--c-envio:#4F46E5;--c-star:#F59E0B}
+/* botones de volver y cerrar: grandes y fáciles de ver */
+.btn.back{align-self:flex-start;gap:4px;padding:8px 16px 8px 10px;border-radius:999px;background:var(--surface);border:1.5px solid var(--line);color:var(--fg);font-size:15px;font-weight:800;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.btn.back svg{width:20px;height:20px;stroke-width:2.6;color:var(--brand)}
+.btn.back:hover{border-color:var(--brand);transform:translateX(-2px)}
+.x{width:40px;height:40px;font-size:24px;font-weight:700;border:1.5px solid var(--line);background:var(--surface-2);color:var(--fg);display:grid;place-items:center;transition:transform .25s cubic-bezier(.34,1.56,.64,1),background .2s,color .2s}
+.x:hover{background:var(--bad-soft);color:var(--bad);border-color:transparent;transform:rotate(90deg)}
+.chat-h .ibtn[data-a="cerrarChat"]{background:var(--surface-2);font-size:22px;font-weight:800;width:42px;height:42px;border-radius:50%;flex:none}
+.sheet>.row.nowrap:first-child{position:sticky;top:-20px;z-index:4;background:var(--surface);margin:-20px -20px 0;padding:16px 20px 10px;border-bottom:1px solid transparent}
+@media (max-width:699px){.sheet{max-height:92dvh}.sheet::before{content:'';display:block;width:42px;height:5px;border-radius:9px;background:var(--line);margin:-10px auto -6px;flex:none}.sheet.comsheet::before{display:none}}
+/* colores por función */
+.btn.pri[data-a="publicar"],form[data-form="publicar"] button[type="submit"],form[data-form="historia"] button[type="submit"],form[data-form="nota"] button[type="submit"],.compose .btn.pri{background:linear-gradient(135deg,var(--c-crear1),var(--c-crear2));border-color:transparent;color:#fff}
+form[data-form="comentario"] button[type="submit"],form[data-form="respHist"] button[type="submit"],form[data-form="msg"] button[type="submit"],form[data-form="apelar"] button[type="submit"]{background:var(--c-conv);border-color:var(--c-conv);color:#fff}
+.btn.pri[data-a="add"],.btn.pri[data-a="neg"],.btn.pri[data-a="pedirPost"]{background:linear-gradient(135deg,#FB923C,#EA580C);border-color:transparent;color:#fff}
+form[data-form="checkout"] button[type="submit"],.btn.pri[data-a="aprobar"],.btn.pri[data-a="repAprobar"],.btn.pri[data-a="repAceptar"],.btn.pri[data-a="aceptarOferta"],.btn.pri[data-a="codigoTienda"],.btn.pri[data-a="repEntregar"],.btn.ok{background:var(--c-confirm);border-color:var(--c-confirm);color:#fff}
+.btn.pri[data-a="seguir"],.btn[data-a="seguir"].pri{background:var(--c-seguir);border-color:var(--c-seguir);color:#fff}
+.btn.pri[data-a="st"][data-o="aceptado"]{background:var(--c-confirm);border-color:var(--c-confirm)}
+.btn.pri[data-a="st"][data-o="preparando"]{background:var(--c-prep);border-color:var(--c-prep);color:#fff}
+.btn.pri[data-a="st"][data-o="listo"]{background:var(--c-listo);border-color:var(--c-listo);color:#fff}
+.btn.pri[data-a="st"][data-o="en_camino"],.btn.pri[data-a="repPaso"][data-o="en_tienda"]{background:var(--c-envio);border-color:var(--c-envio);color:#fff}
+.btn.pri[data-a="st"][data-o="entregado"]{background:var(--c-confirm);border-color:var(--c-confirm);color:#fff}
+.btn.pri[data-a="repPaso"][data-o="en_camino"]{background:linear-gradient(135deg,#FB923C,#EA580C);border-color:transparent;color:#fff}
+.btn.pri[data-a="repPaso"][data-o="llego"]{background:var(--c-listo);border-color:var(--c-listo);color:#fff}
+form[data-form="resena"] button[type="submit"]{background:var(--c-star);border-color:var(--c-star);color:#1F1300}
+.btn.pri[data-a="adelantar"]{background:var(--c-envio);border-color:var(--c-envio);color:#fff}
+.btn.danger{background:var(--bad-soft);border-color:transparent}
+.btn.danger:hover{background:var(--bad);color:#fff}
+.btn.pri[data-a="track"]{background:var(--c-envio);border-color:var(--c-envio);color:#fff}
+.btn.pri[data-a="go"][data-x="checkout"],.btn.pri[data-a="go"][data-x="inicio"]{background:linear-gradient(135deg,#FB923C,#EA580C);border-color:transparent;color:#fff}
+.btn.pri[data-a="go"][data-x="verificar"],form[data-form="verif"] button[type="submit"]{background:linear-gradient(135deg,#6366F1,#0EA5E9);border-color:transparent;color:#fff}
+.segs button.on{color:var(--fg)}
+.cartfloat{background:linear-gradient(135deg,#FB923C,#EA580C)!important;color:#fff!important}
+/* microanimaciones */
+@media (prefers-reduced-motion:no-preference){
+ button,.btn{transition:transform .2s cubic-bezier(.34,1.56,.64,1),background-color .2s,color .2s,box-shadow .2s,border-color .2s,filter .2s}
+ .tap{animation:tapq .36s cubic-bezier(.34,1.56,.64,1)}
+ @keyframes tapq{0%{transform:scale(1)}30%{transform:scale(.9)}65%{transform:scale(1.04)}100%{transform:scale(1)}}
+ .btn:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.08)}
+ .post-a .b-like.on svg,.post-a .b-save.on svg{animation:pop .45s cubic-bezier(.34,1.56,.64,1)}
+ @keyframes pop{0%{transform:scale(.5)}55%{transform:scale(1.35)}100%{transform:scale(1)}}
+ .post-a button svg{transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+ .post-a button:hover svg{transform:scale(1.15)}
+ .bcard2,.prow,.lrow,.vtipo,.ptrack,.rcard{transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s,border-color .2s}
+ .bcard2:hover,.vtipo:hover,.ptrack:hover,.rcard:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,.10)}
+ .lrow:hover{transform:translateX(3px)}
+ .sheet{animation:sheetUp .34s cubic-bezier(.22,1.2,.36,1)}
+ @keyframes sheetUp{from{transform:translateY(60px);opacity:.3}}
+ .ov{animation:fd .2s ease-out}
+ .nv svg,.mnav button svg{transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+ .nv:hover svg{transform:scale(1.15) rotate(-4deg)}
+ .nv.on svg,.mnav button.on svg{animation:pop .4s cubic-bezier(.34,1.56,.64,1)}
+ .rstars button:not(:disabled):hover,.stars button:hover{transform:scale(1.25) rotate(-10deg)}
+ .segs button.on,.ptabs2 button.on,.ptabs button.on{animation:pop2 .3s cubic-bezier(.34,1.56,.64,1)}
+ @keyframes pop2{0%{transform:scale(.92)}100%{transform:scale(1)}}
+ .switch::after{transition:transform .28s cubic-bezier(.34,1.56,.64,1)!important}
+ .cbanner{animation:pulso 2.4s ease-in-out infinite}
+ @keyframes pulso{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--bad) 18%,transparent)}}
+}
+/* me gusta: se puede tocar */
+.likes-n{background:none;border:0;padding:0;font:inherit;font-weight:800;color:var(--fg);cursor:pointer}
+.likes-n:hover{text-decoration:underline}
+/* comentarios: hoja grande */
+.sheet.comsheet{padding:0;gap:0;height:min(64dvh,680px);max-height:none;overflow:hidden}
+@media (min-width:700px){.sheet.comsheet{height:min(78vh,720px)}}
+@media (max-width:699px){.ov:has(.comsheet){align-items:flex-end}.sheet.comsheet{border-radius:24px 24px 0 0;height:64dvh;max-width:none}}
+.comh{position:relative;display:flex;align-items:center;gap:10px;padding:16px 16px 12px;border-bottom:1px solid var(--line);flex:none}
+.comh h2{font-size:18px;margin:0 auto 0 0}.comh h2 .muted{font-weight:600}
+.comh .grab{position:absolute;top:6px;left:50%;width:42px;height:5px;margin-left:-21px;border-radius:9px;background:var(--line)}
+.comlist{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:16px;overscroll-behavior:contain}
+.comlist .cm .tx{min-width:0;overflow-wrap:anywhere;line-height:1.45}
+.comlist .cm.cap{padding-bottom:12px;border-bottom:1px solid var(--line)}
+.cav{background:none;border:0;padding:0}
+.comvacio{margin:auto;text-align:center;display:flex;flex-direction:column;gap:4px;padding:30px 0}
+.comform{display:flex;align-items:center;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--surface);flex:none}
+.comform input{flex:1;min-width:0;border-radius:999px;padding:12px 16px;font-size:16px}
+.comform .btn{border-radius:999px}
+/* verificación */
+.verif.medio{background:#7C3AED}.verif.gobierno{background:#64748B}.verif.figura{background:#0EA5E9}.verif.org{background:#16A34A}
+.vlabel{display:inline-flex;align-items:center;gap:5px;align-self:flex-start;font-size:12.5px;font-weight:800;border-radius:999px;padding:3px 10px;margin-top:4px;background:color-mix(in srgb,var(--verif) 14%,transparent);color:var(--verif)}
+.vlabel.medio{background:color-mix(in srgb,#7C3AED 15%,transparent);color:#8B5CF6}.vlabel.gobierno{background:color-mix(in srgb,#64748B 18%,transparent);color:var(--fg)}.vlabel.figura{background:color-mix(in srgb,#0EA5E9 15%,transparent);color:#0EA5E9}.vlabel.org{background:color-mix(in srgb,#16A34A 15%,transparent);color:#16A34A}
+.pill.medio{background:color-mix(in srgb,#7C3AED 15%,transparent);color:#8B5CF6}.pill.gobierno{background:color-mix(in srgb,#64748B 18%,transparent);color:var(--fg)}.pill.figura{background:color-mix(in srgb,#0EA5E9 15%,transparent);color:#0EA5E9}.pill.org{background:color-mix(in srgb,#16A34A 15%,transparent);color:#16A34A}
+.vtipos{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:8px}
+.vtipo{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:16px;padding:14px;color:var(--fg)}
+.vtipo .verif{width:22px;height:22px;font-size:13px;margin:0 0 4px}
+.vtipo small{color:var(--muted);font-size:12.5px;line-height:1.4}
+.vtipo.on{border-color:var(--brand);background:var(--brand-soft);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 22%,transparent)}
+.vdoc{display:flex;align-items:center;gap:12px;border:1.5px dashed var(--line);border-radius:14px;padding:12px;cursor:pointer}
+.vdoc>span:first-child{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);font-weight:900;font-size:18px;flex:none}
+.vdoc.ok{border-style:solid;border-color:var(--ok)}.vdoc.ok>span:first-child{background:var(--ok);color:#fff}
+.vdoc .tx{display:flex;flex-direction:column;min-width:0}.vdoc small{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chk{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.45}.chk input{margin-top:3px;flex:none;width:20px;height:20px}
+.vsteps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:14px}.vsteps li.done{color:var(--ok)}.vsteps li.now{font-weight:800}
+.vgrid{display:grid;grid-template-columns:140px 1fr;gap:6px 12px;font-size:13.5px}.vgrid span{color:var(--muted)}.vgrid b{font-weight:600;min-width:0;overflow-wrap:anywhere}
+@media (max-width:520px){.vgrid{grid-template-columns:1fr}.vgrid b{margin-bottom:6px}}
+.vsen{display:flex;flex-wrap:wrap;gap:6px}.vsen .pill{white-space:normal}
+.vchecks{display:flex;flex-direction:column;gap:8px}
+.vchk{display:flex;gap:10px;align-items:flex-start;text-align:left;background:var(--surface-2);border:1.5px solid transparent;border-radius:12px;padding:10px;color:var(--fg)}
+.vchk .bx{width:22px;height:22px;border-radius:6px;border:2px solid var(--muted);display:grid;place-items:center;font-weight:900;flex:none;font-size:13px}
+.vchk.on{border-color:var(--ok)}.vchk.on .bx{background:var(--ok);border-color:var(--ok);color:#fff}
+.vchk .tx{display:flex;flex-direction:column;gap:2px}.vchk small{color:var(--muted);font-size:12.5px;line-height:1.35}
+/* estado de cuenta y apelaciones */
+.cestado{display:flex;flex-direction:column;gap:6px;align-items:flex-start;border-radius:14px;padding:12px 14px;background:var(--ok-soft)}
+.cestado b{color:var(--ok)}.cestado.warn{background:var(--warn-soft)}.cestado.warn b{color:var(--warn)}.cestado.bad{background:var(--bad-soft)}.cestado.bad b{color:var(--bad)}
+.avs{width:30px;height:30px;border-radius:50%;background:var(--warn-soft);color:var(--warn);display:grid;place-items:center;font-weight:900;flex:none}
+.rthumb{width:46px;height:46px;border-radius:10px;overflow:hidden;flex:none;position:relative;display:block}.rthumb.lg{width:80px;height:80px}
+.rthumb svg,.rthumb img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.quote{border-left:3px solid var(--brand);padding:6px 12px;background:var(--surface-2);border-radius:0 10px 10px 0;font-size:14px;white-space:pre-line}
+.cbanner{display:flex;align-items:center;gap:12px;text-align:left;border:0;border-radius:16px;padding:12px 14px;background:var(--bad-soft);color:var(--fg);width:100%}
+.cbanner.warn{background:var(--warn-soft)}.cbanner svg{flex:none;color:var(--bad)}.cbanner.warn svg{color:var(--warn)}
+.cbanner span{display:flex;flex-direction:column;gap:2px;min-width:0}.cbanner small{color:var(--muted);font-size:12.5px}
+.note.warn{background:var(--warn-soft)}
+/* calificaciones */
+.rcalif{gap:12px}.rcalif h2{margin:0}
+.rateb{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;justify-content:space-between}
+.rateb .tx{display:flex;flex-direction:column;min-width:0;flex:1 1 180px}.rateb .tx small{color:var(--muted);font-size:12.5px}
+.rstars{display:flex;gap:2px}
+.rstars button{background:none;border:0;font-size:30px;line-height:1;color:var(--line);padding:2px;cursor:pointer}
+.rstars button.on{color:var(--c-star)}
+.rstars:not(:has(:disabled)):hover button{color:var(--c-star)}
+.rstars:not(:has(:disabled)) button:hover~button{color:var(--line)}
+.rstars button:disabled{cursor:default}
+.pill.star{background:color-mix(in srgb,var(--c-star) 18%,transparent);color:#B45309;border:0}
+:root[data-theme="dark"] .pill.star{color:#FBBF24}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pill.star{color:#FBBF24}}
+button.pill.star{cursor:pointer;position:static}
+.st-off{color:var(--line)}
+/* zoom */
+.avz,.cvz{background:none;border:0;padding:0;cursor:zoom-in;border-radius:50%;display:block}
+.cvz{border-radius:0;width:100%;height:100%;position:absolute;inset:0}
+.cvz>*{width:100%;height:100%}
+.bhead .cv .avz{position:absolute}
+.car[data-dbl]{cursor:zoom-in}
+#zoom{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.95);display:flex;animation:fd .18s;color:#fff;user-select:none;-webkit-user-select:none}
+.zv{position:relative;flex:1;display:flex;flex-direction:column;min-width:0}
+.zbar{position:absolute;top:0;left:0;right:0;z-index:3;display:flex;align-items:center;gap:12px;padding:max(12px,env(safe-area-inset-top,0px)) 14px 14px;background:linear-gradient(rgba(0,0,0,.65),transparent)}
+.zn{font-weight:800;font-size:15px;min-width:40px}.zhint{font-size:12.5px;opacity:.75;flex:1}
+.zx{width:48px;height:48px;border-radius:50%;border:0;background:rgba(255,255,255,.2);color:#fff;font-size:22px;font-weight:800;flex:none}
+.zx:hover{background:rgba(255,255,255,.32)}
+#zstage{flex:1;display:grid;place-items:center;overflow:hidden;touch-action:none;cursor:zoom-in}
+#zoom.zoomed #zstage{cursor:grab}
+#zimg{width:100%;height:100%;display:grid;place-items:center;will-change:transform}
+.zbox{position:relative;width:min(100vw,calc(100dvh - 150px));aspect-ratio:1/1;max-height:calc(100dvh - 150px)}
+.zbox>*{position:absolute;inset:0;width:100%;height:100%}
+.zbox>img{object-fit:contain}
+.zbox.ok>:not(img){display:none}
+.zbox.ok{aspect-ratio:auto;height:calc(100dvh - 150px);width:100vw}
+.zbox.zav{border-radius:50%;overflow:hidden;background:var(--c);display:grid;place-items:center;width:min(86vw,70dvh);height:auto;aspect-ratio:1/1}
+.zbox.zav>span{position:static;display:grid;place-items:center;font-size:min(30vw,25dvh);font-weight:800;color:#fff;inset:auto}
+.zbox.zav>img{object-fit:cover}
+.zarr{position:absolute;top:50%;transform:translateY(-50%);width:52px;height:52px;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;font-size:30px;font-weight:700;z-index:3}
+.zarr.l{left:14px}.zarr.r{right:14px}
+@media (hover:none){.zarr{display:none}}
+.zfoot{position:absolute;bottom:0;left:0;right:0;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,rgba(0,0,0,.6))}
+.zdots{display:flex;gap:7px}.zdots button{width:9px;height:9px;border-radius:50%;border:0;padding:0;background:rgba(255,255,255,.4)}.zdots button.on{background:#fff;transform:scale(1.25)}
+.zctl{display:flex;gap:8px}.zctl button{width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.2);color:#fff;font-size:24px;font-weight:700}
+/* galería del producto */
+.pgal{position:relative;margin:-20px -20px 0;overflow:hidden;border-radius:24px 24px 0 0;background:var(--surface-2);flex:none}
+@media (max-width:699px){.pgal{border-radius:24px 24px 0 0}.ov:has(.pgal) .sheet::before{display:none}}
+.pgal-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.pgal-track::-webkit-scrollbar{display:none}
+.pgal-s{flex:0 0 100%;scroll-snap-align:center;border:0;padding:0;background:none;cursor:zoom-in;display:block}
+.pgal-s .ph{aspect-ratio:1/1;border-radius:0;max-height:52dvh;width:100%}
+@media (min-width:700px){.pgal-s .ph{aspect-ratio:4/3}}
+.pgal-x{position:absolute;top:12px;right:12px;z-index:3;background:rgba(0,0,0,.55);color:#fff;border-color:transparent;backdrop-filter:blur(6px)}
+.pgal-zoom{position:absolute;left:12px;bottom:12px;z-index:3;display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.6);color:#fff;font-size:12.5px;font-weight:700;padding:6px 11px;border-radius:999px;pointer-events:none}
+.pgal-zoom svg{width:16px;height:16px}
+.pgal .car-n{top:auto;bottom:12px;right:12px}
+.pgal .car-b{width:40px;height:40px;font-size:22px;opacity:1;z-index:2;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.pgal .car-b.l{left:12px}.pgal .car-b.r{right:12px}
+.pthumbs button{transition:transform .2s,border-color .2s}.pthumbs button.on{transform:scale(1.06)}
+/* móvil: que nada se salga de su cuadro */
+.tx,.srow>*,.row>*,.lrow>*,.stack>*{min-width:0}
+.tx b,.tx span,.srow .tx span{overflow-wrap:anywhere}
+h1,h2,h3,p,.note,.expl,.small,.muted,td{overflow-wrap:break-word}
+@media (max-width:767px){input,textarea,select{font-size:16px}}
+@media (max-width:520px){.pcab .stats{gap:12px;flex-wrap:wrap}.pnom{font-size:22px}.ptabs2 button{padding:9px 10px;font-size:13px}.ptabs2 button span{display:none}.ptabs2 button.on span{display:inline}.row.between{flex-wrap:wrap;gap:8px}.cols{grid-template-columns:1fr!important}.line{gap:10px}.line>span:first-child{min-width:0;overflow-wrap:anywhere}}
+.prof>.avz{flex:none}.prof>.avz>.avatar{--s:clamp(86px,15vw,150px)!important}
+@media (max-width:520px){.prof>.avz>.avatar{--s:86px!important}}
+@media (max-width:520px){.pcab .prof{flex-direction:column;align-items:stretch;gap:12px}.pcab .prof>.avz{align-self:flex-start}.pcab .stats{flex-wrap:nowrap!important;justify-content:space-between;gap:8px}.pcab .stats>*{flex:1;text-align:center}.pcab .stats span{font-size:12.5px}}
 </style>
 </head>
 <body>
@@ -986,14 +1166,15 @@ const nfmt = n => n>=1000 ? (n/1000).toFixed(1).replace('.0','')+' mil' : String
 /* ---------- cuentas: personal o de negocio ---------- */
 function perfilDe(id){
   if (esNeg(id)){ const n=neg(id); return {id, nombre:n.nombre, handle:slug(n.nombre), color:n.color, foto:null, fu:fotoU(kNeg(n), n.id+'l'), negocio:true, verificado:n.verificado}; }
-  const u=usr(id); return {id, nombre:u.nombre, handle:u.usuario, color:u.color, foto:u.foto, fu:u.fu, negocio:false};
+  const u=usr(id); return {id, nombre:u.nombre, handle:u.usuario, color:u.color, foto:u.foto, fu:u.fu, negocio:false, verificado:u.verif?u.verif.tipo:false};
 }
 function yo(){ if (esNeg(S.yo)){ const n=neg(S.yo); return {id:n.id, nombre:n.nombre, usuario:slug(n.nombre), bio:n.desc, subidas:true, strikes:0, negocio:true}; } return usr(S.yo); }
 const soyNegocio = () => esNeg(S.yo);
 const misCuentas = () => [S.personal, ...S.misNegocios];
 const avatar = (a, s=40) => `<span class="avatar ${a.negocio?'biz':''}" style="--c:${esc(a.color)};--s:${s}px">${a.foto?`<img src="${esc(a.foto)}" alt="">`:esc(inits(a.nombre))+imgU(a.fu,160)}</span>`;
-const nombreV = a => `${esc(a.nombre)}${a.verificado?'<span class="verif" title="Negocio verificado">✓</span>':''}`;
-const handleV = a => `${esc(a.handle)}${a.verificado?'<span class="verif" title="Negocio verificado">✓</span>':''}`;
+const marcaV = a => !a.verificado ? '' : typeof a.verificado==='string' ? `<span class="verif ${a.verificado}" title="${{medio:'Medio de comunicación verificado',gobierno:'Institución de gobierno verificada',figura:'Cuenta verificada',org:'Organización verificada'}[a.verificado]||'Verificada'}">✓</span>` : '<span class="verif" title="Negocio verificado">✓</span>';
+const nombreV = a => `${esc(a.nombre)}${marcaV(a)}`;
+const handleV = a => `${esc(a.handle)}${marcaV(a)}`;
 function calif(nid){ const r=S.resenas.filter(x=>x.neg===nid); return r.length?{avg:r.reduce((a,b)=>a+b.est,0)/r.length, n:r.length}:null; }
 function necesitaSesion(msg){ if(S.sesion) return false; ui.sheet=null; ui.sel=null; toast(msg||'Inicia sesión para hacer esto'); go('perfil'); return true; }
 
@@ -1080,7 +1261,7 @@ function evaluar(item, tipoItem){
 function aplicarDecision(item, tipoItem, ev, por){
   const antes = item.estado; item.estado = ev.d; item.mod = {por, razon:ev.razon, t:Date.now(), antes};
   if (ev.d==='aprobado') item.t = Date.now();
-  if (ev.d==='rechazado'){ item.motivo = ev.motivo; strike(item.autor, ev.motivo); }
+  if (ev.d==='rechazado'){ item.motivo = ev.motivo; strike(item.autor, ev.motivo, item.id); }
   if (por==='auto') S.decisiones.unshift({tipo:tipoItem, id:item.id, d:ev.d, razon:ev.razon, t:Date.now(), revisarFoto:!!ev.revisarFoto});
   const que = tipoItem==='hist'?'Tu historia':'Tu publicación';
   if (ev.d!=='pendiente') notif(item.autor,'sistema',null,{texto:`${que} fue ${ev.d==='aprobado'?'aprobada':'rechazada: '+MOTIVOS[ev.motivo]}.`, post:tipoItem==='post'?item.id:null});
@@ -1380,8 +1561,8 @@ const msgBloqueo = r => r.mensaje || (r.nivel>=3 ? 'No se envió: este contenido
 function previosDe(para){ if(!para) return []; const c = chatCon(para); const ahora=Date.now(); return c ? c.msgs.filter(m=>m.de===S.yo && m.texto && ahora-m.t<10*60000).slice(-5).map(m=>m.texto) : []; }
 function revisar(t, lugar, ctx={}){
   if (typeof quitarMenciones==='function') t = quitarMenciones(t);
-  const yoU = !esNeg(S.yo) && usr(S.yo);
-  if (yoU && yoU.suspendido) return {ok:false, bloqueos:['suspendida'], avisos:[], nivel:0, mensaje:'Tu cuenta está suspendida mientras el equipo de seguridad la revisa.'};
+  const yoU = !esNeg(S.yo) && usr(S.yo); if (yoU && typeof revisarSanciones==='function') revisarSanciones(yoU);
+  if (yoU && yoU.suspendido) return {ok:false, bloqueos:['suspendida'], avisos:[], nivel:0, mensaje: yoU.suspHasta ? `Tu cuenta está suspendida hasta el ${new Date(yoU.suspHasta).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}. Si crees que es un error, apela en Configuración → Estado de tu cuenta.` : 'Tu cuenta está suspendida mientras una persona del equipo la revisa. Si crees que es un error, apela en Configuración → Estado de tu cuenta.'};
   if ((S.pausas[S.yo]||0) > Date.now()) { const m=Math.ceil((S.pausas[S.yo]-Date.now())/60000); return {ok:false, bloqueos:['pausa'], avisos:[], nivel:0, mensaje:`Por seguridad, no puedes publicar ni enviar mensajes durante ${m} min.`}; }
   const c = {...ctx}; if (c.para){ c.previos = previosDe(c.para); c.paraMenor = esMenor(c.para) && !esMenor(S.yo); }
   const r = analizarTexto(t, lugar, c);
@@ -1390,8 +1571,8 @@ function revisar(t, lugar, ctx={}){
   intentos.push({t:Date.now(), oculto:r.oculto, nivel:r.nivel});
   const evasiones = intentos.filter(x=>x.oculto).length;
   let accion = '';
-  if (r.nivel>=4){ if (yoU){ yoU.suspendido = true; } accion='Cuenta suspendida automáticamente'; r.mensaje = 'No se envió. Este contenido está prohibido. Tu cuenta quedó suspendida mientras el equipo de seguridad la revisa.'; }
-  else if (r.nivel===3){ if (yoU){ yoU.strikes++; if (yoU.strikes>=S.cfg.strikesMax) { yoU.suspendido=true; accion='Cuenta suspendida (avisos)'; } else accion=`Aviso ${yoU.strikes}/${S.cfg.strikesMax}`; } }
+  if (r.nivel>=4){ if (yoU){ yoU.suspendido = true; yoU.suspHasta = null; yoU.susp = {t:Date.now(), motivo:r.bloqueos, auto:true}; } accion='Cuenta suspendida hasta revisión humana'; r.mensaje = 'No se envió. Este contenido está prohibido. Tu cuenta queda suspendida hasta que una persona del equipo la revise. Si fue un error, puedes apelar en Configuración → Estado de tu cuenta.'; }
+  else if (r.nivel===3){ if (yoU){ const n = registrarAviso(yoU, r.bloqueos[0]); if (n>=S.cfg.strikesMax) { yoU.suspendido=true; yoU.suspHasta=Date.now()+864e5; yoU.susp={t:Date.now(), motivo:r.bloqueos, auto:true}; accion='Suspensión de 24 h (avisos)'; r.mensaje='No se envió. Acumulaste varios avisos: tu cuenta queda en pausa 24 horas. Puedes apelar en Configuración → Estado de tu cuenta.'; } else accion=`Aviso ${n}/${S.cfg.strikesMax}`; } }
   if (!accion && (evasiones>=2 || intentos.length>=4)){ S.pausas[S.yo] = Date.now() + (evasiones>=3?60:30)*60000; accion = `Pausa de ${evasiones>=3?60:30} min por intentos repetidos`; r.mensaje = 'Detectamos varios intentos de enviar contenido no permitido. Tus publicaciones y mensajes quedan en pausa un rato.'; }
   if (r.nivel>=2 || r.oculto || accion){
     S.alertas.unshift({id:'al'+Date.now().toString(36)+Math.random().toString(36).slice(2,5), t:Date.now(), quien:S.yo, para:c.para||null, lugar:ctx.donde||lugar, texto:String(t).slice(0,280), cats:r.bloqueos, nivel:r.nivel, oculto:r.oculto, intentos:intentos.length, accion, estado:'nueva'});
@@ -1507,7 +1688,7 @@ function postCard(p, abierto, por){
       <button class="b-save ${guardado(p.id)?'on':''}" data-a="guardar" data-x="${p.id}" aria-label="Guardar" aria-pressed="${guardado(p.id)}" title="${guardado(p.id)?'Guardado':'Guardar'}">${guardado(p.id)?ico.saveF:ico.save}</button>
     </div>
     <div class="post-b">
-      <b class="small" style="font-size:14px">${nlikes(p)} Me gusta${lb?` <span style="font-weight:500" class="muted">· le gusta a ${esc(lb.handle)}</span>`:''}${nGuardados(p.id)?` <span style="font-weight:500" class="muted">· ${nGuardados(p.id)} guardado${nGuardados(p.id)>1?'s':''}</span>`:''}</b>
+      <b class="small" style="font-size:14px"><button class="likes-n" data-a="verLikes" data-x="${p.id}" aria-label="Ver a quién le gusta">${nlikes(p)} Me gusta</button>${lb?` <span style="font-weight:500" class="muted">· le gusta a ${esc(lb.handle)}</span>`:''}${nGuardados(p.id)?` <span style="font-weight:500" class="muted">· ${nGuardados(p.id)} guardado${nGuardados(p.id)>1?'s':''}</span>`:''}</b>
       <div><b>${esc(a.handle)}</b> ${textoConEtiquetas(p.texto)}</div>
       ${n?`<button class="buy" data-a="pedirPost" data-x="${p.id}"><span>${pr?esc(pr.nombre)+' · '+money(pr.precio):'Ver la tienda de '+esc(n.nombre)}</span><span>${pr?'Pedir ahora':'Ver tienda'} →</span></button>`:''}
       ${abierto ? `<div class="stack" style="gap:10px;margin-top:6px">${cs.map(c=>{ const u=perfilDe(c.autor); return `<div class="cm"><button style="background:none;border:0;padding:0" data-a="verPerfil" data-x="${c.autor}">${avatar(u,30)}</button><div class="tx"><b>${esc(u.handle)}</b> ${esc(c.texto)}<div class="small muted">${hace(c.t)}</div></div></div>`; }).join('')}</div>
@@ -1532,6 +1713,7 @@ function vHome(){
   return `<div class="home"><div class="home-feed">
     <div class="toprow">${climaBtn()}<label class="search hsearch">${ico.search}<input id="q" type="search" placeholder="Buscar personas, negocios o productos" value="${esc(ui.q)}" aria-label="Buscar" autocomplete="off">${ui.q?'<button type="button" class="lk" data-a="limpiarQ" aria-label="Borrar búsqueda">✕</button>':''}</label></div>
     <div id="results" class="stack">${ui.q.trim()?resultados():''}</div>
+    ${bannerCuenta()}
     ${activos.length?activos.slice(0,2).map(p=>bannerPedido(p)).join(''):''}
     ${filaHistorias()}
     <div class="segs" role="tablist">${[['parati','Para ti'],['siguiendo','Siguiendo'],['negocios','Negocios']].map(([k,t])=>`<button role="tab" aria-selected="${ui.feed===k}" class="${ui.feed===k?'on':''}" data-a="feed" data-x="${k}">${t}</button>`).join('')}</div>
@@ -1544,7 +1726,7 @@ function vHome(){
 }
 function vPost(){
   const p = post(ui.post); if(!p || bloq(p.autor)) return `<div class="empty"><h2>Publicación no disponible</h2><button class="btn" data-a="go" data-x="home">Volver al inicio</button></div>`;
-  return `<div class="feed"><button class="btn ghost sm" data-a="atras" style="align-self:flex-start">← Volver</button>
+  return `<div class="feed"><button class="btn back" data-a="atras">${ico.back}Volver</button>
     ${p.estado!=='aprobado'?`<div class="note warn">Esta publicación está: <b>${PEST[p.estado][0]}</b>.</div>`:''}${postCard(p,true)}</div>`;
 }
 function resultados(){
@@ -1579,8 +1761,8 @@ function vNotifs(){
 /* ---------- perfiles ---------- */
 function cabPerfil(id){
   const a = perfilDe(id); const u = esNeg(id)?null:usr(id); const mio = id===S.yo;
-  return `<div class="card pcab"><div class="prof">${avatar(a,150)}<div class="stack" style="gap:8px;min-width:0;flex:1">
-      <div class="row between nowrap"><div style="min-width:0"><h1 class="pnom">${nombreV(a)}</h1><div class="muted small">@${esc(a.handle)}${!mio&&sigue(id,S.yo)?' · <span class="pill">Te sigue</span>':''}</div></div>
+  return `<div class="card pcab"><div class="prof"><button class="avz" data-a="zoomAvatar" data-x="${id}" aria-label="Ver foto de perfil en grande">${avatar(a,150)}</button><div class="stack" style="gap:8px;min-width:0;flex:1">
+      <div class="row between nowrap"><div style="min-width:0"><h1 class="pnom">${nombreV(a)}</h1>${typeof a.verificado==='string'?`<div class="vlabel ${a.verificado}">✓ ${esc(VERIF_TXT[a.verificado])}</div>`:''}<div class="muted small">@${esc(a.handle)}${!mio&&sigue(id,S.yo)?' · <span class="pill">Te sigue</span>':''}</div></div>
         ${mio?`<button class="ibtn" data-a="go" data-x="ajustes" aria-label="Configuración">${ico.gear}</button>`:`<button class="ibtn" data-a="opcPerfil" data-x="${id}" aria-label="Opciones">${ico.dots}</button>`}</div>
       <div class="stats"><div><b>${npubs(id)}</b><span>publicaciones</span></div><button class="stat" data-a="verSeg" data-x="${id}" data-o="seguidores"><b>${seguidores(id)}</b><span>seguidores${listaVisible(id,'seguidores')?'':' 🔒'}</span></button><button class="stat" data-a="verSeg" data-x="${id}" data-o="seguidos"><b>${siguiendo(id)}</b><span>siguiendo${listaVisible(id,'seguidos')?'':' 🔒'}</span></button></div></div></div>
     ${u&&u.bio?`<div>${esc(u.bio)}</div>`:''}
@@ -1601,9 +1783,9 @@ function vPerfil(){
 function miniPost(p, extra=''){ return `<button data-a="verPost" data-x="${p.id}" aria-label="Ver publicación">${extra}${p.fotos.length>1?`<span class="multi">${p.fotos.length}</span>`:''}${fotoCuadro(p.fotos[0])}</button>`; }
 function vUsuario(){
   const id = ui.perfil; if (id===S.yo) return vPerfil(); if (esNeg(id)){ ui.neg=id; return vNegocio(); }
-  if (bloq(id)) return `<div class="feed"><button class="btn ghost sm" data-a="atras" style="align-self:flex-start">← Volver</button><div class="empty"><h2>Cuenta no disponible</h2><p class="muted">${bloqueePor(S.yo,id)?'Bloqueaste esta cuenta. Puedes desbloquearla en Configuración.':'No puedes ver este perfil.'}</p>${bloqueePor(S.yo,id)?`<button class="btn" data-a="desbloquear" data-x="${id}">Desbloquear</button>`:''}</div></div>`;
+  if (bloq(id)) return `<div class="feed"><button class="btn back" data-a="atras">${ico.back}Volver</button><div class="empty"><h2>Cuenta no disponible</h2><p class="muted">${bloqueePor(S.yo,id)?'Bloqueaste esta cuenta. Puedes desbloquearla en Configuración.':'No puedes ver este perfil.'}</p>${bloqueePor(S.yo,id)?`<button class="btn" data-a="desbloquear" data-x="${id}">Desbloquear</button>`:''}</div></div>`;
   const ps = S.posts.filter(p=>p.autor===id&&p.estado==='aprobado').sort((a,b)=>b.t-a.t);
-  return `<div class="perfil-w"><button class="btn ghost sm" data-a="atras" style="align-self:flex-start">← Volver</button>${cabPerfil(id)}
+  return `<div class="perfil-w"><button class="btn back" data-a="atras">${ico.back}Volver</button>${cabPerfil(id)}
     ${tabsPerfil(id)}</div>`;
 }
 function vLogin(){
@@ -1639,6 +1821,7 @@ function vAjustes(){
     <b>Cuentas bloqueadas (${bl.length})</b>
     ${bl.map(b=>{ const a=perfilDe(b.a); return `<div class="srow">${avatar(a,38)}<div class="tx"><b>${esc(a.nombre)}</b><span>@${esc(a.handle)}</span></div><button class="btn sm" data-a="desbloquear" data-x="${b.a}">Desbloquear</button></div>`; }).join('') || '<span class="small muted">No has bloqueado a nadie.</span>'}
   </div></details>
+  ${seccionEstado()}${seccionVerif()}
   <details class="set"><summary>${ico.swap}<span>Cuentas<small>Cambia entre tu cuenta personal y tu negocio</small></span></summary><div class="bd">
     ${misCuentas().map(id=>{ const a=perfilDe(id); return `<div class="srow">${avatar(a,40)}<div class="tx"><b>${nombreV(a)}</b><span>${a.negocio?'Cuenta de negocio':'Cuenta personal'}</span></div>${id===S.yo?'<span class="pill ok">En uso</span>':`<button class="btn sm" data-a="usarCuenta" data-x="${id}">Usar</button>`}</div>`; }).join('')}
     <button class="btn soft" data-a="go" data-x="vende">+ Registrar otro negocio</button>
@@ -1726,7 +1909,8 @@ function hojaCrear(){
 }
 function hojaPublicar(){
   const u = yo();
-  if (!u.subidas) return hoja('No puedes publicar', `<p style="margin:0">Tu cuenta tiene ${u.strikes} publicaciones rechazadas. Si tienes un negocio, regístralo para publicar sus productos.</p><button class="btn acc" data-a="irVende">Registrar mi negocio</button>`);
+  if (!soyNegocio()) revisarSanciones(u);
+  if (!u.subidas) return hoja('Tus publicaciones están en pausa', bloqueoPublicarHTML(u));
   const n = soyNegocio()?neg(S.yo):null;
   return hoja('Nueva publicación', `<label class="f" for="pub-files">Fotos (hasta 10)<input id="pub-files" type="file" accept="image/*" multiple><span class="h">Se reducen antes de guardarse para que pesen poco.</span></label>
     ${ui.draft.length?`<div class="drafts">${ui.draft.map((d,i)=>`<div class="ph">${d.m?`<img src="${esc(d.m)}" alt="">`:escena(d)}<button type="button" data-a="quitarFoto" data-x="${i}" aria-label="Quitar foto">×</button></div>`).join('')}</div>`
@@ -1890,8 +2074,8 @@ function vNegocio(){
   const pubs = S.posts.filter(p=>p.autor===n.id&&p.estado==='aprobado').sort((x,y)=>y.t-x.t);
   const puede = S.sesion && S.pedidos.some(p=>p.neg===n.id&&p.estado==='entregado'&&p.cuenta===S.yo) && !rs.some(r=>r.autor===S.yo);
   const zonas = (n.zonas||[]).map(z=>`${esc(z.col)} ${money(z.costo)}`).join(', ');
-  return `<div class="stack"><button class="btn ghost sm" data-a="atras" style="align-self:flex-start">← Volver</button>
-  <div class="bhead"><div class="cv">${portada(n)}${avatar(a,76)}</div><div class="in">
+  return `<div class="stack"><button class="btn back" data-a="atras">${ico.back}Volver</button>
+  <div class="bhead"><div class="cv"><button class="cvz" data-a="zoomPortada" data-x="${n.id}" aria-label="Ver portada en grande">${portada(n)}</button><button class="avz" data-a="zoomAvatar" data-x="${n.id}" aria-label="Ver logo en grande">${avatar(a,76)}</button></div><div class="in">
     <div class="row between"><div><h1>${nombreV(a)}</h1><div class="small muted">@${esc(a.handle)} · ${esc(TIPOS[n.tipo].uno)}${n.estado!=='activo'?` · <span class="pill warn">${esc(n.estado)}</span>`:''}</div></div>
       <div class="row">${mio?`<button class="btn pri sm" data-a="go" data-x="minegocio">${ico.biz} Mi negocio</button>`:`${botonSeguir(n.id)}${amigos(S.yo,n.id)?`<button class="btn soft sm" data-a="abrirChat" data-x="${n.id}">Mensaje</button>`:''}<button class="ibtn" data-a="opcPerfil" data-x="${n.id}" aria-label="Opciones">${ico.dots}</button>`}</div></div>
     <div class="stats"><div><b>${npubs(n.id)}</b><span>publicaciones</span></div><div><b>${seguidores(n.id)}</b><span>seguidores</span></div><div><b>${c?c.avg.toFixed(1):'—'}</b><span>${c?c.n+' reseñas':'sin reseñas'}</span></div></div>
@@ -1909,7 +2093,7 @@ function vNegocio(){
     <p class="small muted" style="margin:0">Solo opina quien recibió un pedido de este negocio en la app.</p>
     ${puede?`<form class="stack" data-form="resena" novalidate><div class="stars" role="radiogroup" aria-label="Calificación">${[1,2,3,4,5].map(i=>`<button type="button" class="${i<=ui.estrellas?'on':''}" data-a="star" data-x="${i}" aria-label="${i} estrellas">★</button>`).join('')}</div>
       <label class="f" for="r-txt">Tu reseña<textarea id="r-txt" maxlength="300"></textarea></label>${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}<button class="btn pri" type="submit">Publicar reseña</button></form>`:''}
-    ${rs.slice(0,8).map(r=>{ const u=perfilDe(r.autor); return `<div class="rev">${avatar(u,36)}<div><b>${esc(u.nombre)}</b> <span class="st-txt">${'★'.repeat(r.est)}</span> <span class="pill ok">Pedido verificado</span><div>${esc(r.texto)}</div><div class="small muted">${hace(r.t)}</div></div></div>`; }).join('') || '<p class="muted small">Aún no hay reseñas.</p>'}
+    ${rs.filter(r=>r.texto).slice(0,8).map(r=>{ const u=perfilDe(r.autor); return `<div class="rev">${avatar(u,36)}<div><b>${esc(u.nombre)}</b> <span class="st-txt">${'★'.repeat(r.est)}<span class="st-off">${'★'.repeat(5-r.est)}</span></span> <span class="pill ok">Pedido verificado</span><div>${esc(r.texto)}</div><div class="small muted">${hace(r.t)}</div></div></div>`; }).join('') || '<p class="muted small">Aún no hay reseñas.</p>'}
   </div></div>`;
 }
 function hojaProducto(){
@@ -1917,9 +2101,8 @@ function hojaProducto(){
   const err = validarSel(p, sel); const total = Math.round(precioUnitario(p, sel)*sel.qty);
   const optDisabled = (ai, opName) => { if (!p.agot.length) return false; const v = p.var.map((ax,i)=> i===ai ? opName : sel.v[i]); if (v.some(x=>!x)) return p.var.length===1 && p.agot.includes(opName); return p.agot.includes(v.join('|')); };
   return `<div class="ov" data-a="close" data-self="1"><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(p.nombre)}">
-    <div class="ph" style="border-radius:16px;aspect-ratio:16/10">${fotoProd(p, Math.min(ui.pfoto||0, (p.fotos||[1]).length-1))}${(p.fotos||[]).length>1?`<span class="car-n">${(ui.pfoto||0)+1}/${p.fotos.length}</span>`:''}</div>
-    ${(p.fotos||[]).length>1?`<div class="pthumbs">${p.fotos.map((f,i)=>`<button class="${(ui.pfoto||0)===i?'on':''}" data-a="prodFoto" data-x="${p.id}" data-o="${i}" aria-label="Foto ${i+1}"><div class="ph">${verFoto(f)}</div></button>`).join('')}</div>`:''}
-    <div class="row nowrap"><div style="flex:1;min-width:0"><h2 style="font-size:22px">${esc(p.nombre)}</h2><div class="small muted">${esc(n.nombre)}</div></div><button class="x" data-a="close" aria-label="Cerrar">×</button></div>
+    ${galeriaProd(p)}
+    <div class="row nowrap"><div style="flex:1;min-width:0"><h2 style="font-size:22px">${esc(p.nombre)}</h2><div class="small muted">${esc(n.nombre)}</div></div></div>
     <p class="muted" style="margin:0">${esc(p.desc)}</p>
     <div class="price num" style="font-size:18px">${money(p.precio)} <small>/ ${esc(p.unidad)}</small>${p.stock!=null?` <span class="pill ${p.stock===0?'bad':p.stock<=5?'warn':''}">${p.stock===0?'Agotado':p.stock<=5?'Quedan '+p.stock:'Disponible'}</span>`:''}</div>
     ${p.var.map((ax,ai)=>`<div class="grp"><div class="grp-h"><b>${esc(ax.n)}</b><span class="pill ${sel.v[ai]?'ok':'acc'}">${sel.v[ai]?'Listo':'Elige uno'}</span></div>
@@ -1959,7 +2142,7 @@ function vCheckout(){
   const n = neg(c.neg); const sub = subtotalCarrito(); const u = yo();
   const modo0 = n.repartoApp?'reparto':n.entrega?'entrega':'recoger'; const min0 = minimoEnvio(kmDe(COLONIAS[0]));
   const env0 = modo0==='entrega'?costoEnvio(n,COLONIAS[0],sub):modo0==='reparto'?min0:0; const seg0 = modo0==='reparto'?seguroDe(min0):0;
-  return `<div class="stack"><button class="btn ghost sm" data-a="go" data-x="carrito" style="align-self:flex-start">← Carrito</button><h1>Confirmar pedido</h1>
+  return `<div class="stack"><button class="btn back" data-a="go" data-x="carrito">${ico.back}Carrito</button><h1>Confirmar pedido</h1>
   <form class="cols" data-form="checkout" novalidate><div class="stack">
     <div class="card"><h2>1. Tus datos</h2><div class="grid2"><label class="f" for="f-nombre">Nombre<input id="f-nombre" type="text" autocomplete="name" value="${S.sesion&&!u.negocio?esc(u.nombre):''}"></label>
       <label class="f" for="f-tel">Teléfono (10 dígitos)<input id="f-tel" type="tel" inputmode="numeric" autocomplete="tel" maxlength="10"></label></div>
@@ -2006,11 +2189,12 @@ function timeline(p){
 }
 function vSeguimiento(){
   const p = S.pedidos.find(x=>x.id===ui.pedido); if(!p) return vPedidos(); const n = neg(p.neg);
-  return `<div class="stack"><button class="btn ghost sm" data-a="go" data-x="pedidos" style="align-self:flex-start">← Mis pedidos</button><div class="cols">
+  return `<div class="stack"><button class="btn back" data-a="go" data-x="pedidos">${ico.back}Mis pedidos</button><div class="cols">
    <div class="card"><span class="small muted">Tu número de pedido</span><div class="code num">#${esc(p.id)}</div>
      <div class="row"><span class="pill" style="color:${ESTADOS[p.estado].c}">${ESTADOS[p.estado].l}</span><span class="small muted">${fecha(p.creado)}</span></div>
      <div class="expl"><b>${esc(explicarPedido(p).t)}</b><span>${esc(explicarPedido(p).d)}</span></div>
      ${puedeCancelar(p)?`<button class="btn danger" data-a="cancelarPedido" data-x="${p.id}">Cancelar pedido</button><span class="small muted">Puedes cancelar mientras ningún repartidor lo haya tomado y el negocio no lo esté preparando.</span>`:''}
+     ${p.estado==='entregado'&&p.cuenta===S.yo?bloqueCalificar(p):''}
      ${timeline(p)}
      ${p.modo!=='reparto' && p.codigo && !['entregado','rechazado','cancelado'].includes(p.estado)?`<div class="codebox"><span>Tu código de entrega</span><b class="num">${esc(p.codigo)}</b><small>${p.modo==='recoger'?'Dáselo en la tienda al recoger tu pedido.':'Dáselo a quien te entregue, solo cuando tengas tu pedido en la mano.'}</small></div>`:''}
      <div class="note">Prototipo: toca <b>Comercio</b> arriba para aceptar el pedido${p.modo==='reparto'?' y <b>Repartidor</b> para tomarlo':''}. Luego vuelve a <b>Cliente</b> → Perfil → Mis pedidos para ver el avance.</div></div>
@@ -2032,7 +2216,7 @@ function vPedidos(){
     ${ant.length?`<h2 style="margin-top:10px">Anteriores</h2>${ant.map(p=>tarjetaPedido(p,true)).join('')}`:''}</div>`;
 }
 function vVende(){
-  return `<div class="stack" style="max-width:640px;margin:0 auto;width:100%"><button class="btn ghost sm" data-a="atras" style="align-self:flex-start">← Volver</button>
+  return `<div class="stack" style="max-width:640px;margin:0 auto;width:100%"><button class="btn back" data-a="atras">${ico.back}Volver</button>
   <div class="card"><h1>Vende con ${esc(S.cfg.marca)}</h1>
    <p class="muted" style="margin:0">Con una cuenta de negocio publicas tu catálogo, recibes pedidos y compartes publicaciones con botón para pedir. Además sigues usando la app como cliente. Revisamos cada negocio antes de publicarlo y le damos la insignia de verificado.</p>
    <form class="stack" data-form="vende" novalidate>
@@ -2061,11 +2245,12 @@ function pedidoCard(p){
   const sig = siguiente(p);
   return `<div class="ocard" style="--st:${ESTADOS[p.estado].c}"><div class="row between"><b>#${esc(p.id)}</b><span class="small muted">${hora(p.creado)}</span></div>
     ${p.origen?'<span class="pill acc" style="align-self:flex-start">Vino de una publicación</span>':''}
-    <div class="small">${esc(p.cliente.nombre)} · ${esc(p.cliente.tel)}</div>
+    <div class="row" style="gap:6px"><span class="small">${esc(p.cliente.nombre)}${p.cliente.tel?' · '+esc(p.cliente.tel):''}</span>${pillCliente(p.cuenta)}</div>
     <div class="small">${p.items.map(it=>`${esc(String(it.qty).replace('.',','))} × ${esc(it.nombre)}${it.det?` <span class="muted">(${esc(it.det)})</span>`:''}${it.nota?` <i class="muted">“${esc(it.nota)}”</i>`:''}`).join('<br>')}</div>
     <div class="small muted">${p.modo==='reparto'?`Repartidor de la app → Col. ${esc(p.cliente.colonia)}`:p.modo==='entrega'?`Entrega: ${esc(p.cliente.calle)}, ${esc(p.cliente.colonia)}${p.cliente.ref?' · '+esc(p.cliente.ref):''}`:'Recoge en tienda'} · Efectivo${p.cambio?` (paga con ${money(p.cambio)})`:''}</div>
     ${p.nota?`<div class="small">Nota: ${esc(p.nota)}</div>`:''}
     <div class="row between"><b class="num">${money(p.total)}</b><span class="pill" style="color:${ESTADOS[p.estado].c}">${ESTADOS[p.estado].l}</span></div>
+    ${p.estado==='entregado'?estrellasInput(p.id,'cli_n','Califica al cliente','Solo la ven negocios y repartidores'):''}
     ${p.rep?`<div class="note small"><b>Repartidor de la app:</b> ${esc(REP_EST[p.rep.estado])}${p.rep.estado==='buscando'?` · <span class="num" data-exp="${p.rep.expira}">${mmss(p.rep.expira-Date.now())}</span> · <b>no lo prepares todavía</b>`:''}${p.rep.rep?` · ${esc(nombrePila(rep(p.rep.rep).nombre))} (${esc(rep(p.rep.rep).vehiculo)})`:''}</div>`:''}
     ${sig==='entregado'?`<div class="row nowrap"><input type="text" id="tcod-${p.id}" inputmode="numeric" maxlength="4" placeholder="Código del cliente" class="codein sm" autocomplete="off"><button class="btn pri sm" data-a="codigoTienda" data-x="${p.id}">Entregar</button></div>${p.intentosTienda?`<span class="small" style="color:var(--bad)">Código incorrecto (${p.intentosTienda})</span>`:''}<span class="small muted">Pide al cliente su código. Sin código no se marca como entregado.</span>`
      : sig==='preparando' && p.rep && !p.rep.rep ? `<div class="row"><button class="btn sm" disabled>Esperando repartidor…</button></div>`
@@ -2190,7 +2375,7 @@ function tarjetaPedido(p, corto){
   return `<div class="ptrack ${act?'':'fin'}"><div class="row between nowrap"><div class="row nowrap">${avatar(perfilDe(n.id),40)}<div><b>${esc(n.nombre)}</b><div class="small muted">#${esc(p.id)} · ${fecha(p.creado)} · ${money(p.total)}</div></div></div><span class="pill" style="color:${ESTADOS[p.estado].c}">${ESTADOS[p.estado].l}</span></div>
     ${act?`<div class="pbar"><i style="width:${Math.round(avancePedido(p)*100)}%"></i></div>`:''}
     ${corto?'':`<div><b>${esc(e.t)}</b><div class="small muted">${esc(e.d)}</div></div>`}
-    <div class="row"><button class="btn ${act?'pri':''} sm" data-a="track" data-x="${p.id}">${act?'Ver seguimiento':'Ver detalle'}</button>${act&&p.codigo&&p.modo!=='entrega'?`<span class="small muted">Código: <b class="num">${esc(p.codigo)}</b></span>`:''}${puedeCancelar(p)?`<button class="btn danger sm" data-a="cancelarPedido" data-x="${p.id}">Cancelar</button>`:''}</div></div>`;
+    <div class="row"><button class="btn ${act?'pri':''} sm" data-a="track" data-x="${p.id}">${act?'Ver seguimiento':'Ver detalle'}</button>${p.estado==='entregado'&&!calDe(p.id,'neg')?`<button class="pill star" data-a="track" data-x="${p.id}">★ Califica tu pedido</button>`:''}${act&&p.codigo&&p.modo!=='entrega'?`<span class="small muted">Código: <b class="num">${esc(p.codigo)}</b></span>`:''}${puedeCancelar(p)?`<button class="btn danger sm" data-a="cancelarPedido" data-x="${p.id}">Cancelar</button>`:''}</div></div>`;
 }
 function bannerPedido(p){
   const e = explicarPedido(p);
@@ -2219,7 +2404,7 @@ const yoRep = () => rep(S.yoRep);
 const nombrePila = n => String(n||'').trim().split(/\s+/)[0] || 'Cliente';
 const genCodigo = () => { const a=new Uint32Array(1); (crypto||window.crypto).getRandomValues(a); return String(a[0]%10000).padStart(4,'0'); };
 const mmss = ms => { const s=Math.max(0,Math.ceil(ms/1000)); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; };
-const califRep = r => r.calif ? r.calif.toFixed(1) : 'Nuevo';
+const califRep = r => { const v = typeof promRep==='function' ? promRep(r) : r.calif; return v ? v.toFixed(1) : 'Nuevo'; };
 const REP_EST = {esperando_tienda:'Esperando a que la tienda acepte', buscando:'Buscando repartidor', asignado:'Repartidor va a la tienda', en_tienda:'Repartidor en la tienda', en_camino:'En camino a tu casa', llego:'Tu repartidor llegó', entregado:'Entregado', sin_repartidor:'Sin repartidor disponible', cancelado_cliente:'Cancelado por el cliente'};
 
 function seedRepartidores(){
@@ -2375,6 +2560,7 @@ function repInicio(r, activo){
   const disp = S.pedidos.filter(p=>p.modo==='reparto' && p.rep && p.rep.estado==='buscando' && !(p.rep.ocultos||[]).includes(r.id));
   return `<div class="stack">
     <div class="rstats"><div><span>Hoy</span><b class="num">${money(hoy.reduce((a,p)=>a+p.envio,0))}</b></div><div><span>Entregas</span><b class="num">${hoy.length}</b></div><div><span>Calificación</span><b>★ ${califRep(r)}</b></div></div>
+    ${pendientesRep(r).length?`<div class="card rcalif"><h2>Califica a tus clientes</h2><span class="small muted">Tu calificación solo la ven negocios y otros repartidores. Ayuda a saber quién paga y recibe bien.</span>${pendientesRep(r).slice(0,3).map(p=>estrellasInput(p.id,'cli_r',nombrePila(p.cliente.nombre)+' · #'+p.id, 'Col. '+p.cliente.colonia)).join('')}</div>`:''}
     ${activo?`<button class="ractive" data-a="rTab" data-x="pedido"><b>Tienes un pedido activo</b><span>#${esc(activo.id)} · ${esc(REP_EST[activo.rep.estado])} →</span></button>`:''}
     <div class="row between"><h2 style="margin:0">Pedidos disponibles</h2><span class="small muted">${disp.length}</span></div>
     ${!S.repOnline?`<div class="empty" style="padding:30px 10px"><h2>Estás desconectado</h2><p class="muted">Conéctate para ver pedidos de Los Mochis.</p></div>`
@@ -2385,6 +2571,7 @@ function repOfertaCard(p, r, ocupado){
   const n = neg(p.neg); const mia = p.rep.ofertas.find(o=>o.rep===r.id);
   return `<div class="rcard"><div class="row between"><div class="row nowrap">${avatar(perfilDe(n.id),38)}<div><b>${esc(n.nombre)}</b><div class="small muted">${p.items.length} producto(s) · ${esc(p.pago==='efectivo'?'Efectivo':'Pagado')}</div></div></div><span class="pill warn num" data-exp="${p.rep.expira}">${mmss(p.rep.expira-Date.now())}</span></div>
     <div class="rruta"><span>🏪 ${esc(n.nombre)}</span><span>→</span><span>🏠 Col. ${esc(p.cliente.colonia)}</span></div>
+    <div class="row" style="gap:6px"><span class="small muted">Cliente:</span>${pillCliente(p.cuenta)}</div>
     <div class="row between"><span class="small muted">~${p.rep.km} km · la dirección exacta se muestra al recoger</span><b class="rprecio num">${money(p.rep.oferta)}</b></div>
     ${mia?`<div class="note">Tu contraoferta: <b class="num">${money(mia.monto)}</b> · esperando al cliente</div>`:
       ocupado?`<div class="small muted">Termina tu pedido activo para tomar otro.</div>`:
@@ -2599,7 +2786,7 @@ const guardado = pid => S.guardados.some(g=>g.u===S.yo && g.post===pid);
 const nGuardados = pid => S.guardados.filter(g=>g.post===pid).length;
 function vGuardados(){
   const ids = S.guardados.filter(g=>g.u===S.yo).sort((a,b)=>b.t-a.t).map(g=>post(g.post)).filter(p=>p && p.estado==='aprobado' && !bloq(p.autor));
-  return `<div class="perfil-w"><button class="btn ghost sm" data-a="atras" style="align-self:flex-start">← Volver</button>
+  return `<div class="perfil-w"><button class="btn back" data-a="atras">${ico.back}Volver</button>
     <div class="row nowrap" style="gap:12px"><span class="ictile save">${ico.saveF}</span><div><h1 style="margin:0">Guardados</h1><span class="small muted">Solo tú puedes ver esta carpeta. Los demás solo ven cuántas personas guardaron una publicación, nunca quiénes.</span></div></div>
     ${ids.length?`<div class="pgrid">${ids.map(p=>miniPost(p)).join('')}</div>`:'<div class="empty"><h2>Aún no guardas nada</h2><p class="muted">Toca el ícono de guardar en cualquier publicación para encontrarla aquí después.</p></div>'}</div>`;
 }
@@ -2778,8 +2965,8 @@ function vAdmin(){
   const rep = S.posts.filter(p=>p.estado==='aprobado'&&S.reportes.some(r=>r.post===p.id)).length;
   return `<div class="stack"><div class="row between"><div><span class="small muted">Panel del administrador</span><h1>${esc(S.cfg.marca)}</h1></div><div class="row" style="gap:8px"><span class="pill ${S.cfg.autoMod?'ok':''}">Revisión automática: ${S.cfg.autoMod?'activada':'desactivada'}</span><button class="btn pri sm" data-a="adelantar" title="Simula que pasa un día">⏩ Adelantar 1 día</button><button class="btn danger sm" data-a="reiniciar">↺ Reiniciar</button></div></div>
   ${S.dias?`<div class="note small">Simulación: han pasado <b>${S.dias}</b> día(s). Revisa Pedidos, Comisiones, Repartidores y la App para ver la actividad.</div>`:''}
-  <div class="ptabs">${[['moderacion',`Por revisar (${pend})`],['seguridad',`Seguridad (${S.alertas.filter(a=>a.estado==='nueva').length})`],['reportes',`Reportes (${rep})`],['automaticas','Decisiones automáticas'],['comercios','Negocios'],['repartidores','Repartidores'],['usuarios','Usuarios'],['pedidos','Pedidos'],['comisiones','Comisiones'],['bitacora','Bitácora'],['ajustes','Ajustes']].map(([k,l])=>`<button class="${ui.aTab===k?'on':''}" data-a="atab" data-x="${k}">${l}</button>`).join('')}</div>
-  ${ {moderacion:aModeracion, seguridad:aSeguridad, reportes:aReportes, automaticas:aAutomaticas, comercios:aComercios, repartidores:aRepartidores, usuarios:aUsuarios, pedidos:aPedidos, comisiones:aComisiones, bitacora:aBitacora, ajustes:aAjustes}[ui.aTab]() }</div>`;
+  <div class="ptabs">${[['moderacion',`Por revisar (${pend})`],['seguridad',`Seguridad (${S.alertas.filter(a=>a.estado==='nueva').length})`],['reportes',`Reportes (${rep})`],['automaticas','Decisiones automáticas'],['comercios','Negocios'],['repartidores','Repartidores'],['usuarios','Usuarios'],['pedidos','Pedidos'],['comisiones','Comisiones'],['verificacion',`Verificación (${S.verifs.filter(v=>v.estado==='pendiente').length})`],['apelaciones',`Apelaciones (${S.apelaciones.filter(a=>a.estado==='pendiente').length})`],['bitacora','Bitácora'],['ajustes','Ajustes']].map(([k,l])=>`<button class="${ui.aTab===k?'on':''}" data-a="atab" data-x="${k}">${l}</button>`).join('')}</div>
+  ${ {moderacion:aModeracion, seguridad:aSeguridad, reportes:aReportes, automaticas:aAutomaticas, comercios:aComercios, repartidores:aRepartidores, usuarios:aUsuarios, pedidos:aPedidos, comisiones:aComisiones, bitacora:aBitacora, ajustes:aAjustes, verificacion:aVerificacion, apelaciones:aApelaciones}[ui.aTab]() }</div>`;
 }
 function selMotivo(id, sug){ return `<select id="rej-${id}" aria-label="Motivo" style="width:auto;padding:7px 9px;font-size:13px">${Object.entries(MOTIVOS).map(([k,l])=>`<option value="${k}" ${k===sug?'selected':''}>${esc(l)}</option>`).join('')}</select>`; }
 function modItem(it, tipo, reportado){
@@ -2914,9 +3101,435 @@ function aSeguridad(){
   </div>`;
 }
 
+/* ============================================================
+   v12 — FILTROS MÁS JUSTOS · VERIFICACIÓN OFICIAL · ZOOM · CALIFICACIONES · PULIDO
+   ============================================================ */
+ico.back = I('<path d="M15 5l-7 7 7 7"/>');
+ico.zoom = I('<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2M11 8.5v5M8.5 11h5"/>');
+ico.badge = I('<path d="M12 2.8l2.3 1.7 2.8-.1.9 2.7 2.3 1.7-.9 2.7.9 2.7-2.3 1.7-.9 2.7-2.8-.1L12 21.2l-2.3-1.7-2.8.1-.9-2.7L3.7 15.2l.9-2.7-.9-2.7 2.3-1.7.9-2.7 2.8.1z"/><path d="M8.8 12.2l2.2 2.2 4.2-4.4"/>');
+ico.scale = I('<path d="M12 3v18M5 21h14M6 7h12M6 7l-3 7a3 3 0 0 0 6 0zM18 7l-3 7a3 3 0 0 0 6 0z"/>');
+const DIA = 864e5;
+
+/* ---------- tipos de verificación ---------- */
+const VERIF = {
+  medio:   {l:'Medio de comunicación o periodista', b:'Medio de comunicación verificado', ej:'Periódicos, noticieros, radio, TV y periodistas.', req:['identidad','control','correo','notoriedad','llamada']},
+  gobierno:{l:'Gobierno o institución pública', b:'Institución de gobierno verificada', ej:'Ayuntamiento, dependencias, escuelas públicas y funcionarios en su cargo.', req:['identidad','control','correo','documento','llamada']},
+  figura:  {l:'Figura pública o creador', b:'Cuenta verificada', ej:'Deportistas, artistas y creadores conocidos en la región.', req:['identidad','control','notoriedad']},
+  org:     {l:'Organización, asociación o escuela', b:'Organización verificada', ej:'Asociaciones civiles, iglesias, escuelas privadas y clubes.', req:['identidad','control','correo','documento']}
+};
+const VCHK = {
+  identidad:['Identidad del responsable','INE vigente y selfie con prueba de vida. El nombre coincide con la solicitud.'],
+  control:['Prueba de control','El código aparece en su sitio oficial o en su cuenta oficial de otra red. Búscalo tú: no abras enlaces que mande el solicitante.'],
+  correo:['Correo institucional','Respondió a nuestro correo desde el dominio oficial (no Gmail, Hotmail ni Outlook).'],
+  documento:['Documento oficial','Nombramiento, acta constitutiva o carta membretada firmada por el representante legal.'],
+  notoriedad:['Notoriedad','Al menos 3 menciones en fuentes independientes de los últimos 12 meses.'],
+  llamada:['Llamada de confirmación','Llamamos al teléfono público oficial (directorio o sitio oficial), nunca al que nos dieron.']
+};
+const RECHAZOS_V = {identidad:'No pudimos confirmar tu identidad', control:'No encontramos el código en tu sitio o red oficial', suplantacion:'Parece suplantación de otra cuenta o institución', notoriedad:'Todavía no cumple con la notoriedad necesaria', documentos:'Documentos incompletos o no válidos'};
+const CORREO_GRATIS = /@(gmail|hotmail|outlook|live|yahoo|icloud|proton|protonmail|aol|gmx|yandex|me)\./i;
+const PROTEGIDOS_BASE = ['El Debate','Noroeste','Línea Directa','Gobierno de Sinaloa','Ayuntamiento de Ahome','Presidencia de la República','Policía Municipal','Guardia Nacional','Protección Civil','Cruz Roja','IMSS','CFE','SAT'];
+const GOB_PAL = ['gobierno','gob','presidencia','presidente','presidenta','ayuntamiento','municipio','alcaldia','alcalde','alcaldesa','gobernador','gobernadora','senado','senador','senadora','diputado','diputada','policia','fiscalia','sedena','semar','marina'];
+const normNombre = t => limpiarTexto(t).replace(/0/g,'o').replace(/1/g,'i').replace(/3/g,'e').replace(/4/g,'a').replace(/5/g,'s').replace(/7/g,'t').replace(/@/g,'a');
+const tokensNombre = t => normNombre(t).split(/[^a-zñ]+/).filter(Boolean);
+function protegido(texto){
+  const junto = normNombre(texto).replace(/[^a-zñ]/g,''), toks = tokensNombre(texto);
+  return (S.cfg.protegidos||PROTEGIDOS_BASE).find(p=>{ const np = normNombre(p).replace(/[^a-zñ]/g,''); if (!np) return false; return np.length<=4 ? toks.includes(np) : junto.includes(np); }) || '';
+}
+/* nombres reservados: nadie puede hacerse pasar por gobierno, medios conocidos o el equipo de la app */
+function nombreSeguro(nombre, usuario){
+  const s = limpiarTexto(nombre+' '+usuario); const u = !esNeg(S.yo) && usr(S.yo);
+  if (/(soporte|admin|moderador|verificad|seguridad|ayuda|staff)/.test(s) || s.includes(slug(S.cfg.marca))) return 'Ese nombre podría confundirse con una cuenta del equipo de la app. Elige otro.';
+  if (u && u.verif) return '';
+  if (/oficial/.test(s)) return 'La palabra "oficial" solo la pueden usar cuentas verificadas. Si eres la cuenta real, pide la verificación en Configuración → Verificación.';
+  const toks = tokensNombre(nombre+' '+usuario.replace(/[._]/g,' ')); const g = GOB_PAL.find(w=>toks.includes(w));
+  if (g) return `"${g}" está reservado para cuentas de gobierno verificadas. Si lo eres, pide la verificación en Configuración → Verificación.`;
+  const p = protegido(nombre+' '+usuario); if (p) return `"${p}" es un nombre protegido para evitar cuentas falsas. Si eres la cuenta real, pide la verificación.`;
+  return '';
+}
+
+/* ---------- datos nuevos ---------- */
+function asegurarV12(){
+  S.verifs = S.verifs || []; S.apelaciones = S.apelaciones || []; S.calif = S.calif || [];
+  if (!S.cfg.protegidos) S.cfg.protegidos = PROTEGIDOS_BASE.slice();
+  if (!S.v12){
+    S.v12 = true; S.cfg.autoMod = true; // la revisión automática viene encendida: lo limpio se publica solo
+    if (!S.usuarios.some(u=>u.id==='u90')) S.usuarios.push({id:'u90', nombre:'Mochis al Día', usuario:'mochisaldia', bio:'Noticias de Los Mochis. Cuenta de ejemplo para el prototipo.', color:'#7C3AED', foto:null, strikes:0, subidas:true, grupo:'vecinos', priv:{etiquetar:true,seguidores:true,seguidos:true}, verif:{tipo:'medio', t:Date.now()-40*DIA, por:'Admin'}});
+    if (!S.usuarios.some(u=>u.id==='u91')) S.usuarios.push({id:'u91', nombre:'Noticias Mochis Oficial', usuario:'noticiasmochis.oficial', bio:'', color:'#B91C1C', foto:null, strikes:0, subidas:true, grupo:'vecinos', priv:{etiquetar:true,seguidores:true,seguidos:true}, nueva:true});
+    const ok = S.usuarios.filter(u=>u.grupo!=='spam').map(u=>u.id);
+    ok.slice(0,40).forEach((id,i)=>{ if (hashStr(id+'md')%3===0 && !S.sigue.some(s=>s.de===id&&s.a==='u90')) S.sigue.push({de:id, a:'u90'}); });
+    if (!S.sigue.some(s=>s.de===S.personal&&s.a==='u90')) S.sigue.push({de:S.personal, a:'u90'});
+    S.posts.push({id:'qmd1', autor:'u90', tipo:'usuario', fotos:[foto('ciudad','Centro de Los Mochis')], texto:'Así amaneció el centro de Los Mochis. Cielo despejado y calor por la tarde: revisa el clima en la app antes de salir.', likes:84, likedBy:[], estado:'aprobado', t:Date.now()-5*3600e3, demo:true});
+    const mv = usr('u24') || S.usuarios[20];
+    S.verifs.push({id:'vf1', cuenta:mv.id, tipo:'figura', nombre:mv.nombre, resp:mv.nombre, cargo:'Creador de contenido de comida local', correo:'contacto@'+mv.usuario.replace(/[^a-z]/g,'')+'.mx', sitio:'Cuenta de Instagram con 40 mil seguidores', menciones:'Nota en un periódico local (mayo)\nEntrevista en radio local (julio)\nReportaje de TV regional (agosto)', docs:{ine:true, selfie:true}, codigo:'LM-7Q2K-91XD', t:Date.now()-26*3600e3, estado:'pendiente', checks:{}});
+    S.verifs.push({id:'vf2', cuenta:'u91', tipo:'medio', nombre:'Noticias Mochis', resp:'Juan Pérez', cargo:'Director', correo:'noticiasmochis2026@gmail.com', sitio:'No tenemos página todavía', menciones:'', docs:{ine:false, selfie:false}, codigo:'LM-H4TR-2B6N', t:Date.now()-3*3600e3, estado:'pendiente', checks:{}});
+    S.pedidos.filter(p=>p.estado==='entregado').forEach(p=>{
+      const h = hashStr(p.id); const est = [5,5,5,4,4,3,5,2][h%8];
+      if (h%4!==0) S.calif.push({ped:p.id, rol:'cli_n', de:p.neg, a:p.cuenta, est:Math.max(3,est), t:p.creado+3600e3});
+      if (p.rep && p.rep.rep && h%3!==0){ S.calif.push({ped:p.id, rol:'cli_r', de:p.rep.rep, a:p.cuenta, est:Math.max(3,[5,4,5][h%3]), t:p.creado+3600e3}); S.calif.push({ped:p.id, rol:'rep', de:p.cuenta, a:p.rep.rep, est:[5,5,4,5,3][h%5], t:p.creado+3600e3}); }
+    });
+  }
+  S.usuarios.forEach(revisarSanciones);
+}
+
+/* ---------- sanciones justas: avisos que caducan, pausas temporales y apelación ---------- */
+function revisarSanciones(u){
+  if (!u || u.negocio) return u;
+  if (!u.strikeLog) u.strikeLog = Array.from({length:u.strikes||0}, ()=>({t:Date.now()-10*DIA, motivo:'otro'}));
+  u.strikeLog = u.strikeLog.filter(s=>Date.now()-s.t < 90*DIA && !s.anulado);
+  u.strikes = u.strikeLog.length;
+  if (u.subidas===false && u.bloqHasta && Date.now()>u.bloqHasta){ u.subidas = true; u.bloqHasta = null; }
+  if (u.suspendido && u.suspHasta && Date.now()>u.suspHasta){ u.suspendido = false; u.suspHasta = null; u.susp = null; }
+  return u;
+}
+function registrarAviso(u, motivo, ref){
+  revisarSanciones(u); u.strikeLog.push({t:Date.now(), motivo, ref:ref||null}); u.strikes = u.strikeLog.length; return u.strikes;
+}
+function strike(autor, motivo, ref){
+  if (esNeg(autor) || !['publicidad','adulto','enlace','estafa','menores','drogas','armas','explotacion','ofensivo'].includes(motivo)) return '';
+  const u = usr(autor); const n = registrarAviso(u, motivo, ref); const max = S.cfg.strikesMax;
+  if (n >= max){ const dias = n===max ? 1 : n===max+1 ? 7 : 30; u.subidas = false; u.bloqHasta = Date.now()+dias*DIA;
+    notif(u.id,'sistema',null,{texto:`Tus publicaciones quedan en pausa ${dias===1?'24 horas':dias+' días'} por acumular ${n} avisos. Si crees que es un error, apela en Configuración → Estado de tu cuenta.`});
+    return ` · ${n} avisos · pausa de ${dias===1?'24 h':dias+' días'}`; }
+  return ` · aviso ${n}/${max}`;
+}
+function quitarAviso(u, ref){ revisarSanciones(u); const i = ref ? u.strikeLog.findIndex(s=>s.ref===ref) : u.strikeLog.length-1; if (i>=0) u.strikeLog.splice(i,1); u.strikes = u.strikeLog.length; if (u.strikes < S.cfg.strikesMax){ u.subidas = true; u.bloqHasta = null; } }
+const fechaCorta = t => new Date(t).toLocaleDateString('es-MX',{day:'numeric', month:'short'});
+const horaFecha = t => new Date(t).toLocaleString('es-MX',{day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+function estadoCuenta(u){
+  revisarSanciones(u);
+  if (u.suspendido) return {c:'bad', t:u.suspHasta?`Suspendida hasta el ${horaFecha(u.suspHasta)}`:'Suspendida: una persona del equipo la está revisando', d:u.suspHasta?'Por varios avisos seguidos. Se reactiva sola.':'Por contenido grave. Ninguna cuenta se elimina sin que una persona la revise.'};
+  if (u.subidas===false) return {c:'warn', t:u.bloqHasta?`Publicaciones en pausa hasta el ${horaFecha(u.bloqHasta)}`:'Publicaciones en pausa', d:'Puedes seguir usando la app, ver, comprar y escribir a tus amigos.'};
+  if (u.strikes) return {c:'warn', t:`${u.strikes} aviso${u.strikes>1?'s':''} activo${u.strikes>1?'s':''}`, d:`Con ${S.cfg.strikesMax} avisos tus publicaciones se pausan 24 horas. Los avisos se borran solos a los 90 días.`};
+  return {c:'ok', t:'Todo en orden', d:'No tienes avisos. ¡Gracias por cuidar la comunidad!'};
+}
+function bloqueoPublicarHTML(u){
+  const e = estadoCuenta(u);
+  return `<div class="note warn"><b>${esc(e.t)}</b><br><span class="small">${esc(e.d)}</span></div>
+    <p class="small muted" style="margin:0">Tienes ${u.strikes} aviso(s) por publicaciones rechazadas. Si crees que nos equivocamos, cuéntanos y una persona lo revisará.</p>
+    <div class="row"><button class="btn pri" data-a="apelar" data-x="publicar">Apelar</button><button class="btn" data-a="estadoCuenta">Ver el estado de mi cuenta</button></div>
+    ${!soyNegocio()?`<button class="btn acc" data-a="irVende">¿Tienes un negocio? Regístralo para publicar sus productos</button>`:''}`;
+}
+function bannerCuenta(){
+  if (soyNegocio() || !S.sesion) return ''; const u = usr(S.yo); if (!u) return ''; const e = estadoCuenta(u);
+  if (e.c==='ok' || (e.c==='warn' && u.subidas!==false)) return '';
+  return `<button class="cbanner ${e.c}" data-a="estadoCuenta">${ico.shield}<span><b>${esc(e.t)}</b><small>${esc(e.d)} Toca para ver detalles o apelar.</small></span></button>`;
+}
+function seccionEstado(){
+  if (soyNegocio()) return '';
+  const u = revisarSanciones(usr(S.yo)); const e = estadoCuenta(u);
+  const rech = S.posts.filter(p=>p.autor===S.yo && p.estado==='rechazado').sort((a,b)=>b.t-a.t);
+  const mias = S.apelaciones.filter(a=>a.u===S.yo).sort((a,b)=>b.t-a.t);
+  const ya = ref => S.apelaciones.some(a=>a.u===S.yo && a.ref===ref && a.estado==='pendiente');
+  const pc = promCliente(S.yo);
+  return `<details class="set" id="estado-cuenta" ${ui.abrirEstado?'open':''}><summary>${ico.scale}<span>Estado de tu cuenta<small>${esc(e.t)}</small></span></summary><div class="bd">
+    <div class="cestado ${e.c}"><b>${esc(e.t)}</b><span class="small">${esc(e.d)}</span>${u.suspendido&&!ya('suspension')?`<button class="btn pri sm" data-a="apelar" data-x="suspension">Apelar la suspensión</button>`:''}${u.subidas===false&&!u.suspendido&&!ya('publicar')?`<button class="btn pri sm" data-a="apelar" data-x="publicar">Apelar la pausa</button>`:''}</div>
+    <b>Avisos activos (${u.strikes})</b>
+    ${u.strikeLog.length ? u.strikeLog.slice().reverse().map(s=>`<div class="srow"><span class="avs">!</span><div class="tx"><b>${esc(MOTIVOS[s.motivo]||ETIQ[s.motivo]||'Regla de la comunidad')}</b><span>${fechaCorta(s.t)} · se borra el ${fechaCorta(s.t+90*DIA)}</span></div>${s.ref&&!ya(s.ref)?`<button class="btn sm" data-a="apelar" data-x="${s.ref}">Apelar</button>`:ya(s.ref)?'<span class="pill warn">En revisión</span>':''}</div>`).join('') : '<span class="small muted">Sin avisos.</span>'}
+    ${rech.length?`<b>Publicaciones rechazadas</b>${rech.slice(0,6).map(p=>`<div class="srow"><span class="rthumb">${verFoto(p.fotos[0])}</span><div class="tx"><b>${esc(MOTIVOS[p.motivo]||'Rechazada')}</b><span>${esc((p.texto||'Sin texto').slice(0,60))}</span></div>${ya(p.id)?'<span class="pill warn">En revisión</span>':`<button class="btn sm" data-a="apelar" data-x="${p.id}">Apelar</button>`}</div>`).join('')}`:''}
+    ${mias.length?`<b>Tus apelaciones</b>${mias.map(a=>`<div class="srow"><div class="tx"><b>${esc(a.titulo)}</b><span>${fechaCorta(a.t)} · ${a.estado==='pendiente'?'en revisión':a.estado==='aceptada'?'te dimos la razón':'se mantuvo la decisión'}${a.resp?' · '+esc(a.resp):''}</span></div><span class="pill ${a.estado==='aceptada'?'ok':a.estado==='rechazada'?'bad':'warn'}">${a.estado==='pendiente'?'Pendiente':a.estado==='aceptada'?'Aceptada':'Rechazada'}</span></div>`).join('')}`:''}
+    <div class="note small"><b>Cómo funciona:</b> cada publicación rechazada por romper una regla es 1 aviso. Con ${S.cfg.strikesMax} avisos se pausan tus publicaciones 24 horas, con ${S.cfg.strikesMax+1} son 7 días y con más son 30 días. Los avisos se borran solos a los 90 días. Solo el contenido muy grave (riesgo para menores, explotación, venta de drogas o armas) suspende la cuenta, y siempre lo revisa una persona. <b>Nunca se elimina una cuenta sin revisión humana.</b></div>
+    ${pc?`<div class="small"><b>Tu calificación como cliente:</b> ★ ${pc.avg.toFixed(1)} (${pc.n}) · solo la ven los negocios y repartidores que te atienden.</div>`:''}
+  </div></details>`;
+}
+function hojaApelar(){
+  const {ref} = ui.sheet; const u = usr(S.yo); let titulo='Apelar', det='';
+  if (ref==='suspension'){ titulo='Apelar la suspensión'; det = u.susp ? `Motivo: ${(u.susp.motivo||[]).map(m=>ETIQ[m]||m).join(', ')||'varios avisos'}` : ''; }
+  else if (ref==='publicar'){ titulo='Apelar la pausa de publicaciones'; det = `${u.strikes} aviso(s) activos`; }
+  else { const p = post(ref); titulo='Apelar una publicación rechazada'; det = p ? `"${(p.texto||'Sin texto').slice(0,80)}" · ${MOTIVOS[p.motivo]||''}` : ''; }
+  return hoja(titulo, `<p class="small muted" style="margin:0">${esc(det)}</p>
+    <label class="f" for="ap-txt">¿Por qué crees que fue un error?<textarea id="ap-txt" maxlength="400" placeholder="Explica con tus palabras. Una persona del equipo leerá tu apelación."></textarea><span class="h">Sin enlaces ni teléfonos. Respondemos normalmente en menos de 48 horas.</span></label>
+    ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}
+    <button class="btn pri block" type="submit">Enviar apelación</button>`, 'apelar');
+}
+function aApelaciones(){
+  const l = S.apelaciones.slice().sort((a,b)=>(a.estado==='pendiente'?0:1)-(b.estado==='pendiente'?0:1) || b.t-a.t);
+  return `<div class="note small">Aquí llegan las personas que creen que el sistema (o un moderador) se equivocó. Revisa el contexto antes de decidir. Si das la razón, se quita el aviso y se restaura lo que corresponda.</div>
+    ${l.map(a=>{ const p = perfilDe(a.u), u = usr(a.u); const ps = !['suspension','publicar'].includes(a.ref) ? post(a.ref) : null;
+      return `<div class="card" style="gap:8px"><div class="row">${avatar(p,32)}<b>${esc(p.nombre)}</b><span class="small muted">@${esc(p.handle)} · ${hace(a.t)}</span><span class="pill ${a.estado==='pendiente'?'warn':a.estado==='aceptada'?'ok':'bad'}">${a.estado}</span></div>
+        <b>${esc(a.titulo)}</b>
+        ${ps?`<div class="row nowrap" style="align-items:flex-start"><span class="rthumb lg">${verFoto(ps.fotos[0])}</span><div class="small">${esc(ps.texto||'Sin texto')}<br><span class="muted">Rechazada por: ${esc(MOTIVOS[ps.motivo]||'—')}${ps.mod?.razon?' · '+esc(ps.mod.razon):''}</span></div></div>`:''}
+        ${a.ref==='suspension'&&u.susp?`<div class="small muted">Suspendida por: ${(u.susp.motivo||[]).map(m=>ETIQ[m]||m).join(', ')} · ${u.susp.auto?'automática':'manual'}</div>`:''}
+        <div class="quote">${esc(a.texto)}</div>
+        <div class="small muted">Avisos activos: ${u.strikes}</div>
+        ${a.estado==='pendiente'?`<div class="row"><button class="btn ok sm" data-a="apResolver" data-x="${a.id}" data-o="aceptada">Dar la razón y restaurar</button><button class="btn danger sm" data-a="apResolver" data-x="${a.id}" data-o="rechazada">Mantener la decisión</button></div>`:''}</div>`; }).join('') || '<p class="muted">No hay apelaciones.</p>'}`;
+}
+
+/* ---------- verificación de cuentas oficiales ---------- */
+const misVerifs = () => S.verifs.filter(v=>v.cuenta===S.yo).sort((a,b)=>b.t-a.t);
+const VERIF_TXT = {medio:'Medio de comunicación verificado', gobierno:'Institución de gobierno verificada', figura:'Cuenta verificada', org:'Organización verificada'};
+function seccionVerif(){
+  if (soyNegocio()) return '';
+  const u = usr(S.yo); const v = misVerifs()[0];
+  return `<details class="set"><summary>${ico.badge}<span>Verificación<small>${u.verif?esc(VERIF_TXT[u.verif.tipo]):v&&v.estado==='pendiente'?'Solicitud en revisión':'Para medios, gobierno, figuras públicas y organizaciones'}</small></span></summary><div class="bd">
+    ${u.verif?`<div class="vlabel ${u.verif.tipo}">✓ ${esc(VERIF_TXT[u.verif.tipo])}</div><span class="small muted">Desde el ${fechaCorta(u.verif.t)}. Si cambias tu nombre o usuario, la insignia se quita hasta que la revisemos de nuevo.</span>`
+      :`<p class="small" style="margin:0">La insignia confirma que una cuenta es <b>la real</b>: por ejemplo, el periódico, el ayuntamiento o el artista de verdad. No se compra y no se da por tener muchos seguidores.</p>
+        ${v?`<div class="small">Última solicitud: <b>${esc(VERIF[v.tipo].l)}</b> · ${v.estado==='pendiente'?'en revisión':v.estado==='info'?'te pedimos más información':v.estado==='rechazada'?'rechazada':'aprobada'}${v.motivo?' · '+esc(v.motivo):''}</div>`:''}
+        <button class="btn pri" data-a="go" data-x="verificar">${v&&v.estado==='pendiente'?'Ver mi solicitud':'Solicitar verificación'}</button>`}
+  </div></details>`;
+}
+function vVerificar(){
+  const u = usr(S.yo); if (!u) return `<div class="empty"><h2>Solo para cuentas personales</h2><p class="muted">Los negocios se verifican al registrarse.</p></div>`;
+  const v = misVerifs()[0]; const back = `<button class="btn back" data-a="atras">${ico.back}Volver</button>`;
+  if (u.verif) return `<div class="feed">${back}<div class="card"><h1>Ya estás verificado</h1><div class="vlabel ${u.verif.tipo}">✓ ${esc(VERIF_TXT[u.verif.tipo])}</div></div></div>`;
+  if (v && (v.estado==='pendiente')) return `<div class="feed">${back}<div class="card" style="gap:10px"><h1>Tu solicitud está en revisión</h1>
+    <div class="small muted">${esc(VERIF[v.tipo].l)} · enviada ${hace(v.t)}</div>
+    <div class="codebox"><span>Tu código de verificación</span><b class="num">${esc(v.codigo)}</b><small>Publícalo en tu sitio oficial o en tu cuenta oficial de otra red social. Puedes borrarlo cuando te aprobemos.</small></div>
+    <ol class="vsteps"><li class="done">Enviaste tus datos y documentos</li><li class="now">Una persona del equipo revisa identidad, código${VERIF[v.tipo].req.includes('llamada')?' y hace una llamada al teléfono oficial':''}</li><li>Te avisamos por notificación (normalmente de 3 a 7 días)</li></ol></div></div>`;
+  const d = ui.vf || (ui.vf = {tipo:'', codigo:'LM-'+Math.random().toString(36).slice(2,6).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase(), docs:{}});
+  const e = estadoCuenta(u); const bloqueada = u.suspendido || u.strikes>0;
+  const reint = v && v.estado==='rechazada' && Date.now()-v.t < 30*DIA;
+  return `<div class="feed" style="gap:14px">${back}<h1>Solicitar verificación</h1>
+    <p class="muted" style="margin:0">La verificación es <b>manual</b>: una persona del equipo revisa cada solicitud. Es gratis. Mentir o hacerse pasar por otra persona o institución es motivo de suspensión.</p>
+    ${bloqueada?`<div class="note warn">No puedes pedir la verificación mientras tengas avisos activos o una suspensión (${esc(e.t)}).</div>`:''}
+    ${reint?`<div class="note warn">Tu solicitud anterior fue rechazada (${esc(v.motivo||'')}). Podrás volver a intentarlo el ${fechaCorta(v.t+30*DIA)}.</div>`:''}
+    <form class="stack" data-form="verif" novalidate style="gap:14px">
+    <div><b>1. ¿Qué tipo de cuenta eres?</b><div class="vtipos">${Object.entries(VERIF).map(([k,t])=>`<button type="button" class="vtipo ${d.tipo===k?'on':''} ${k}" data-a="vfTipo" data-x="${k}"><span class="verif ${k}">✓</span><b>${esc(t.l)}</b><small>${esc(t.ej)}</small></button>`).join('')}</div>
+      <span class="small muted">¿Tienes un negocio? Los negocios se verifican al registrarse en "Vende con nosotros".</span></div>
+    ${d.tipo?`
+    <div class="stack" style="gap:10px"><b>2. Datos de la cuenta</b>
+      <div class="grid2"><label class="f" for="vf-nom">Nombre oficial<input id="vf-nom" type="text" maxlength="60" value="${esc(d.nom||u.nombre)}" placeholder="Como aparece en documentos"></label>
+      <label class="f" for="vf-resp">Persona responsable<input id="vf-resp" type="text" maxlength="60" value="${esc(d.resp||'')}" placeholder="Nombre completo"></label></div>
+      <div class="grid2"><label class="f" for="vf-cargo">Cargo o actividad<input id="vf-cargo" type="text" maxlength="60" value="${esc(d.cargo||'')}" placeholder="${d.tipo==='gobierno'?'Ej. Director de Comunicación Social':d.tipo==='medio'?'Ej. Jefa de redacción':'Ej. Creador de contenido'}"></label>
+      <label class="f" for="vf-mail">Correo ${d.tipo==='figura'?'de contacto':'institucional'}<input id="vf-mail" type="email" maxlength="80" value="${esc(d.mail||'')}" placeholder="${d.tipo==='gobierno'?'nombre@dependencia.gob.mx':'nombre@tumedio.com'}"><span class="h">${d.tipo==='gobierno'?'Obligatorio con dominio oficial.':'Te escribiremos aquí; con dominio propio es más rápido.'}</span></label></div>
+      <label class="f" for="vf-sitio">Sitio oficial o cuenta oficial en otra red<input id="vf-sitio" type="text" maxlength="120" value="${esc(d.sitio||'')}" placeholder="Ej. el nombre de tu página o tu usuario en otra red"><span class="h">Solo lo ve el equipo de revisión. Ahí buscaremos tu código.</span></label>
+      ${VERIF[d.tipo].req.includes('notoriedad')?`<label class="f" for="vf-men">3 menciones en otros medios<textarea id="vf-men" maxlength="400" placeholder="Una por renglón: medio, fecha y tema">${esc(d.men||'')}</textarea><span class="h">Notas, entrevistas o reportajes de los últimos 12 meses. No cuentan publicaciones pagadas.</span></label>`:''}</div>
+    <div class="stack" style="gap:10px"><b>3. Documentos</b><span class="small muted">En la versión real se guardan cifrados, solo los ve el equipo de revisión y se borran 30 días después de decidir.</span>
+      ${[['ine','INE vigente del responsable (frente y vuelta)'],['selfie','Selfie sosteniendo tu INE'],...(VERIF[d.tipo].req.includes('documento')?[['doc',d.tipo==='gobierno'?'Nombramiento oficial o credencial institucional':'Acta constitutiva o carta membretada firmada']]:[])].map(([k,l])=>`<label class="vdoc ${d.docs[k]?'ok':''}" for="vf-${k}"><span>${d.docs[k]?'✓':'+'}</span><span class="tx"><b>${l}</b><small>${d.docs[k]?esc(d.docs[k]):'Toca para elegir el archivo'}</small></span><input id="vf-${k}" type="file" accept="image/*,application/pdf" data-doc="${k}" hidden></label>`).join('')}</div>
+    <div class="stack" style="gap:8px"><b>4. Prueba de que la cuenta es tuya</b>
+      <div class="codebox"><span>Tu código</span><b class="num">${esc(d.codigo)}</b><small>Publícalo en tu sitio oficial o en tu cuenta oficial de otra red social (en la descripción o en una publicación). Así comprobamos que quien pide la insignia controla la cuenta real.</small></div></div>
+    <label class="chk"><input id="vf-ok" type="checkbox"> <span>Declaro que los datos son verdaderos y que represento a esta cuenta. Sé que hacerse pasar por otra persona o institución es motivo de suspensión.</span></label>
+    ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}
+    <button class="btn pri block lg" type="submit" ${bloqueada||reint?'disabled':''}>Enviar solicitud</button>`:''}
+    </form></div>`;
+}
+function senalesVerif(v){
+  const u = usr(v.cuenta); const s = [];
+  if (CORREO_GRATIS.test(v.correo)) s.push(['bad', v.tipo==='gobierno'?'Correo gratuito: el gobierno usa dominio oficial':'Correo gratuito, no institucional']);
+  if (normNombre(v.nombre).replace(/[^a-z]/g,'') !== normNombre(u.nombre).replace(/[^a-z]/g,'')) s.push(['warn','El nombre oficial no coincide con el del perfil']);
+  const parecida = S.usuarios.find(x=>x.verif && x.id!==u.id && (normNombre(x.nombre).includes(normNombre(v.nombre).replace(/oficial/g,'').trim().split(' ')[0]) || normNombre(v.nombre).includes(normNombre(x.nombre).split(' ')[0])) );
+  if (parecida) s.push(['bad',`Nombre parecido a una cuenta ya verificada: @${parecida.usuario}`]);
+  const p = protegido(v.nombre); if (p) s.push(['warn',`Usa un nombre protegido (${p}): confirma que es la institución real`]);
+  if (u.nueva) s.push(['bad','Cuenta creada hace muy poco']);
+  if (u.strikes) s.push(['bad',`La cuenta tiene ${u.strikes} aviso(s)`]);
+  if (seguidores(u.id) < 15 && v.tipo!=='gobierno') s.push(['warn',`Pocos seguidores (${seguidores(u.id)})`]);
+  if (!v.docs.ine || !v.docs.selfie) s.push(['bad','Faltan INE o selfie']);
+  if (VERIF[v.tipo].req.includes('notoriedad') && (v.menciones||'').split('\n').filter(x=>x.trim()).length<3) s.push(['warn','Menos de 3 menciones en medios']);
+  return s;
+}
+function aVerificacion(){
+  const pend = S.verifs.filter(v=>['pendiente','info'].includes(v.estado)).sort((a,b)=>a.t-b.t);
+  const hechas = S.verifs.filter(v=>!['pendiente','info'].includes(v.estado)).sort((a,b)=>b.t-a.t).slice(0,8);
+  const verif = S.usuarios.filter(u=>u.verif);
+  return `<div class="note small"><b>Cómo revisar:</b> todas las casillas obligatorias deben marcarse antes de aprobar. Busca tú mismo el sitio y el teléfono oficiales (Google, directorio de gobierno); <b>nunca</b> uses enlaces ni teléfonos que mande el solicitante. Para gobierno, de preferencia que lo revisen dos personas.</div>
+    <div class="sec-h"><h2>Solicitudes</h2><span class="muted small">${pend.length}</span></div>
+    ${pend.map(v=>{ const u = usr(v.cuenta), a = perfilDe(u.id), sen = senalesVerif(v), req = VERIF[v.tipo].req, listo = req.every(k=>v.checks[k]);
+      return `<div class="card vcard" style="gap:10px"><div class="row">${avatar(a,40)}<div style="min-width:0"><b>${esc(a.nombre)}</b><div class="small muted">@${esc(a.handle)} · ${seguidores(u.id)} seguidores · ${hace(v.t)}</div></div><span class="pill ${v.tipo}">${esc(VERIF[v.tipo].l)}</span>${v.estado==='info'?'<span class="pill warn">Esperando información</span>':''}</div>
+        <div class="vgrid"><span>Nombre oficial</span><b>${esc(v.nombre)}</b><span>Responsable</span><b>${esc(v.resp)} · ${esc(v.cargo)}</b><span>Correo</span><b>${esc(v.correo)}</b><span>Sitio o red oficial</span><b>${esc(v.sitio||'—')}</b>${v.menciones?`<span>Menciones</span><b style="white-space:pre-line">${esc(v.menciones)}</b>`:''}<span>Código</span><b class="num">${esc(v.codigo)}</b><span>Documentos</span><b>INE ${v.docs.ine?'✓':'✗'} · Selfie ${v.docs.selfie?'✓':'✗'}${req.includes('documento')?` · Documento ${v.docs.doc?'✓':'✗'}`:''}</b></div>
+        ${sen.length?`<div class="vsen">${sen.map(([c,t])=>`<span class="pill ${c}">⚠ ${esc(t)}</span>`).join('')}</div>`:'<span class="pill ok">Sin señales de riesgo</span>'}
+        <div class="vchecks">${req.map(k=>`<button type="button" class="vchk ${v.checks[k]?'on':''}" data-a="vfCheck" data-x="${v.id}" data-o="${k}"><span class="bx">${v.checks[k]?'✓':''}</span><span class="tx"><b>${VCHK[k][0]}</b><small>${VCHK[k][1]}</small></span></button>`).join('')}</div>
+        <div class="row"><button class="btn ok sm" data-a="vfAprobar" data-x="${v.id}" ${listo?'':'disabled title="Marca todas las revisiones"'}>Aprobar verificación</button>
+          <button class="btn sm" data-a="vfInfo" data-x="${v.id}">Pedir más información</button>
+          <select id="vfr-${v.id}" aria-label="Motivo" style="width:auto;padding:7px 9px;font-size:13px">${Object.entries(RECHAZOS_V).map(([k,l])=>`<option value="${k}">${esc(l)}</option>`).join('')}</select><button class="btn danger sm" data-a="vfRechazar" data-x="${v.id}">Rechazar</button></div></div>`; }).join('') || '<p class="muted">No hay solicitudes pendientes.</p>'}
+    <div class="sec-h"><h2>Cuentas verificadas</h2><span class="muted small">${verif.length}</span></div>
+    ${verif.map(u=>`<div class="srow">${avatar(perfilDe(u.id),36)}<div class="tx"><b>${nombreV(perfilDe(u.id))}</b><span>${esc(VERIF_TXT[u.verif.tipo])} · desde ${fechaCorta(u.verif.t)}</span></div><button class="btn danger sm" data-a="vfQuitar" data-x="${u.id}">Quitar insignia</button></div>`).join('') || '<p class="muted small">Ninguna.</p>'}
+    ${hechas.length?`<div class="sec-h"><h2>Decididas</h2></div>${hechas.map(v=>`<div class="small">@${esc(perfilDe(v.cuenta).handle)} · ${esc(VERIF[v.tipo].l)} · <b>${v.estado}</b>${v.motivo?' · '+esc(v.motivo):''}</div>`).join('')}`:''}
+    <div class="sec-h"><h2>Nombres protegidos</h2></div>
+    <p class="small muted" style="margin:0">Ninguna cuenta sin verificar puede usar estos nombres (aunque cambie letras por números o agregue puntos). Uno por renglón.</p>
+    <textarea id="prot-txt" rows="5">${esc((S.cfg.protegidos||[]).join('\n'))}</textarea><button class="btn sm" data-a="vfProtegidos" style="align-self:flex-start">Guardar nombres protegidos</button>`;
+}
+
+/* ---------- lista de "me gusta" ---------- */
+function quienesLike(p){
+  const set = new Set(); if (leGusta(p.id)) set.add(S.yo); (p.likedBy||[]).forEach(x=>set.add(x));
+  const am = new Set(misAmigos());
+  const pool = S.usuarios.filter(u=>u.grupo!=='spam' && !u.suspendido && u.id!==p.autor && u.id!==S.yo).map(u=>u.id).sort((a,b)=>(am.has(b)-am.has(a)) || (hashStr(p.id+a)%997 - hashStr(p.id+b)%997));
+  for (const id of pool){ if (set.size >= nlikes(p)) break; set.add(id); }
+  return [...set].filter(id=>!bloq(id));
+}
+function hojaLikes(){
+  const p = post(ui.sheet.post); const l = quienesLike(p); const resto = Math.max(0, nlikes(p)-l.length);
+  return hoja(`Me gusta · ${nlikes(p)}`, `<div class="stack" style="gap:8px">${l.map(id=>id===S.yo?`<div class="lrow">${avatar(perfilDe(id),44)}<div class="tx"><b>${esc(perfilDe(id).handle)}</b><div class="small muted">Tú</div></div></div>`:personaRow(id)).join('')}</div>
+    ${resto?`<p class="small muted" style="margin:0;text-align:center">y ${resto} persona${resto>1?'s':''} más</p>`:''}${!l.length?'<p class="muted">Todavía nadie. ¡Sé el primero!</p>':''}`);
+}
+
+/* ---------- comentarios: hoja grande que cubre la mitad de abajo ---------- */
+function hojaComentarios(){
+  const p = post(ui.sheet.post); const cs = comsDe(p.id); const a = perfilDe(p.autor);
+  return `<div class="ov" data-a="closeSheet" data-self="1"><div class="sheet comsheet" role="dialog" aria-modal="true" aria-label="Comentarios">
+    <div class="comh"><span class="grab" aria-hidden="true"></span><h2>Comentarios <span class="muted">${cs.length}</span></h2><button type="button" class="x" data-a="closeSheet" aria-label="Cerrar">×</button></div>
+    <div class="comlist" id="comlist">${p.texto?`<div class="cm cap">${avatar(a,36)}<div class="tx"><b>${esc(a.handle)}</b> ${textoConEtiquetas(p.texto)}<div class="small muted">${hace(p.t)}</div></div></div>`:''}
+      ${cs.map(c=>{ const u=perfilDe(c.autor); return `<div class="cm"><button class="cav" data-a="verPerfil" data-x="${c.autor}" aria-label="Ver perfil">${avatar(u,36)}</button><div class="tx"><b>${esc(u.handle)}</b> <span class="small muted">${hace(c.t)}</span><div>${esc(c.texto)}</div></div></div>`; }).join('') || '<div class="comvacio"><b>Aún no hay comentarios</b><span class="small muted">Sé el primero en comentar.</span></div>'}</div>
+    ${ui.err?`<div class="err" role="alert" style="margin:0 16px 8px">${esc(ui.err)}</div>`:''}
+    <form class="comform" data-form="comentario" novalidate>${avatar(perfilDe(S.yo),36)}<input id="c-txt" type="text" maxlength="200" placeholder="Agrega un comentario…" aria-label="Comentario" autocomplete="off" enterkeyhint="send"><button class="btn pri" type="submit">Publicar</button></form>
+  </div></div>`;
+}
+
+/* ---------- calificaciones (1 a 5 estrellas) ---------- */
+const calDe = (ped, rol) => S.calif.find(c=>c.ped===ped && c.rol===rol);
+const promedio = l => l.length ? {avg:l.reduce((a,c)=>a+c.est,0)/l.length, n:l.length} : null;
+const promCliente = uid => promedio(S.calif.filter(c=>(c.rol==='cli_n'||c.rol==='cli_r') && c.a===uid));
+function promRep(r){ const l = S.calif.filter(c=>c.rol==='rep' && c.a===r.id); const nb = r.calif ? 20 : 0; const n = l.length+nb; return n ? (l.reduce((a,c)=>a+c.est,0) + (r.calif||0)*nb)/n : 0; }
+const pillCliente = uid => { const c = promCliente(uid); return c ? `<span class="pill star">★ ${c.avg.toFixed(1)} <small>(${c.n})</small></span>` : '<span class="pill">Cliente nuevo</span>'; };
+function estrellasInput(ped, rol, titulo, sub){
+  const c = calDe(ped, rol);
+  return `<div class="rateb ${c?'done':''}"><div class="tx"><b>${esc(titulo)}</b>${sub?`<small>${esc(sub)}</small>`:''}</div>
+    <div class="rstars" role="group" aria-label="${esc(titulo)}">${[1,2,3,4,5].map(i=>`<button type="button" class="${c&&i<=c.est?'on':''}" data-a="calificar" data-x="${ped}|${rol}|${i}" aria-label="${i} de 5 estrellas" ${c?'disabled':''}>★</button>`).join('')}</div>
+    ${c?'<span class="small muted">¡Gracias por calificar!</span>':''}</div>`;
+}
+function bloqueCalificar(p){
+  const n = neg(p.neg); const r = p.rep && p.rep.rep ? rep(p.rep.rep) : null; const cn = calDe(p.id,'neg');
+  return `<div class="card rcalif"><h2>¿Cómo te fue?</h2>
+    ${estrellasInput(p.id,'neg',`Califica a ${n.nombre}`,'Aparece en su tienda y ayuda a otros clientes')}
+    ${cn && !cn.coment ? `<div class="row nowrap"><input id="rc-${p.id}" type="text" maxlength="200" placeholder="Cuéntales cómo estuvo (opcional)" aria-label="Comentario de la reseña"><button class="btn sm" data-a="calComent" data-x="${p.id}">Enviar</button></div>` : ''}
+    ${r ? estrellasInput(p.id,'rep',`Califica a ${nombrePila(r.nombre)}, tu repartidor`,'Solo la ven el repartidor y el equipo de la app') : ''}</div>`;
+}
+function pendientesRep(r){ return S.pedidos.filter(p=>p.rep && p.rep.rep===r.id && p.rep.estado==='entregado' && !calDe(p.id,'cli_r') && Date.now()-p.rep.pasos.at(-1).t < 3*DIA); }
+
+/* ---------- visor de fotos con zoom ---------- */
+const ZM = {items:[], i:0, s:1, x:0, y:0, ptrs:new Map(), pinch:null, sw:null, tapT:0, movido:false};
+function zoomHTML(f){
+  if (!f) return '';
+  if (f.m) return MEDIA[f.m] ? `<div class="zbox ok"><img src="${esc(MEDIA[f.m])}" alt=""></div>` : '';
+  return `<div class="zbox">${escena(f)}${f.u?`<img data-u="1" src="https://images.unsplash.com/photo-${f.u}?w=1600&q=80&auto=format" alt="" referrerpolicy="no-referrer">`:''}</div>`;
+}
+function fotosDeProd(p){ return p.fotos && p.fotos.length ? p.fotos : [{k:p.k||TIPOS[neg(p.neg).tipo].k, a:'#F5F5F4', b:'#E7E5E4', c:'#FFFFFF', l:p.nombre, u:p.foto?null:fotoU(p.k||TIPOS[neg(p.neg).tipo].k,p.id)}]; }
+function abrirZoom(items, i=0){ items = items.filter(Boolean); if (!items.length) return; ZM.items = items; ZM.i = Math.max(0, Math.min(i, items.length-1)); pintarZoom(); document.body.style.overflow = 'hidden'; }
+function cerrarZoom(){ const z = $('#zoom'); if (z) z.remove(); ZM.ptrs.clear(); if (!$('#layer').innerHTML && !ui.story) document.body.style.overflow = ''; }
+function pintarZoom(){
+  let z = $('#zoom'); if (!z){ z = document.createElement('div'); z.id = 'zoom'; document.body.appendChild(z); bindZoom(z); }
+  const n = ZM.items.length; ZM.s = 1; ZM.x = 0; ZM.y = 0;
+  z.innerHTML = `<div class="zv" role="dialog" aria-modal="true" aria-label="Foto en grande">
+    <div class="zbar"><span class="zn">${n>1?`${ZM.i+1} / ${n}`:''}</span><span class="zhint">Pellizca o toca dos veces para acercar</span><button class="zx" data-z="close" aria-label="Cerrar">✕</button></div>
+    <div id="zstage"><div id="zimg">${ZM.items[ZM.i]}</div></div>
+    ${n>1?`<button class="zarr l" data-z="prev" aria-label="Foto anterior">‹</button><button class="zarr r" data-z="next" aria-label="Foto siguiente">›</button>`:''}
+    <div class="zfoot">${n>1?`<div class="zdots">${ZM.items.map((_,k)=>`<button class="${k===ZM.i?'on':''}" data-z="go" data-i="${k}" aria-label="Foto ${k+1}"></button>`).join('')}</div>`:'<span></span>'}
+      <div class="zctl"><button data-z="out" aria-label="Alejar">−</button><button data-z="in" aria-label="Acercar">+</button></div></div></div>`;
+  aplicarZ(false);
+}
+function aplicarZ(anim){ const im = $('#zimg'); if (!im) return; im.style.transition = anim ? 'transform .28s cubic-bezier(.2,.8,.2,1)' : 'none'; im.style.transform = `translate(${ZM.x}px,${ZM.y}px) scale(${ZM.s})`; im.style.opacity = ''; $('#zoom')?.classList.toggle('zoomed', ZM.s>1.02); }
+function limitarZ(){ const st = $('#zstage'); if (!st) return; const mx = (ZM.s-1)*st.clientWidth/2, my = (ZM.s-1)*st.clientHeight/2; ZM.x = Math.max(-mx, Math.min(mx, ZM.x)); ZM.y = Math.max(-my, Math.min(my, ZM.y)); }
+function zoomA(s, cx, cy){ const s2 = Math.max(1, Math.min(5, s)); const k = s2/ZM.s; ZM.x = cx-(cx-ZM.x)*k; ZM.y = cy-(cy-ZM.y)*k; ZM.s = s2; if (s2<=1.01){ ZM.s=1; ZM.x=0; ZM.y=0; } limitarZ(); }
+function irZ(d){ const n = ZM.items.length; if (n<2) return aplicarZ(true); ZM.i = (ZM.i+d+n)%n; pintarZoom(); }
+function centroRel(x, y){ const r = $('#zstage').getBoundingClientRect(); return [x-r.left-r.width/2, y-r.top-r.height/2]; }
+function bindZoom(z){
+  z.addEventListener('click', e=>{ const b = e.target.closest('[data-z]'); if (!b) return; const a = b.dataset.z;
+    if (a==='close') return cerrarZoom(); if (a==='prev') return irZ(-1); if (a==='next') return irZ(1);
+    if (a==='go'){ ZM.i = +b.dataset.i; return pintarZoom(); }
+    if (a==='in'){ zoomA(ZM.s*1.7,0,0); aplicarZ(true); } if (a==='out'){ zoomA(ZM.s/1.7,0,0); aplicarZ(true); } });
+  z.addEventListener('wheel', e=>{ if (!e.target.closest('#zstage')) return; e.preventDefault(); const [cx,cy] = centroRel(e.clientX,e.clientY); zoomA(ZM.s*Math.exp(-e.deltaY*0.0018), cx, cy); aplicarZ(false); }, {passive:false});
+  z.addEventListener('pointerdown', e=>{ if (!e.target.closest('#zstage')) return; e.preventDefault();
+    ZM.ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY}); try { $('#zstage').setPointerCapture(e.pointerId); } catch(_){}
+    if (ZM.ptrs.size===2){ const [a,b] = [...ZM.ptrs.values()]; const [cx,cy] = centroRel((a.x+b.x)/2,(a.y+b.y)/2); ZM.pinch = {d:Math.hypot(a.x-b.x,a.y-b.y)||1, s:ZM.s, cx, cy, x:ZM.x, y:ZM.y}; ZM.sw = null; ZM.movido = true; }
+    else if (ZM.ptrs.size===1){ ZM.sw = {x0:e.clientX, y0:e.clientY, x:ZM.x, y:ZM.y, t:Date.now()}; ZM.movido = false; } });
+  z.addEventListener('pointermove', e=>{ if (!ZM.ptrs.has(e.pointerId)) return; ZM.ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if (ZM.pinch && ZM.ptrs.size>=2){ const [a,b] = [...ZM.ptrs.values()]; const s2 = Math.max(1, Math.min(5, ZM.pinch.s*Math.hypot(a.x-b.x,a.y-b.y)/ZM.pinch.d)); const k = s2/ZM.pinch.s; ZM.s = s2; ZM.x = ZM.pinch.cx-(ZM.pinch.cx-ZM.pinch.x)*k; ZM.y = ZM.pinch.cy-(ZM.pinch.cy-ZM.pinch.y)*k; limitarZ(); aplicarZ(false); return; }
+    if (!ZM.sw) return; const dx = e.clientX-ZM.sw.x0, dy = e.clientY-ZM.sw.y0; if (Math.hypot(dx,dy)>8) ZM.movido = true;
+    if (ZM.s>1.02){ ZM.x = ZM.sw.x+dx; ZM.y = ZM.sw.y+dy; limitarZ(); aplicarZ(false); }
+    else { const im = $('#zimg'); im.style.transition = 'none'; const vert = Math.abs(dy)>Math.abs(dx) && dy>0; im.style.transform = vert ? `translate(0,${dy}px) scale(${Math.max(.8,1-dy/1200)})` : `translate(${dx}px,0)`; im.style.opacity = vert ? String(Math.max(.4,1-dy/500)) : ''; } });
+  const fin = e=>{ if (!ZM.ptrs.has(e.pointerId)) return; ZM.ptrs.delete(e.pointerId);
+    if (ZM.ptrs.size===1){ const [r] = [...ZM.ptrs.values()]; ZM.pinch = null; ZM.sw = {x0:r.x, y0:r.y, x:ZM.x, y:ZM.y, t:Date.now()}; return; }
+    if (ZM.ptrs.size) return; ZM.pinch = null; const sw = ZM.sw; ZM.sw = null; if (!sw) return aplicarZ(true);
+    const dx = e.clientX-sw.x0, dy = e.clientY-sw.y0;
+    if (!ZM.movido && Date.now()-sw.t < 300){ // toque
+      if (Date.now()-ZM.tapT < 320){ ZM.tapT = 0; const [cx,cy] = centroRel(e.clientX,e.clientY); if (ZM.s>1.02) zoomA(1,0,0); else zoomA(2.6,cx,cy); return aplicarZ(true); }
+      ZM.tapT = Date.now(); return; }
+    if (ZM.s<=1.02){ if (Math.abs(dx)>70 && Math.abs(dx)>Math.abs(dy)) return irZ(dx<0?1:-1); if (dy>110 && dy>Math.abs(dx)) return cerrarZoom(); }
+    aplicarZ(true); };
+  z.addEventListener('pointerup', fin); z.addEventListener('pointercancel', fin);
+}
+document.addEventListener('keydown', e=>{ if (!$('#zoom')) return; if (e.key==='Escape'){ e.stopPropagation(); cerrarZoom(); } else if (e.key==='ArrowRight') irZ(1); else if (e.key==='ArrowLeft') irZ(-1); else if (e.key==='+'||e.key==='='){ zoomA(ZM.s*1.5,0,0); aplicarZ(true); } else if (e.key==='-'){ zoomA(ZM.s/1.5,0,0); aplicarZ(true); } }, true);
+document.addEventListener('load', e=>{ const im = e.target; if (im instanceof HTMLImageElement && im.parentElement?.classList.contains('zbox')) im.parentElement.classList.add('ok'); }, true);
+/* un toque en la foto de una publicación la abre en grande; dos toques siguen siendo "me gusta" */
+let zTap = null;
+document.addEventListener('click', e=>{ const car = e.target.closest('.car[data-dbl]'); if (!car || e.target.closest('button')) return;
+  if (zTap){ clearTimeout(zTap); zTap = null; return; }
+  zTap = setTimeout(()=>{ zTap = null; const p = post(car.dataset.dbl); if (!p) return; const tr = car.querySelector('.car-track'); const i = tr ? Math.round(tr.scrollLeft/Math.max(1,tr.clientWidth)) : 0; abrirZoom(p.fotos.map(zoomHTML), i); }, 300); });
+
+/* ---------- galería del producto ---------- */
+function galeriaProd(p){
+  const fs = fotosDeProd(p); const i = Math.min(ui.pfoto||0, fs.length-1);
+  return `<div class="pgal"><div class="pgal-track" id="pgal">${fs.map((f,k)=>`<button type="button" class="pgal-s" data-a="zoomProd" data-x="${p.id}" data-o="${k}" aria-label="Ver foto ${k+1} en grande"><div class="ph">${verFoto(f)}</div></button>`).join('')}</div>
+    <button type="button" class="x pgal-x" data-a="close" aria-label="Cerrar">×</button>
+    <span class="pgal-zoom">${ico.zoom}Toca para ver en grande</span>
+    ${fs.length>1?`<span class="car-n" id="pgal-n">${i+1}/${fs.length}</span><button type="button" class="car-b l" data-a="pgalMove" data-o="-1" aria-label="Foto anterior">‹</button><button type="button" class="car-b r" data-a="pgalMove" data-o="1" aria-label="Foto siguiente">›</button>`:''}</div>
+    ${fs.length>1?`<div class="pthumbs" id="pthumbs">${fs.map((f,k)=>`<button type="button" class="${i===k?'on':''}" data-a="pgalGo" data-o="${k}" aria-label="Foto ${k+1}"><div class="ph">${verFoto(f)}</div></button>`).join('')}</div>`:''}`;
+}
+document.addEventListener('scroll', e=>{ const g = e.target; if (!g || g.id!=='pgal') return; const i = Math.round(g.scrollLeft/Math.max(1,g.clientWidth)); if (i===ui.pfoto) return; ui.pfoto = i;
+  const n = $('#pgal-n'); if (n) n.textContent = `${i+1}/${g.children.length}`; document.querySelectorAll('#pthumbs button').forEach((b,k)=>b.classList.toggle('on',k===i)); }, true);
+const ZOBS = {n:null, post:null};
+new MutationObserver(()=>{ const g = $('#pgal'); if (g) g.scrollLeft = (ui.pfoto||0)*g.clientWidth;
+  const cl = $('#comlist'); if (cl){ const n = cl.querySelectorAll('.cm').length; if (ZOBS.post===ui.sheet?.post && ZOBS.n!=null && n>ZOBS.n) cl.scrollTop = cl.scrollHeight; ZOBS.n = n; ZOBS.post = ui.sheet?.post; } else { ZOBS.n = null; ZOBS.post = null; } }).observe($('#layer'), {childList:true});
+
+/* ---------- microanimaciones: los botones "rebotan" al tocarlos ---------- */
+document.addEventListener('pointerdown', e=>{ const b = e.target.closest('button, .btn'); if (!b || b.disabled || b.closest('#zoom')) return; b.classList.remove('tap'); requestAnimationFrame(()=>{ b.classList.add('tap'); setTimeout(()=>b.classList.remove('tap'), 380); }); }, {passive:true});
+
+/* ---------- acciones ---------- */
+function registrarAccionesV12(){
+  Object.assign(A, {
+    verLikes: x => { ui.sheet = {t:'likes', post:x}; renderLayer(); },
+    zoomAvatar: x => { const a = perfilDe(x); const big = a.foto ? `<div class="zbox ok"><img src="${esc(a.foto)}" alt=""></div>` : a.fu ? `<div class="zbox zav" style="--c:${esc(a.color)}"><span>${esc(inits(a.nombre))}</span><img data-u="1" src="https://images.unsplash.com/photo-${a.fu}?w=1200&q=80&auto=format" alt="" referrerpolicy="no-referrer"></div>` : `<div class="zbox zav ok" style="--c:${esc(a.color)}"><span>${esc(inits(a.nombre))}</span></div>`; abrirZoom([big]); },
+    zoomPortada: x => { const n = neg(x); abrirZoom([zoomHTML({k:kNeg(n), a:color2(n.color,.25), b:color2(n.color,.55), l:n.nombre, u:fotoU(kNeg(n), n.id+'c')})]); },
+    zoomProd: (x, el) => { const p = prod(x); abrirZoom(fotosDeProd(p).map(zoomHTML), +el.dataset.o); },
+    pgalMove: (x, el) => { const g = $('#pgal'); if (!g) return; const n = g.children.length; const i = ((ui.pfoto||0)+(+el.dataset.o)+n)%n; g.scrollTo({left:i*g.clientWidth, behavior:'smooth'}); },
+    pgalGo: (x, el) => { const g = $('#pgal'); if (g) g.scrollTo({left:(+el.dataset.o)*g.clientWidth, behavior:'smooth'}); },
+    estadoCuenta: () => { ui.abrirEstado = true; ui.sheet = null; go('ajustes'); ui.abrirEstado = false; setTimeout(()=>$('#estado-cuenta')?.scrollIntoView({behavior:'smooth', block:'start'}), 60); },
+    apelar: x => { ui.sheet = {t:'apelar', ref:x}; ui.err=''; renderLayer(); },
+    apResolver: (x, el) => { const a = S.apelaciones.find(a=>a.id===x); if (!a) return; const u = usr(a.u); a.estado = el.dataset.o; a.resuelta = Date.now();
+      if (a.estado==='aceptada'){
+        if (a.ref==='suspension'){ u.suspendido = false; u.susp = null; u.suspHasta = null; delete S.pausas[u.id]; }
+        else if (a.ref==='publicar'){ quitarAviso(u); u.subidas = true; u.bloqHasta = null; }
+        else { const p = post(a.ref); if (p){ p.estado = 'aprobado'; p.t = Date.now(); } quitarAviso(u, a.ref); }
+        a.resp = 'Revisamos tu caso y te damos la razón'; notif(u.id,'sistema',null,{texto:'Aceptamos tu apelación. Ya quitamos el aviso. ¡Gracias por tu paciencia!'});
+      } else { a.resp = 'Revisamos tu caso y la decisión se mantiene'; notif(u.id,'sistema',null,{texto:'Revisamos tu apelación y la decisión se mantiene. Puedes consultar las reglas en Configuración.'}); }
+      log('Admin', `Apelación ${a.estado}`, `@${u.usuario} · ${a.titulo}`); save(); rerender(); toast(a.estado==='aceptada'?'Apelación aceptada: se restauró':'Se mantuvo la decisión'); },
+    vfTipo: x => { const g = id => $('#'+id)?.value; if (ui.vf){ ['nom','resp','cargo','mail','sitio','men'].forEach(k=>{ const v = g('vf-'+k); if (v!=null) ui.vf[k] = v; }); ui.vf.tipo = x; } rerender(); },
+    vfCheck: (x, el) => { const v = S.verifs.find(v=>v.id===x); v.checks[el.dataset.o] = !v.checks[el.dataset.o]; save(); rerender(); },
+    vfAprobar: x => { const v = S.verifs.find(v=>v.id===x); if (!VERIF[v.tipo].req.every(k=>v.checks[k])) return toast('Marca todas las revisiones antes de aprobar');
+      const u = usr(v.cuenta); v.estado = 'aprobada'; v.decidida = Date.now(); u.verif = {tipo:v.tipo, t:Date.now(), por:'Admin'}; u.nueva = false;
+      notif(u.id,'sistema',null,{texto:`¡Tu cuenta fue verificada! Ahora aparece la insignia de ${VERIF_TXT[v.tipo].toLowerCase()}.`}); log('Admin','Verificó una cuenta',`@${u.usuario} · ${VERIF[v.tipo].l}`); save(); rerender(); toast('Cuenta verificada'); },
+    vfInfo: x => { const v = S.verifs.find(v=>v.id===x); v.estado = 'info'; notif(v.cuenta,'sistema',null,{texto:'Necesitamos más información para tu verificación. Revisa tu correo institucional.'}); save(); rerender(); toast('Se pidió más información'); },
+    vfRechazar: x => { const v = S.verifs.find(v=>v.id===x); const k = $('#vfr-'+x).value; v.estado = 'rechazada'; v.motivo = RECHAZOS_V[k]; v.t = Date.now();
+      if (k==='suplantacion'){ const u = usr(v.cuenta); registrarAviso(u, 'otro', 'verif:'+v.id); S.alertas.unshift({id:'al'+Date.now().toString(36), t:Date.now(), quien:u.id, para:null, lugar:'verificación', texto:`Intentó verificarse como "${v.nombre}" (${VERIF[v.tipo].l})`, cats:['suplantación'], nivel:2, oculto:false, intentos:1, estado:'nueva'}); }
+      notif(v.cuenta,'sistema',null,{texto:`Tu solicitud de verificación no fue aprobada: ${v.motivo}. Podrás intentarlo de nuevo en 30 días.`}); log('Admin','Rechazó una verificación',`@${perfilDe(v.cuenta).handle} · ${v.motivo}`); save(); rerender(); toast('Solicitud rechazada'); },
+    vfQuitar: x => { if (!confirmarSimple('¿Quitar la insignia de verificación?')) return; const u = usr(x); u.verif = null; notif(x,'sistema',null,{texto:'Se retiró la insignia de verificación de tu cuenta.'}); log('Admin','Quitó una verificación','@'+u.usuario); save(); rerender(); },
+    vfProtegidos: () => { S.cfg.protegidos = $('#prot-txt').value.split('\n').map(s=>s.trim()).filter(Boolean); save(); toast('Nombres protegidos guardados'); },
+    calificar: x => { const [ped, rol, n] = x.split('|'); const p = S.pedidos.find(o=>o.id===ped); if (!p || p.estado!=='entregado') return; if (calDe(ped, rol)) return toast('Ya calificaste');
+      const a = rol==='neg' ? p.neg : rol==='rep' ? p.rep?.rep : p.cuenta; const de = rol==='neg'||rol==='rep' ? p.cuenta : rol==='cli_n' ? p.neg : p.rep?.rep;
+      S.calif.push({ped, rol, de, a, est:+n, t:Date.now()});
+      if (rol==='neg' && !S.resenas.some(r=>r.ped===ped)) S.resenas.push({neg:p.neg, autor:p.cuenta, est:+n, texto:'', t:Date.now(), ped});
+      save(); rerender(); toast(+n<=2 ? 'Gracias. Si algo salió mal, lo revisaremos.' : '¡Gracias por calificar!'); },
+    calComent: x => { const i = $('#rc-'+x); const t = (i?.value||'').trim(); if (t.length<3) return toast('Escribe tu comentario'); const r = revisar(t,'publico',{donde:'reseña'}); if (!r.ok) return toast(msgBloqueo(r));
+      const rs = S.resenas.find(r=>r.ped===x); if (rs) rs.texto = t; const c = calDe(x,'neg'); if (c) c.coment = true; save(); rerender(); toast('Reseña publicada'); }
+  });
+  Object.assign(F, {
+    apelar: () => { const t = ($('#ap-txt').value||'').trim(); if (t.length<10){ ui.err = 'Explica un poco más (mínimo 10 letras).'; return renderLayer(); }
+      const an = analizarTexto(t,'privado'); if (an.bloqueos.some(b=>['enlace','correo','teléfono','dirección IP'].includes(b))){ ui.err = 'Sin enlaces, correos ni teléfonos, por favor.'; return renderLayer(); }
+      const ref = ui.sheet.ref; const titulo = ref==='suspension' ? 'Apelación de suspensión' : ref==='publicar' ? 'Apelación de pausa de publicaciones' : 'Apelación de publicación rechazada';
+      S.apelaciones.push({id:'ap'+Date.now().toString(36), u:S.yo, ref, titulo, texto:t, t:Date.now(), estado:'pendiente'}); log('Escudo','Nueva apelación', `@${usr(S.yo).usuario} · ${titulo}`);
+      ui.err = ''; cerrarHoja(); save(); rerender(); toast('Apelación enviada. Una persona la revisará.'); },
+    verif: () => { const g = id => ($('#'+id)?.value||'').trim(); const d = ui.vf; const fail = m => { ui.err = m; rerender(); };
+      ['nom','resp','cargo','mail','sitio','men'].forEach(k=>{ const v = $('#vf-'+k)?.value; if (v!=null) d[k] = v; });
+      if (!d.tipo) return fail('Elige el tipo de cuenta.');
+      if (g('vf-nom').length<3) return fail('Escribe el nombre oficial.'); if (g('vf-resp').split(' ').filter(Boolean).length<2) return fail('Escribe el nombre completo del responsable.');
+      if (g('vf-cargo').length<3) return fail('Escribe el cargo o la actividad.');
+      if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(g('vf-mail'))) return fail('Escribe un correo válido.');
+      if (d.tipo==='gobierno' && CORREO_GRATIS.test(g('vf-mail'))) return fail('Las instituciones de gobierno deben usar su correo oficial, no Gmail, Hotmail u Outlook.');
+      if (g('vf-sitio').length<4) return fail('Escribe tu sitio oficial o tu cuenta oficial en otra red, para buscar ahí el código.');
+      if (VERIF[d.tipo].req.includes('notoriedad') && g('vf-men').split('\n').filter(x=>x.trim()).length<3) return fail('Escribe al menos 3 menciones en otros medios (una por renglón).');
+      if (!d.docs.ine || !d.docs.selfie) return fail('Agrega tu INE y la selfie con tu INE.');
+      if (VERIF[d.tipo].req.includes('documento') && !d.docs.doc) return fail('Agrega el documento oficial.');
+      if (!$('#vf-ok').checked) return fail('Confirma la declaración.');
+      const r = revisar(g('vf-nom')+' '+g('vf-cargo'),'publico'); if (!r.ok) return fail(msgBloqueo(r));
+      S.verifs.push({id:'vf'+Date.now().toString(36), cuenta:S.yo, tipo:d.tipo, nombre:g('vf-nom'), resp:g('vf-resp'), cargo:g('vf-cargo'), correo:g('vf-mail'), sitio:g('vf-sitio'), menciones:g('vf-men'), docs:{ine:!!d.docs.ine, selfie:!!d.docs.selfie, doc:!!d.docs.doc}, codigo:d.codigo, t:Date.now(), estado:'pendiente', checks:{}});
+      log('Verificación','Nueva solicitud',`@${usr(S.yo).usuario} · ${VERIF[d.tipo].l}`); ui.vf = null; ui.err = ''; save(); rerender(); window.scrollTo(0,0); toast('Solicitud enviada. Te avisaremos por notificación.'); }
+  });
+  document.addEventListener('change', e=>{ const t = e.target; if (t.dataset && t.dataset.doc && ui.vf){ const f = t.files[0]; if (f){ ['nom','resp','cargo','mail','sitio','men'].forEach(k=>{ const v = $('#vf-'+k)?.value; if (v!=null) ui.vf[k] = v; }); ui.vf.docs[t.dataset.doc] = f.name.slice(0,40); const ok = $('#vf-ok')?.checked; rerender(); if (ok) $('#vf-ok').checked = true; } } });
+}
+asegurarV12();
+
 
 /* ---------- render ---------- */
-const VISTAS = {guardados:vGuardados, home:vHome, buscar:vBuscar, inicio:vInicio, notifs:vNotifs, negocio:vNegocio, carrito:vCarrito, checkout:vCheckout, seguimiento:vSeguimiento, pedidos:vPedidos, vende:vVende, post:vPost, perfil:vPerfil, usuario:vUsuario, mensajes:vMensajes, ajustes:vAjustes, minegocio:vMiNegocio};
+const VISTAS = {verificar:vVerificar, guardados:vGuardados, home:vHome, buscar:vBuscar, inicio:vInicio, notifs:vNotifs, negocio:vNegocio, carrito:vCarrito, checkout:vCheckout, seguimiento:vSeguimiento, pedidos:vPedidos, vende:vVende, post:vPost, perfil:vPerfil, usuario:vUsuario, mensajes:vMensajes, ajustes:vAjustes, minegocio:vMiNegocio};
 const historial = [];
 function modosNav(){
   const act = ui.mode==='app' ? (soyNegocio()?'comercio':'app') : ui.mode;
@@ -2985,7 +3598,7 @@ function renderLayer(){
   if (ui.mode==='app'){
     if (ui.pend) h = avisoOtroComercio();
     else if (ui.sel) h = hojaProducto();
-    else if (ui.sheet) h = ({coment:hojaComentarios, compartir:hojaCompartir, opcPost:hojaOpcPost, reportar:hojaReportar, opcPerfil:hojaOpcPerfil, publicar:hojaPublicar, nota:hojaNota, crear:hojaCrear, historia:hojaHistoria, cuentas:hojaCuentas, mas:hojaMas, verNota:hojaVerNota, seguidores:hojaSeguidores, clima:hojaClima}[ui.sheet.t]||(()=>''))();
+    else if (ui.sheet) h = ({coment:hojaComentarios, compartir:hojaCompartir, opcPost:hojaOpcPost, reportar:hojaReportar, opcPerfil:hojaOpcPerfil, publicar:hojaPublicar, nota:hojaNota, crear:hojaCrear, historia:hojaHistoria, cuentas:hojaCuentas, mas:hojaMas, verNota:hojaVerNota, seguidores:hojaSeguidores, clima:hojaClima, likes:hojaLikes, apelar:hojaApelar}[ui.sheet.t]||(()=>''))();
   }
   $('#layer').innerHTML = h;
   if (!ui.story) document.body.style.overflow = h ? 'hidden' : '';
@@ -3151,7 +3764,7 @@ const A = {
     S.reportes = S.reportes.filter(r=>r.post!==id&&r.hist!==id);
     aplicarDecision(it,t,{d:'rechazado',motivo:m,razon:'Decisión manual: '+MOTIVOS[m]},'admin'); if(antes==='aprobado') it.estado='retirado'; save(); rerender(); toast(antes==='aprobado'?'Retirado':'Rechazado'); },
   revertir: x => { const d=S.decisiones[+x]; const it=d.tipo==='post'?post(d.id):S.historias.find(h=>h.id===d.id);
-    if (d.d==='rechazado' && !esNeg(it.autor) && ['publicidad','adulto','enlace','estafa'].includes(it.motivo)){ const u=usr(it.autor); u.strikes=Math.max(0,u.strikes-1); if(u.strikes<S.cfg.strikesMax) u.subidas=true; }
+    if (d.d==='rechazado' && !esNeg(it.autor) && ['publicidad','adulto','enlace','estafa'].includes(it.motivo)){ quitarAviso(usr(it.autor), it.id); }
     it.estado = d.d==='aprobado' ? 'pendiente' : 'aprobado'; d.revertida=true; S.decisiones.splice(+x,1);
     log('Admin','Revirtió decisión automática',`${d.id}: ${d.d} → ${it.estado}`); save(); rerender(); toast(it.estado==='aprobado'?'Ahora está publicado':'Regresó a revisión manual'); },
   descartarRep: x => { S.reportes=S.reportes.filter(r=>r.post!==x); log('Admin','Reporte descartado',x); save(); rerender(); },
@@ -3259,7 +3872,8 @@ const F = {
     const ns = nombreSeguro(nom,us); if (ns) return fail(ns);
     const r=revisar(nom+' '+us+' '+bio,'publico'); if(!r.ok) return fail(msgBloqueo(r));
     const f=$('#u-foto').files[0]; if (f){ try { u.foto = await redimensionar(f,200,true); } catch(e){ return fail('No se pudo leer la imagen.'); } }
-    Object.assign(u,{nombre:nom, usuario:us, bio}); ui.err=''; save(); rerender(); toast('Perfil guardado');
+    const perdio = u.verif && (u.nombre!==nom || u.usuario!==us); if (perdio) u.verif = null;
+    Object.assign(u,{nombre:nom, usuario:us, bio}); ui.err=''; save(); rerender(); toast(perdio?'Perfil guardado. Como cambiaste tu nombre, la insignia de verificación se quitó hasta revisarte de nuevo.':'Perfil guardado');
   },
   resena: () => {
     const t=$('#r-txt').value.trim(); if(t.length<3) return toast('Escribe tu reseña');
@@ -3340,7 +3954,7 @@ Object.assign(A, {
   termAdd: () => { const t=$('#term-t').value.trim().toLowerCase(), c=$('#term-c').value; if(t.length<3) return toast('Escribe al menos 3 letras'); S.cfg.terminos.push({t:limpiarTexto(t), cat:c}); CACHE_RE.clear(); log('Admin','Agregó término al Escudo',c); save(); rerender(); },
   termDel: x => { S.cfg.terminos.splice(+x,1); save(); rerender(); }
 });
-registrarAccionesReparto(); registrarAccionesExtras();
+registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12();
 aplicarPref();
 render();
 cargarFotos();
