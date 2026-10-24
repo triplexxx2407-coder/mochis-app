@@ -737,6 +737,9 @@ html,body,button,a,.car,input,textarea,select{touch-action:manipulation}
 .rmain .post .car .ph img{width:100%;height:100%;object-fit:cover}
 .pgrid .ph img{width:100%;height:100%;object-fit:cover}
 .rcentro .card{text-align:left}.rchat .who{border:0;background:none;padding:0;gap:10px;display:flex;align-items:center;color:var(--fg)}.rmain .segs{flex-wrap:wrap}
+.pill.ejm{background:color-mix(in srgb,#0EA5E9 14%,transparent);color:#0284C7;font-size:10.5px;padding:1px 7px;vertical-align:middle}.side .nv[data-a="rCrear"] svg,.mnav button[data-a="rCrear"] svg{color:var(--c-crear)}.side .nv[data-x="admin"] svg{color:var(--brand)}.prow .btn.sm svg{width:14px;height:14px}
+.protobar .modes{max-width:100%;min-width:0;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}.protobar .modes::-webkit-scrollbar{display:none}.protobar .modes button{white-space:nowrap;flex:none}.protobar{min-width:0;max-width:100%;box-sizing:border-box}
+.rxpasos{display:flex;gap:4px}.rxpasos span{flex:1;min-width:0;text-align:center;font-size:11.5px;font-weight:700;padding:6px 2px 0;border-top:4px solid var(--line);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rxpasos span.on{border-color:var(--ok);color:var(--ok)}
 .rltabs{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--line)}.rltabs button{flex:1;border:0;background:none;padding:9px;border-radius:9px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer}.rltabs button.on{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}.rlogin form{text-align:left}
 </style>
 </head>
@@ -3459,10 +3462,10 @@ const RCFG = { url:'https://vhxisjkmkwgpvuqcbomt.supabase.co', key:'eyJhbGciOiJI
 const SB_LIB = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.75.1/dist/umd/supabase.js';
 const RV = { sb:null, fase:'cargando', user:null, me:null, est:null, view:'feed', feed:'parati', posts:[], perfiles:{}, misLikes:new Set(), guardados:new Set(),
   sigo:new Set(), meSiguen:new Set(), sheet:null, err:'', perfil:null, chat:null, msgs:[], chats:[], noLeidos:0, notifs:[], nNotifs:0, q:'', res:[], adm:'revisar', canal:null, cargandoFeed:false, draft:[], enviado:0 };
-const rFoto = path => path ? `${RCFG.url}/storage/v1/object/public/fotos/${path}` : null;
+const rFoto = path => !path ? null : path.startsWith('u:') ? urlU(path.slice(2), 1080) : `${RCFG.url}/storage/v1/object/public/fotos/${path}`;
 const rPerfil = id => RV.perfiles[id] || {id, usuario:'…', nombre:'…', color:'#6B7280'};
 const rAv = (id, s=40) => { const p = rPerfil(id); return avatar({nombre:p.nombre, color:p.color, foto:rFoto(p.foto), negocio:false}, s); };
-const rHandle = id => { const p = rPerfil(id); return `${esc(p.usuario)}${p.verif?`<span class="verif ${p.verif}" title="Cuenta verificada">✓</span>`:''}`; };
+const rHandle = id => { const p = rPerfil(id); return `${esc(p.usuario)}${p.verif?`<span class="verif ${p.verif}" title="Cuenta verificada">✓</span>`:''}${p.ejemplo?' <span class="pill ejm" title="Cuenta de ejemplo creada por el equipo para que la app no se vea vacía">Ejemplo</span>':''}`; };
 const rT = s => new Date(s).getTime();
 const rAmigo = id => RV.sigo.has(id) && RV.meSiguen.has(id);
 const rErr = e => { const m = (e && (e.message || e.error_description)) || String(e||''); if (/duplicate key.*usuario/i.test(m)) return 'Ese usuario ya existe. Elige otro.'; if (/JWT|session/i.test(m)) return 'Tu sesión venció. Vuelve a entrar.'; if (/Failed to fetch|NetworkError/i.test(m)) return 'Sin conexión. Revisa tu internet.'; return m.replace(/^.*?ERROR:\s*/,''); };
@@ -3486,10 +3489,10 @@ async function rSesion(ses){
   if (!uid){ RV.user=null; RV.me=null; RV.fase='login'; rCanal(false); return renderReal(); }
   if (RV.user && RV.user.id===uid && RV.me) return;
   RV.user = ses.user; if (location.hash.includes('access_token')) history.replaceState(null,'',location.pathname);
-  const { data:me } = await RV.sb.from('profiles').select('id,usuario,nombre,bio,foto,color,priv,verif,created_at').eq('id', uid).maybeSingle();
+  const { data:me } = await RV.sb.from('profiles').select('id,usuario,nombre,bio,foto,color,priv,verif,created_at,ejemplo').eq('id', uid).maybeSingle();
   if (!me){ RV.fase='registro'; return renderReal(); }
   RV.me = me; RV.perfiles[uid] = me; RV.fase='app';
-  await Promise.all([rEstado(), rRelaciones(), rCargarFeed(), rCargarChats(), rCargarNotifs()]);
+  await Promise.all([rEstado(), rRelaciones(), rCargarFeed(), rCargarChats(), rCargarNotifs(), rxCargarTienda(), rxSugeridos()]); rxCargarCarrito();
   rCanal(true); renderReal();
 }
 async function rEstado(){ const { data } = await RV.sb.rpc('mi_estado'); RV.est = data && data[0] || {rol:'user', avisos:0, suspendido:false, menor:false}; }
@@ -3500,7 +3503,7 @@ async function rRelaciones(){
 }
 async function rTraerPerfiles(ids){
   const faltan = [...new Set(ids)].filter(id=>id && !RV.perfiles[id]); if (!faltan.length) return;
-  const { data } = await RV.sb.from('profiles').select('id,usuario,nombre,bio,foto,color,priv,verif,created_at').in('id', faltan);
+  const { data } = await RV.sb.from('profiles').select('id,usuario,nombre,bio,foto,color,priv,verif,created_at,ejemplo').in('id', faltan);
   (data||[]).forEach(p=>RV.perfiles[p.id]=p);
 }
 
@@ -3734,6 +3737,8 @@ function rPintarHoja(){
     const p = RV.posts.find(x=>x.id===h.id) || (RV.pdatos&&RV.pdatos.posts.find(x=>x.id===h.id)); const mio = p && p.autor===RV.user.id;
     html = hoja('Opciones', `${mio||RV.est.rol==='admin'?`<button class="lrow" data-a="rBorrar" data-x="${h.id}" style="color:var(--bad)">${ico.block}<div class="tx"><b>Eliminar publicación</b></div></button>`:''}
       ${!mio?`<button class="lrow" data-a="rReportar" data-x="${h.id}">${ico.flag}<div class="tx"><b>Reportar</b><div class="small muted">Una persona del equipo la revisa</div></div></button>`:''}`).replace(/data-a="closeSheet"/g,'data-a="rCerrar"');
+  } else if (h.t==='clima'){
+    html = hojaClima().replace(/data-a="closeSheet"/g,'data-a="rCerrar"');
   } else if (h.t==='reportar'){
     html = hoja('¿Por qué la reportas?', ['Contenido +18 o desnudos','Riesgo para menores','Acoso o amenazas','Ofensivo o violento','Venta de drogas o armas','Estafa o publicidad','Suplantación de identidad','Otro'].map(m=>`<button class="lrow" data-a="rEnviarReporte" data-x="${esc(m)}"><div class="tx"><b>${m}</b></div></button>`).join('')).replace(/data-a="closeSheet"/g,'data-a="rCerrar"');
   }
@@ -3854,15 +3859,422 @@ function registrarAccionesReal(){
       const e = rTextoOk(nom+' '+bio,'publico'); if (e) return fail(e);
       const cambios = {nombre:nom, usuario:usr, bio}; const f = $('#re-foto').files[0];
       if (f){ try { const blob = await rComprimir(f, 400); const ruta = `${RV.user.id}/perfil-${Date.now()}.jpg`; const up = await RV.sb.storage.from('fotos').upload(ruta, blob, {contentType:'image/jpeg'}); if (up.error) throw up.error; cambios.foto = ruta; } catch(err){ return fail('No se pudo subir la foto: '+rErr(err)); } }
-      const {data, error} = await RV.sb.from('profiles').update(cambios).eq('id', RV.user.id).select('id,usuario,nombre,bio,foto,color,priv,verif,created_at').single();
+      const {data, error} = await RV.sb.from('profiles').update(cambios).eq('id', RV.user.id).select('id,usuario,nombre,bio,foto,color,priv,verif,created_at,ejemplo').single();
       if (error) return fail(rErr(error)); RV.me = data; RV.perfiles[RV.user.id] = data; RV.pdatos=null; RV.view='perfil'; renderReal(); toast('Perfil guardado'); }
   });
   document.addEventListener('change', async e => { if (e.target.id!=='rc-fotos') return; const files=[...e.target.files].filter(f=>f.type.startsWith('image/')).slice(0, 4-RV.draft.length); RV.draftTxt=$('#rc-txt')?.value||'';
     for (const f of files){ try { const blob = await rComprimir(f); RV.draft.push({blob, url:URL.createObjectURL(blob)}); } catch(err){ toast('No se pudo leer una foto'); } } renderReal(); });
-  let rqT=null; document.addEventListener('input', e => { if (e.target.id!=='rq') return; RV.q=e.target.value; clearTimeout(rqT); rqT=setTimeout(async ()=>{ const q=RV.q.trim().toLowerCase().replace(/[%_,()]/g,''); if (q.length<2){ RV.res=[]; } else { const {data} = await RV.sb.from('profiles').select('id,usuario,nombre,bio,foto,color,priv,verif,created_at').or(`usuario.ilike.%${q}%,nombre.ilike.%${q}%`).limit(20); (data||[]).forEach(p=>RV.perfiles[p.id]=p); RV.res=(data||[]).map(p=>p.id); } const box=$('#rres'); if (box) box.innerHTML = RV.res.map(rFila).join('') || `<p class="muted small">${q.length>=2?'Sin resultados.':'Escribe al menos 2 letras.'}</p>`; }, 300); });
+  let rqT=null; document.addEventListener('input', e => { if (e.target.id!=='rq') return; RV.q=e.target.value; clearTimeout(rqT); rqT=setTimeout(async ()=>{ const q=RV.q.trim().toLowerCase().replace(/[%_,()]/g,''); if (q.length<2){ RV.res=[]; } else { const {data} = await RV.sb.from('profiles').select('id,usuario,nombre,bio,foto,color,priv,verif,created_at,ejemplo').or(`usuario.ilike.%${q}%,nombre.ilike.%${q}%`).limit(20); (data||[]).forEach(p=>RV.perfiles[p.id]=p); RV.res=(data||[]).map(p=>p.id); } const box=$('#rres'); if (box) box.innerHTML = RV.res.map(rFila).join('') || `<p class="muted small">${q.length>=2?'Sin resultados.':'Escribe al menos 2 letras.'}</p>`; }, 300); });
   let rTap=null; document.addEventListener('dblclick', e => { const c=e.target.closest('[data-rdbl]'); if (!c) return; const id=c.dataset.rdbl; if (!RV.misLikes.has(id)) A.rLike(id); });
 }
 function rRefrescarCard(id){ const el=$('#rp-'+id); const p = RV.posts.find(o=>o.id===id) || (RV.pdatos&&RV.pdatos.posts.find(o=>o.id===id)) || RV.postAbierto; if (el && p){ const t=document.createElement('div'); t.innerHTML=rPostCard(p); el.replaceWith(t.firstElementChild); } }
+
+/* ============================================================
+   EN VIVO v15 — mismo diseño que la demo, con datos reales
+   Tienda de prueba (negocios, productos, pedidos para recoger), panel de admin
+   y cuentas de ejemplo. El servidor revisa todo otra vez.
+   ============================================================ */
+const RX_CAT = {comida:['Comida','tacos'], ropa:['Ropa y calzado','ropa'], tecnologia:['Tecnología','celular'], belleza:['Belleza','tijeras'], hogar:['Hogar y ferretería','ferre'], mascotas:['Mascotas','perro'], papeleria:['Papelería','libros'], servicios:['Servicios','ciudad'], otro:['Otro','tienda']};
+const RX_ALIAS = {home:'feed', inicio:'tienda'};
+const RX_PEST = {nuevo:['Nuevo','warn'], aceptado:['Preparando','br'], listo:['Listo para recoger','ok'], entregado:['Entregado','ok'], cancelado:['Cancelado','bad'], rechazado:['Rechazado','bad']};
+const RX_NEST = {pendiente:['En revisión','warn'], aprobado:['Abierto','ok'], rechazado:['No aprobado','bad'], pausado:['Pausado','']};
+Object.assign(RV, {negs:[], prods:{}, carrito:null, misPed:[], pedNeg:[], miNeg:null, sug:[], cat:'todos', mnTab:'pedidos', negId:null, admNeg:null});
+const rxPesos = n => money(Math.round(Number(n||0)*100));
+const rxEsAdmin = () => !!(RV.est && RV.est.rol==='admin');
+const rxNeg = id => RV.negs.find(n=>n.id===id) || (RV.miNeg && RV.miNeg.id===id ? RV.miNeg : null);
+function rxNegAv(n, s=40){ return avatar({nombre:n.nombre, color:'#EA580C', foto:rFoto(n.foto), negocio:true}, s); }
+function rxPortada(n){ const f = rFoto(n.portada || n.foto); const k = (RX_CAT[n.categoria]||RX_CAT.otro)[1];
+  return f ? `<img src="${esc(f)}" alt="" loading="lazy">` : verFoto({k, a:'#FED7AA', b:'#FB923C', l:n.nombre}); }
+function rxProdFoto(p){ const f = rFoto(p.foto); const n = rxNeg(p.negocio) || (RV.admDatos&&RV.admDatos.negs.find(o=>o.id===p.negocio)); return f ? `<img src="${esc(f)}" alt="" loading="lazy">` : verFoto({k:n?(RX_CAT[n.categoria]||RX_CAT.otro)[1]:'tienda', a:'#F5F5F4', b:'#E7E5E4', l:p.nombre}); }
+async function rxSubir(file, max=1280){ const blob = await rComprimir(file, max); const ruta = `${RV.user.id}/${crypto.randomUUID()}.jpg`; const {error} = await RV.sb.storage.from('fotos').upload(ruta, blob, {contentType:'image/jpeg'}); if (error) throw error; return ruta; }
+
+/* ---------- datos ---------- */
+async function rxCargarTienda(){
+  const uid = RV.user.id;
+  const [ng, mp] = await Promise.all([ RV.sb.from('negocios').select('*').order('created_at', {ascending:false}).limit(100),
+    RV.sb.from('pedidos').select('*').eq('cliente', uid).order('created_at', {ascending:false}).limit(50) ]);
+  const todos = ng.data||[]; RV.miNeg = todos.find(n=>n.dueno===uid) || null; RV.negs = todos.filter(n=>n.estado==='aprobado');
+  RV.misPed = mp.data||[]; await rTraerPerfiles(todos.map(n=>n.dueno));
+  if (RV.miNeg) await rxCargarMiNeg();
+}
+async function rxCargarMiNeg(){
+  if (!RV.miNeg) return; const id = RV.miNeg.id;
+  const [pr, pe] = await Promise.all([ RV.sb.from('productos').select('*').eq('negocio', id).order('created_at', {ascending:false}), RV.sb.from('pedidos').select('*').eq('negocio', id).order('created_at', {ascending:false}).limit(100) ]);
+  RV.prods[id] = pr.data||[]; RV.pedNeg = pe.data||[]; await rTraerPerfiles(RV.pedNeg.map(p=>p.cliente));
+}
+async function rxCargarProds(id){ const {data} = await RV.sb.from('productos').select('*').eq('negocio', id).order('created_at', {ascending:false}); RV.prods[id] = data||[]; }
+async function rxSugeridos(){
+  const {data} = await RV.sb.from('profiles').select('id,usuario,nombre,bio,foto,color,priv,verif,created_at,ejemplo').neq('id', RV.user.id).order('created_at', {ascending:false}).limit(40);
+  (data||[]).forEach(p=>RV.perfiles[p.id]=p); RV.sug = (data||[]).map(p=>p.id);
+}
+function rxCarritoKey(){ return 'lm-carrito-'+(RV.user?RV.user.id:''); }
+function rxCargarCarrito(){ try { RV.carrito = JSON.parse(localStorage.getItem(rxCarritoKey())||'null'); } catch(e){ RV.carrito=null; } if (RV.carrito && !RV.carrito.items?.length) RV.carrito=null; }
+function rxGuardarCarrito(){ try { if (RV.carrito && RV.carrito.items.length) localStorage.setItem(rxCarritoKey(), JSON.stringify(RV.carrito)); else { localStorage.removeItem(rxCarritoKey()); RV.carrito=null; } } catch(e){} }
+const rxCartN = () => RV.carrito ? RV.carrito.items.reduce((s,i)=>s+i.cant,0) : 0;
+const rxCartTot = () => RV.carrito ? RV.carrito.items.reduce((s,i)=>s+i.precio*i.cant,0) : 0;
+
+function rCanal(on){
+  if (RV.canal){ RV.sb.removeChannel(RV.canal); RV.canal = null; }
+  if (!on) return; const uid = RV.user.id;
+  let ch = RV.sb.channel('yo-'+uid)
+    .on('postgres_changes', {event:'INSERT', schema:'public', table:'messages', filter:`para=eq.${uid}`}, async p=>{ const m = p.new; await rTraerPerfiles([m.de]);
+      if (RV.view==='chat' && RV.chat===m.de){ RV.msgs.push(m); RV.sb.from('messages').update({leido:true}).eq('id', m.id).then(()=>{}); rPintarChat(); }
+      else { toast(`💬 ${rPerfil(m.de).nombre}: ${m.texto.slice(0,40)}`); }
+      rCargarChats().then(()=>{ if (RV.view==='mensajes') renderReal(); else rBadges(); }); })
+    .on('postgres_changes', {event:'INSERT', schema:'public', table:'notifs', filter:`para=eq.${uid}`}, async p=>{ await rTraerPerfiles([p.new.de]); RV.notifs.unshift(p.new); RV.nNotifs++;
+      if (p.new.tipo==='pedido'){ toast('🛍️ ' + (p.new.de ? rPerfil(p.new.de).nombre + ' ' : '') + (p.new.texto||'')); await rxCargarTienda(); }
+      if (['notifs','pedidos','minegocio'].includes(RV.view)) renderReal(); else rBadges(); })
+    .on('postgres_changes', {event:'UPDATE', schema:'public', table:'pedidos', filter:`cliente=eq.${uid}`}, p=>{ const i = RV.misPed.findIndex(x=>x.id===p.new.id); if (i>=0) RV.misPed[i] = p.new; if (RV.view==='pedidos') renderReal(); });
+  if (RV.miNeg) ch = ch.on('postgres_changes', {event:'*', schema:'public', table:'pedidos', filter:`negocio=eq.${RV.miNeg.id}`}, async ()=>{ await rxCargarMiNeg(); if (RV.view==='minegocio') renderReal(); else rBadges(); });
+  RV.canal = ch.subscribe();
+}
+
+/* ---------- armazón (igual que la demo) ---------- */
+function renderReal(){
+  const app = $('#app'); if (!app) return;
+  if (!RV.sb && RV.fase==='cargando'){ rIniciar(); }
+  const top = `<div class="protobar rprotobar"><b>En vivo</b><span>Cuentas reales · tienda en modo prueba (sin pagos)</span>${modosNav()}</div>`;
+  if (RV.fase==='app'){ app.innerHTML = rVApp(top); }
+  else {
+    let cuerpo = '';
+    if (RV.fase==='cargando') cuerpo = `<div class="rcentro"><div class="rspin"></div><p class="muted">Conectando…</p></div>`;
+    else if (RV.fase==='sinred') cuerpo = `<div class="rcentro"><h2>Sin conexión</h2><p class="muted">No se pudo conectar con el servidor. Revisa tu internet e inténtalo de nuevo.</p><button class="btn pri" data-a="rRecargar">Reintentar</button></div>`;
+    else if (RV.fase==='login') cuerpo = rVLogin();
+    else if (RV.fase==='registro') cuerpo = rVRegistro();
+    app.innerHTML = `<div class="rwrapv">${top}${cuerpo}</div>`;
+  }
+  rPintarHoja();
+  if (RV.view==='chat'){ const b=$('#rchat-b'); if (b) b.scrollTop=b.scrollHeight; }
+}
+function rxBadges(){ return { msg:RV.noLeidos, not:RV.nNotifs, ped:RV.misPed.filter(p=>['nuevo','aceptado','listo'].includes(p.estado)).length, neg:RV.pedNeg.filter(p=>p.estado==='nuevo').length, cart:rxCartN() }; }
+function rBadges(){ const b = rxBadges(); document.querySelectorAll('[data-badge]').forEach(el=>{ const n = b[el.dataset.badge]||0; el.textContent = n>9?'9+':n; el.hidden = !n; }); }
+function rVApp(top){
+  const v = RV.view; const B = rxBadges(); const me = RV.user.id;
+  const V = {feed:rVFeed, buscar:rVBuscar, crear:rVCrear, mensajes:rVMensajes, chat:rVChat, perfil:rVPerfil, notifs:rVNotifs, editar:rVEditar, admin:rVAdmin, post:rVPost, tienda:rxVTienda, negocio:rxVNegocio, carrito:rxVCarrito, pedidos:rxVPedidos, minegocio:rxVMiNegocio}[v] || rVFeed;
+  const act = {home:['feed','post','buscar'], inicio:['tienda','negocio'], mensajes:['mensajes','chat'], notifs:['notifs'], carrito:['carrito'], pedidos:['pedidos'], minegocio:['minegocio'], admin:['admin'], perfil:['perfil','editar']};
+  const on = k => (act[k]||[k]).includes(v) && !(k==='perfil' && RV.perfil && RV.perfil!==me) ? 'on' : '';
+  const bd = (k) => `<span class="badge" data-badge="${k}" ${B[k]?'':'hidden'}>${B[k]>9?'9+':B[k]}</span>`;
+  const items = [['home','Inicio',ico.home,''],['inicio','Tienda',ico.shop,''],['mensajes','Mensajes',ico.msg,'msg'],['notifs','Notificaciones',ico.bell,'not'],['crear','Crear',ico.plus,''],
+    ['minegocio', RV.miNeg?'Mi negocio':'Vende aquí', ico.biz, 'neg'], ['carrito','Carrito',ico.bag,'cart'], ['pedidos','Mis pedidos',ico.list,'ped'],
+    ...(rxEsAdmin()?[['admin','Administrar',ico.shield,'']]:[]), ['perfil','Perfil',rAv(me,26),'']];
+  const tema = temaActual()==='oscuro';
+  const showBar = RV.carrito && ['tienda','negocio','feed'].includes(v);
+  return `<nav class="side" aria-label="Navegación principal">
+    <button class="logo2" data-a="rGo" data-x="home"><span class="mark">${esc(inits(S.cfg.marca))}</span><span class="txt">${esc(S.cfg.marca)}</span></button>
+    ${items.map(([x,l,ic,b])=>`<button class="nv ${x==='crear'?'':on(x)}" ${x==='crear'?'data-a="rCrear"':`data-a="rGo" data-x="${x}"`} title="${l}">${ic}${b?bd(b):''}<span class="lbl">${l}</span></button>`).join('')}
+    <span class="grow"></span>
+    <button class="nv" data-a="toggleTema" title="Cambiar a modo ${tema?'claro':'oscuro'}">${tema?ico.sun:ico.moon}<span class="lbl">Modo ${tema?'claro':'oscuro'}</span></button>
+    <button class="nv" data-a="rSalir" title="Cerrar sesión">${ico.back||'←'}<span class="lbl">Cerrar sesión</span></button>
+  </nav>
+  <header class="mtop"><button class="logo2" data-a="rGo" data-x="home"><span class="mark">${esc(inits(S.cfg.marca))}</span><span class="txt">${esc(S.cfg.marca)}</span></button><span class="sp"></span>
+    ${rxEsAdmin()?`<button class="ibtn" data-a="rGo" data-x="admin" aria-label="Administrar">${ico.shield}</button>`:''}
+    <button class="ibtn" data-a="rGo" data-x="notifs" aria-label="Notificaciones">${ico.bell}${bd('not')}</button>
+    <button class="ibtn" data-a="rGo" data-x="mensajes" aria-label="Mensajes">${ico.msg}${bd('msg')}</button>
+    ${RV.miNeg?`<button class="ibtn" data-a="rGo" data-x="pedidos" aria-label="Mis pedidos">${ico.list}${bd('ped')}</button>`:''}
+    <button class="ibtn" data-a="rGo" data-x="carrito" aria-label="Carrito">${ico.bag}${bd('cart')}</button></header>
+  <main class="igmain"><div class="igin stack">${top}
+    ${RV.est&&RV.est.suspendido?`<div class="cbanner bad">${ico.shield}<span><b>Tu cuenta está suspendida</b><small>Una persona del equipo la está revisando. Mientras tanto no puedes publicar, escribir ni vender.</small></span></div>`:''}
+    ${V()}</div></main>
+  ${showBar?`<button class="cartfloat" data-a="rGo" data-x="carrito"><span>${rxCartN()} producto(s) · ${esc(RV.carrito.negNombre||'')}</span><span class="num">${rxPesos(rxCartTot())} →</span></button>`:''}
+  <nav class="mnav" aria-label="Navegación">
+    <button class="${on('home')}" data-a="rGo" data-x="home">${ico.home}Inicio</button>
+    <button class="${on('inicio')}" data-a="rGo" data-x="inicio">${ico.shop}Tienda</button>
+    <button data-a="rCrear">${ico.plus}Crear</button>
+    ${RV.miNeg?`<button class="${on('minegocio')}" data-a="rGo" data-x="minegocio">${ico.biz}${bd('neg')}Negocio</button>`:`<button class="${on('pedidos')}" data-a="rGo" data-x="pedidos">${ico.list}${bd('ped')}Pedidos</button>`}
+    <button class="${on('perfil')}" data-a="rGo" data-x="perfil">${rAv(me,24)}Perfil</button>
+  </nav>`;
+}
+
+/* ---------- inicio ---------- */
+function rxFilaPersonas(){
+  const ids = RV.sug.filter(id=>!RV.sigo.has(id)).slice(0,12);
+  return `<div class="stories" aria-label="Personas">
+    <button class="stb" data-a="rVer" data-x="${RV.user.id}"><span class="ring none">${rAv(RV.user.id,62)}</span><span class="nm">Tú</span></button>
+    ${ids.map(id=>`<button class="stb" data-a="rVer" data-x="${id}"><span class="ring ${rPerfil(id).ejemplo?'seen':''}">${rAv(id,62)}</span><span class="nm">${esc(rPerfil(id).usuario)}</span></button>`).join('')}
+    ${!ids.length?`<span class="small muted" style="align-self:center">Ya sigues a todos. ¡Invita a tus amigos!</span>`:''}</div>`;
+}
+function rxBizCard(n){ const k = (RX_CAT[n.categoria]||RX_CAT.otro)[0];
+  return `<button class="bcard2" data-a="rNeg" data-x="${n.id}"><div class="cv">${rxPortada(n)}<span class="pill acc">Para recoger</span>${rxNegAv(n,40)}</div>
+    <div class="in"><b>${esc(n.nombre)}</b><span class="small muted">${esc(k)}${n.zona?' · '+esc(n.zona):''}</span><span class="small">${n.horario?esc(n.horario):'Modo prueba'}</span></div></button>`; }
+function rxNegociosRail(t){
+  const l = RV.negs.filter(n=>n.dueno!==RV.user.id);
+  if (!l.length) return `<div class="card" style="flex-direction:row;align-items:center;flex-wrap:wrap;justify-content:space-between;gap:12px"><div><h2 style="margin:0">Aún no hay negocios abiertos</h2><div class="muted small">¿Tienes uno? Ábrelo en modo prueba: sube tus productos y recibe pedidos para recoger.</div></div><button class="btn acc" data-a="rGo" data-x="minegocio">${RV.miNeg?'Ver mi negocio':'Abrir mi negocio'}</button></div>`;
+  return `<div class="sec-h"><h2>${esc(t)}</h2><button class="lk" data-a="rGo" data-x="inicio">Ver todos</button></div><div class="bizrail">${l.map(rxBizCard).join('')}</div>`;
+}
+function rxColumna(){
+  const me = RV.user.id, p = rPerfil(me);
+  const negs = RV.negs.filter(n=>n.dueno!==me).slice(0,4);
+  const sug = RV.sug.filter(id=>!RV.sigo.has(id)).slice(0,5);
+  return `<aside class="home-side">
+    <div class="srow">${rAv(me,48)}<div class="tx"><b>${rHandle(me)}</b><span>${esc(p.nombre)}${rxEsAdmin()?' · admin':''}</span></div><button class="lk" data-a="rGo" data-x="perfil">Perfil</button></div>
+    <div class="sec-h"><b class="small muted" style="font-size:14px">Negocios para pedir hoy</b><button class="lk" data-a="rGo" data-x="inicio" style="color:var(--fg)">Ver todos</button></div>
+    ${negs.map(n=>`<div class="srow"><button style="background:none;border:0;padding:0" data-a="rNeg" data-x="${n.id}" aria-label="${esc(n.nombre)}">${rxNegAv(n,38)}</button><div class="tx"><b>${esc(n.nombre)}</b><span>${esc((RX_CAT[n.categoria]||RX_CAT.otro)[0])}${n.zona?' · '+esc(n.zona):''}</span></div><button class="lk" data-a="rNeg" data-x="${n.id}" style="color:var(--accent)">Pedir</button></div>`).join('') || `<span class="small muted">Todavía no hay. ${RV.miNeg?'':'<button class="lk" data-a="rGo" data-x="minegocio">Abre el primero</button>'}</span>`}
+    ${sug.length?`<b class="small muted" style="font-size:14px;margin-top:6px">Quizá conoces</b>${sug.map(id=>`<div class="srow"><button style="background:none;border:0;padding:0" data-a="rVer" data-x="${id}">${rAv(id,34)}</button><div class="tx"><b>${rHandle(id)}</b><span>${esc(rPerfil(id).nombre)}${RV.meSiguen.has(id)?' · te sigue':''}</span></div><button class="lk" data-a="rSeguir" data-x="${id}">Seguir</button></div>`).join('')}`:''}
+    <div class="foot">Modo prueba: sin pagos reales · Las cuentas con la etiqueta "Ejemplo" las creó el equipo<br>© 2026 ${esc(S.cfg.marca.toUpperCase())} · ${esc(S.cfg.ciudad)}, Sinaloa</div>
+  </aside>`;
+}
+function rVFeed(){
+  const tabs = [['parati','Para ti'],['siguiendo','Siguiendo'],['negocios','Negocios']];
+  let lista;
+  if (RV.feed==='negocios') lista = RV.negs.length ? `<div class="bizgrid">${RV.negs.map(rxBizCard).join('')}</div>` : rxNegociosRail('');
+  else lista = RV.cargandoFeed ? '<div class="rcentro"><div class="rspin"></div></div>' : RV.posts.length ? RV.posts.map(rPostCard).join('')
+    : `<div class="empty"><h2>${RV.feed==='siguiendo'?'Aún no sigues a nadie':'Todavía no hay publicaciones'}</h2><p class="muted">${RV.feed==='siguiendo'?'Busca a tus amigos y síguelos.':'¡Sé el primero en publicar algo!'}</p><button class="btn pri" data-a="${RV.feed==='siguiendo'?'rGo" data-x="buscar':'rCrear'}">${RV.feed==='siguiendo'?'Buscar personas':'Publicar'}</button></div>`;
+  return `<div class="home"><div class="home-feed">
+    <div class="toprow">${climaBtn().replace('data-a="clima"','data-a="rClima"')}<label class="search hsearch">${ico.search}<input id="rq" type="search" placeholder="Buscar personas, negocios o productos" value="${esc(RV.q)}" aria-label="Buscar" autocomplete="off"></label></div>
+    <div id="rres" class="stack">${RV.q.trim().length>=2?rxResultados():''}</div>
+    ${rxFilaPersonas()}
+    <div class="segs" role="tablist">${tabs.map(([k,t])=>`<button role="tab" aria-selected="${RV.feed===k}" class="${RV.feed===k?'on':''}" data-a="rFeed" data-x="${k}">${t}</button>`).join('')}</div>
+    <button class="compose" data-a="rCrear">${rAv(RV.user.id,36)}<span class="t">¿Qué está pasando en ${esc(S.cfg.ciudad)}?</span><span class="btn pri sm">Publicar</span></button>
+    ${RV.feed==='parati'?`<div class="stack" style="gap:10px">${rxNegociosRail('Negocios de '+S.cfg.ciudad)}</div>`:''}
+    <div class="feed">${lista}${RV.feed!=='negocios'?'<button class="btn block" data-a="rRefrescar">Actualizar</button>':''}</div>
+  </div>${rxColumna()}</div>`;
+}
+
+/* ---------- búsqueda ---------- */
+RV.resN = []; RV.resP = [];
+function rxResultados(){
+  const us = RV.res.filter(id=>id!==RV.user.id);
+  if (!us.length && !RV.resN.length && !RV.resP.length) return `<p class="muted small">Sin resultados para “${esc(RV.q)}”.</p>`;
+  return `${RV.resN.length?`<div class="sec-h"><h2>Negocios</h2></div><div class="bizgrid">${RV.resN.map(rxBizCard).join('')}</div>`:''}
+    ${us.length?`<div class="sec-h"><h2>Personas</h2></div><div class="stack" style="gap:8px">${us.map(rFila).join('')}</div>`:''}
+    ${RV.resP.length?`<div class="sec-h"><h2>Productos</h2></div><div class="plist">${RV.resP.map(p=>rxProdRow(p,true)).join('')}</div>`:''}`;
+}
+function rVBuscar(){
+  return `<h1>Buscar</h1><label class="search">${ico.search}<input id="rq" type="search" placeholder="Personas, negocios o productos" value="${esc(RV.q)}" autocomplete="off" aria-label="Buscar"></label>
+    <div class="stack" id="rres">${RV.q.trim().length>=2?rxResultados():'<p class="muted small">Escribe al menos 2 letras.</p>'}</div>`;
+}
+async function rxBuscar(){
+  const q = RV.q.trim().toLowerCase().replace(/[%_,()*]/g,'');
+  if (q.length<2){ RV.res=[]; RV.resN=[]; RV.resP=[]; }
+  else {
+    const [u, n, p] = await Promise.all([ RV.sb.from('profiles').select('id,usuario,nombre,bio,foto,color,priv,verif,created_at,ejemplo').or(`usuario.ilike.%${q}%,nombre.ilike.%${q}%`).limit(20),
+      RV.sb.from('negocios').select('*').eq('estado','aprobado').or(`nombre.ilike.%${q}%,descripcion.ilike.%${q}%`).limit(12),
+      RV.sb.from('productos').select('*').eq('estado','aprobado').ilike('nombre', `%${q}%`).limit(20) ]);
+    (u.data||[]).forEach(x=>RV.perfiles[x.id]=x); RV.res = (u.data||[]).map(x=>x.id); RV.resN = n.data||[];
+    RV.resP = (p.data||[]).filter(x=>rxNeg(x.negocio));
+  }
+  const box=$('#rres'); if (box) box.innerHTML = q.length>=2 ? rxResultados() : (RV.view==='buscar'?'<p class="muted small">Escribe al menos 2 letras.</p>':'');
+}
+
+/* ---------- tienda ---------- */
+function rxProdRow(p, conNeg){
+  const n = rxNeg(p.negocio); const off = !p.disponible; const mio = n && n.dueno===RV.user.id;
+  return `<div class="prow ${off?'off':''}"><div class="tx"><h4>${esc(p.nombre)}</h4>${p.descripcion?`<p>${esc(p.descripcion)}</p>`:''}
+    <div class="row" style="gap:8px"><span class="price num">${rxPesos(p.precio)}</span>${off?'<span class="pill">No disponible</span>':''}${p.estado!=='aprobado'?`<span class="pill ${p.estado==='pendiente'?'warn':'bad'}">${p.estado==='pendiente'?'En revisión':'No aprobado'}</span>`:''}</div>
+    ${conNeg&&n?`<button class="lk small" data-a="rNeg" data-x="${n.id}" style="align-self:flex-start">${esc(n.nombre)}</button>`:''}
+    ${!off && !mio && p.estado==='aprobado'?`<button class="btn pri sm" data-a="rAgregar" data-x="${p.id}" style="align-self:flex-start;margin-top:4px">${ico.plus} Agregar</button>`:''}</div>
+    <div class="thumb">${rxProdFoto(p)}</div></div>`;
+}
+function rxVTienda(){
+  const cats = Object.entries(RX_CAT).filter(([k])=>RV.negs.some(n=>n.categoria===k));
+  const l = RV.negs.filter(n=>RV.cat==='todos'||n.categoria===RV.cat);
+  return `<div class="stack">
+    <section class="shophero"><h1>Pide a los negocios de ${esc(S.cfg.ciudad)}</h1><div style="opacity:.9">Modo prueba: haces tu pedido, el negocio lo prepara y tú lo recoges. Sin pagos dentro de la app.</div>
+      <button class="search" data-a="rGo" data-x="buscar" style="text-align:left;color:var(--muted)">${ico.search}<span style="padding:10px 0">Busca negocios o productos…</span></button></section>
+    ${cats.length>1?`<div class="chips"><button class="chip ${RV.cat==='todos'?'on':''}" data-a="rCat" data-x="todos">Todos</button>${cats.map(([k,[t]])=>`<button class="chip ${RV.cat===k?'on':''}" data-a="rCat" data-x="${k}">${esc(t)}</button>`).join('')}</div>`:''}
+    <div class="sec-h"><h2>${RV.cat==='todos'?'Negocios abiertos':esc(RX_CAT[RV.cat][0])}</h2><span class="muted small">${l.length}</span></div>
+    ${l.length?`<div class="bizgrid">${l.map(rxBizCard).join('')}</div>`:'<div class="empty"><h2>Todavía no hay negocios abiertos</h2><p class="muted">Los negocios aparecen aquí cuando el equipo los aprueba.</p></div>'}
+    <div class="card" style="flex-direction:row;align-items:center;flex-wrap:wrap;justify-content:space-between;gap:12px"><div><h2 style="margin:0">¿Tienes un negocio en ${esc(S.cfg.ciudad)}?</h2><div class="muted small">Ábrelo gratis en modo prueba. Necesitas ser mayor de 18 años y el equipo lo revisa antes de publicarlo.</div></div><button class="btn acc" data-a="rGo" data-x="minegocio">${RV.miNeg?'Ver mi negocio':'Quiero vender aquí'}</button></div>
+  </div>`;
+}
+function rxVNegocio(){
+  const n = rxNeg(RV.negId); if (!n) return `<div class="empty"><h2>Negocio no disponible</h2><button class="btn" data-a="rGo" data-x="inicio">Ir a la tienda</button></div>`;
+  const ps = RV.prods[n.id]; if (!ps){ rxCargarProds(n.id).then(()=>{ if (RV.view==='negocio') renderReal(); }); }
+  const mio = n.dueno===RV.user.id; const k = (RX_CAT[n.categoria]||RX_CAT.otro)[0];
+  const vis = (ps||[]).filter(p=>mio || p.estado==='aprobado');
+  return `<div class="stack"><button class="btn back" data-a="rAtras">${ico.back}Volver</button>
+  <div class="bhead"><div class="cv">${rxPortada(n)}${rxNegAv(n,76)}</div><div class="in">
+    <div class="row between"><div><h1>${esc(n.nombre)}</h1><div class="small muted">${esc(k)} · de <button class="lk small" data-a="rVer" data-x="${n.dueno}">@${esc(rPerfil(n.dueno).usuario)}</button>${n.estado!=='aprobado'?` · <span class="pill ${RX_NEST[n.estado][1]}">${RX_NEST[n.estado][0]}</span>`:''}</div></div>
+      <div class="row">${mio?`<button class="btn pri sm" data-a="rGo" data-x="minegocio">${ico.biz} Mi negocio</button>`:''}</div></div>
+    ${n.descripcion?`<div>${esc(n.descripcion)}</div>`:''}
+    <div class="row small" style="gap:6px"><span class="pill ok">Recoger en el local</span><span class="pill">Pagas al recoger</span><span class="pill warn">Modo prueba</span></div>
+    <div class="infol"><div><b>Horario:</b> ${n.horario?esc(n.horario):'—'}</div><div><b>Zona:</b> ${n.zona?esc(n.zona):'—'}</div></div>
+  </div></div>
+  <div class="sec-h"><h2>Catálogo</h2><span class="muted small">${vis.length}</span></div>
+  ${!ps?'<div class="rcentro"><div class="rspin"></div></div>':vis.length?`<div class="plist">${vis.map(p=>rxProdRow(p,false)).join('')}</div>`:'<div class="empty"><p class="muted">Este catálogo está vacío por ahora.</p></div>'}
+  </div>`;
+}
+function rxVCarrito(){
+  const c = RV.carrito;
+  if (!c) return `<div class="empty"><h2>Tu carrito está vacío</h2><p class="muted">Entra a un negocio y agrega productos.</p><button class="btn pri" data-a="rGo" data-x="inicio">Ir a la tienda</button></div>`;
+  return `<div class="stack"><h1>Carrito</h1><div class="card stack" style="gap:10px"><div class="row between"><b>${esc(c.negNombre)}</b><button class="lk" data-a="rNeg" data-x="${c.neg}">Agregar más</button></div>
+    ${c.items.map((i,ix)=>`<div class="line" style="align-items:center"><span style="flex:1;min-width:0">${esc(i.nombre)}<br><span class="small muted">${rxPesos(i.precio)} c/u</span></span>
+      <span class="row nowrap" style="gap:6px"><button class="btn sm" data-a="rCant" data-x="${ix}" data-o="-1" aria-label="Quitar uno">−</button><b class="num">${i.cant}</b><button class="btn sm" data-a="rCant" data-x="${ix}" data-o="1" aria-label="Agregar uno">+</button></span>
+      <b class="num" style="min-width:76px;text-align:right">${rxPesos(i.precio*i.cant)}</b></div>`).join('')}
+    <div class="line" style="border-top:1px solid var(--line);padding-top:10px"><b>Total</b><b class="num">${rxPesos(rxCartTot())}</b></div></div>
+    <form class="stack" data-form="rPedir" novalidate style="gap:12px">
+      <label class="f" for="rp-nota">Nota para el negocio (opcional)<textarea id="rp-nota" maxlength="200" placeholder="Ej. sin cebolla, paso a las 6">${esc(RV.notaPed||'')}</textarea><span class="h">Sin teléfonos ni enlaces.</span></label>
+      <div class="note small"><b>Modo prueba:</b> no se cobra nada en la app. Recoges en el local y pagas ahí. Te avisamos aquí cuando esté listo.</div>
+      ${RV.err?`<div class="err" role="alert">${esc(RV.err)}</div>`:''}
+      <button class="btn pri block lg" type="submit" ${RV.enviandoPed?'disabled':''}>${RV.enviandoPed?'Enviando…':'Hacer pedido · '+rxPesos(rxCartTot())}</button>
+      <button class="btn block" type="button" data-a="rVaciar">Vaciar carrito</button></form></div>`;
+}
+function rxPedidoCard(p, comoNeg){
+  const n = rxNeg(p.negocio); const [et, cl] = RX_PEST[p.estado]||[p.estado,''];
+  const pasos = ['nuevo','aceptado','listo','entregado']; const ix = pasos.indexOf(p.estado);
+  let acciones = '';
+  if (comoNeg){
+    if (p.estado==='nuevo') acciones = `<button class="btn pri sm" data-a="rPedEstado" data-x="${p.id}" data-o="aceptado">Aceptar</button><button class="btn danger sm" data-a="rPedEstado" data-x="${p.id}" data-o="rechazado">Rechazar</button>`;
+    if (p.estado==='aceptado') acciones = `<button class="btn pri sm" data-a="rPedEstado" data-x="${p.id}" data-o="listo">Marcar listo</button><button class="btn sm" data-a="rPedEstado" data-x="${p.id}" data-o="cancelado">Cancelar</button>`;
+    if (p.estado==='listo') acciones = `<button class="btn ok sm" data-a="rPedEstado" data-x="${p.id}" data-o="entregado">Entregado</button>`;
+  } else if (p.estado==='nuevo') acciones = `<button class="btn sm" data-a="rPedEstado" data-x="${p.id}" data-o="cancelado">Cancelar pedido</button>`;
+  return `<div class="card stack" style="gap:8px"><div class="row between"><div class="row" style="gap:10px">${comoNeg?rAv(p.cliente,36):(n?rxNegAv(n,36):'')}<div><b>${comoNeg?rHandle(p.cliente):esc(n?n.nombre:'Negocio')}</b><div class="small muted">${hace(rT(p.created_at))} · ${rxPesos(p.total)}</div></div></div><span class="pill ${cl}">${et}</span></div>
+    ${ix>=0?`<div class="rxpasos">${['Recibido','Preparando','Listo','Entregado'].map((s,i)=>`<span class="${i<=ix?'on':''}">${s}</span>`).join('')}</div>`:''}
+    <div class="small">${(p.items||[]).map(i=>`${i.cant} × ${esc(i.nombre)} <span class="muted">(${rxPesos(i.precio)})</span>`).join('<br>')}</div>
+    ${p.nota?`<div class="quote small">${esc(p.nota)}</div>`:''}
+    ${acciones?`<div class="row">${acciones}</div>`:''}</div>`;
+}
+function rxVPedidos(){
+  const act = RV.misPed.filter(p=>['nuevo','aceptado','listo'].includes(p.estado)), ant = RV.misPed.filter(p=>!['nuevo','aceptado','listo'].includes(p.estado));
+  return `<div class="stack"><h1>Mis pedidos</h1>
+    ${RV.misPed.length?'':`<div class="empty"><h2>Aún no haces pedidos</h2><p class="muted">Explora los negocios de ${esc(S.cfg.ciudad)}.</p><button class="btn pri" data-a="rGo" data-x="inicio">Ir a la tienda</button></div>`}
+    ${act.length?`<div class="sec-h"><h2>En curso</h2></div>${act.map(p=>rxPedidoCard(p,false)).join('')}`:''}
+    ${ant.length?`<div class="sec-h"><h2>Anteriores</h2></div>${ant.map(p=>rxPedidoCard(p,false)).join('')}`:''}</div>`;
+}
+
+/* ---------- mi negocio ---------- */
+function rxFormNegocio(n){
+  n = n || {};
+  return `<form class="stack" data-form="rGuardarNeg" novalidate style="gap:12px">
+    <label class="f" for="mn-nom">Nombre del negocio<input id="mn-nom" type="text" maxlength="40" value="${esc(n.nombre||'')}" placeholder="Ej. Tacos Don Chuy"></label>
+    <label class="f" for="mn-cat">Categoría<select id="mn-cat">${Object.entries(RX_CAT).map(([k,[t]])=>`<option value="${k}" ${n.categoria===k?'selected':''}>${esc(t)}</option>`).join('')}</select></label>
+    <label class="f" for="mn-desc">Descripción<textarea id="mn-desc" maxlength="300" placeholder="Qué vendes y qué te hace especial">${esc(n.descripcion||'')}</textarea><span class="h">Sin teléfonos, enlaces ni redes sociales.</span></label>
+    <div class="row" style="gap:12px;align-items:flex-start"><label class="f" for="mn-zona" style="flex:1;min-width:160px">Colonia o zona<input id="mn-zona" type="text" maxlength="60" value="${esc(n.zona||'')}" placeholder="Ej. Centro"></label>
+      <label class="f" for="mn-hor" style="flex:1;min-width:160px">Horario<input id="mn-hor" type="text" maxlength="60" value="${esc(n.horario||'')}" placeholder="Ej. Lun a Sáb 9 a 7"></label></div>
+    <label class="f" for="mn-foto">Logo o foto del negocio${n.foto?' (deja vacío para conservar la actual)':''}<input id="mn-foto" type="file" accept="image/*"></label>
+    ${RV.err?`<div class="err" role="alert">${esc(RV.err)}</div>`:''}
+    <button class="btn pri block lg" type="submit" ${RV.guardando?'disabled':''}>${RV.guardando?'Guardando…':n.id?'Guardar cambios':'Mandar a revisión'}</button></form>`;
+}
+function rxVMiNegocio(){
+  const n = RV.miNeg;
+  if (!n){
+    if (RV.est && RV.est.menor) return `<div class="empty"><h2>Para vender necesitas ser mayor de 18 años</h2><p class="muted">Es una regla para proteger a todos. Mientras tanto puedes comprar y publicar normalmente.</p><button class="btn" data-a="rGo" data-x="inicio">Ir a la tienda</button></div>`;
+    return `<div class="stack"><h1>Abre tu negocio</h1>
+      <div class="note small"><b>Modo prueba.</b> Tu negocio aparece en la tienda cuando el equipo lo aprueba. Los clientes hacen pedidos para recoger y pagan en tu local; la app no cobra nada.</div>
+      ${rxFormNegocio(null)}</div>`;
+  }
+  const [et, cl] = RX_NEST[n.estado]; const ps = RV.prods[n.id]||[]; const nuevos = RV.pedNeg.filter(p=>p.estado==='nuevo').length;
+  const tabs = [['pedidos',`Pedidos${nuevos?` (${nuevos})`:''}`],['productos',`Productos (${ps.length})`],['datos','Datos del negocio']];
+  let c = '';
+  if (RV.mnTab==='pedidos'){
+    const act = RV.pedNeg.filter(p=>['nuevo','aceptado','listo'].includes(p.estado)), ant = RV.pedNeg.filter(p=>!['nuevo','aceptado','listo'].includes(p.estado)).slice(0,20);
+    c = n.estado!=='aprobado' ? '<p class="muted">Cuando tu negocio esté abierto, aquí llegan los pedidos.</p>'
+      : `${act.length?act.map(p=>rxPedidoCard(p,true)).join(''):'<p class="muted">No hay pedidos en curso. Comparte tu negocio con tus clientes.</p>'}${ant.length?`<div class="sec-h"><h2>Anteriores</h2></div>${ant.map(p=>rxPedidoCard(p,true)).join('')}`:''}`;
+  } else if (RV.mnTab==='productos'){
+    c = `<details class="card" ${ps.length?'':'open'}><summary><b>${ico.plus} Agregar producto</b></summary>
+      <form class="stack" data-form="rNuevoProd" novalidate style="gap:12px;margin-top:12px">
+        <label class="f" for="np-nom">Nombre<input id="np-nom" type="text" maxlength="60" placeholder="Ej. Orden de tacos de asada"></label>
+        <label class="f" for="np-precio">Precio (MXN)<input id="np-precio" type="number" inputmode="decimal" min="1" max="50000" step="0.5" placeholder="Ej. 90"></label>
+        <label class="f" for="np-desc">Descripción (opcional)<textarea id="np-desc" maxlength="200"></textarea></label>
+        <label class="f" for="np-foto">Foto (opcional)<input id="np-foto" type="file" accept="image/*"></label>
+        <p class="small muted" style="margin:0">Tus primeros 3 productos los revisa el equipo. Nada ilegal, +18, armas, alcohol ni medicinas.</p>
+        ${RV.err?`<div class="err" role="alert">${esc(RV.err)}</div>`:''}
+        <button class="btn pri" type="submit" ${RV.guardando?'disabled':''}>${RV.guardando?'Guardando…':'Agregar'}</button></form></details>
+      <div class="plist">${ps.map(p=>`<div class="prow ${p.disponible?'':'off'}"><div class="tx"><h4>${esc(p.nombre)}</h4><div class="row" style="gap:8px"><span class="price num">${rxPesos(p.precio)}</span>${p.estado!=='aprobado'?`<span class="pill ${p.estado==='pendiente'?'warn':'bad'}">${p.estado==='pendiente'?'En revisión':'No aprobado'+(p.motivo?': '+esc(p.motivo):'')}</span>`:''}</div>
+        <div class="row" style="gap:6px;margin-top:4px"><button class="btn sm" data-a="rProdDisp" data-x="${p.id}">${p.disponible?'Marcar agotado':'Marcar disponible'}</button><button class="btn sm danger" data-a="rProdBorrar" data-x="${p.id}">Eliminar</button></div></div><div class="thumb">${rxProdFoto(p)}</div></div>`).join('')}</div>`;
+  } else c = `${n.estado==='aprobado'||n.estado==='pausado'?`<div class="row"><button class="btn ${n.estado==='aprobado'?'':'pri'}" data-a="rPausarNeg">${n.estado==='aprobado'?'Pausar (no recibir pedidos)':'Reanudar pedidos'}</button></div>`:''}
+    <p class="small muted" style="margin:0">Si cambias el nombre, el negocio vuelve a revisión.</p>${rxFormNegocio(n)}
+    <button class="btn danger sm" data-a="rBorrarNeg" style="align-self:flex-start">Cerrar y borrar mi negocio</button>`;
+  return `<div class="stack"><div class="row between"><div class="row" style="gap:12px">${rxNegAv(n,56)}<div><span class="small muted">Mi negocio</span><h1 style="margin:0">${esc(n.nombre)}</h1></div></div><span class="pill ${cl}">${et}</span></div>
+    ${n.estado==='pendiente'?'<div class="note small">Tu negocio está en revisión. Mientras, agrega tus productos para que esté listo cuando lo aprueben.</div>':''}
+    ${n.estado==='rechazado'?`<div class="note warn small"><b>No fue aprobado</b>${n.motivo?': '+esc(n.motivo):''}. Corrige los datos y guarda para mandarlo otra vez.</div>`:''}
+    ${n.estado==='aprobado'?`<button class="btn soft sm" data-a="rNeg" data-x="${n.id}" style="align-self:flex-start">Ver cómo lo ven los clientes</button>`:''}
+    <div class="ptabs">${tabs.map(([k,l])=>`<button class="${RV.mnTab===k?'on':''}" data-a="rMnTab" data-x="${k}">${l}</button>`).join('')}</div>${c}</div>`;
+}
+
+/* ---------- administrador ---------- */
+function rVAdmin(){
+  if (!rxEsAdmin()) return '<p class="muted">Solo para el equipo.</p>';
+  if (!RV.admDatos){ rCargarAdmin(); return '<div class="rcentro"><div class="rspin"></div></div>'; }
+  const d = RV.admDatos; const negP = d.negs.filter(n=>n.estado==='pendiente');
+  const tabs = [['revisar',`Publicaciones (${d.pend.length})`],['negocios',`Negocios (${negP.length})`],['productos',`Productos (${d.prods.length})`],['pedidos','Pedidos'],['reportes',`Reportes (${d.rep.length})`],['alertas',`Seguridad (${d.al.length})`],['cuentas',`Usuarios (${d.cuentas.length})`]];
+  const motivos = ['Contenido +18','Ofensivo o violento','Publicidad','Enlaces o datos de contacto','Riesgo para menores','Fotos de otra persona sin permiso','Producto prohibido','Datos incompletos','Otro'];
+  const sel = id => `<select id="rmot-${id}" aria-label="Motivo" style="width:auto;padding:7px 9px;font-size:13px">${motivos.map(m=>`<option>${m}</option>`).join('')}</select>`;
+  let c = '';
+  if (RV.adm==='revisar') c = d.pend.map(p=>`<div class="card"><div class="modq"><div class="car"><div class="car-track">${p.fotos.map(f=>`<div class="ph"><img src="${esc(rFoto(f))}" alt=""></div>`).join('')}</div>${p.fotos.length>1?`<span class="car-n">${p.fotos.length} fotos</span>`:''}</div>
+      <div class="stack" style="gap:8px;min-width:0"><div class="row">${rAv(p.autor,32)}<b>${rHandle(p.autor)}</b><span class="pill">Publicación</span><span class="small muted">${hace(rT(p.created_at))}</span></div>${p.texto?`<div>${esc(p.texto)}</div>`:'<span class="small muted">Sin texto</span>'}
+      <div class="row"><button class="btn pri sm" data-a="rDecidir" data-x="${p.id}" data-o="aprobado">Aprobar</button>${sel(p.id)}<button class="btn danger sm" data-a="rDecidir" data-x="${p.id}" data-o="rechazado">Rechazar</button></div></div></div></div>`).join('') || '<div class="empty"><h2>Todo al día</h2><p class="muted">No hay publicaciones esperando revisión.</p></div>';
+  if (RV.adm==='negocios') c = d.negs.map(n=>`<div class="card stack" style="gap:8px"><div class="row between"><div class="row" style="gap:10px">${rxNegAv(n,40)}<div><b>${esc(n.nombre)}</b><div class="small muted">${esc((RX_CAT[n.categoria]||RX_CAT.otro)[0])} · dueño ${rHandle(n.dueno)} · ${hace(rT(n.created_at))}</div></div></div><span class="pill ${RX_NEST[n.estado][1]}">${RX_NEST[n.estado][0]}</span></div>
+      ${n.descripcion?`<div class="small">${esc(n.descripcion)}</div>`:''}<div class="small muted">Zona: ${esc(n.zona||'—')} · Horario: ${esc(n.horario||'—')}${n.motivo?' · Motivo: '+esc(n.motivo):''}</div>
+      <div class="row">${n.estado!=='aprobado'?`<button class="btn pri sm" data-a="rDecNeg" data-x="${n.id}" data-o="aprobado">Aprobar</button>`:`<button class="btn sm" data-a="rDecNeg" data-x="${n.id}" data-o="pausado">Pausar</button>`}${n.estado!=='rechazado'?`${sel(n.id)}<button class="btn danger sm" data-a="rDecNeg" data-x="${n.id}" data-o="rechazado">Rechazar</button>`:''}<button class="btn soft sm" data-a="rNeg" data-x="${n.id}">Ver catálogo</button></div></div>`).join('') || '<div class="empty"><h2>Sin negocios todavía</h2><p class="muted">Cuando alguien abra uno, aparece aquí para que lo apruebes.</p></div>';
+  if (RV.adm==='productos') c = d.prods.map(p=>`<div class="prow"><div class="tx"><h4>${esc(p.nombre)}</h4>${p.descripcion?`<p>${esc(p.descripcion)}</p>`:''}<div class="row" style="gap:8px"><span class="price num">${rxPesos(p.precio)}</span><span class="small muted">${esc((d.negs.find(n=>n.id===p.negocio)||{}).nombre||'')}</span></div>
+      <div class="row" style="margin-top:4px"><button class="btn pri sm" data-a="rDecProd" data-x="${p.id}" data-o="aprobado">Aprobar</button>${sel(p.id)}<button class="btn danger sm" data-a="rDecProd" data-x="${p.id}" data-o="rechazado">Rechazar</button></div></div><div class="thumb">${rxProdFoto(p)}</div></div>`).join('') || '<div class="empty"><h2>Todo al día</h2><p class="muted">No hay productos esperando revisión.</p></div>';
+  if (RV.adm==='pedidos') c = d.peds.map(p=>`<div class="lrow"><span class="tx" style="flex:1;min-width:0"><b>${rHandle(p.cliente)}</b> → ${esc((d.negs.find(n=>n.id===p.negocio)||{}).nombre||'negocio')}<span class="small muted"> · ${rxPesos(p.total)} · ${hace(rT(p.created_at))}</span></span><span class="pill ${(RX_PEST[p.estado]||[])[1]||''}">${(RX_PEST[p.estado]||[p.estado])[0]}</span></div>`).join('') || '<p class="muted">Aún no hay pedidos.</p>';
+  if (RV.adm==='reportes') c = d.rep.map(r=>`<div class="card small"><b>${esc(r.motivo)}</b> · ${hace(rT(r.created_at))}<br>Reportó: ${rHandle(r.quien)}${r.cuenta?` · Cuenta: ${rHandle(r.cuenta)}`:''}${r.post?` · <button class="lnk" data-a="rAbrirPost" data-x="${r.post}">ver publicación</button>`:''}<div class="row" style="margin-top:6px"><button class="btn sm" data-a="rRepListo" data-x="${r.id}">Marcar revisado</button></div></div>`).join('') || '<div class="empty"><h2>Sin reportes</h2></div>';
+  if (RV.adm==='alertas') c = `<p class="small muted" style="margin:0">Lo que el filtro del servidor bloqueó solo (enlaces, teléfonos, contenido prohibido, riesgo para menores).</p>` + (d.al.map(a=>`<div class="card small"><div class="row"><span class="pill ${a.motivo==='menores'||a.motivo==='riesgo_menor'?'bad':'warn'}">${esc(a.motivo)}</span> en ${esc(a.lugar)} · ${hace(rT(a.created_at))} ${a.quien?'· '+rHandle(a.quien):''}</div><div class="quote">${esc(a.texto||'')}</div></div>`).join('') || '<div class="empty"><h2>Sin alertas</h2></div>');
+  if (RV.adm==='cuentas') c = d.cuentas.map(u=>`<div class="lrow"><button class="who" data-a="rVer" data-x="${u.id}" style="flex:1;min-width:0">${rAv(u.id,40)}<span class="tx"><b>@${esc(u.usuario)}</b><span class="small muted">${esc(u.nombre)} · ${u.menor?'<b>menor de edad</b> · ':''}${u.avisos} aviso(s)${u.rol==='admin'?' · admin':''}${rPerfil(u.id).ejemplo?' · ejemplo':''}${u.suspendido?' · <b style="color:var(--bad)">suspendida</b>':''}</span></span></button>${u.id!==RV.user.id?`<button class="btn sm ${u.suspendido?'ok':'danger'}" data-a="rSuspender" data-x="${u.id}" data-o="${u.suspendido?'0':'1'}">${u.suspendido?'Quitar suspensión':'Suspender'}</button>`:''}</div>`).join('');
+  return `<div class="stack"><div class="row between"><div><span class="small muted">Panel del administrador · en vivo</span><h1 style="margin:0">${esc(S.cfg.marca)}</h1></div><button class="btn sm" data-a="rAdmRecargar">↻ Actualizar</button></div>
+    <div class="kpis">${[['Usuarios',d.cuentas.length],['Negocios abiertos',d.negs.filter(n=>n.estado==='aprobado').length],['Por revisar',d.pend.length+negP.length+d.prods.length],['Pedidos',d.peds.length]].map(([l,v])=>`<div class="card kpi"><span class="small muted">${l}</span><b class="num" style="font-size:24px">${v}</b></div>`).join('')}</div>
+    <div class="ptabs">${tabs.map(([k,l])=>`<button class="${RV.adm===k?'on':''}" data-a="rAdm" data-x="${k}">${l}</button>`).join('')}</div>${c}</div>`;
+}
+async function rCargarAdmin(){
+  const [pend, rep, al, cu, ng, pr, pe] = await Promise.all([ RV.sb.from('posts').select('*').eq('estado','pendiente').order('created_at'), RV.sb.from('reportes').select('*').eq('estado','nuevo').order('created_at',{ascending:false}),
+    RV.sb.from('alertas').select('*').order('created_at',{ascending:false}).limit(50), RV.sb.rpc('admin_perfiles'),
+    RV.sb.from('negocios').select('*').order('created_at',{ascending:false}), RV.sb.from('productos').select('*').eq('estado','pendiente').order('created_at'),
+    RV.sb.from('pedidos').select('*').order('created_at',{ascending:false}).limit(60) ]);
+  const negs = (ng.data||[]).sort((a,b)=>(a.estado==='pendiente'?0:1)-(b.estado==='pendiente'?0:1));
+  RV.admDatos = {pend:pend.data||[], rep:rep.data||[], al:al.data||[], cuentas:cu.data||[], negs, prods:pr.data||[], peds:pe.data||[]};
+  await rTraerPerfiles([...RV.admDatos.pend.map(p=>p.autor), ...RV.admDatos.rep.flatMap(r=>[r.quien,r.cuenta]), ...RV.admDatos.al.map(a=>a.quien), ...negs.map(n=>n.dueno), ...RV.admDatos.peds.map(p=>p.cliente), ...RV.admDatos.cuentas.map(u=>u.id)]);
+  if (RV.view==='admin') renderReal();
+}
+
+/* ---------- acciones ---------- */
+function registrarAccionesReal2(){
+  const goBase = A.rGo;
+  Object.assign(A, {
+    rGo: x => { x = RX_ALIAS[x] || x; if (x==='minegocio'){ RV.err=''; if (RV.miNeg) rxCargarMiNeg().then(()=>{ if (RV.view==='minegocio') renderReal(); }); } if (x==='feed' && RV.feed==='negocios') rxCargarTienda().then(()=>{ if (RV.view==='feed') renderReal(); }); goBase(x); },
+    rCrear: () => A.rGo('crear'),
+    rClima: () => { RV.sheet={t:'clima'}; rPintarHoja(); if (climaEstado!=='ok') cargarClima(true).then(()=>{ if (RV.sheet&&RV.sheet.t==='clima') rPintarHoja(); }); },
+    rCat: x => { RV.cat=x; renderReal(); },
+    rNeg: x => { RV.sheet=null; RV.negId=x; if (!rxNeg(x) && RV.admDatos){ const n = RV.admDatos.negs.find(o=>o.id===x); if (n && !RV.negs.some(o=>o.id===x)) RV.negs.push(n); } RV.prev=RV.view; RV.view='negocio'; delete RV.prods[x]; renderReal(); window.scrollTo(0,0); },
+    rAgregar: x => { const p = Object.values(RV.prods).flat().concat(RV.resP).find(o=>o.id===x); if (!p) return; const n = rxNeg(p.negocio); if (!n) return;
+      if (RV.carrito && RV.carrito.neg!==n.id){ if (!confirmarSimple(`Tu carrito tiene productos de ${RV.carrito.negNombre}. ¿Empezar uno nuevo con ${n.nombre}?`)) return; RV.carrito=null; }
+      if (!RV.carrito) RV.carrito = {neg:n.id, negNombre:n.nombre, items:[]};
+      const it = RV.carrito.items.find(i=>i.id===x); if (it){ if (it.cant<20) it.cant++; } else RV.carrito.items.push({id:p.id, nombre:p.nombre, precio:Number(p.precio), cant:1});
+      rxGuardarCarrito(); toast(`Agregado: ${p.nombre}`); renderReal(); },
+    rCant: (x, el) => { const it = RV.carrito && RV.carrito.items[+x]; if (!it) return; it.cant = Math.max(0, Math.min(20, it.cant + (+el.dataset.o))); if (!it.cant) RV.carrito.items.splice(+x,1); RV.notaPed = $('#rp-nota')?.value||''; rxGuardarCarrito(); renderReal(); },
+    rVaciar: () => { if (!confirmarSimple('¿Vaciar el carrito?')) return; RV.carrito=null; rxGuardarCarrito(); renderReal(); },
+    rPedEstado: async (x, el) => { const est = el.dataset.o; if (['rechazado','cancelado'].includes(est) && !confirmarSimple(est==='rechazado'?'¿Rechazar este pedido?':'¿Cancelar este pedido?')) return;
+      const {data, error} = await RV.sb.from('pedidos').update({estado:est}).eq('id', x).select('*').single(); if (error) return toast(rErr(error));
+      [RV.misPed, RV.pedNeg].forEach(l=>{ const i=l.findIndex(p=>p.id===x); if (i>=0) l[i]=data; }); renderReal(); toast('Pedido: '+RX_PEST[est][0]); },
+    rMnTab: x => { RV.mnTab=x; RV.err=''; renderReal(); },
+    rProdDisp: async x => { const p = (RV.prods[RV.miNeg.id]||[]).find(o=>o.id===x); if (!p) return; const {data, error} = await RV.sb.from('productos').update({disponible:!p.disponible}).eq('id', x).select('*').single(); if (error) return toast(rErr(error)); Object.assign(p, data); renderReal(); },
+    rProdBorrar: async x => { if (!confirmarSimple('¿Eliminar este producto?')) return; const {error} = await RV.sb.from('productos').delete().eq('id', x); if (error) return toast(rErr(error)); RV.prods[RV.miNeg.id] = RV.prods[RV.miNeg.id].filter(p=>p.id!==x); renderReal(); toast('Producto eliminado'); },
+    rPausarNeg: async () => { const n = RV.miNeg; const est = n.estado==='aprobado'?'pausado':'aprobado'; const {data, error} = await RV.sb.from('negocios').update({estado:est}).eq('id', n.id).select('*').single(); if (error) return toast(rErr(error)); RV.miNeg=data; await rxCargarTienda(); renderReal(); toast(est==='pausado'?'Negocio pausado':'¡Negocio abierto otra vez!'); },
+    rBorrarNeg: async () => { if (!confirmarSimple('¿Seguro? Se borran tu negocio, sus productos y sus pedidos. No se puede deshacer.')) return; const {error} = await RV.sb.from('negocios').delete().eq('id', RV.miNeg.id); if (error) return toast(rErr(error)); RV.miNeg=null; await rxCargarTienda(); rCanal(true); A.rGo('feed'); toast('Negocio cerrado'); },
+    rAdmRecargar: () => { RV.admDatos=null; renderReal(); },
+    rDecNeg: async (x, el) => { const est = el.dataset.o; const mot = est==='rechazado' ? $('#rmot-'+x)?.value : null; const {error} = await RV.sb.from('negocios').update({estado:est, motivo:mot}).eq('id', x); if (error) return toast(rErr(error)); RV.admDatos=null; await rxCargarTienda(); renderReal(); toast(est==='aprobado'?'Negocio aprobado':est==='pausado'?'Negocio pausado':'Negocio rechazado'); },
+    rDecProd: async (x, el) => { const est = el.dataset.o; const mot = est==='rechazado' ? $('#rmot-'+x)?.value : null; const {error} = await RV.sb.from('productos').update({estado:est, motivo:mot}).eq('id', x); if (error) return toast(rErr(error)); RV.admDatos.prods = RV.admDatos.prods.filter(p=>p.id!==x); renderReal(); toast(est==='aprobado'?'Producto aprobado':'Producto rechazado'); }
+  });
+  Object.assign(F, {
+    rPedir: async () => { if (RV.enviandoPed || !RV.carrito) return; const nota = ($('#rp-nota').value||'').trim(); RV.notaPed = nota; RV.err='';
+      if (nota){ const e = rTextoOk(nota,'privado'); if (e){ RV.err=e; return renderReal(); } }
+      RV.enviandoPed=true; renderReal();
+      const {data, error} = await RV.sb.from('pedidos').insert({negocio:RV.carrito.neg, items:RV.carrito.items.map(i=>({producto:i.id, cant:i.cant})), nota}).select('*').single();
+      RV.enviandoPed=false; if (error){ RV.err=rErr(error); return renderReal(); }
+      RV.misPed.unshift(data); RV.carrito=null; RV.notaPed=''; rxGuardarCarrito(); RV.view='pedidos'; renderReal(); window.scrollTo(0,0); toast('¡Pedido enviado! Te avisamos cuando lo acepten.'); },
+    rGuardarNeg: async () => { if (RV.guardando) return; const v = id => ($('#'+id).value||'').trim(); RV.err='';
+      const datos = {nombre:v('mn-nom'), categoria:$('#mn-cat').value, descripcion:v('mn-desc'), zona:v('mn-zona'), horario:v('mn-hor')};
+      const fail = m => { RV.err=m; RV.guardando=false; renderReal(); };
+      if (datos.nombre.length<2) return fail('Escribe el nombre del negocio.'); const e = rTextoOk([datos.nombre,datos.descripcion,datos.zona,datos.horario].join(' '),'publico'); if (e) return fail(e);
+      RV.guardando=true; renderReal();
+      const f = $('#mn-foto')?.files?.[0]; if (f){ try { datos.foto = await rxSubir(f, 800); } catch(err){ return fail('No se pudo subir la foto: '+rErr(err)); } }
+      const r = RV.miNeg ? await RV.sb.from('negocios').update(datos).eq('id', RV.miNeg.id).select('*').single() : await RV.sb.from('negocios').insert(datos).select('*').single();
+      if (r.error) return fail(/duplicate/i.test(r.error.message)?'Ya tienes un negocio.':rErr(r.error));
+      const nuevo = !RV.miNeg; RV.miNeg = r.data; RV.guardando=false; await rxCargarTienda(); if (nuevo){ RV.mnTab='productos'; rCanal(true); }
+      renderReal(); toast(nuevo ? (r.data.estado==='aprobado'?'¡Negocio abierto!':'¡Listo! El equipo revisará tu negocio. Mientras, agrega tus productos.') : r.data.estado==='pendiente'?'Guardado. Vuelve a revisión.':'Cambios guardados'); },
+    rNuevoProd: async () => { if (RV.guardando) return; const nom = ($('#np-nom').value||'').trim(), precio = Number($('#np-precio').value), desc = ($('#np-desc').value||'').trim(); RV.err='';
+      const fail = m => { RV.err=m; RV.guardando=false; renderReal(); };
+      if (nom.length<2) return fail('Escribe el nombre del producto.'); if (!(precio>0 && precio<=50000)) return fail('Escribe un precio entre $1 y $50,000.');
+      const e = rTextoOk(nom+' '+desc,'publico'); if (e) return fail(e);
+      RV.guardando=true; renderReal(); const datos = {negocio:RV.miNeg.id, nombre:nom, precio:Math.round(precio*100)/100, descripcion:desc};
+      const f = $('#np-foto')?.files?.[0]; if (f){ try { datos.foto = await rxSubir(f, 900); } catch(err){ return fail('No se pudo subir la foto: '+rErr(err)); } }
+      const {data, error} = await RV.sb.from('productos').insert(datos).select('*').single(); if (error) return fail(rErr(error));
+      (RV.prods[RV.miNeg.id] = RV.prods[RV.miNeg.id]||[]).unshift(data); RV.guardando=false; renderReal(); toast(data.estado==='aprobado'?'Producto agregado':'Producto agregado. El equipo lo revisa (solo los primeros 3).'); }
+  });
+  // búsqueda en vivo (personas, negocios y productos)
+  let t=null; document.addEventListener('input', e => { if (e.target.id!=='rq' || ui.mode!=='real') return; e.stopImmediatePropagation(); RV.q=e.target.value; clearTimeout(t); t=setTimeout(rxBuscar, 300); }, true);
+}
 
 
 /* ---------- render ---------- */
@@ -4295,7 +4707,7 @@ Object.assign(A, {
   termAdd: () => { const t=$('#term-t').value.trim().toLowerCase(), c=$('#term-c').value; if(t.length<3) return toast('Escribe al menos 3 letras'); S.cfg.terminos.push({t:limpiarTexto(t), cat:c}); CACHE_RE.clear(); log('Admin','Agregó término al Escudo',c); save(); rerender(); },
   termDel: x => { S.cfg.terminos.splice(+x,1); save(); rerender(); }
 });
-registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal();
+registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal(); registrarAccionesReal2();
 aplicarPref();
 const EN_VIVO_OK = /github\.io$/.test(location.host) || /[?&]vivo=1/.test(location.search);
 try { if (EN_VIVO_OK && (localStorage.getItem('lm-modo')||'real')==='real') ui.mode='real'; } catch(e){ if (EN_VIVO_OK) ui.mode='real'; }
