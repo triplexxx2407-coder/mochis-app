@@ -4134,7 +4134,10 @@ async function revisarFoto(dataUrl){
   // 1) desnudos o poca ropa
   const pr = {}; (await ESC_FOTO.modelo.classify(img)).forEach(x => pr[x.className] = x.probability);
   const sexual = (pr.Porn||0) + (pr.Hentai||0) + (pr.Sexy||0);
-  if ((pr.Porn||0) > 0.35 || (pr.Hentai||0) > 0.4 || (pr.Sexy||0) > 0.6 || sexual > 0.6){
+  // más estricto para cuentas de menores; el modelo a veces confunde arena o flores, por eso hay una zona gris que solo avisa al equipo
+  const L = (typeof esMenor==='function' && esMenor(S.yo)) ? {p:0.5, h:0.5, s:0.7, t:0.7} : {p:0.7, h:0.7, s:0.85, t:0.85};
+  if (sexual > 0.45 && !((pr.Porn||0) > L.p || (pr.Hentai||0) > L.h || (pr.Sexy||0) > L.s || sexual > L.t)) efAlerta(['revisar foto'], 1, `foto dudosa, se subió y conviene revisarla (${Math.round(sexual*100)}%)`);
+  if ((pr.Porn||0) > L.p || (pr.Hentai||0) > L.h || (pr.Sexy||0) > L.s || sexual > L.t){
     efAlerta(['adulto'], 2, `posible desnudo o poca ropa (${Math.round(sexual*100)}%)`);
     throw efError('Esta foto no se puede subir: parece mostrar desnudos o poca ropa. En MOCHI hay menores de edad y eso no está permitido.');
   }
