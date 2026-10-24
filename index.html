@@ -743,6 +743,41 @@ html,body,button,a,.car,input,textarea,select{touch-action:manipulation}
 .verif.bot{font-size:0!important;background:color-mix(in srgb,#0EA5E9 16%,transparent)!important;color:#0284C7!important;width:auto!important;height:auto!important;padding:1px 6px!important;border-radius:999px!important;vertical-align:middle}.verif.bot::after{content:'Bot';font-size:10.5px;font-weight:800}
 .vlabel.bot{color:#0284C7}
 body.vivo .todo{display:none!important}
+.ov{z-index:80}
+.tpost{position:relative;margin:0 0 4px;padding:22px 18px;min-height:110px;display:flex;align-items:center;border-radius:16px;background:linear-gradient(135deg,color-mix(in srgb,var(--brand) 12%,var(--surface)),color-mix(in srgb,var(--accent) 10%,var(--surface)));border:1px solid var(--line)}
+.tpost-t{font-size:19px;line-height:1.45;font-weight:600;white-space:pre-wrap;overflow-wrap:anywhere;width:100%}
+.tpost .bigheart{position:absolute;inset:0;margin:auto;display:grid;place-items:center;pointer-events:none}
+.ph.txtile{display:flex;align-items:center;justify-content:center;padding:8px;background:linear-gradient(135deg,color-mix(in srgb,var(--brand) 14%,var(--surface-2)),var(--surface-2));text-align:center}
+.ph.txtile span{font-size:12px;font-weight:600;line-height:1.3;color:var(--fg);display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+[data-lp]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.msg.borrado{font-style:italic;opacity:.75;background:transparent;border:1px dashed var(--line);color:var(--muted)}
+.msg.me.borrado{color:var(--muted)}
+.resp-q{display:flex;flex-direction:column;gap:1px;border-left:3px solid currentColor;padding:3px 8px;margin:0 0 5px;border-radius:6px;background:rgba(127,127,127,.16);font-size:12px;opacity:.9;max-width:100%}
+.resp-q span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cm .resp-q{border-left-color:var(--brand)}
+.resp-bar{display:flex;align-items:center;gap:8px;background:var(--surface-2);border-radius:12px;padding:6px 6px 6px 10px;font-size:13px;margin-bottom:6px}
+.resp-bar span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.resp-bar svg{flex:none;color:var(--brand)}
+.resp-bar .x{flex:none;width:32px;height:32px}
+.cm.elim .tx{font-style:italic}
+.cresp{padding:2px 0;font-size:12.5px;font-weight:700;color:var(--muted)}
+.histc{display:flex;gap:10px;align-items:center;text-align:left;background:rgba(127,127,127,.14);border:0;border-radius:12px;padding:6px;margin:2px 0 4px;color:inherit;max-width:260px;font-size:13px}
+.histc .hmini{width:48px;height:72px;flex:none;border-radius:8px;overflow:hidden;position:relative;background:#222;display:grid;place-items:center}
+.histc .hmini img,.histc .hmini svg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.histc .hmini.lock{font-size:22px}
+.histc.off{opacity:.85}
+.histc .tx{min-width:0}
+.strep-ic{display:inline-grid;place-items:center;color:#DC2626;flex:none}
+.strep-ic.big svg{width:44px;height:44px}
+.repconf{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:6px 0 4px}
+.who2 .stwho{padding:0;display:flex;align-items:center;gap:8px;color:#fff;font-weight:700;font-size:14px;min-width:0;max-width:52%}
+.who2 .stwho .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who2 .stbtn{min-width:40px;height:40px;display:grid;place-items:center;flex:none;border-radius:50%}
+.who2 .strep{color:#fff;background:#DC2626;width:40px;padding:0}
+.who2 .strep svg{width:20px;height:20px}
+.who2 .stx{font-size:30px;line-height:1}
+@media (min-width:900px){.who2 .stx{display:none}}
+@media (max-width:899px){.stv .x2{display:none}.stcard .top2{padding-top:calc(10px + env(safe-area-inset-top,0px))}}
 .rltabs{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--line)}.rltabs button{flex:1;border:0;background:none;padding:9px;border-radius:9px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer}.rltabs button.on{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}.rlogin form{text-align:left}
 </style>
 </head>
@@ -1671,9 +1706,10 @@ function postCard(p, abierto, por){
     <div class="post-h"><button class="who" data-a="verPerfil" data-x="${p.autor}">${avatar(a,40)}<span style="min-width:0"><b>${handleV(a)}</b>${a.negocio?' <span class="pill acc">Negocio</span>':''}<span class="small muted"> · ${hace(p.t)}</span></span></button>
       ${p.autor!==S.yo && !sigue(S.yo,p.autor) ? botonSeguir(p.autor) : ''}
       <button class="ibtn" data-a="opcPost" data-x="${p.id}" aria-label="Más opciones">${ico.dots}</button></div>
-    <div class="car" data-dbl="${p.id}"><div class="car-track" data-car="${p.id}">${p.fotos.map(f=>fotoCuadro(f)).join('')}</div>
+    ${!p.fotos.length?`<div class="tpost" data-dbl="${p.id}"><div class="tpost-t">${textoConEtiquetas(p.texto)}</div><span class="bigheart" id="bh-${p.id}">${I('<path d="M12 20s-7.5-4.8-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.2 12 20 12 20z"/>',90,'currentColor')}</span></div>`:`<div class="car" data-dbl="${p.id}"><div class="car-track" data-car="${p.id}">${p.fotos.map(f=>fotoCuadro(f)).join('')}</div>
       ${p.fotos.length>1?`<span class="car-n" id="cn-${p.id}">1/${p.fotos.length}</span><button class="car-b l" data-a="carMove" data-x="${p.id}" data-o="-1" aria-label="Foto anterior">‹</button><button class="car-b r" data-a="carMove" data-x="${p.id}" data-o="1" aria-label="Foto siguiente">›</button>`:''}
       <span class="bigheart" id="bh-${p.id}">${I('<path d="M12 20s-7.5-4.8-7.5-10.2A4.3 4.3 0 0 1 12 7.2a4.3 4.3 0 0 1 7.5 2.6C19.5 15.2 12 20 12 20z"/>',90,'currentColor')}</span></div>
+`}
     <div class="dots" id="cd-${p.id}">${p.fotos.length>1?p.fotos.map((_,i)=>`<i class="${i?'':'on'}"></i>`).join(''):''}</div>
     <div class="post-a">
       <button class="b-like ${leGusta(p.id)?'on':''}" data-a="like" data-x="${p.id}" data-o="${por||''}" aria-label="Me gusta" aria-pressed="${leGusta(p.id)}" title="Me gusta">${leGusta(p.id)?ico.heartF:ico.heart}</button>
@@ -1685,7 +1721,7 @@ function postCard(p, abierto, por){
     </div>
     <div class="post-b">
       <b class="small" style="font-size:14px"><button class="likes-n" data-a="verLikes" data-x="${p.id}" aria-label="Ver a quién le gusta">${nlikes(p)} Me gusta</button>${lb?` <span style="font-weight:500" class="muted">· le gusta a ${esc(lb.handle)}</span>`:''}${nGuardados(p.id)?` <span style="font-weight:500" class="muted">· ${nGuardados(p.id)} guardado${nGuardados(p.id)>1?'s':''}</span>`:''}</b>
-      <div><b>${esc(a.handle)}</b> ${textoConEtiquetas(p.texto)}</div>
+      ${p.fotos.length&&p.texto?`<div><b>${esc(a.handle)}</b> ${textoConEtiquetas(p.texto)}</div>`:''}
       ${n?`<button class="buy" data-a="pedirPost" data-x="${p.id}"><span>${pr?esc(pr.nombre)+' · '+money(pr.precio):'Ver la tienda de '+esc(n.nombre)}</span><span>${pr?'Pedir ahora':'Ver tienda'} →</span></button>`:''}
       ${abierto ? `<div class="stack" style="gap:10px;margin-top:6px">${cs.map(c=>{ const u=perfilDe(c.autor); return `<div class="cm"><button style="background:none;border:0;padding:0" data-a="verPerfil" data-x="${c.autor}">${avatar(u,30)}</button><div class="tx"><b>${esc(u.handle)}</b> ${esc(c.texto)}<div class="small muted">${hace(c.t)}</div></div></div>`; }).join('')}</div>
         <form class="row nowrap" data-form="comentario" novalidate><input id="c-txt" type="text" maxlength="200" placeholder="Agrega un comentario…" aria-label="Comentario" autocomplete="off"><button class="btn pri" type="submit">Publicar</button></form>
@@ -1749,7 +1785,7 @@ function vNotifs(){
     return `<div class="nrow ${n.leida?'':'new'}">${a?`<button style="background:none;border:0;padding:0" data-a="verPerfil" data-x="${n.de}">${avatar(a,44)}</button>`:`<span class="mark" style="width:44px;height:44px;border-radius:50%">${esc(inits(S.cfg.marca))}</span>`}
       <div class="tx">${a&&n.tipo!=='pedido'?`<b>${esc(a.handle)}</b> `:''}${n.tipo==='sistema'||n.tipo==='pedido'?esc(n.texto):esc(NTXT[n.tipo]||'')}${n.tipo==='comentario'&&n.texto?` “${esc(n.texto)}”`:''} <span class="muted small">${hace(n.t)}</span></div>
       ${['etiqueta','etiqueta_hist'].includes(n.tipo)&&!n.compartida?`<button class="btn sm rpbtn" data-a="compartirEtiqueta" data-x="${n.id}">${ico.repost} Compartir</button>`:''}
-      ${n.tipo==='follow'&&n.de?botonSeguir(n.de):n.tipo==='pedido'?`<button class="btn sm pri" data-a="go" data-x="minegocio">Ver</button>`:p?`<button style="background:none;border:0;padding:0;width:46px" data-a="verPost" data-x="${p.id}">${fotoCuadro(p.fotos[0])}</button>`:''}</div>`; };
+      ${n.tipo==='follow'&&n.de?botonSeguir(n.de):n.tipo==='pedido'?`<button class="btn sm pri" data-a="go" data-x="minegocio">Ver</button>`:p?`<button style="background:none;border:0;padding:0;width:46px" data-a="verPost" data-x="${p.id}">${miniFoto(p)}</button>`:''}</div>`; };
   return `<div class="feed" style="gap:4px"><div class="row between"><h1>Notificaciones</h1><button class="btn sm soft" data-a="simularAct" title="Solo en el prototipo">Simular actividad</button></div>
     ${l.length?grupos.map(([g,fn])=>{ const x=l.filter(fn); return x.length?`<div class="ngrp">${g}</div>${x.map(fila).join('')}`:''; }).join(''):'<div class="empty"><h2>Sin notificaciones</h2><p class="muted">Aquí verás quién te sigue, le da me gusta o comenta.</p></div>'}</div>`;
 }
@@ -1776,7 +1812,8 @@ function vPerfil(){
     ${mis.filter(p=>['rechazado','retirado'].includes(p.estado)).map(p=>`<div class="note bad small">“${esc(p.texto.slice(0,40))}…” fue ${p.estado}: <b>${esc(MOTIVOS[p.motivo]||'')}</b></div>`).join('')}`
    :'<div class="empty"><h2>Comparte tu primera foto</h2><button class="btn pri" data-a="publicar">Publicar</button></div>'}</div>`;
 }
-function miniPost(p, extra=''){ return `<button data-a="verPost" data-x="${p.id}" aria-label="Ver publicación">${extra}${p.fotos.length>1?`<span class="multi">${p.fotos.length}</span>`:''}${fotoCuadro(p.fotos[0])}</button>`; }
+function miniPost(p, extra=''){ return `<button data-a="verPost" data-x="${p.id}" aria-label="Ver publicación">${extra}${p.fotos.length>1?`<span class="multi">${p.fotos.length}</span>`:''}${miniFoto(p)}</button>`; }
+function miniFoto(p){ return p.fotos.length ? fotoCuadro(p.fotos[0]) : `<div class="ph txtile"><span>${esc((p.texto||'').slice(0,90))}${(p.texto||'').length>90?'…':''}</span></div>`; }
 function vUsuario(){
   const id = ui.perfil; if (id===S.yo) return vPerfil(); if (esNeg(id)){ ui.neg=id; return vNegocio(); }
   if (bloq(id)) return `<div class="feed"><button class="btn back" data-a="atras">${ico.back}Volver</button><div class="empty"><h2>Cuenta no disponible</h2><p class="muted">${bloqueePor(S.yo,id)?'Bloqueaste esta cuenta. Puedes desbloquearla en Configuración.':'No puedes ver este perfil.'}</p>${bloqueePor(S.yo,id)?`<button class="btn" data-a="desbloquear" data-x="${id}">Desbloquear</button>`:''}</div></div>`;
@@ -1858,7 +1895,7 @@ function panelChat(id){
   const c = chatCon(id) || {msgs:[]}; c.msgs.forEach(m=>{ if(m.de!==S.yo) m.leido=true; });
   return `<div class="chat-h"><button class="ibtn" data-a="cerrarChat" aria-label="Volver">←</button><button class="row nowrap" style="background:none;border:0;padding:0;color:var(--fg);flex:1;min-width:0" data-a="verPerfil" data-x="${id}">${avatar(a,40)}<span style="text-align:left;min-width:0"><b>${nombreV(a)}</b><br><span class="small muted">@${esc(a.handle)}</span></span></button><button class="ibtn" data-a="opcPerfil" data-x="${id}" aria-label="Opciones">${ico.dots}</button></div>
   <div class="chat-b" id="chat-b"><div class="safety">${ico.shield.replace('width="24" height="24"','width="14" height="14"')} Nunca compartas contraseñas ni códigos. ${esc(S.cfg.marca)} nunca te los pedirá.${esMenor(S.yo)?' Nunca mandes fotos tuyas ni tu dirección, y no aceptes verte con alguien que solo conoces por internet.':''}</div>
-    ${c.msgs.map(m=>{ const p=m.post?post(m.post):null; const h=m.hist?S.historias.find(x=>x.id===m.hist):null; return `<div class="msg ${m.de===S.yo?'me':''}">${h?`<div class="rep">${m.de===S.yo?'Respondiste a su historia':'Respondió a tu historia'}</div>`:''}${m.nota?`<div class="rep">${m.de===S.yo?'Respondiste a su nota':'Respondió a tu nota'}: “${esc(m.nota)}”</div>`:''}${m.texto?esc(m.texto):''}${p&&!bloq(p.autor)?`<button class="shared" data-a="verPost" data-x="${p.id}">${fotoCuadro(p.fotos[0])}<div class="tx"><b>${esc(perfilDe(p.autor).handle)}</b><br>${esc(p.texto.slice(0,50))}${p.texto.length>50?'…':''}</div></button>`:''}${m.de!==S.yo&&m.texto?alertaMsg(m.texto):''}<time>${hora(m.t)}</time></div>`; }).join('') || '<p class="muted small" style="text-align:center">Escribe el primer mensaje.</p>'}</div>
+    ${c.msgs.map(m=>{ const p=m.post?post(m.post):null; const h=m.hist?S.historias.find(x=>x.id===m.hist):null; return `<div class="msg ${m.de===S.yo?'me':''}">${h?`<div class="rep">${m.de===S.yo?'Respondiste a su historia':'Respondió a tu historia'}</div>`:''}${m.nota?`<div class="rep">${m.de===S.yo?'Respondiste a su nota':'Respondió a tu nota'}: “${esc(m.nota)}”</div>`:''}${m.texto?esc(m.texto):''}${p&&!bloq(p.autor)?`<button class="shared" data-a="verPost" data-x="${p.id}">${miniFoto(p)}<div class="tx"><b>${esc(perfilDe(p.autor).handle)}</b><br>${esc(p.texto.slice(0,50))}${p.texto.length>50?'…':''}</div></button>`:''}${m.de!==S.yo&&m.texto?alertaMsg(m.texto):''}<time>${hora(m.t)}</time></div>`; }).join('') || '<p class="muted small" style="text-align:center">Escribe el primer mensaje.</p>'}</div>
   <div class="chat-f"><form data-form="msg" novalidate><input id="m-txt" type="text" maxlength="500" placeholder="Escribe un mensaje…" aria-label="Mensaje" autocomplete="off"><button class="btn pri sm" type="submit">Enviar</button></form>
     ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}
     <span class="small muted">Solo texto y publicaciones de la app. Sin enlaces, correos, fotos ni audios.</span></div>`;
@@ -1908,14 +1945,14 @@ function hojaPublicar(){
   if (!soyNegocio()) revisarSanciones(u);
   if (!u.subidas) return hoja('Tus publicaciones están en pausa', bloqueoPublicarHTML(u));
   const n = soyNegocio()?neg(S.yo):null;
-  return hoja('Nueva publicación', `<label class="f" for="pub-files">Fotos (hasta 10)<input id="pub-files" type="file" accept="image/*" multiple><span class="h">Se reducen antes de guardarse para que pesen poco.</span></label>
+  return hoja('Nueva publicación', `<label class="f" for="pub-files">Fotos (opcional, hasta 10)<input id="pub-files" type="file" accept="image/*" multiple><span class="h">Sin fotos se publica como <b>post</b> de solo texto.</span></label>
     ${ui.draft.length?`<div class="drafts">${ui.draft.map((d,i)=>`<div class="ph">${d.m?`<img src="${esc(d.m)}" alt="">`:escena(d)}<button type="button" data-a="quitarFoto" data-x="${i}" aria-label="Quitar foto">×</button></div>`).join('')}</div>`
-      :`<button type="button" class="btn soft sm" data-a="fotosEjemplo">Sin fotos a la mano: usar fotos de ejemplo</button>`}
-    <label class="f" for="pub-txt">Descripción<textarea id="pub-txt" maxlength="300" placeholder="Escribe algo sobre tus fotos. Usa @ para etiquetar personas o negocios">${esc(ui.draftTxt)}</textarea><span class="h">Escribe <b>@</b> y las primeras letras: te sugerimos cuentas para etiquetar.</span></label>
+      :VIVO?'':`<button type="button" class="btn soft sm" data-a="fotosEjemplo">Sin fotos a la mano: usar fotos de ejemplo</button>`}
+    <label class="f" for="pub-txt">Texto<textarea id="pub-txt" maxlength="300" placeholder="¿Qué está pasando? Usa @ para etiquetar personas o negocios">${esc(ui.draftTxt)}</textarea><span class="h">Escribe <b>@</b> y las primeras letras: te sugerimos cuentas para etiquetar.</span></label>
     <div id="tag-sug"></div>
     ${n?`<label class="f" for="pub-prod">Producto para el botón “Pedir”<select id="pub-prod"><option value="">Solo enlazar a mi tienda</option>${S.productos.filter(p=>p.neg===n.id).map(p=>`<option value="${p.id}">${esc(p.nombre)} · ${money(p.precio)}</option>`).join('')}</select></label>`
       :`<div class="note small">Reglas: nada de contenido +18, ofensivo, enlaces ni teléfonos, y <b>nada de publicidad de negocios</b>. Los negocios tienen su propia cuenta. Con ${S.cfg.strikesMax} publicaciones rechazadas ya no podrás publicar.</div>`}
-    <label class="chk"><input id="pub-ok" type="checkbox"> Confirmo que mis fotos respetan las reglas y tengo permiso de las personas que aparecen.</label>
+    <label class="chk"><input id="pub-ok" type="checkbox"> Confirmo que lo que publico respeta las reglas y tengo permiso de las personas que aparecen.</label>
     ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}
     <button class="btn pri block" type="submit">Publicar</button>`, 'publicar');
 }
@@ -2969,7 +3006,7 @@ function modItem(it, tipo, reportado){
   const a = perfilDe(it.autor); const u = esNeg(it.autor)?null:usr(it.autor); const ev = evaluar(it, tipo);
   const r = analizarTexto(it.texto||'','publico'); const ad = u?senalesPublicidad(it.texto||''):[];
   const reps = S.reportes.filter(x=>tipo==='post'?x.post===it.id:x.hist===it.id);
-  const media = tipo==='post' ? `<div class="car"><div class="car-track">${it.fotos.map(fotoCuadro).join('')}</div>${it.fotos.length>1?`<span class="car-n">${it.fotos.length} fotos</span>`:''}</div>` : `<div class="ph" style="aspect-ratio:9/16;border-radius:10px">${verFoto(it.foto)}</div>`;
+  const media = tipo==='post' && !it.fotos.length ? miniFoto(it) : tipo==='post' ? `<div class="car"><div class="car-track">${it.fotos.map(fotoCuadro).join('')}</div>${it.fotos.length>1?`<span class="car-n">${it.fotos.length} fotos</span>`:''}</div>` : `<div class="ph" style="aspect-ratio:9/16;border-radius:10px">${verFoto(it.foto)}</div>`;
   return `<div class="card"><div class="modq">${media}<div class="stack" style="gap:8px;min-width:0">
     <div class="row">${avatar(a,32)}<b>${nombreV(a)}</b><span class="pill ${a.negocio?'acc':''}">${a.negocio?'Negocio':'Usuario'}</span><span class="pill">${tipo==='post'?'Publicación':'Historia'}</span>${u&&u.strikes?`<span class="pill bad">${u.strikes} aviso(s)</span>`:''}</div>
     ${it.texto?`<div>${esc(it.texto)}</div>`:''}
@@ -3003,7 +3040,7 @@ function aAutomaticas(){
   return `<p class="small muted" style="margin:0">Todo lo que decidió la revisión automática. Si no estás de acuerdo, reviértelo.</p>
   <div class="tbl"><table><thead><tr><th>Contenido</th><th>Decisión</th><th>Razón</th><th></th></tr></thead><tbody>
   ${l.map((d,i)=>{ const it = d.tipo==='post'?post(d.id):S.historias.find(h=>h.id===d.id); if(!it) return ''; const a=perfilDe(it.autor);
-    return `<tr><td><div class="row nowrap"><div style="width:52px;flex:none">${fotoCuadro(d.tipo==='post'?it.fotos[0]:it.foto)}</div><div><b>${esc(a.nombre)}</b><div class="small muted">${esc((it.texto||'Historia').slice(0,50))}</div></div></div></td>
+    return `<tr><td><div class="row nowrap"><div style="width:52px;flex:none">${(d.tipo==='post'?miniFoto(it):fotoCuadro(it.foto))}</div><div><b>${esc(a.nombre)}</b><div class="small muted">${esc((it.texto||'Historia').slice(0,50))}</div></div></div></td>
     <td><span class="pill ${d.d==='aprobado'?'ok':d.d==='rechazado'?'bad':'warn'}">${d.d}</span>${d.revisarFoto&&it.estado==='aprobado'?'<br><span class="pill warn" style="margin-top:4px">revisar foto</span>':''}</td><td class="small">${esc(d.razon)}<div class="muted">${hace(d.t)}</div></td>
     <td>${it.estado===d.d?`<button class="btn sm" data-a="revertir" data-x="${i}">Revertir</button>`:`<span class="small muted">Ya cambió: ${it.estado}</span>`}</td></tr>`; }).join('') || '<tr><td colspan="4" class="muted">Aún no hay decisiones automáticas. Enciende la revisión automática en “Por revisar”.</td></tr>'}</tbody></table></div>`;
 }
@@ -3221,7 +3258,7 @@ function seccionEstado(){
     <div class="cestado ${e.c}"><b>${esc(e.t)}</b><span class="small">${esc(e.d)}</span>${u.suspendido&&!ya('suspension')?`<button class="btn pri sm" data-a="apelar" data-x="suspension">Apelar la suspensión</button>`:''}${u.subidas===false&&!u.suspendido&&!ya('publicar')?`<button class="btn pri sm" data-a="apelar" data-x="publicar">Apelar la pausa</button>`:''}</div>
     <b>Avisos activos (${u.strikes})</b>
     ${u.strikeLog.length ? u.strikeLog.slice().reverse().map(s=>`<div class="srow"><span class="avs">!</span><div class="tx"><b>${esc(MOTIVOS[s.motivo]||ETIQ[s.motivo]||'Regla de la comunidad')}</b><span>${fechaCorta(s.t)} · se borra el ${fechaCorta(s.t+90*DIA)}</span></div>${s.ref&&!ya(s.ref)?`<button class="btn sm" data-a="apelar" data-x="${s.ref}">Apelar</button>`:ya(s.ref)?'<span class="pill warn">En revisión</span>':''}</div>`).join('') : '<span class="small muted">Sin avisos.</span>'}
-    ${rech.length?`<b>Publicaciones rechazadas</b>${rech.slice(0,6).map(p=>`<div class="srow"><span class="rthumb">${verFoto(p.fotos[0])}</span><div class="tx"><b>${esc(MOTIVOS[p.motivo]||'Rechazada')}</b><span>${esc((p.texto||'Sin texto').slice(0,60))}</span></div>${ya(p.id)?'<span class="pill warn">En revisión</span>':`<button class="btn sm" data-a="apelar" data-x="${p.id}">Apelar</button>`}</div>`).join('')}`:''}
+    ${rech.length?`<b>Publicaciones rechazadas</b>${rech.slice(0,6).map(p=>`<div class="srow"><span class="rthumb">${miniFoto(p)}</span><div class="tx"><b>${esc(MOTIVOS[p.motivo]||'Rechazada')}</b><span>${esc((p.texto||'Sin texto').slice(0,60))}</span></div>${ya(p.id)?'<span class="pill warn">En revisión</span>':`<button class="btn sm" data-a="apelar" data-x="${p.id}">Apelar</button>`}</div>`).join('')}`:''}
     ${mias.length?`<b>Tus apelaciones</b>${mias.map(a=>`<div class="srow"><div class="tx"><b>${esc(a.titulo)}</b><span>${fechaCorta(a.t)} · ${a.estado==='pendiente'?'en revisión':a.estado==='aceptada'?'te dimos la razón':'se mantuvo la decisión'}${a.resp?' · '+esc(a.resp):''}</span></div><span class="pill ${a.estado==='aceptada'?'ok':a.estado==='rechazada'?'bad':'warn'}">${a.estado==='pendiente'?'Pendiente':a.estado==='aceptada'?'Aceptada':'Rechazada'}</span></div>`).join('')}`:''}
     <div class="note small"><b>Cómo funciona:</b> cada publicación rechazada por romper una regla es 1 aviso. Con ${S.cfg.strikesMax} avisos se pausan tus publicaciones 24 horas, con ${S.cfg.strikesMax+1} son 7 días y con más son 30 días. Los avisos se borran solos a los 90 días. Solo el contenido muy grave (riesgo para menores, explotación, venta de drogas o armas) suspende la cuenta, y siempre lo revisa una persona. <b>Nunca se elimina una cuenta sin revisión humana.</b></div>
     ${pc?`<div class="small"><b>Tu calificación como cliente:</b> ★ ${pc.avg.toFixed(1)} (${pc.n}) · solo la ven los negocios y repartidores que te atienden.</div>`:''}
@@ -3243,7 +3280,7 @@ function aApelaciones(){
     ${l.map(a=>{ const p = perfilDe(a.u), u = usr(a.u); const ps = !['suspension','publicar'].includes(a.ref) ? post(a.ref) : null;
       return `<div class="card" style="gap:8px"><div class="row">${avatar(p,32)}<b>${esc(p.nombre)}</b><span class="small muted">@${esc(p.handle)} · ${hace(a.t)}</span><span class="pill ${a.estado==='pendiente'?'warn':a.estado==='aceptada'?'ok':'bad'}">${a.estado}</span></div>
         <b>${esc(a.titulo)}</b>
-        ${ps?`<div class="row nowrap" style="align-items:flex-start"><span class="rthumb lg">${verFoto(ps.fotos[0])}</span><div class="small">${esc(ps.texto||'Sin texto')}<br><span class="muted">Rechazada por: ${esc(MOTIVOS[ps.motivo]||'—')}${ps.mod?.razon?' · '+esc(ps.mod.razon):''}</span></div></div>`:''}
+        ${ps?`<div class="row nowrap" style="align-items:flex-start"><span class="rthumb lg">${miniFoto(ps)}</span><div class="small">${esc(ps.texto||'Sin texto')}<br><span class="muted">Rechazada por: ${esc(MOTIVOS[ps.motivo]||'—')}${ps.mod?.razon?' · '+esc(ps.mod.razon):''}</span></div></div>`:''}
         ${a.ref==='suspension'&&u.susp?`<div class="small muted">Suspendida por: ${(u.susp.motivo||[]).map(m=>ETIQ[m]||m).join(', ')} · ${u.susp.auto?'automática':'manual'}</div>`:''}
         <div class="quote">${esc(a.texto)}</div>
         <div class="small muted">Avisos activos: ${u.strikes}</div>
@@ -3606,6 +3643,248 @@ function registrarAccionesReal(){
 }
 
 /* ============================================================
+   v17 — responder y borrar mensajes/comentarios, reportes con confirmación,
+   enviar historias a amigos, posts de solo texto y arreglos de celular.
+   ============================================================ */
+ico.megafono = I('<path d="M3.5 10.2h3.2L17 5v14l-10.3-5.2H3.5a1 1 0 0 1-1-1v-1.6a1 1 0 0 1 1-1z" fill="currentColor"/><path d="M7.2 14l1.6 5.3h2.6L10.2 15"/><path d="M20 10v4"/>', 22);
+ico.responder = I('<path d="M9 7 4 12l5 5"/><path d="M4 12h10a6 6 0 0 1 6 6v1"/>', 20);
+ico.basura = I('<path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4h6v3"/>', 20);
+const MSG_10MIN = 10*60e3;
+const nuevoId = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const msgId = m => m.id || (m.id = nuevoId('m'));
+function buscarMsg(id){ for (const c of S.chats){ const m = c.msgs.find(x=>x.id===id || (x.sid && 'm'+x.sid===id)); if (m) return {c, m}; } return null; }
+const comPorId = id => S.comentarios.find(c=>c.id===id || (c.sid && 'k'+c.sid===id));
+const cortar = (t, n=70) => { t = t||''; return t.length>n ? t.slice(0,n)+'…' : t; };
+function textoMsgCorto(m){ if (!m) return ''; if (m.borrado) return 'Mensaje eliminado'; if (m.texto) return cortar(m.texto, 60); if (m.post) return 'Publicación'; if (m.histComp) return 'Historia'; return ''; }
+
+/* ---------- chat ---------- */
+function panelChat(id){
+  const a = perfilDe(id);
+  if (bloq(id)) return `<div class="empty" style="margin:auto"><h2>Conversación no disponible</h2><p class="muted">Una de las dos cuentas está bloqueada.</p></div>`;
+  if (!amigos(S.yo,id)) return `<div class="empty" style="margin:auto"><h2>Aún no son amigos</h2><p class="muted">Para mandarse mensajes tienen que seguirse mutuamente.</p>${botonSeguir(id,false)}</div>`;
+  const c = chatCon(id) || {msgs:[]}; c.msgs.forEach(m=>{ if(m.de!==S.yo) m.leido=true; msgId(m); });
+  const resp = ui.respMsg && ui.respMsg.chat===id ? buscarMsg(ui.respMsg.id) : null;
+  const burbuja = m => {
+    if (m.oculto) return '';
+    const yoM = m.de===S.yo;
+    if (m.borrado) return `<div class="msg borrado ${yoM?'me':''}" data-lp="m:${m.id}">🚫 ${yoM?'Eliminaste este mensaje':'Este mensaje fue eliminado'}<time>${hora(m.t)}</time></div>`;
+    const p = m.post?post(m.post):null; const h = m.hist?S.historias.find(x=>x.id===m.hist):null;
+    const r = m.resp ? buscarMsg(m.resp) : null;
+    return `<div class="msg ${yoM?'me':''}" data-lp="m:${m.id}">
+      ${r?`<div class="resp-q"><b>${r.m.de===S.yo?'Tú':esc(perfilDe(r.m.de).handle)}</b><span>${esc(textoMsgCorto(r.m))}</span></div>`:''}
+      ${h?`<div class="rep">${yoM?'Respondiste a su historia':'Respondió a tu historia'}</div>`:''}${m.nota?`<div class="rep">${yoM?'Respondiste a su nota':'Respondió a tu nota'}: “${esc(m.nota)}”</div>`:''}
+      ${m.histComp?tarjetaHistComp(m.histComp):''}
+      ${m.texto?esc(m.texto):''}${p&&!bloq(p.autor)?`<button class="shared" data-a="verPost" data-x="${p.id}">${miniFoto(p)}<div class="tx"><b>${esc(perfilDe(p.autor).handle)}</b><br>${esc(cortar(p.texto,50))}</div></button>`:''}
+      ${!yoM&&m.texto?alertaMsg(m.texto):''}<time>${hora(m.t)}</time></div>`; };
+  return `<div class="chat-h"><button class="ibtn" data-a="cerrarChat" aria-label="Volver">←</button><button class="row nowrap" style="background:none;border:0;padding:0;color:var(--fg);flex:1;min-width:0" data-a="verPerfil" data-x="${id}">${avatar(a,40)}<span style="text-align:left;min-width:0"><b>${nombreV(a)}</b><br><span class="small muted">@${esc(a.handle)}</span></span></button><button class="ibtn" data-a="opcPerfil" data-x="${id}" aria-label="Opciones">${ico.dots}</button></div>
+  <div class="chat-b" id="chat-b"><div class="safety">${ico.shield.replace('width="24" height="24"','width="14" height="14"')} Nunca compartas contraseñas ni códigos. ${esc(S.cfg.marca)} nunca te los pedirá.${esMenor(S.yo)?' Nunca mandes fotos tuyas ni tu dirección, y no aceptes verte con alguien que solo conoces por internet.':''}</div>
+    ${c.msgs.map(burbuja).join('') || '<p class="muted small" style="text-align:center">Escribe el primer mensaje.</p>'}</div>
+  <div class="chat-f">${resp?`<div class="resp-bar">${ico.responder}<span>Respondiendo a <b>${resp.m.de===S.yo?'ti':esc(perfilDe(resp.m.de).handle)}</b>: ${esc(textoMsgCorto(resp.m))}</span><button type="button" class="x" data-a="cancelarResp" aria-label="Cancelar respuesta">×</button></div>`:''}
+    <form data-form="msg" novalidate><input id="m-txt" type="text" maxlength="500" placeholder="${resp?'Escribe tu respuesta…':'Escribe un mensaje…'}" aria-label="Mensaje" autocomplete="off"><button class="btn pri sm" type="submit">Enviar</button></form>
+    ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}
+    <span class="small muted">Mantén presionado un mensaje para responder, reportar o borrar. Sin enlaces, correos, fotos ni audios.</span></div>`;
+}
+function tarjetaHistComp(hid){
+  const h = S.historias.find(x=>x.id===hid);
+  if (!h || !histVigente(h)) return `<div class="histc off">${ico.clock||'⏱'} Historia que ya no está disponible</div>`;
+  const au = perfilDe(h.autor);
+  if (h.autor===S.yo || amigos(S.yo, h.autor)) return `<button class="histc" data-a="verHistComp" data-x="${h.id}"><span class="hmini">${mediaHist(h)}</span><span class="tx"><b>Historia de @${esc(au.handle)}</b><br><span class="small">Toca para verla</span></span></button>`;
+  return `<div class="histc off"><span class="hmini lock">🔒</span><span class="tx"><b>Historia de @${esc(au.handle)}</b><br><span class="small">Para verla, primero tú y @${esc(au.handle)} deben ser amigos (seguirse mutuamente).</span></span></div>`;
+}
+
+/* ---------- comentarios ---------- */
+function hojaComentarios(){
+  const p = post(ui.sheet.post); const cs = comsDe(p.id); const a = perfilDe(p.autor);
+  const resp = ui.respCom && ui.respCom.post===p.id ? comPorId(ui.respCom.id) : null;
+  const vivos = cs.filter(c=>!c.eliminado).length;
+  const fila = c => { const u = perfilDe(c.autor);
+    if (c.eliminado) return `<div class="cm elim" data-lp="k:${c.id}"><button class="cav" data-a="verPerfil" data-x="${c.autor}" aria-label="Ver perfil">${avatar(u,36)}</button><div class="tx"><b>${esc(u.handle)}</b> <span class="small muted">${hace(c.t)}</span><div class="muted">🗑 El dueño eliminó este comentario</div></div></div>`;
+    const r = c.resp ? comPorId(c.resp) : null;
+    return `<div class="cm" data-lp="k:${c.id}"><button class="cav" data-a="verPerfil" data-x="${c.autor}" aria-label="Ver perfil">${avatar(u,36)}</button><div class="tx">
+      ${r?`<div class="resp-q"><b>@${esc(perfilDe(r.autor).handle)}</b><span>${r.eliminado?'Comentario eliminado':esc(cortar(r.texto,60))}</span></div>`:''}
+      <b>${esc(u.handle)}</b> <span class="small muted">${hace(c.t)}</span><div>${esc(c.texto)}</div>
+      <button class="lk small cresp" data-a="responderCom" data-x="${c.id}">Responder</button></div></div>`; };
+  return `<div class="ov" data-a="closeSheet" data-self="1"><div class="sheet comsheet" role="dialog" aria-modal="true" aria-label="Comentarios">
+    <div class="comh"><span class="grab" aria-hidden="true"></span><h2>Comentarios <span class="muted">${vivos}</span></h2><button type="button" class="x" data-a="closeSheet" aria-label="Cerrar">×</button></div>
+    <div class="comlist" id="comlist">${p.texto&&p.fotos.length?`<div class="cm cap">${avatar(a,36)}<div class="tx"><b>${esc(a.handle)}</b> ${textoConEtiquetas(p.texto)}<div class="small muted">${hace(p.t)}</div></div></div>`:''}
+      ${cs.map(fila).join('') || '<div class="comvacio"><b>Aún no hay comentarios</b><span class="small muted">Sé el primero en comentar.</span></div>'}
+      ${cs.length?'<p class="small muted" style="text-align:center;margin:0">Mantén presionado un comentario para más opciones.</p>':''}</div>
+    ${ui.err?`<div class="err" role="alert" style="margin:0 16px 8px">${esc(ui.err)}</div>`:''}
+    ${resp?`<div class="resp-bar" style="margin:0 16px">${ico.responder}<span>Respondiendo a <b>@${esc(perfilDe(resp.autor).handle)}</b>: ${esc(cortar(resp.texto,50))}</span><button type="button" class="x" data-a="cancelarRespCom" aria-label="Cancelar respuesta">×</button></div>`:''}
+    <form class="comform" data-form="comentario" novalidate>${avatar(perfilDe(S.yo),36)}<input id="c-txt" type="text" maxlength="200" placeholder="${resp?'Escribe tu respuesta…':'Agrega un comentario…'}" aria-label="Comentario" autocomplete="off" enterkeyhint="send"><button class="btn pri" type="submit">Publicar</button></form>
+  </div></div>`;
+}
+
+/* ---------- menú al mantener presionado ---------- */
+function hojaOpcMsg(){
+  const sh = ui.sheet; const f = buscarMsg(sh.id); if (!f) return '';
+  const m = f.m, mio = m.de===S.yo, dentro10 = Date.now() - m.t < MSG_10MIN;
+  if (sh.paso==='borrar') return hoja('¿Borrar mensaje?', `
+    ${mio&&!m.borrado?(dentro10?`<button class="lrow" data-a="borrarMsgTodos" data-x="${m.id}" style="color:var(--bad)">${ico.basura}<div class="tx"><b>Eliminar para todos</b><div class="small muted">Desaparece también para la otra persona. Te quedan ${Math.max(1,Math.ceil((MSG_10MIN-(Date.now()-m.t))/60e3))} min.</div></div></button>`
+      :`<div class="note small">Ya pasaron más de 10 minutos: solo puedes eliminarlo para ti.</div>`):''}
+    <button class="lrow" data-a="borrarMsgYo" data-x="${m.id}">${ico.basura}<div class="tx"><b>Eliminar para mí</b><div class="small muted">Solo desaparece de tu chat.</div></div></button>`);
+  return hoja('Mensaje', `<div class="quote small">${esc(textoMsgCorto(m))||'—'}</div>
+    ${m.borrado?'':`<button class="lrow" data-a="responderMsg" data-x="${m.id}">${ico.responder}<div class="tx"><b>Responder</b></div></button>`}
+    ${!mio&&!m.borrado?`<button class="lrow" data-a="reportarMsg" data-x="${m.id}"><span class="strep-ic">${ico.megafono}</span><div class="tx"><b>Reportar</b><div class="small muted">Nadie sabrá que fuiste tú</div></div></button>`:''}
+    <button class="lrow" data-a="borrarMsgPaso" data-x="${m.id}" style="color:var(--bad)">${ico.basura}<div class="tx"><b>Borrar</b></div></button>`);
+}
+function hojaOpcCom(){
+  const c = comPorId(ui.sheet.id); if (!c) return '';
+  const mio = c.autor===S.yo;
+  if (c.eliminado) return hoja('Comentario', `<p class="muted" style="margin:0">Este comentario fue eliminado por su dueño.</p>`);
+  return hoja('Comentario', `<div class="quote small">${esc(cortar(c.texto,120))}</div>
+    <button class="lrow" data-a="responderCom" data-x="${c.id}">${ico.responder}<div class="tx"><b>Responder</b></div></button>
+    ${mio?`<button class="lrow" data-a="borrarCom" data-x="${c.id}" style="color:var(--bad)">${ico.basura}<div class="tx"><b>Eliminar para todos</b><div class="small muted">Todos verán que eliminaste un comentario, pero no lo que decía.</div></div></button>`
+      :`<button class="lrow" data-a="reportarCom" data-x="${c.id}"><span class="strep-ic">${ico.megafono}</span><div class="tx"><b>Reportar</b><div class="small muted">Nadie sabrá que fuiste tú</div></div></button>`}`);
+}
+
+/* ---------- reportar con motivo y confirmación ---------- */
+function hojaReportar(){
+  const sh = ui.sheet; const que = sh.hist?'esta historia':sh.mensaje?'este mensaje':sh.comentario?'este comentario':sh.cuenta?'esta cuenta':'esta publicación';
+  if (sh.motivo) return hoja('Confirmar reporte', `<div class="repconf"><span class="strep-ic big">${ico.megafono}</span><p style="margin:0">¿Seguro que quieres reportar ${que} por <b>${esc(MOTIVOS[sh.motivo]||sh.motivo)}</b>?</p><p class="small muted" style="margin:0">El equipo de ${esc(S.cfg.marca)} lo revisará. Nadie sabrá que fuiste tú.</p></div>
+    <button class="btn danger block" data-a="confirmarReporte">Sí, enviar reporte</button><button class="btn block" data-a="cambiarMotivo">Cambiar motivo</button>`);
+  return hoja('Reportar', `<p class="muted" style="margin:0">¿Por qué reportas ${que}? Elige un motivo.</p>${Object.entries(MOTIVOS).map(([k,l])=>`<button class="lrow" data-a="enviarReporte" data-x="${k}"><div class="tx"><b>${esc(l)}</b></div><span class="muted">›</span></button>`).join('')}`);
+}
+
+/* ---------- enviar historia ---------- */
+function hojaEnviarHist(){
+  const am = misAmigos();
+  return hoja('Enviar historia', am.length?`<p class="small muted" style="margin:0">Tus amigos podrán verla si también son amigos de quien la publicó.</p>
+    <label class="f" for="eh-txt">Mensaje (opcional)<input id="eh-txt" type="text" maxlength="140" placeholder="¡Mira esto!" autocomplete="off"></label>
+    ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}
+    ${am.map(id=>{ const a=perfilDe(id); return `<button class="lrow" data-a="enviarHistA" data-x="${id}">${avatar(a,40)}<div class="tx"><b>${nombreV(a)}</b><div class="small muted">@${esc(a.handle)}</div></div><span class="btn sm pri">Enviar</span></button>`; }).join('')}`
+    :`<p style="margin:0">Aún no tienes amigos para enviarles historias.</p>`);
+}
+
+/* ---------- visor de historias (sin botones encimados en celular) ---------- */
+function renderStory(){
+  const box = $('#story'); if(!ui.story){ box.innerHTML=''; return; }
+  const st = ui.story; const {uid,l,h} = stActual(); if(!h){ cerrarStory(); return; }
+  S.vistas[S.yo+'|'+h.id]=true;
+  const a = perfilDe(uid); const n = esNeg(uid)?neg(uid):null; const pr = h.prod?prod(h.prod):null;
+  const prevs = st.users.slice(Math.max(0,st.u-2), st.u), nexts = st.users.slice(st.u+1, st.u+3);
+  const prevCard = id => { const hh=histDe(id)[0]; if(!hh) return ''; const aa=perfilDe(id); return `<button class="stprev" data-a="stUser" data-x="${id}"><div class="media2">${mediaHist(hh)}</div><div class="c">${avatar(aa,52)}<span>${esc(aa.handle)}</span><span style="opacity:.75;font-weight:500">${hace(hh.t)}</span></div></button>`; };
+  const puede = uid!==S.yo && amigos(S.yo,uid);
+  const puedeEnviar = !esNeg(S.yo) && (uid===S.yo || amigos(S.yo,uid));
+  box.innerHTML = `<div class="stv" role="dialog" aria-modal="true" aria-label="Historias de ${esc(a.nombre)}">
+    <span class="brand2">${esc(S.cfg.marca)}</span><button class="x2" data-a="stClose" aria-label="Cerrar">×</button>
+    ${prevs.map(prevCard).join('')}<button class="arr" data-a="stPrev" aria-label="Anterior">‹</button>
+    <div class="stcard"><div class="media2">${mediaHist(h)}</div>
+      ${h.origen?`<button class="storig" data-a="stPerfil" data-x="${h.origen.autor}">${ico.repost} Historia de <b>@${esc(perfilDe(h.origen.autor).handle)}</b></button>`:''}
+      ${(h.etiq||[]).filter(id=>!bloq(id)).length?`<div class="sttags">${h.etiq.filter(id=>!bloq(id)).map(id=>`<button data-a="stPerfil" data-x="${id}">${ico.tag}@${esc(perfilDe(id).handle)}</button>`).join('')}</div>`:''}
+      ${(h.etiq||[]).includes(S.yo)&&uid!==S.yo?`<button class="stshare" data-a="compartirHist" data-x="${h.id}">${ico.repost} Te etiquetaron · Compartir en tu historia</button>`:''}
+      <div class="top2"><div class="bars">${l.map((x,i)=>`<span class="${i<st.s?'done':''}"><i ${i===st.s?'id="stbar"':''}></i></span>`).join('')}</div>
+        <div class="who2"><button class="stwho" data-a="stPerfil" data-x="${uid}">${avatar(a,32)}<span class="nm">${handleV(a)}</span></button><small>${hace(h.t)}</small><span class="sp"></span>
+          <button class="stbtn" data-a="stPause" aria-label="${st.paused?'Reanudar':'Pausar'}">${st.paused?'▶':'❚❚'}</button>
+          ${uid!==S.yo?`<button class="stbtn strep" data-a="reportarHist" data-x="${h.id}" aria-label="Reportar historia" title="Reportar">${ico.megafono}</button>`:''}
+          <button class="stbtn stx" data-a="stClose" aria-label="Cerrar">×</button></div></div>
+      <button class="tap l" data-a="stPrev" aria-label="Anterior"></button><button class="tap r" data-a="stNext" aria-label="Siguiente"></button>
+      ${n?`<button class="cta3" data-a="stPedir" data-x="${h.id}">${pr?'Pedir '+esc(pr.nombre)+' · '+money(pr.precio):'Ver la tienda'}</button>`:''}
+      <div class="bot2">${uid===S.yo?`<span class="msg2">Tu historia · se borra en ${Math.max(1,Math.ceil((h.t+H24-Date.now())/3600e3))} h</span>`
+        : puede?`<form data-form="respHist" novalidate style="flex:1;display:flex;min-width:0"><input id="st-resp" type="text" maxlength="200" placeholder="Responde a ${esc(a.handle)}…" aria-label="Responder" autocomplete="off"></form>`
+        : `<span class="msg2">Síganse mutuamente para responder</span>`}
+        ${puedeEnviar?`<button class="ib" data-a="enviarHist" data-x="${h.id}" aria-label="Enviar a un amigo" title="Enviar a un amigo">${ico.send}</button>`:''}
+        ${uid!==S.yo?`<button class="ib ${S.likesHist[likeKey(h.id)]?'on':''}" data-a="likeHist" data-x="${h.id}" aria-label="Me gusta">${S.likesHist[likeKey(h.id)]?ico.heartF:ico.heart}</button>`:''}</div>
+    </div><button class="arr" data-a="stNext" aria-label="Siguiente">›</button>${nexts.map(prevCard).join('')}
+  </div>`;
+  document.body.style.overflow='hidden';
+}
+
+/* ---------- acciones ---------- */
+window.HOJAS_EXTRA = {opcMsg:hojaOpcMsg, opcCom:hojaOpcCom, enviarHist:hojaEnviarHist};
+function registrarAccionesV17(){
+  const reportarOrig = A.enviarReporte;
+  Object.assign(A, {
+    responderMsg: x => { const f = buscarMsg(x); if (!f) return; ui.respMsg = {id:x, chat:ui.chat}; ui.sheet=null; renderLayer(); render(); setTimeout(()=>$('#m-txt')?.focus(), 30); },
+    cancelarResp: () => { ui.respMsg = null; render(); },
+    borrarMsgPaso: x => { ui.sheet = {t:'opcMsg', id:x, paso:'borrar'}; renderLayer(); },
+    borrarMsgTodos: x => { const f = buscarMsg(x); if (!f) return; const m = f.m;
+      if (m.de!==S.yo) return toast('Solo puedes borrar para todos tus propios mensajes.');
+      if (Date.now()-m.t >= MSG_10MIN) return toast('Ya pasaron 10 minutos: solo puedes borrarlo para ti.');
+      m.borrado = true; m.texto = ''; delete m.post; delete m.histComp; delete m.nota; delete m.resp; cerrarHoja(); save(); render(); toast('Mensaje eliminado para todos'); },
+    borrarMsgYo: x => { const f = buscarMsg(x); if (!f) return; f.m.oculto = true; if (ui.respMsg && ui.respMsg.id===x) ui.respMsg=null; cerrarHoja(); save(); render(); toast('Mensaje eliminado para ti'); },
+    reportarMsg: x => { const f = buscarMsg(x); if (!f || f.m.de===S.yo) return toast('No puedes reportar tus propios mensajes.'); ui.sheet = {t:'reportar', mensaje:x}; renderLayer(); },
+    responderCom: x => { const c = comPorId(x); if (!c || c.eliminado) return; const pid = c.post; ui.respCom = {id:x, post:pid}; ui.sheet = {t:'coment', post:pid}; renderLayer(); setTimeout(()=>$('#c-txt')?.focus(), 30); },
+    cancelarRespCom: () => { ui.respCom = null; renderLayer(); },
+    reportarCom: x => { const c = comPorId(x); if (!c || c.autor===S.yo) return toast('No puedes reportar tus propios comentarios.'); ui.sheet = {t:'reportar', comentario:x, volver:c.post}; renderLayer(); },
+    borrarCom: x => { const c = comPorId(x); if (!c || c.autor!==S.yo) return;
+      if (!confirmarSimple('¿Eliminar tu comentario para todos? Se verá que eliminaste un comentario, pero no lo que decía.')) return;
+      c.eliminado = true; c.texto = ''; save(); ui.sheet = {t:'coment', post:c.post}; renderLayer(); refrescarPost(c.post); toast('Comentario eliminado'); },
+    reportarHist: x => { if (ui.story) ui.story.paused = true; const h = S.historias.find(o=>o.id===x); if (!h || h.autor===S.yo) return; ui.sheet = {t:'reportar', hist:x}; renderLayer(); },
+    enviarReporte: x => { if (!ui.sheet) return; ui.sheet.motivo = x; renderLayer(); },
+    cambiarMotivo: () => { if (ui.sheet) delete ui.sheet.motivo; renderLayer(); },
+    confirmarReporte: () => { const sh = ui.sheet; if (!sh || !sh.motivo) return;
+      if (sh.mensaje || sh.comentario){ S.reportes.push({id:nuevoId('rp'), por:S.yo, motivo:sh.motivo, t:Date.now(), mensaje:sh.mensaje, comentario:sh.comentario});
+        log('Usuario','Reporte',`${sh.mensaje?'mensaje':'comentario'}: ${MOTIVOS[sh.motivo]}`); cerrarHoja(); save(); toast('Gracias. Lo revisaremos. Nadie sabrá que fuiste tú.'); return; }
+      reportarOrig(sh.motivo); },
+    enviarHist: x => { if (ui.story) ui.story.paused = true; ui.err=''; ui.sheet = {t:'enviarHist', hist:x}; renderLayer(); },
+    enviarHistA: x => { const hid = ui.sheet && ui.sheet.hist; const h = S.historias.find(o=>o.id===hid); if (!h) return;
+      if (!amigos(S.yo,x)) return toast('Solo puedes enviar a tus amigos');
+      const txt = ($('#eh-txt')?.value||'').trim();
+      if (txt){ const r=revisar(txt,'privado',{para:x,donde:'mensaje'}); if(!r.ok){ ui.err=msgBloqueo(r); renderLayer(); return; } }
+      if (!permitirEnvio()){ ui.err='Vas muy rápido. Espera unos segundos.'; renderLayer(); return; }
+      const c = chatNuevo(x); c.msgs.push({id:nuevoId('m'), de:S.yo, histComp:hid, texto:txt, t:Date.now()});
+      cerrarHoja(); save(); toast(`Historia enviada a ${perfilDe(x).nombre}`); },
+    repRevisado: x => { S.reportes = S.reportes.filter(r=>r.id!==x); save(); rerender(); toast('Marcado como revisado'); },
+    verHistComp: x => { const h = S.historias.find(o=>o.id===x); if (!h || !histVigente(h)) return toast('Esta historia ya no está disponible');
+      if (h.autor!==S.yo && !amigos(S.yo, h.autor)) return toast('Para ver esta historia primero deben ser amigos.');
+      const l = histDe(h.autor); ui.story = {users:[h.autor], u:0, s:Math.max(0, l.findIndex(o=>o.id===x)), paused:false}; renderStory(); iniciarTimer(); }
+  });
+  Object.assign(F, {
+    msg: () => {
+      const inp=$('#m-txt'); const t=inp.value.trim(); if(!t) return;
+      if (!amigos(S.yo,ui.chat) || bloq(ui.chat)) return toast('Solo puedes escribir a tus amigos');
+      const r=revisar(t,'privado',{para:ui.chat,donde:'mensaje'}); if (!r.ok){ ui.err=msgBloqueo(r); render(); $('#m-txt').value=t; return; }
+      if (!permitirEnvio()){ ui.err='Vas muy rápido. Espera unos segundos.'; render(); return; }
+      const m = {id:nuevoId('m'), de:S.yo, texto:t, t:Date.now()};
+      if (ui.respMsg && ui.respMsg.chat===ui.chat && buscarMsg(ui.respMsg.id)) m.resp = ui.respMsg.id;
+      ui.respMsg = null; chatNuevo(ui.chat).msgs.push(m); ui.err=''; save(); render(); $('#m-txt')?.focus();
+    },
+    comentario: () => {
+      if (necesitaSesion()) return; const t=$('#c-txt').value.trim(); if(!t) return; const pid = ui.sheet?.post || ui.post;
+      const r=revisar(t,'publico',{donde:'comentario'}); if (!r.ok){ ui.err=msgBloqueo(r); ui.sheet?renderLayer():rerender(); return; }
+      const c = {id:nuevoId('k'), post:pid, autor:S.yo, texto:t, t:Date.now()};
+      if (ui.respCom && ui.respCom.post===pid && comPorId(ui.respCom.id)){ c.resp = ui.respCom.id; const pa = comPorId(c.resp); if (pa.autor!==S.yo) notif(pa.autor,'comentario',S.yo,{post:pid,texto:'te respondió: '+t}); }
+      ui.respCom = null; S.comentarios.push(c); notif(post(pid).autor,'comentario',S.yo,{post:pid,texto:t}); ui.err=''; save();
+      if (ui.sheet){ renderLayer(); refrescarPost(pid); setTimeout(()=>$('#c-txt')?.focus(),20); } else { rerender(); }
+    }
+  });
+  // mantener presionado (celular) o clic derecho (computadora)
+  let lpT = null, lpX = 0, lpY = 0, lpHecho = false;
+  const abrirLP = el => { const [t, id] = el.dataset.lp.split(':'); lpHecho = true; setTimeout(()=>{ lpHecho = false; }, 700); if (navigator.vibrate) try{ navigator.vibrate(15); }catch(e){}
+    if (t==='m'){ const f = buscarMsg(id); if (!f) return; ui.sheet = {t:'opcMsg', id}; }
+    else { const c = comPorId(id); if (!c) return; ui.respComVolver = c.post; ui.sheet = {t:'opcCom', id}; }
+    renderLayer(); };
+  document.addEventListener('pointerdown', e => { const el = e.target.closest('[data-lp]'); if (!el || e.button>0) return; lpHecho = false; lpX = e.clientX; lpY = e.clientY; clearTimeout(lpT); lpT = setTimeout(()=>abrirLP(el), 480); });
+  ['pointerup','pointercancel','scroll'].forEach(ev=>document.addEventListener(ev, ()=>clearTimeout(lpT), true));
+  document.addEventListener('pointermove', e => { if (Math.abs(e.clientX-lpX)>8 || Math.abs(e.clientY-lpY)>8) clearTimeout(lpT); });
+  document.addEventListener('contextmenu', e => { const el = e.target.closest('[data-lp]'); if (!el) return; e.preventDefault(); clearTimeout(lpT); abrirLP(el); });
+  document.addEventListener('click', e => { if (lpHecho && e.target.closest('[data-lp]')){ e.stopPropagation(); e.preventDefault(); lpHecho = false; } }, true);
+}
+
+/* ---------- admin: reportes de historias, mensajes y comentarios ---------- */
+function aReportes(){
+  const rep = S.posts.filter(p=>p.estado==='aprobado'&&S.reportes.some(r=>r.post===p.id));
+  const cuentas = S.reportes.filter(r=>r.cuenta);
+  const otros = S.reportes.filter(r=>r.hist||r.mensaje||r.comentario);
+  const fila = r => { const h = r.hist ? S.historias.find(x=>x.id===r.hist) : null;
+    const autor = h ? h.autor : r.det && r.det.autor ? 'u'+r.det.autor : (r.comentario && comPorId(r.comentario) ? comPorId(r.comentario).autor : null);
+    const a = autor ? perfilDe(autor) : null; const tipo = r.hist?'Historia':r.mensaje?'Mensaje':'Comentario';
+    const texto = r.det ? r.det.texto : r.comentario && comPorId(r.comentario) ? comPorId(r.comentario).texto : '';
+    return `<div class="card stack" style="gap:8px"><div class="row"><span class="pill bad">${tipo}</span><b>${esc(MOTIVOS[r.motivo]||r.motivo)}</b><span class="small muted">${hace(r.t)}</span></div>
+      ${a?`<div class="row">${avatar(a,30)}<b>@${esc(a.handle)}</b></div>`:''}
+      ${h?`<div style="width:90px;aspect-ratio:9/16;border-radius:10px;overflow:hidden;position:relative">${mediaHist(h)}</div>`:''}
+      ${texto?`<div class="quote">${esc(texto)}</div>`:''}
+      <div class="row"><button class="btn sm" data-a="repRevisado" data-x="${r.id}">Marcar revisado</button>${a&&autor[0]==='u'?`<button class="btn sm" data-a="verPerfil" data-x="${autor}">Ver cuenta</button>`:''}</div></div>`; };
+  return `<p class="small muted" style="margin:0">Con la revisión automática encendida, una publicación con ${S.cfg.umbralReportes} reportes se oculta sola hasta que la revises.</p>
+  ${rep.map(p=>modItem(p,'post',true)).join('') || '<p class="muted">Sin publicaciones reportadas.</p>'}
+  <div class="sec-h"><h2>Historias, mensajes y comentarios</h2></div>
+  ${otros.map(fila).join('') || '<p class="muted">Sin reportes.</p>'}
+  <div class="sec-h"><h2>Cuentas reportadas</h2></div>
+  ${cuentas.map(r=>{ const a=perfilDe(r.cuenta); return `<div class="srow card" style="flex-direction:row">${avatar(a,38)}<div class="tx"><b>${esc(a.nombre)}</b><span>${esc(MOTIVOS[r.motivo]||r.motivo)} · ${hace(r.t)}</span></div><button class="btn sm" data-a="repRevisado" data-x="${r.id}">Revisado</button></div>`; }).join('') || '<p class="muted">Sin cuentas reportadas.</p>'}`;
+}
+
+/* ============================================================
    EN VIVO — la demo completa conectada al servidor (Supabase)
    Las pantallas son exactamente las de la demo. Aquí:
    1) se cargan los datos reales y se arma el mismo "S" que usa la demo,
@@ -3646,14 +3925,15 @@ async function vCargar(){
       prods: sb.from('productos').select('*').limit(3000),
       posts: sb.from('feed2').select('*').order('created_at',{ascending:false}).limit(400),
       likes: sb.from('likes').select('post,usuario').limit(20000),
-      coms: sb.from('comments').select('id,post,autor,texto,estado,created_at').order('created_at').limit(5000),
-      hist: sb.from('historias').select('*').order('created_at').limit(600),
+      coms: sb.from('comments').select('id,post,autor,texto,estado,created_at,responde,eliminado').order('created_at').limit(5000),
+      hist: sb.from('historias').select('*').order('created_at',{ascending:false}).limit(600),
       vistas: sb.from('hist_vistas').select('hist').limit(5000),
       hlikes: sb.from('hist_likes').select('hist').limit(5000),
       notas: sb.from('notas').select('*'),
       reps: sb.from('reposts').select('usuario,post,created_at').limit(10000),
       guard: sb.from('guardados').select('post,created_at'),
-      msgs: sb.from('messages').select('id,de,para,texto,post,hist,nota,estado,leido,created_at').order('created_at').limit(3000),
+      msgs: sb.from('messages').select('id,de,para,texto,post,hist,nota,estado,leido,created_at,responde,borrado,hist_comp').order('created_at').limit(3000),
+      ocultos: sb.from('msg_ocultos').select('mensaje').limit(5000),
       notifs: sb.from('notifs').select('*').order('created_at',{ascending:false}).limit(200),
       res: sb.from('resenas').select('*').limit(5000),
       peds: sb.from('pedidos').select(PEDCOLS).order('created_at',{ascending:false}).limit(400),
@@ -3665,7 +3945,8 @@ async function vCargar(){
         alertas: sb.from('alertas').select('*').order('created_at',{ascending:false}).limit(300),
         reportes: sb.from('reportes').select('*').order('created_at',{ascending:false}).limit(500),
         bit: sb.from('bitacora').select('*').order('t',{ascending:false}).limit(300),
-        adm: sb.rpc('admin_perfiles2')
+        adm: sb.rpc('admin_perfiles2'),
+        repdet: sb.rpc('admin_reportes_detalle')
       } : {})
     };
     const keys = Object.keys(pedir); const vals = await Promise.all(Object.values(pedir));
@@ -3712,7 +3993,7 @@ function vArmar(D, E, admin, conteos, promCli){
     return {id:'q'+p.id, sid:p.id, autor:p.negocio?negDe(p.negocio):'u'+p.autor, autorU:'u'+p.autor, tipo:p.negocio?'negocio':'usuario', fotos:(p.fotos||[]).map(vFotoObj), texto:p.texto||'',
       likes:lk.length - (yoLe?1:0), likedBy:lk.filter(x=>x!==me).slice(0,50), estado:p.estado, motivo:p.motivo, t:vMs(p.created_at), prod:p.prod?'p'+p.prod:null, etiq:p.etiq||[],
       mod:mod?{por:mod.por, razon:mod.razon, t:mod.t, antes:mod.antes}:null}; });
-  const comentarios = D.coms.filter(c=>c.estado==='ok').map(c=>({id:'k'+c.id, sid:c.id, post:'q'+c.post, autor:'u'+c.autor, texto:c.texto, t:vMs(c.created_at)}));
+  const comentarios = D.coms.filter(c=>c.estado==='ok').map(c=>({id:'k'+c.id, sid:c.id, post:'q'+c.post, autor:'u'+c.autor, texto:c.eliminado?'':c.texto, t:vMs(c.created_at), resp:c.responde?'k'+c.responde:undefined, eliminado:!!c.eliminado}));
   const decisiones = posts.filter(p=>p.mod && p.mod.por==='auto').map(p=>({tipo:'post', id:p.id, d:p.estado==='aprobado'?'aprobado':p.estado==='rechazado'?'rechazado':'pendiente', razon:p.mod.razon||'', t:p.mod.t||p.t, revisarFoto:!!(p.mod&&p.mod.revisarFoto)}));
   // historias
   const vistas = {}; D.vistas.forEach(v=>vistas[me+'|h'+v.hist]=true);
@@ -3731,8 +4012,9 @@ function vArmar(D, E, admin, conteos, promCli){
   const reposts = D.reps.map(r=>({u:'u'+r.usuario, post:'q'+r.post, t:vMs(r.created_at)}));
   // mensajes
   const chats = {};
+  const ocultos = new Set((D.ocultos||[]).map(o=>o.mensaje));
   D.msgs.forEach(m=>{ if (m.estado!=='ok' && m.de!==uid) return; const otro = m.de===uid ? m.para : m.de; const c = chats[otro] = chats[otro] || {id:'c'+otro, p:[me,'u'+otro], msgs:[]};
-    c.msgs.push({sid:m.id, de:'u'+m.de, texto:m.texto||'', post:m.post?'q'+m.post:undefined, hist:m.hist?'h'+m.hist:undefined, nota:m.nota||undefined, t:vMs(m.created_at), leido:m.de===uid?true:!!m.leido, bloq:m.estado!=='ok'}); });
+    c.msgs.push({id:'m'+m.id, resp:m.responde?'m'+m.responde:undefined, borrado:!!m.borrado, oculto:ocultos.has(m.id), histComp:m.hist_comp?'h'+m.hist_comp:undefined, sid:m.id, de:'u'+m.de, texto:m.borrado?'':(m.texto||''), post:m.post?'q'+m.post:undefined, hist:m.hist?'h'+m.hist:undefined, nota:m.nota||undefined, t:vMs(m.created_at), leido:m.de===uid?true:!!m.leido, bloq:m.estado!=='ok'}); });
   // notificaciones
   const misNeg = negocios.filter(n=>n.dueno===me);
   const notifs = D.notifs.map(n=>{ let para = me; if (n.tipo==='pedido' || n.tipo==='follow_neg') para = misNeg[0] ? misNeg[0].id : me;
@@ -3754,7 +4036,7 @@ function vArmar(D, E, admin, conteos, promCli){
   const verifs = D.verifs.map(v=>({id:'v'+v.id, sid:v.id, cuenta:'u'+v.cuenta, tipo:v.tipo, nombre:v.nombre, resp:v.resp, cargo:v.cargo, correo:v.correo, sitio:v.sitio, menciones:v.menciones, docs:{ine:true, selfie:true, doc:true}, codigo:v.codigo, t:vMs(v.created_at), estado:v.estado, checks:v.checks||{}, motivo:v.motivo}));
   const apelaciones = D.apel.map(a=>({id:'a'+a.id, sid:a.id, u:'u'+a.usuario, ref:/^[0-9a-f-]{36}$/.test(a.ref)?'q'+a.ref:a.ref, titulo:a.titulo, texto:a.texto, t:vMs(a.created_at), estado:a.estado, resp:a.resp, resuelta:a.resuelta?vMs(a.resuelta):null}));
   const alertas = (D.alertas||[]).map(a=>({id:'al'+a.id, sid:a.id, t:vMs(a.created_at), quien:a.quien?'u'+a.quien:null, para:a.para?'u'+a.para:null, lugar:a.lugar||'', texto:a.texto||'', cats:(a.cats&&a.cats.length)?a.cats:[a.motivo||'otro'], nivel:a.nivel||1, oculto:!!a.oculto, intentos:a.intentos||1, accion:a.accion||'', estado:a.estado||'nueva'}));
-  const reportes = (D.reportes||[]).filter(r=>r.estado!=='revisado').map(r=>({id:'rp'+r.id, sid:r.id, post:r.post?'q'+r.post:undefined, cuenta:r.cuenta?'u'+r.cuenta:undefined, hist:r.hist?'h'+r.hist:undefined, por:'u'+r.quien, motivo:r.motivo, t:vMs(r.created_at)}));
+  const reportes = (D.reportes||[]).filter(r=>r.estado!=='revisado').map(r=>({id:'rp'+r.id, sid:r.id, post:r.post?'q'+r.post:undefined, cuenta:r.cuenta?'u'+r.cuenta:undefined, hist:r.hist?'h'+r.hist:undefined, mensaje:r.mensaje?'m'+r.mensaje:undefined, comentario:r.comentario?'k'+r.comentario:undefined, det:(D.repdet||[]).find(d=>d.reporte===r.id)||null, por:'u'+r.quien, motivo:r.motivo, t:vMs(r.created_at)}));
   const bitacora = (D.bit||[]).map(b=>({t:vMs(b.t), actor:b.actor, accion:b.accion, detalle:b.detalle, sid:b.id}));
   // carrito (solo en este teléfono)
   let carrito = null; try { carrito = JSON.parse(localStorage.getItem('lm-vivo-carrito-'+uid)||'null'); } catch(e){}
@@ -3781,13 +4063,13 @@ function vFoto(s){
   return JSON.parse(JSON.stringify({
     posts:s.posts.map(p=>({id:p.id, sid:p.sid, estado:p.estado, motivo:p.motivo, autor:p.autor})),
     likes:Object.keys(s.likes).filter(k=>s.likes[k]),
-    comentarios:s.comentarios.map(c=>({id:c.id, sid:c.sid})),
+    comentarios:s.comentarios.map(c=>({id:c.id, sid:c.sid, eliminado:!!c.eliminado})),
     historias:s.historias.map(h=>({id:h.id, sid:h.sid, estado:h.estado, motivo:h.motivo})),
     vistas:Object.keys(s.vistas).filter(k=>s.vistas[k]), likesHist:Object.keys(s.likesHist).filter(k=>s.likesHist[k]),
     notas:s.notas.map(n=>({autor:n.autor, texto:n.texto, t:n.t})),
     sigue:s.sigue.map(x=>x.de+'>'+x.a), bloqueos:s.bloqueos.map(x=>x.de+'>'+x.a),
     guardados:s.guardados.filter(g=>g.u===me).map(g=>g.post), reposts:s.reposts.filter(r=>r.u===me).map(r=>r.post),
-    msgs:s.chats.flatMap(c=>c.msgs.map(m=>({sid:m.sid, leido:m.leido}))),
+    msgs:s.chats.flatMap(c=>c.msgs.map(m=>({sid:m.sid, leido:m.leido, borrado:!!m.borrado, oculto:!!m.oculto}))),
     notifs:s.notifs.filter(n=>n.sid).map(n=>({sid:n.sid, leida:n.leida, compartida:!!n.compartida})),
     resenas:s.resenas.map(r=>({id:r.id, sid:r.sid, texto:r.texto, ped:r.ped})), calif:s.calif.map(c=>c.ped+'|'+c.rol),
     reportes:s.reportes.map(r=>({id:r.id, sid:r.sid})),
@@ -3816,6 +4098,7 @@ function vGuardar(){
     for (const op of ops){ try { if (await op()) cambio = true; } catch(e){ error = error || e; console.warn('vivo', e); } }
     if (error){ toast(vMsgError(error)); await vRecargar(true); return; }
     if (cambio){ SNAP = vFoto(S); vRefrescar(); }
+    if (S.productos.some(p=>!p.sid && !p.enviando && S.misNegocios.includes(p.neg))) setTimeout(()=>{ VQ.cola.then(()=>vGuardar()); }, 400);
   });
   return VQ.cola;
 }
@@ -3860,8 +4143,12 @@ function vDiff(A0, B){
   // --- comentarios
   S.comentarios.filter(c=>!c.sid && !c.enviando && c.autor===me).forEach(c=>{ c.enviando = true; ops.push(async ()=>{
     const s = post2sid(c.post); if (!s) throw new Error('La publicación aún se está subiendo. Intenta en un momento.');
-    const {data, error} = await sb.from('comments').insert({post:s, autor:uid, texto:c.texto}).select('id,estado').single(); c.enviando=false; if (error) throw error;
+    const pr = c.resp ? (S.comentarios.find(x=>x.id===c.resp)||{}).sid || null : null;
+    const {data, error} = await sb.from('comments').insert({post:s, autor:uid, texto:c.texto, responde:pr}).select('id,estado').single(); c.enviando=false; if (error) throw error;
     c.sid = data.id; if (data.estado!=='ok'){ S.comentarios = S.comentarios.filter(x=>x!==c); toast('No se publicó: rompe las reglas.'); return true; } }); });
+  const coa = vIdx(A0.comentarios);
+  S.comentarios.filter(c=>c.sid && c.eliminado && c.autor===me && coa.get(c.id) && !coa.get(c.id).eliminado).forEach(c=>ops.push(async ()=>{
+    const {data, error} = await sb.rpc('borrar_comentario', {cid:c.sid}); if (error) throw error; if (data!=='ok') throw new Error(data); }));
   // --- historias
   const ha = vIdx(A0.historias);
   S.historias.filter(h=>!h.sid && !h.enviando && mios.has(h.autor)).forEach(h=>{ h.enviando = true; ops.push(async ()=>{
@@ -3904,9 +4191,14 @@ function vDiff(A0, B){
   S.chats.forEach(c=>{ const otro = c.p.find(x=>x!==me) || c.p[1];
     c.msgs.filter(m=>!m.sid && !m.enviando && m.de===me).forEach(m=>{ m.enviando = true; ops.push(async ()=>{
       if (otro[0]!=='u') throw new Error('Las cuentas de negocio no reciben mensajes todavía.');
-      const row = {de:uid, para:vSid(otro), texto:m.texto||'', post:m.post?post2sid(m.post):null, hist:m.hist?hist2sid(m.hist):null, nota:m.nota||null};
+      const rm = m.resp ? (c.msgs.find(x=>x.id===m.resp)||{}).sid || null : null;
+      const row = {de:uid, para:vSid(otro), texto:m.texto||'', post:m.post?post2sid(m.post):null, hist:m.hist?hist2sid(m.hist):null, nota:m.nota||null, responde:rm, hist_comp:m.histComp?hist2sid(m.histComp):null};
       const {data, error} = await sb.from('messages').insert(row).select('id,estado,created_at').single(); m.enviando=false; if (error) throw error;
-      m.sid = data.id; m.t = vMs(data.created_at); if (data.estado!=='ok'){ m.bloq = true; m.texto = 'No se envió: rompe las reglas'; toast('No se envió: en los mensajes no se permiten enlaces, teléfonos ni contenido prohibido.'); return true; } }); }); });
+      m.sid = data.id; m.t = vMs(data.created_at); if (data.estado!=='ok'){ m.bloq = true; m.texto = 'No se envió: rompe las reglas'; toast('No se envió: en los mensajes no se permiten enlaces, teléfonos ni contenido prohibido.'); return true; } return true; }); }); });
+  const mb = new Map(A0.msgs.filter(m=>m.sid).map(m=>[m.sid, m]));
+  B.msgs.filter(m=>m.sid && mb.get(m.sid)).forEach(m=>{ const a = mb.get(m.sid);
+    if (m.borrado && !a.borrado) ops.push(async ()=>{ const {data, error} = await sb.rpc('borrar_mensaje', {mid:m.sid, para_todos:true}); if (error) throw error; if (data!=='ok') throw new Error(data); });
+    else if (m.oculto && !a.oculto) ops.push(async ()=>{ const {data, error} = await sb.rpc('borrar_mensaje', {mid:m.sid, para_todos:false}); if (error) throw error; if (data!=='ok') throw new Error(data); }); });
   const ma = new Map(A0.msgs.filter(m=>m.sid).map(m=>[m.sid, m.leido]));
   const leidos = B.msgs.filter(m=>m.sid && m.leido && ma.get(m.sid)===false).map(m=>m.sid);
   if (leidos.length) ops.push(async ()=>{ await sb.from('messages').update({leido:true}).in('id', leidos); });
@@ -3925,8 +4217,11 @@ function vDiff(A0, B){
   S.resenas.filter(r=>r.sid && rsa.get(r.id) && rsa.get(r.id).texto!==r.texto).forEach(r=>ops.push(async ()=>{ const {error} = await sb.from('resenas').update({texto:r.texto}).eq('id', r.sid); if (error) throw error; }));
   // --- reportes
   S.reportes.filter(r=>!r.sid && !r.enviando).forEach(r=>{ r.enviando = true; ops.push(async ()=>{
-    const row = {quien:uid, motivo:String(r.motivo).slice(0,60), post:r.post?post2sid(r.post):null, hist:r.hist?hist2sid(r.hist):null, cuenta:r.cuenta?cuenta2perfil(r.cuenta):null};
-    const {data, error} = await sb.from('reportes').insert(row).select('id').single(); r.enviando=false; if (error) throw error; r.sid = data.id; if (!admin) S.reportes = S.reportes.filter(x=>x!==r); }); });
+    const msgSid = id => { for (const c of S.chats){ const m = c.msgs.find(x=>x.id===id); if (m) return m.sid||null; } return null; };
+    const row = {quien:uid, motivo:String(r.motivo).slice(0,60), post:r.post?post2sid(r.post):null, hist:r.hist?hist2sid(r.hist):null, cuenta:r.cuenta?cuenta2perfil(r.cuenta):null,
+      mensaje:r.mensaje?msgSid(r.mensaje):null, comentario:r.comentario?(S.comentarios.find(x=>x.id===r.comentario)||{}).sid||null:null};
+    if (admin){ const {data, error} = await sb.from('reportes').insert(row).select('id').single(); r.enviando=false; if (error) throw error; r.sid = data.id; }
+    else { const {error} = await sb.from('reportes').insert(row); r.enviando=false; if (error) throw error; S.reportes = S.reportes.filter(x=>x!==r); } }); });
   if (admin) A0.reportes.filter(r=>r.sid && !S.reportes.some(x=>x.sid===r.sid)).forEach(r=>ops.push(async ()=>{ await sb.from('reportes').update({estado:'revisado'}).eq('id', r.sid); }));
   // --- personas (mi perfil y decisiones del admin)
   const ua = vIdx(A0.usuarios);
@@ -3950,7 +4245,9 @@ function vDiff(A0, B){
     const {data, error} = await sb.from('negocios').insert({nombre:n.nombre, categoria:n.tipo, telefono:(n.telefono||'').replace(/[^0-9 ]/g,'').slice(0,20), secciones:n.secciones, color:n.color}).select('*').single(); n.enviando=false;
     if (error){ S.negocios = S.negocios.filter(x=>x!==n); S.misNegocios = S.misNegocios.filter(x=>x!==n.id); if (S.yo===n.id) S.yo = me; throw error; }
     const viejo = n.id; n.sid = data.id; n.id = 'b'+data.id; n.dueno = me; n.estado = ESTN[data.estado]||data.estado; n.verificado = !!data.verificado;
-    S.misNegocios = S.misNegocios.map(x=>x===viejo?n.id:x); if (S.yo===viejo) S.yo = n.id; if (ui.ultNeg===viejo) ui.ultNeg = n.id; return true; }); });
+    S.misNegocios = S.misNegocios.map(x=>x===viejo?n.id:x); if (S.yo===viejo) S.yo = n.id; if (ui.ultNeg===viejo) ui.ultNeg = n.id;
+    S.productos.forEach(p=>{ if (p.neg===viejo) p.neg = n.id; }); S.posts.forEach(p=>{ if (p.autor===viejo) p.autor = n.id; }); S.historias.forEach(h=>{ if (h.autor===viejo) h.autor = n.id; });
+    if (ui.neg===viejo) ui.neg = n.id; return true; }); });
   S.negocios.filter(n=>n.sid && nga.get(n.id)).forEach(n=>{ const a = nga.get(n.id); const mio = S.misNegocios.includes(n.id);
     if (mio){ const c = {}; if (n.nombre!==a.nombre) c.nombre=n.nombre; if (n.tipo!==a.tipo) c.categoria=n.tipo; if (n.desc!==a.desc) c.descripcion=n.desc; if (n.horario!==a.horario) c.horario=n.horario;
       if (n.telefono!==a.telefono) c.telefono=(n.telefono||'').replace(/[^0-9 ]/g,'').slice(0,20); if (n.direccion!==a.direccion) c.direccion=n.direccion; if (n.tiempo!==a.tiempo) c.tiempo=n.tiempo;
@@ -3963,7 +4260,7 @@ function vDiff(A0, B){
   // --- productos
   const pra = vIdx(A0.productos);
   const prodRow = p => ({nombre:p.nombre, descripcion:p.desc||'', seccion:p.sec||'General', precio:vPesos(p.precio), unidad:p.unidad, paso:p.paso, stock:p.stock, disponible:!!p.disp, variantes:p.var||[], mods:p.mods||[], agot:p.agot||[]});
-  S.productos.filter(p=>!p.sid && !p.enviando && S.misNegocios.includes(p.neg)).forEach(p=>{ p.enviando = true; ops.push(async ()=>{
+  S.productos.filter(p=>!p.sid && !p.enviando && S.misNegocios.includes(p.neg) && (S.negocios.find(x=>x.id===p.neg)||{}).sid).forEach(p=>{ p.enviando = true; ops.push(async ()=>{
     const fotos = []; for (const f of (p.fotos||[])) fotos.push(await vSubir(f,'p-'));
     const {data, error} = await sb.from('productos').insert({...prodRow(p), negocio:neg2sid(p.neg), fotos}).select('id,estado').single(); p.enviando=false;
     if (error){ S.productos = S.productos.filter(x=>x!==p); throw error; }
@@ -4048,7 +4345,10 @@ let vPronto = null; function vRecargarPronto(){ clearTimeout(vPronto); vPronto =
 function vRefrescar(forzar){
   if (!VIVO) return;
   const a = document.activeElement; const escribiendo = a && (a.tagName==='INPUT' || a.tagName==='TEXTAREA') && a.type!=='checkbox' && a.type!=='radio' && a.value;
-  if (escribiendo && !forzar){ vRefrescar.pendiente = true; return; }
+  // nunca borrar un formulario a medio llenar (producto, publicación, historia, nota, mensaje…)
+  const conDatos = [...document.querySelectorAll('#app form input, #app form textarea, #layer form input, #layer form textarea')].some(e=>e.type!=='checkbox' && e.type!=='radio' && e.type!=='hidden' && (e.type==='file' ? e.files && e.files.length : e.value));
+  const formAbierto = ui.edit || (ui.sheet && ['publicar','historia','nota','apelar','enviarHist','reportar','verNota','compartir'].includes(ui.sheet.t)) || (ui.draft && ui.draft.length) || ui.draftH || (ui.draftPF && ui.draftPF.length && ui.edit);
+  if ((escribiendo || conDatos || formAbierto) && !forzar){ vRefrescar.pendiente = true; clearTimeout(vRefrescar.t); vRefrescar.t = setTimeout(()=>{ if (vRefrescar.pendiente) vRefrescar(); }, 8000); return; }
   vRefrescar.pendiente = false;
   if (ui.story){ renderStory(); return; }
   const y = window.scrollY; render(); if (ui.sheet || ui.sel) renderLayer(); window.scrollTo(0, y);
@@ -4058,6 +4358,7 @@ function vCanal(on){
   if (VQ.canal){ try { RV.sb.removeChannel(VQ.canal); } catch(e){} VQ.canal = null; }
   if (!on || !RV.sb || !RV.user) return; const uid = vUid();
   VQ.canal = RV.sb.channel('vivo-'+uid)
+    .on('postgres_changes', {event:'UPDATE', schema:'public', table:'messages', filter:`para=eq.${uid}`}, ()=>vRecargarPronto())
     .on('postgres_changes', {event:'INSERT', schema:'public', table:'messages', filter:`para=eq.${uid}`}, p=>{ const m = p.new; if (m.estado==='ok' && !(ui.view==='mensajes' && ui.chat==='u'+m.de)) toast('💬 Nuevo mensaje'); vRecargarPronto(); })
     .on('postgres_changes', {event:'INSERT', schema:'public', table:'notifs', filter:`para=eq.${uid}`}, p=>{ const n = p.new; if (n.tipo==='pedido') toast('🛍️ '+(n.texto||'Nuevo pedido')); else if (n.tipo==='sistema' && /pedido/i.test(n.texto||'')) toast(n.texto); vRecargarPronto(); })
     .on('postgres_changes', {event:'INSERT', schema:'public', table:'historias'}, ()=>vRecargarPronto())
@@ -4216,7 +4517,7 @@ function renderLayer(){
   if (ui.mode==='app'){
     if (ui.pend) h = avisoOtroComercio();
     else if (ui.sel) h = hojaProducto();
-    else if (ui.sheet) h = ({coment:hojaComentarios, compartir:hojaCompartir, opcPost:hojaOpcPost, reportar:hojaReportar, opcPerfil:hojaOpcPerfil, publicar:hojaPublicar, nota:hojaNota, crear:hojaCrear, historia:hojaHistoria, cuentas:hojaCuentas, mas:hojaMas, verNota:hojaVerNota, seguidores:hojaSeguidores, clima:hojaClima, likes:hojaLikes, apelar:hojaApelar}[ui.sheet.t]||(()=>''))();
+    else if (ui.sheet) h = ({coment:hojaComentarios, compartir:hojaCompartir, opcPost:hojaOpcPost, reportar:hojaReportar, opcPerfil:hojaOpcPerfil, publicar:hojaPublicar, nota:hojaNota, crear:hojaCrear, historia:hojaHistoria, cuentas:hojaCuentas, mas:hojaMas, verNota:hojaVerNota, seguidores:hojaSeguidores, clima:hojaClima, likes:hojaLikes, apelar:hojaApelar, ...(window.HOJAS_EXTRA||{})}[ui.sheet.t]||(()=>''))();
   }
   $('#layer').innerHTML = h;
   if (!ui.story) document.body.style.overflow = h ? 'hidden' : '';
@@ -4316,7 +4617,7 @@ const A = {
     if (ui.chat===x) ui.chat=null; log('@'+yo().usuario,'Bloqueó a',a.nombre); save(); cerrarHoja(); if(['usuario','negocio'].includes(ui.view)) go('home',true); else rerender();
     toast(`Bloqueaste a ${a.nombre}. Ya no verán su contenido entre ustedes.`); },
   desbloquear: x => { S.bloqueos=S.bloqueos.filter(b=>!(b.de===S.yo&&b.a===x)); save(); rerender(); toast(`Desbloqueaste a ${perfilDe(x).nombre}`); },
-  borrarPost: x => { S.posts=S.posts.filter(p=>p.id!==x); cerrarHoja(); save(); go('perfil',true); toast('Publicación eliminada'); },
+  borrarPost: x => { if (!confirmarSimple('¿Eliminar esta publicación? No se puede deshacer.')) return; S.posts=S.posts.filter(p=>p.id!==x); cerrarHoja(); save(); go('perfil',true); toast('Publicación eliminada'); },
   enviarPost: x => { const p=ui.sheet.post, txt=($('#sh-txt')?.value||'').trim();
     if (!amigos(S.yo,x)) return toast('Solo puedes enviar a tus amigos');
     if (txt){ const r=revisar(txt,'privado',{para:x,donde:'mensaje'}); if(!r.ok){ ui.err=msgBloqueo(r); renderLayer(); return; } }
@@ -4440,8 +4741,8 @@ const F = {
   },
   publicar: async () => {
     guardarBorrador(); const u=yo(); const texto=ui.draftTxt.trim(); const err = m => { ui.err=m; renderLayer(); };
-    if (!ui.draft.length) return err('Agrega al menos una foto.');
-    if (!$('#pub-ok').checked) return err('Confirma que tus fotos respetan las reglas.');
+    if (!ui.draft.length && !texto) return err('Escribe algo o agrega una foto.');
+    if (!$('#pub-ok').checked) return err('Confirma que lo que publicas respeta las reglas.');
     const r = revisar(texto,'publico'); if (!r.ok) return err(msgBloqueo(r));
     const et = etiquetasDeTexto(texto);
     const p = {id:'q'+Date.now().toString(36), autor:S.yo, tipo:soyNegocio()?'negocio':'usuario', texto, likes:0, likedBy:[], t:Date.now(), prod:$('#pub-prod')?.value||null, etiq:et.ids};
@@ -4575,7 +4876,7 @@ Object.assign(A, {
   termAdd: () => { const t=$('#term-t').value.trim().toLowerCase(), c=$('#term-c').value; if(t.length<3) return toast('Escribe al menos 3 letras'); S.cfg.terminos.push({t:limpiarTexto(t), cat:c}); CACHE_RE.clear(); log('Admin','Agregó término al Escudo',c); save(); rerender(); },
   termDel: x => { S.cfg.terminos.splice(+x,1); save(); rerender(); }
 });
-registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal(); registrarAccionesVivo();
+registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal(); registrarAccionesV17(); registrarAccionesVivo();
 aplicarPref();
 const EN_VIVO_OK = /github\.io$/.test(location.host) || /[?&]vivo=1/.test(location.search);
 try { if (EN_VIVO_OK && (localStorage.getItem('lm-modo')||'real')==='real') ui.mode='real'; } catch(e){ if (EN_VIVO_OK) ui.mode='real'; }
