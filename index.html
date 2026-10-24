@@ -1736,7 +1736,8 @@ function postCard(p, abierto, por){
       <b class="small" style="font-size:14px"><button class="likes-n" data-a="verLikes" data-x="${p.id}" aria-label="Ver a quién le gusta">${nlikes(p)} Me gusta</button>${lb?` <span style="font-weight:500" class="muted">· le gusta a ${esc(lb.handle)}</span>`:''}${nGuardados(p.id)?` <span style="font-weight:500" class="muted">· ${nGuardados(p.id)} guardado${nGuardados(p.id)>1?'s':''}</span>`:''}</b>
       ${p.fotos.length&&p.texto?`<div><b>${esc(a.handle)}</b> ${textoConEtiquetas(p.texto)}</div>`:''}
       ${n?`<button class="buy" data-a="pedirPost" data-x="${p.id}"><span>${pr?esc(pr.nombre)+' · '+money(pr.precio):'Ver la tienda de '+esc(n.nombre)}</span><span>${pr?'Pedir ahora':'Ver tienda'} →</span></button>`:''}
-      ${abierto ? `<div class="stack" style="gap:10px;margin-top:6px">${cs.map(c=>{ const u=perfilDe(c.autor); return `<div class="cm"><button style="background:none;border:0;padding:0" data-a="verPerfil" data-x="${c.autor}">${avatar(u,30)}</button><div class="tx"><b>${esc(u.handle)}</b> ${esc(c.texto)}<div class="small muted">${hace(c.t)}</div></div></div>`; }).join('')}</div>
+      ${abierto ? `<div class="stack comlist-in" style="gap:12px;margin-top:6px">${cs.map(c=>typeof filaCom==='function'?filaCom(c):'').join('')}${cs.length?'<p class="small muted" style="text-align:center;margin:0">Mantén presionado un comentario para responder, reportar o borrar.</p>':''}</div>
+        ${typeof barraRespIn==='function'?barraRespIn(p.id):''}
         <form class="row nowrap" data-form="comentario" novalidate><input id="c-txt" type="text" maxlength="200" placeholder="Agrega un comentario…" aria-label="Comentario" autocomplete="off"><button class="btn pri" type="submit">Publicar</button></form>
         ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}`
       : (cs.length?`<button class="lnk" data-a="coment" data-x="${p.id}">Ver ${cs.length>1?'los '+cs.length+' comentarios':'1 comentario'}</button>`:'')}
@@ -3709,17 +3710,20 @@ function tarjetaHistComp(hid){
 }
 
 /* ---------- comentarios ---------- */
-function hojaComentarios(){
-  const p = post(ui.sheet.post); const cs = comsDe(p.id); const a = perfilDe(p.autor);
-  const resp = ui.respCom && ui.respCom.post===p.id ? comPorId(ui.respCom.id) : null;
-  const vivos = cs.filter(c=>!c.eliminado).length;
-  const fila = c => { const u = perfilDe(c.autor);
+function filaCom(c){ const u = perfilDe(c.autor);
     if (c.eliminado) return `<div class="cm elim" data-lp="k:${c.id}"><button class="cav" data-a="verPerfil" data-x="${c.autor}" aria-label="Ver perfil">${avatar(u,36)}</button><div class="tx"><b>${esc(u.handle)}</b> <span class="small muted">${hace(c.t)}</span><div class="muted">🗑 El dueño eliminó este comentario</div></div></div>`;
     const r = c.resp ? comPorId(c.resp) : null;
     return `<div class="cm" data-lp="k:${c.id}"><button class="cav" data-a="verPerfil" data-x="${c.autor}" aria-label="Ver perfil">${avatar(u,36)}</button><div class="tx">
       ${r?`<div class="resp-q"><b>@${esc(perfilDe(r.autor).handle)}</b><span>${r.eliminado?'Comentario eliminado':esc(cortar(r.texto,60))}</span></div>`:''}
       <b>${esc(u.handle)}</b> <span class="small muted">${hace(c.t)}</span><div>${esc(c.texto)}</div>
-      <button class="lk small cresp" data-a="responderCom" data-x="${c.id}">Responder</button></div>${botonLikeCom(c)}</div>`; };
+      <button class="lk small cresp" data-a="responderCom" data-x="${c.id}">Responder</button></div>${botonLikeCom(c)}</div>`;
+}
+function hojaComentarios(){
+  const p = post(ui.sheet.post); const cs = comsDe(p.id); const a = perfilDe(p.autor);
+  const resp = ui.respCom && ui.respCom.post===p.id ? comPorId(ui.respCom.id) : null;
+  const vivos = cs.filter(c=>!c.eliminado).length;
+  const fila = filaCom;
+
   return `<div class="ov" data-a="closeSheet" data-self="1"><div class="sheet comsheet" role="dialog" aria-modal="true" aria-label="Comentarios">
     <div class="comh"><span class="grab" aria-hidden="true"></span><h2>Comentarios <span class="muted">${vivos}</span></h2><button type="button" class="x" data-a="closeSheet" aria-label="Cerrar">×</button></div>
     <div class="comlist" id="comlist">${p.texto&&p.fotos.length?`<div class="cm cap">${avatar(a,36)}<div class="tx"><b>${esc(a.handle)}</b> ${textoConEtiquetas(p.texto)}<div class="small muted">${hace(p.t)}</div></div></div>`:''}
@@ -3820,12 +3824,14 @@ function registrarAccionesV17(){
       m.borrado = true; m.texto = ''; delete m.post; delete m.histComp; delete m.nota; delete m.resp; cerrarHoja(); save(); render(); toast('Mensaje eliminado para todos'); },
     borrarMsgYo: x => { const f = buscarMsg(x); if (!f) return; f.m.oculto = true; if (ui.respMsg && ui.respMsg.id===x) ui.respMsg=null; cerrarHoja(); save(); render(); toast('Mensaje eliminado para ti'); },
     reportarMsg: x => { const f = buscarMsg(x); if (!f || f.m.de===S.yo) return toast('No puedes reportar tus propios mensajes.'); ui.sheet = {t:'reportar', mensaje:x}; renderLayer(); },
-    responderCom: x => { const c = comPorId(x); if (!c || c.eliminado) return; const pid = c.post; ui.respCom = {id:x, post:pid}; ui.sheet = {t:'coment', post:pid}; renderLayer(); setTimeout(()=>$('#c-txt')?.focus(), 30); },
-    cancelarRespCom: () => { ui.respCom = null; renderLayer(); },
+    responderCom: x => { const c = comPorId(x); if (!c || c.eliminado) return; const pid = c.post; ui.respCom = {id:x, post:pid};
+      if (ui.view==='post' && ui.post===pid && (!ui.sheet || ui.sheet.t==='opcCom')){ ui.sheet = null; renderLayer(); refrescarPost(pid); setTimeout(()=>{ const i=$('#app #c-txt'); if(i){ i.focus(); i.scrollIntoView({block:'center'}); } }, 30); return; }
+      ui.sheet = {t:'coment', post:pid}; renderLayer(); setTimeout(()=>$('#layer #c-txt')?.focus(), 30); },
+    cancelarRespCom: () => { ui.respCom = null; if (ui.sheet) renderLayer(); else if (ui.view==='post') refrescarPost(ui.post); },
     reportarCom: x => { const c = comPorId(x); if (!c || c.autor===S.yo) return toast('No puedes reportar tus propios comentarios.'); ui.sheet = {t:'reportar', comentario:x, volver:c.post}; renderLayer(); },
     borrarCom: x => { const c = comPorId(x); if (!c || c.autor!==S.yo) return;
       if (!confirmarSimple('¿Eliminar tu comentario para todos? Se verá que eliminaste un comentario, pero no lo que decía.')) return;
-      c.eliminado = true; c.texto = ''; save(); ui.sheet = {t:'coment', post:c.post}; renderLayer(); refrescarPost(c.post); toast('Comentario eliminado'); },
+      c.eliminado = true; c.texto = ''; save(); ui.sheet = (ui.view==='post' && ui.post===c.post) ? null : {t:'coment', post:c.post}; renderLayer(); refrescarPost(c.post); toast('Comentario eliminado'); },
     reportarHist: x => { if (ui.story) ui.story.paused = true; const h = S.historias.find(o=>o.id===x); if (!h || h.autor===S.yo) return; ui.sheet = {t:'reportar', hist:x}; renderLayer(); },
     enviarReporte: x => { if (!ui.sheet) return; ui.sheet.motivo = x; renderLayer(); },
     cambiarMotivo: () => { if (ui.sheet) delete ui.sheet.motivo; renderLayer(); },
@@ -3857,12 +3863,12 @@ function registrarAccionesV17(){
       ui.respMsg = null; chatNuevo(ui.chat).msgs.push(m); ui.err=''; save(); render(); $('#m-txt')?.focus();
     },
     comentario: () => {
-      if (necesitaSesion()) return; const t=$('#c-txt').value.trim(); if(!t) return; const pid = ui.sheet?.post || ui.post;
+      if (necesitaSesion()) return; const inp = (ui.sheet && $('#layer #c-txt')) || $('#c-txt'); const t=(inp?.value||'').trim(); if(!t) return; const pid = (ui.sheet && ui.sheet.post) || ui.post;
       const r=revisar(t,'publico',{donde:'comentario'}); if (!r.ok){ ui.err=msgBloqueo(r); ui.sheet?renderLayer():rerender(); return; }
       const c = {id:nuevoId('k'), post:pid, autor:S.yo, texto:t, t:Date.now()};
       if (ui.respCom && ui.respCom.post===pid && comPorId(ui.respCom.id)){ c.resp = ui.respCom.id; const pa = comPorId(c.resp); if (pa.autor!==S.yo) notif(pa.autor,'comentario',S.yo,{post:pid,texto:'te respondió: '+t}); }
       ui.respCom = null; S.comentarios.push(c); notif(post(pid).autor,'comentario',S.yo,{post:pid,texto:t}); ui.err=''; save();
-      if (ui.sheet){ renderLayer(); refrescarPost(pid); setTimeout(()=>$('#c-txt')?.focus(),20); } else { rerender(); }
+      if (ui.sheet){ renderLayer(); refrescarPost(pid); setTimeout(()=>$('#layer #c-txt')?.focus(),20); } else { rerender(); }
     }
   });
   // mantener presionado (celular) o clic derecho (computadora)
@@ -4025,7 +4031,7 @@ function registrarAccionesV18(){
     likeCom: async x => { asegurarV18(); const c = comPorId(x); if (!c || c.eliminado) return;
       if (soyNegocio()) return toast('Cambia a tu cuenta personal para dar me gusta.');
       const k = comKey(c), on = !S.likesCom[k]; S.likesCom[k] = on; S.nLikesCom[k] = Math.max(0, (S.nLikesCom[k]||0) + (on?1:-1));
-      const pintar = () => { const b = document.querySelector(`.clk[data-x="${CSS.escape(x)}"]`); if (b) b.outerHTML = botonLikeCom(c); else renderLayer(); };
+      const pintar = () => { const bs = document.querySelectorAll(`.clk[data-x="${CSS.escape(x)}"]`); if (bs.length) bs.forEach(b=>b.outerHTML = botonLikeCom(c)); else renderLayer(); };
       pintar();
       if (VIVO){ if (!c.sid) return; const sb = RV.sb; let r;
         if (on) r = await sb.from('comment_likes').upsert({comentario:c.sid, usuario:vUid(), activo:true}, {onConflict:'comentario,usuario'});
@@ -4041,6 +4047,12 @@ function registrarAccionesV18(){
   });
   const goO = window.go; // si ya tiene negocio, "vende" lleva a su negocio
   if (typeof goO==='function') window.go = function(v, ...r){ if (v==='vende' && VIVO && tieneNegocio()) return A.irMiNegocio(); return goO(v, ...r); };
+}
+
+/* barra de "respondiendo a…" dentro de la publicación abierta */
+function barraRespIn(pid){
+  const r = ui.respCom && ui.respCom.post===pid && !ui.sheet ? comPorId(ui.respCom.id) : null; if (!r) return '';
+  return `<div class="resp-bar">${ico.responder}<span>Respondiendo a <b>@${esc(perfilDe(r.autor).handle)}</b>: ${esc(cortar(r.texto,50))}</span><button type="button" class="x" data-a="cancelarRespCom" aria-label="Cancelar respuesta">×</button></div>`;
 }
 
 /* ============================================================
