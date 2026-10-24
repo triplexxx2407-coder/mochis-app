@@ -674,41 +674,12 @@ form[data-form="resena"] button[type="submit"]{background:var(--c-star);border-c
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pill.star{color:#FBBF24}}
 button.pill.star{cursor:pointer;position:static}
 .st-off{color:var(--line)}
-/* zoom */
-.avz,.cvz{background:none;border:0;padding:0;cursor:zoom-in;border-radius:50%;display:block}
-.cvz{border-radius:0;width:100%;height:100%;position:absolute;inset:0}
-.cvz>*{width:100%;height:100%}
-.bhead .cv .avz{position:absolute}
-.car[data-dbl]{cursor:zoom-in}
-#zoom{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.95);display:flex;animation:fd .18s;color:#fff;user-select:none;-webkit-user-select:none}
-.zv{position:relative;flex:1;display:flex;flex-direction:column;min-width:0}
-.zbar{position:absolute;top:0;left:0;right:0;z-index:3;display:flex;align-items:center;gap:12px;padding:max(12px,env(safe-area-inset-top,0px)) 14px 14px;background:linear-gradient(rgba(0,0,0,.65),transparent)}
-.zn{font-weight:800;font-size:15px;min-width:40px}.zhint{font-size:12.5px;opacity:.75;flex:1}
-.zx{width:48px;height:48px;border-radius:50%;border:0;background:rgba(255,255,255,.2);color:#fff;font-size:22px;font-weight:800;flex:none}
-.zx:hover{background:rgba(255,255,255,.32)}
-#zstage{flex:1;display:grid;place-items:center;overflow:hidden;touch-action:none;cursor:zoom-in}
-#zoom.zoomed #zstage{cursor:grab}
-#zimg{width:100%;height:100%;display:grid;place-items:center;will-change:transform}
-.zbox{position:relative;width:min(100vw,calc(100dvh - 150px));aspect-ratio:1/1;max-height:calc(100dvh - 150px)}
-.zbox>*{position:absolute;inset:0;width:100%;height:100%}
-.zbox>img{object-fit:contain}
-.zbox.ok>:not(img){display:none}
-.zbox.ok{aspect-ratio:auto;height:calc(100dvh - 150px);width:100vw}
-.zbox.zav{border-radius:50%;overflow:hidden;background:var(--c);display:grid;place-items:center;width:min(86vw,70dvh);height:auto;aspect-ratio:1/1}
-.zbox.zav>span{position:static;display:grid;place-items:center;font-size:min(30vw,25dvh);font-weight:800;color:#fff;inset:auto}
-.zbox.zav>img{object-fit:cover}
-.zarr{position:absolute;top:50%;transform:translateY(-50%);width:52px;height:52px;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;font-size:30px;font-weight:700;z-index:3}
-.zarr.l{left:14px}.zarr.r{right:14px}
-@media (hover:none){.zarr{display:none}}
-.zfoot{position:absolute;bottom:0;left:0;right:0;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,rgba(0,0,0,.6))}
-.zdots{display:flex;gap:7px}.zdots button{width:9px;height:9px;border-radius:50%;border:0;padding:0;background:rgba(255,255,255,.4)}.zdots button.on{background:#fff;transform:scale(1.25)}
-.zctl{display:flex;gap:8px}.zctl button{width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.2);color:#fff;font-size:24px;font-weight:700}
 /* galería del producto */
 .pgal{position:relative;margin:-20px -20px 0;overflow:hidden;border-radius:24px 24px 0 0;background:var(--surface-2);flex:none}
 @media (max-width:699px){.pgal{border-radius:24px 24px 0 0}.ov:has(.pgal) .sheet::before{display:none}}
 .pgal-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
 .pgal-track::-webkit-scrollbar{display:none}
-.pgal-s{flex:0 0 100%;scroll-snap-align:center;border:0;padding:0;background:none;cursor:zoom-in;display:block}
+.pgal-s{flex:0 0 100%;scroll-snap-align:center}
 .pgal-s .ph{aspect-ratio:1/1;border-radius:0;max-height:52dvh;width:100%}
 @media (min-width:700px){.pgal-s .ph{aspect-ratio:4/3}}
 .pgal-x{position:absolute;top:12px;right:12px;z-index:3;background:rgba(0,0,0,.55);color:#fff;border-color:transparent;backdrop-filter:blur(6px)}
@@ -723,9 +694,12 @@ button.pill.star{cursor:pointer;position:static}
 h1,h2,h3,p,.note,.expl,.small,.muted,td{overflow-wrap:break-word}
 @media (max-width:767px){input,textarea,select{font-size:16px}}
 @media (max-width:520px){.pcab .stats{gap:12px;flex-wrap:wrap}.pnom{font-size:22px}.ptabs2 button{padding:9px 10px;font-size:13px}.ptabs2 button span{display:none}.ptabs2 button.on span{display:inline}.row.between{flex-wrap:wrap;gap:8px}.cols{grid-template-columns:1fr!important}.line{gap:10px}.line>span:first-child{min-width:0;overflow-wrap:anywhere}}
-.prof>.avz{flex:none}.prof>.avz>.avatar{--s:clamp(86px,15vw,150px)!important}
-@media (max-width:520px){.prof>.avz>.avatar{--s:86px!important}}
-@media (max-width:520px){.pcab .prof{flex-direction:column;align-items:stretch;gap:12px}.pcab .prof>.avz{align-self:flex-start}.pcab .stats{flex-wrap:nowrap!important;justify-content:space-between;gap:8px}.pcab .stats>*{flex:1;text-align:center}.pcab .stats span{font-size:12.5px}}
+@media (max-width:520px){.prof>.avatar{--s:86px!important}}
+@media (max-width:520px){.pcab .prof{flex-direction:column;align-items:stretch;gap:12px}.pcab .prof>.avatar{align-self:flex-start}.pcab .stats{flex-wrap:nowrap!important;justify-content:space-between;gap:8px}.pcab .stats>*{flex:1;text-align:center}.pcab .stats span{font-size:12.5px}}
+/* iPhone: sin "fantasmas" al mantener presionado, sin zoom por doble toque */
+img,svg{-webkit-user-drag:none;user-select:none;-webkit-user-select:none}
+button,.btn,.car,.bcard2,.pgal,.post-a,.mnav,.side,.stv{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+html,body,button,a,.car,input,textarea,select{touch-action:manipulation}
 </style>
 </head>
 <body>
@@ -1734,7 +1708,7 @@ function vNotifs(){
 /* ---------- perfiles ---------- */
 function cabPerfil(id){
   const a = perfilDe(id); const u = esNeg(id)?null:usr(id); const mio = id===S.yo;
-  return `<div class="card pcab"><div class="prof"><button class="avz" data-a="zoomAvatar" data-x="${id}" aria-label="Ver foto de perfil en grande">${avatar(a,150)}</button><div class="stack" style="gap:8px;min-width:0;flex:1">
+  return `<div class="card pcab"><div class="prof">${avatar(a,150)}<div class="stack" style="gap:8px;min-width:0;flex:1">
       <div class="row between nowrap"><div style="min-width:0"><h1 class="pnom">${nombreV(a)}</h1>${typeof a.verificado==='string'?`<div class="vlabel ${a.verificado}">✓ ${esc(VERIF_TXT[a.verificado])}</div>`:''}<div class="muted small">@${esc(a.handle)}${!mio&&sigue(id,S.yo)?' · <span class="pill">Te sigue</span>':''}</div></div>
         ${mio?`<button class="ibtn" data-a="go" data-x="ajustes" aria-label="Configuración">${ico.gear}</button>`:`<button class="ibtn" data-a="opcPerfil" data-x="${id}" aria-label="Opciones">${ico.dots}</button>`}</div>
       <div class="stats"><div><b>${npubs(id)}</b><span>publicaciones</span></div><button class="stat" data-a="verSeg" data-x="${id}" data-o="seguidores"><b>${seguidores(id)}</b><span>seguidores${listaVisible(id,'seguidores')?'':' 🔒'}</span></button><button class="stat" data-a="verSeg" data-x="${id}" data-o="seguidos"><b>${siguiendo(id)}</b><span>siguiendo${listaVisible(id,'seguidos')?'':' 🔒'}</span></button></div></div></div>
@@ -2048,7 +2022,7 @@ function vNegocio(){
   const puede = S.sesion && S.pedidos.some(p=>p.neg===n.id&&p.estado==='entregado'&&p.cuenta===S.yo) && !rs.some(r=>r.autor===S.yo);
   const zonas = (n.zonas||[]).map(z=>`${esc(z.col)} ${money(z.costo)}`).join(', ');
   return `<div class="stack"><button class="btn back" data-a="atras">${ico.back}Volver</button>
-  <div class="bhead"><div class="cv"><button class="cvz" data-a="zoomPortada" data-x="${n.id}" aria-label="Ver portada en grande">${portada(n)}</button><button class="avz" data-a="zoomAvatar" data-x="${n.id}" aria-label="Ver logo en grande">${avatar(a,76)}</button></div><div class="in">
+  <div class="bhead"><div class="cv">${portada(n)}${avatar(a,76)}</div><div class="in">
     <div class="row between"><div><h1>${nombreV(a)}</h1><div class="small muted">@${esc(a.handle)} · ${esc(TIPOS[n.tipo].uno)}${n.estado!=='activo'?` · <span class="pill warn">${esc(n.estado)}</span>`:''}</div></div>
       <div class="row">${mio?`<button class="btn pri sm" data-a="go" data-x="minegocio">${ico.biz} Mi negocio</button>`:`${botonSeguir(n.id)}${amigos(S.yo,n.id)?`<button class="btn soft sm" data-a="abrirChat" data-x="${n.id}">Mensaje</button>`:''}<button class="ibtn" data-a="opcPerfil" data-x="${n.id}" aria-label="Opciones">${ico.dots}</button>`}</div></div>
     <div class="stats"><div><b>${npubs(n.id)}</b><span>publicaciones</span></div><div><b>${seguidores(n.id)}</b><span>seguidores</span></div><div><b>${c?c.avg.toFixed(1):'—'}</b><span>${c?c.n+' reseñas':'sin reseñas'}</span></div></div>
@@ -3358,72 +3332,13 @@ function bloqueCalificar(p){
 }
 function pendientesRep(r){ return S.pedidos.filter(p=>p.rep && p.rep.rep===r.id && p.rep.estado==='entregado' && !calDe(p.id,'cli_r') && Date.now()-p.rep.pasos.at(-1).t < 3*DIA); }
 
-/* ---------- visor de fotos con zoom ---------- */
-const ZM = {items:[], i:0, s:1, x:0, y:0, ptrs:new Map(), pinch:null, sw:null, tapT:0, movido:false};
-function zoomHTML(f){
-  if (!f) return '';
-  if (f.m) return MEDIA[f.m] ? `<div class="zbox ok"><img src="${esc(MEDIA[f.m])}" alt=""></div>` : '';
-  return `<div class="zbox">${escena(f)}${f.u?`<img data-u="1" src="https://images.unsplash.com/photo-${f.u}?w=1600&q=80&auto=format" alt="" referrerpolicy="no-referrer">`:''}</div>`;
-}
 function fotosDeProd(p){ return p.fotos && p.fotos.length ? p.fotos : [{k:p.k||TIPOS[neg(p.neg).tipo].k, a:'#F5F5F4', b:'#E7E5E4', c:'#FFFFFF', l:p.nombre, u:p.foto?null:fotoU(p.k||TIPOS[neg(p.neg).tipo].k,p.id)}]; }
-function abrirZoom(items, i=0){ items = items.filter(Boolean); if (!items.length) return; ZM.items = items; ZM.i = Math.max(0, Math.min(i, items.length-1)); pintarZoom(); document.body.style.overflow = 'hidden'; }
-function cerrarZoom(){ const z = $('#zoom'); if (z) z.remove(); ZM.ptrs.clear(); if (!$('#layer').innerHTML && !ui.story) document.body.style.overflow = ''; }
-function pintarZoom(){
-  let z = $('#zoom'); if (!z){ z = document.createElement('div'); z.id = 'zoom'; document.body.appendChild(z); bindZoom(z); }
-  const n = ZM.items.length; ZM.s = 1; ZM.x = 0; ZM.y = 0;
-  z.innerHTML = `<div class="zv" role="dialog" aria-modal="true" aria-label="Foto en grande">
-    <div class="zbar"><span class="zn">${n>1?`${ZM.i+1} / ${n}`:''}</span><span class="zhint">Pellizca o toca dos veces para acercar</span><button class="zx" data-z="close" aria-label="Cerrar">✕</button></div>
-    <div id="zstage"><div id="zimg">${ZM.items[ZM.i]}</div></div>
-    ${n>1?`<button class="zarr l" data-z="prev" aria-label="Foto anterior">‹</button><button class="zarr r" data-z="next" aria-label="Foto siguiente">›</button>`:''}
-    <div class="zfoot">${n>1?`<div class="zdots">${ZM.items.map((_,k)=>`<button class="${k===ZM.i?'on':''}" data-z="go" data-i="${k}" aria-label="Foto ${k+1}"></button>`).join('')}</div>`:'<span></span>'}
-      <div class="zctl"><button data-z="out" aria-label="Alejar">−</button><button data-z="in" aria-label="Acercar">+</button></div></div></div>`;
-  aplicarZ(false);
-}
-function aplicarZ(anim){ const im = $('#zimg'); if (!im) return; im.style.transition = anim ? 'transform .28s cubic-bezier(.2,.8,.2,1)' : 'none'; im.style.transform = `translate(${ZM.x}px,${ZM.y}px) scale(${ZM.s})`; im.style.opacity = ''; $('#zoom')?.classList.toggle('zoomed', ZM.s>1.02); }
-function limitarZ(){ const st = $('#zstage'); if (!st) return; const mx = (ZM.s-1)*st.clientWidth/2, my = (ZM.s-1)*st.clientHeight/2; ZM.x = Math.max(-mx, Math.min(mx, ZM.x)); ZM.y = Math.max(-my, Math.min(my, ZM.y)); }
-function zoomA(s, cx, cy){ const s2 = Math.max(1, Math.min(5, s)); const k = s2/ZM.s; ZM.x = cx-(cx-ZM.x)*k; ZM.y = cy-(cy-ZM.y)*k; ZM.s = s2; if (s2<=1.01){ ZM.s=1; ZM.x=0; ZM.y=0; } limitarZ(); }
-function irZ(d){ const n = ZM.items.length; if (n<2) return aplicarZ(true); ZM.i = (ZM.i+d+n)%n; pintarZoom(); }
-function centroRel(x, y){ const r = $('#zstage').getBoundingClientRect(); return [x-r.left-r.width/2, y-r.top-r.height/2]; }
-function bindZoom(z){
-  z.addEventListener('click', e=>{ const b = e.target.closest('[data-z]'); if (!b) return; const a = b.dataset.z;
-    if (a==='close') return cerrarZoom(); if (a==='prev') return irZ(-1); if (a==='next') return irZ(1);
-    if (a==='go'){ ZM.i = +b.dataset.i; return pintarZoom(); }
-    if (a==='in'){ zoomA(ZM.s*1.7,0,0); aplicarZ(true); } if (a==='out'){ zoomA(ZM.s/1.7,0,0); aplicarZ(true); } });
-  z.addEventListener('wheel', e=>{ if (!e.target.closest('#zstage')) return; e.preventDefault(); const [cx,cy] = centroRel(e.clientX,e.clientY); zoomA(ZM.s*Math.exp(-e.deltaY*0.0018), cx, cy); aplicarZ(false); }, {passive:false});
-  z.addEventListener('pointerdown', e=>{ if (!e.target.closest('#zstage')) return; e.preventDefault();
-    ZM.ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY}); try { $('#zstage').setPointerCapture(e.pointerId); } catch(_){}
-    if (ZM.ptrs.size===2){ const [a,b] = [...ZM.ptrs.values()]; const [cx,cy] = centroRel((a.x+b.x)/2,(a.y+b.y)/2); ZM.pinch = {d:Math.hypot(a.x-b.x,a.y-b.y)||1, s:ZM.s, cx, cy, x:ZM.x, y:ZM.y}; ZM.sw = null; ZM.movido = true; }
-    else if (ZM.ptrs.size===1){ ZM.sw = {x0:e.clientX, y0:e.clientY, x:ZM.x, y:ZM.y, t:Date.now()}; ZM.movido = false; } });
-  z.addEventListener('pointermove', e=>{ if (!ZM.ptrs.has(e.pointerId)) return; ZM.ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY});
-    if (ZM.pinch && ZM.ptrs.size>=2){ const [a,b] = [...ZM.ptrs.values()]; const s2 = Math.max(1, Math.min(5, ZM.pinch.s*Math.hypot(a.x-b.x,a.y-b.y)/ZM.pinch.d)); const k = s2/ZM.pinch.s; ZM.s = s2; ZM.x = ZM.pinch.cx-(ZM.pinch.cx-ZM.pinch.x)*k; ZM.y = ZM.pinch.cy-(ZM.pinch.cy-ZM.pinch.y)*k; limitarZ(); aplicarZ(false); return; }
-    if (!ZM.sw) return; const dx = e.clientX-ZM.sw.x0, dy = e.clientY-ZM.sw.y0; if (Math.hypot(dx,dy)>8) ZM.movido = true;
-    if (ZM.s>1.02){ ZM.x = ZM.sw.x+dx; ZM.y = ZM.sw.y+dy; limitarZ(); aplicarZ(false); }
-    else { const im = $('#zimg'); im.style.transition = 'none'; const vert = Math.abs(dy)>Math.abs(dx) && dy>0; im.style.transform = vert ? `translate(0,${dy}px) scale(${Math.max(.8,1-dy/1200)})` : `translate(${dx}px,0)`; im.style.opacity = vert ? String(Math.max(.4,1-dy/500)) : ''; } });
-  const fin = e=>{ if (!ZM.ptrs.has(e.pointerId)) return; ZM.ptrs.delete(e.pointerId);
-    if (ZM.ptrs.size===1){ const [r] = [...ZM.ptrs.values()]; ZM.pinch = null; ZM.sw = {x0:r.x, y0:r.y, x:ZM.x, y:ZM.y, t:Date.now()}; return; }
-    if (ZM.ptrs.size) return; ZM.pinch = null; const sw = ZM.sw; ZM.sw = null; if (!sw) return aplicarZ(true);
-    const dx = e.clientX-sw.x0, dy = e.clientY-sw.y0;
-    if (!ZM.movido && Date.now()-sw.t < 300){ // toque
-      if (Date.now()-ZM.tapT < 320){ ZM.tapT = 0; const [cx,cy] = centroRel(e.clientX,e.clientY); if (ZM.s>1.02) zoomA(1,0,0); else zoomA(2.6,cx,cy); return aplicarZ(true); }
-      ZM.tapT = Date.now(); return; }
-    if (ZM.s<=1.02){ if (Math.abs(dx)>70 && Math.abs(dx)>Math.abs(dy)) return irZ(dx<0?1:-1); if (dy>110 && dy>Math.abs(dx)) return cerrarZoom(); }
-    aplicarZ(true); };
-  z.addEventListener('pointerup', fin); z.addEventListener('pointercancel', fin);
-}
-document.addEventListener('keydown', e=>{ if (!$('#zoom')) return; if (e.key==='Escape'){ e.stopPropagation(); cerrarZoom(); } else if (e.key==='ArrowRight') irZ(1); else if (e.key==='ArrowLeft') irZ(-1); else if (e.key==='+'||e.key==='='){ zoomA(ZM.s*1.5,0,0); aplicarZ(true); } else if (e.key==='-'){ zoomA(ZM.s/1.5,0,0); aplicarZ(true); } }, true);
-document.addEventListener('load', e=>{ const im = e.target; if (im instanceof HTMLImageElement && im.parentElement?.classList.contains('zbox')) im.parentElement.classList.add('ok'); }, true);
-/* un toque en la foto de una publicación la abre en grande; dos toques siguen siendo "me gusta" */
-let zTap = null;
-document.addEventListener('click', e=>{ const car = e.target.closest('.car[data-dbl]'); if (!car || e.target.closest('button')) return;
-  if (zTap){ clearTimeout(zTap); zTap = null; return; }
-  zTap = setTimeout(()=>{ zTap = null; const p = post(car.dataset.dbl); if (!p) return; const tr = car.querySelector('.car-track'); const i = tr ? Math.round(tr.scrollLeft/Math.max(1,tr.clientWidth)) : 0; abrirZoom(p.fotos.map(zoomHTML), i); }, 300); });
 
 /* ---------- galería del producto ---------- */
 function galeriaProd(p){
   const fs = fotosDeProd(p); const i = Math.min(ui.pfoto||0, fs.length-1);
-  return `<div class="pgal"><div class="pgal-track" id="pgal">${fs.map((f,k)=>`<button type="button" class="pgal-s" data-a="zoomProd" data-x="${p.id}" data-o="${k}" aria-label="Ver foto ${k+1} en grande"><div class="ph">${verFoto(f)}</div></button>`).join('')}</div>
+  return `<div class="pgal"><div class="pgal-track" id="pgal">${fs.map((f,k)=>`<div class="pgal-s"><div class="ph">${verFoto(f)}</div></div>`).join('')}</div>
     <button type="button" class="x pgal-x" data-a="close" aria-label="Cerrar">×</button>
-    <span class="pgal-zoom">${ico.zoom}Toca para ver en grande</span>
     ${fs.length>1?`<span class="car-n" id="pgal-n">${i+1}/${fs.length}</span><button type="button" class="car-b l" data-a="pgalMove" data-o="-1" aria-label="Foto anterior">‹</button><button type="button" class="car-b r" data-a="pgalMove" data-o="1" aria-label="Foto siguiente">›</button>`:''}</div>
     ${fs.length>1?`<div class="pthumbs" id="pthumbs">${fs.map((f,k)=>`<button type="button" class="${i===k?'on':''}" data-a="pgalGo" data-o="${k}" aria-label="Foto ${k+1}"><div class="ph">${verFoto(f)}</div></button>`).join('')}</div>`:''}`;
 }
@@ -3437,9 +3352,6 @@ new MutationObserver(()=>{ const g = $('#pgal'); if (g) g.scrollLeft = (ui.pfoto
 function registrarAccionesV12(){
   Object.assign(A, {
     verLikes: x => { ui.sheet = {t:'likes', post:x}; renderLayer(); },
-    zoomAvatar: x => { const a = perfilDe(x); const big = a.foto ? `<div class="zbox ok"><img src="${esc(a.foto)}" alt=""></div>` : a.fu ? `<div class="zbox zav" style="--c:${esc(a.color)}"><span>${esc(inits(a.nombre))}</span><img data-u="1" src="https://images.unsplash.com/photo-${a.fu}?w=1200&q=80&auto=format" alt="" referrerpolicy="no-referrer"></div>` : `<div class="zbox zav ok" style="--c:${esc(a.color)}"><span>${esc(inits(a.nombre))}</span></div>`; abrirZoom([big]); },
-    zoomPortada: x => { const n = neg(x); abrirZoom([zoomHTML({k:kNeg(n), a:color2(n.color,.25), b:color2(n.color,.55), l:n.nombre, u:fotoU(kNeg(n), n.id+'c')})]); },
-    zoomProd: (x, el) => { const p = prod(x); abrirZoom(fotosDeProd(p).map(zoomHTML), +el.dataset.o); },
     pgalMove: (x, el) => { const g = $('#pgal'); if (!g) return; const n = g.children.length; const i = ((ui.pfoto||0)+(+el.dataset.o)+n)%n; g.scrollTo({left:i*g.clientWidth, behavior:'smooth'}); },
     pgalGo: (x, el) => { const g = $('#pgal'); if (g) g.scrollTo({left:(+el.dataset.o)*g.clientWidth, behavior:'smooth'}); },
     estadoCuenta: () => { ui.abrirEstado = true; ui.sheet = null; go('ajustes'); ui.abrirEstado = false; setTimeout(()=>$('#estado-cuenta')?.scrollIntoView({behavior:'smooth', block:'start'}), 60); },
@@ -3496,6 +3408,8 @@ function registrarAccionesV12(){
   document.addEventListener('change', e=>{ const t = e.target; if (t.dataset && t.dataset.doc && ui.vf){ const f = t.files[0]; if (f){ ['nom','resp','cargo','mail','sitio','men'].forEach(k=>{ const v = $('#vf-'+k)?.value; if (v!=null) ui.vf[k] = v; }); ui.vf.docs[t.dataset.doc] = f.name.slice(0,40); const ok = $('#vf-ok')?.checked; rerender(); if (ok) $('#vf-ok').checked = true; } } });
 }
 asegurarV12();
+/* evitar que el teléfono "levante" fotos al mantenerlas presionadas */
+document.addEventListener('dragstart', e=>{ if (e.target && (e.target.tagName==='IMG' || e.target.closest?.('button'))) e.preventDefault(); });
 
 
 /* ---------- render ---------- */
