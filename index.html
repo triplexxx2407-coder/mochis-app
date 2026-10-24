@@ -700,6 +700,43 @@ h1,h2,h3,p,.note,.expl,.small,.muted,td{overflow-wrap:break-word}
 img,svg{-webkit-user-drag:none;user-select:none;-webkit-user-select:none}
 button,.btn,.car,.bcard2,.pgal,.post-a,.mnav,.side,.stv{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 html,body,button,a,.car,input,textarea,select{touch-action:manipulation}
+/* ===== modo en vivo ===== */
+.rwrapv{min-height:100vh;display:flex;flex-direction:column;background:var(--bg)}
+.rprotobar{margin:10px 12px 0}
+.rtop{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:10px 16px;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.rlogo{display:flex;align-items:center;gap:8px;background:none;border:0;padding:0;font-family:var(--display);font-weight:800;font-size:19px;color:var(--fg)}
+.rlogo .mark,.mark{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--brand),#16a34a);color:#fff;font-size:14px;font-weight:900}
+.mark.big{width:64px;height:64px;border-radius:18px;font-size:24px}
+.rnav-top{display:none;margin:0 auto;gap:4px}
+.rnav-top button,.rnav-bot button{position:relative;display:flex;align-items:center;gap:6px;background:none;border:0;color:var(--muted);font-weight:700;padding:8px 12px;border-radius:12px}
+.rnav-top button.on,.rnav-bot button.on{color:var(--fg);background:var(--surface-2)}
+.rtop-r{margin-left:auto;display:flex;gap:6px}
+.rtop-r .ibtn{position:relative}
+.rbadge{position:absolute;top:2px;right:2px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--bad);color:#fff;font-size:10.5px;font-style:normal;font-weight:800;display:grid;place-items:center}
+.rbadge.static{position:static}
+.rbadge[hidden]{display:none}
+.rmain{width:100%;max-width:640px;margin:0 auto;padding:14px 16px 96px;display:flex;flex-direction:column;gap:14px}
+.rnav-bot{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:space-around;background:var(--surface);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px))}
+.rnav-bot button{flex-direction:column;gap:2px;font-size:11px;padding:6px 8px}
+.rnav-bot button svg{width:24px;height:24px}
+@media (min-width:768px){.rnav-top{display:flex}.rnav-bot{display:none}.rmain{padding-bottom:40px}}
+.rgut{margin:10px 16px 0;width:auto}
+.rcentro{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:12px;padding:40px 16px}
+.rlogin h1{margin:0}
+.rspin{width:34px;height:34px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--brand);animation:rgira 0.8s linear infinite}
+@keyframes rgira{to{transform:rotate(360deg)}}
+.note.ok{background:var(--ok-soft)}
+.lrow.nueva{border-color:var(--brand);background:var(--brand-soft)}
+.rchat{display:flex;flex-direction:column;height:calc(100dvh - 200px);min-height:360px;background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.rchat .chat-h{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.rchat-b{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;overscroll-behavior:contain}
+.rbub{align-self:flex-start;max-width:80%;background:var(--surface-2);border-radius:18px 18px 18px 6px;padding:9px 13px;font-size:15px;line-height:1.4;overflow-wrap:anywhere}
+.rbub.yo{align-self:flex-end;background:var(--brand);color:var(--brand-ink);border-radius:18px 18px 6px 18px}
+.rbub small{display:block;font-size:11px;opacity:.7;margin-top:3px}
+.rbub.bloq{background:var(--bad-soft);color:var(--bad)}
+.rmain .post .car .ph img{width:100%;height:100%;object-fit:cover}
+.pgrid .ph img{width:100%;height:100%;object-fit:cover}
+.rcentro .card{text-align:left}.rchat .who{border:0;background:none;padding:0;gap:10px;display:flex;align-items:center;color:var(--fg)}.rmain .segs{flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -3411,19 +3448,395 @@ asegurarV12();
 /* evitar que el teléfono "levante" fotos al mantenerlas presionadas */
 document.addEventListener('dragstart', e=>{ if (e.target && (e.target.tagName==='IMG' || e.target.closest?.('button'))) e.preventDefault(); });
 
+/* ============================================================
+   MODO EN VIVO — cuentas reales con Supabase
+   Inicio de sesión con enlace al correo, publicaciones con fotos, me gusta,
+   comentarios, seguir, mensajes en tiempo real, notificaciones y panel de revisión.
+   El servidor vuelve a revisar todo (filtro, amigos, edad, suspensiones): esto es solo la pantalla.
+   ============================================================ */
+const RCFG = { url:'https://vhxisjkmkwgpvuqcbomt.supabase.co', key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoeGlzamtta3dncHZ1cWNib210Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4MDA0NDksImV4cCI6MjEwODM3NjQ0OX0.i-LPjHWSft5rvi2EXE5yQkZjVyPzFdbkdRp8Z2oPW2Y' };
+const SB_LIB = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.75.1/dist/umd/supabase.js';
+const RV = { sb:null, fase:'cargando', user:null, me:null, est:null, view:'feed', feed:'parati', posts:[], perfiles:{}, misLikes:new Set(), guardados:new Set(),
+  sigo:new Set(), meSiguen:new Set(), sheet:null, err:'', perfil:null, chat:null, msgs:[], chats:[], noLeidos:0, notifs:[], nNotifs:0, q:'', res:[], adm:'revisar', canal:null, cargandoFeed:false, draft:[], enviado:0 };
+const rFoto = path => path ? `${RCFG.url}/storage/v1/object/public/fotos/${path}` : null;
+const rPerfil = id => RV.perfiles[id] || {id, usuario:'…', nombre:'…', color:'#6B7280'};
+const rAv = (id, s=40) => { const p = rPerfil(id); return avatar({nombre:p.nombre, color:p.color, foto:rFoto(p.foto), negocio:false}, s); };
+const rHandle = id => { const p = rPerfil(id); return `${esc(p.usuario)}${p.verif?`<span class="verif ${p.verif}" title="Cuenta verificada">✓</span>`:''}`; };
+const rT = s => new Date(s).getTime();
+const rAmigo = id => RV.sigo.has(id) && RV.meSiguen.has(id);
+const rErr = e => { const m = (e && (e.message || e.error_description)) || String(e||''); if (/duplicate key.*usuario/i.test(m)) return 'Ese usuario ya existe. Elige otro.'; if (/JWT|session/i.test(m)) return 'Tu sesión venció. Vuelve a entrar.'; if (/Failed to fetch|NetworkError/i.test(m)) return 'Sin conexión. Revisa tu internet.'; return m.replace(/^.*?ERROR:\s*/,''); };
+function rTextoOk(t, lugar){ // filtro rápido en el teléfono (el servidor revisa otra vez)
+  const limpio = (' '+t).replace(/(\s)@[a-zA-Z0-9._]{2,30}/g, '$1 ');
+  try { const r = analizarTexto(limpio, lugar, {}); if (r.bloqueos && r.bloqueos.length) return msgBloqueo(r); } catch(e){}
+  return '';
+}
+
+/* ---------- arranque ---------- */
+function rCargarLib(){ return new Promise((ok, no)=>{ if (window.supabase && window.supabase.createClient) return ok(); const s=document.createElement('script'); s.src=SB_LIB; s.crossOrigin='anonymous'; s.onload=()=>ok(); s.onerror=()=>no(new Error('No se pudo cargar')); document.head.appendChild(s); }); }
+async function rIniciar(){
+  if (RV.sb) return;
+  try { await rCargarLib(); } catch(e){ RV.fase='sinred'; return renderReal(); }
+  RV.sb = window.supabase.createClient(RCFG.url, RCFG.key, { auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:true, flowType:'implicit' } });
+  RV.sb.auth.onAuthStateChange((ev, ses) => { setTimeout(()=>rSesion(ses), 0); });
+  const { data } = await RV.sb.auth.getSession(); await rSesion(data.session);
+}
+async function rSesion(ses){
+  const uid = ses && ses.user ? ses.user.id : null;
+  if (!uid){ RV.user=null; RV.me=null; RV.fase='login'; rCanal(false); return renderReal(); }
+  if (RV.user && RV.user.id===uid && RV.me) return;
+  RV.user = ses.user; if (location.hash.includes('access_token')) history.replaceState(null,'',location.pathname);
+  const { data:me } = await RV.sb.from('profiles').select('id,usuario,nombre,bio,foto,color,priv,verif,created_at').eq('id', uid).maybeSingle();
+  if (!me){ RV.fase='registro'; return renderReal(); }
+  RV.me = me; RV.perfiles[uid] = me; RV.fase='app';
+  await Promise.all([rEstado(), rRelaciones(), rCargarFeed(), rCargarChats(), rCargarNotifs()]);
+  rCanal(true); renderReal();
+}
+async function rEstado(){ const { data } = await RV.sb.rpc('mi_estado'); RV.est = data && data[0] || {rol:'user', avisos:0, suspendido:false, menor:false}; }
+async function rRelaciones(){
+  const uid = RV.user.id;
+  const [a,b,g] = await Promise.all([ RV.sb.from('follows').select('a').eq('de', uid), RV.sb.from('follows').select('de').eq('a', uid), RV.sb.from('guardados').select('post').eq('usuario', uid) ]);
+  RV.sigo = new Set((a.data||[]).map(x=>x.a)); RV.meSiguen = new Set((b.data||[]).map(x=>x.de)); RV.guardados = new Set((g.data||[]).map(x=>x.post));
+}
+async function rTraerPerfiles(ids){
+  const faltan = [...new Set(ids)].filter(id=>id && !RV.perfiles[id]); if (!faltan.length) return;
+  const { data } = await RV.sb.from('profiles').select('id,usuario,nombre,bio,foto,color,priv,verif,created_at').in('id', faltan);
+  (data||[]).forEach(p=>RV.perfiles[p.id]=p);
+}
+
+/* ---------- datos ---------- */
+async function rCargarFeed(){
+  RV.cargandoFeed = true;
+  let q = RV.sb.from('feed').select('*').eq('estado','aprobado').order('created_at', {ascending:false}).limit(40);
+  if (RV.feed==='siguiendo') q = q.in('autor', [...RV.sigo, RV.user.id]);
+  const { data, error } = await q; RV.cargandoFeed = false;
+  if (error){ RV.err = rErr(error); return; }
+  RV.posts = data||[]; await rTraerPerfiles(RV.posts.map(p=>p.autor)); await rMisLikes(RV.posts.map(p=>p.id));
+}
+async function rMisLikes(ids){ if (!ids.length) return; const { data } = await RV.sb.from('likes').select('post').eq('usuario', RV.user.id).in('post', ids); (data||[]).forEach(l=>RV.misLikes.add(l.post)); }
+async function rCargarChats(){
+  const uid = RV.user.id;
+  const { data } = await RV.sb.from('messages').select('id,de,para,texto,estado,leido,created_at').or(`de.eq.${uid},para.eq.${uid}`).order('created_at', {ascending:false}).limit(300);
+  const ult = {}; let nl = 0;
+  (data||[]).forEach(m=>{ const otro = m.de===uid ? m.para : m.de; if (!ult[otro]) ult[otro] = m; if (m.para===uid && !m.leido) nl++; });
+  const amigos = [...RV.sigo].filter(rAmigo);
+  RV.chats = [...new Set([...Object.keys(ult), ...amigos])].map(id=>({id, ult:ult[id]||null, sinLeer:(data||[]).filter(m=>m.de===id && m.para===uid && !m.leido).length}))
+    .sort((a,b)=>(b.ult?rT(b.ult.created_at):0)-(a.ult?rT(a.ult.created_at):0));
+  RV.noLeidos = nl; await rTraerPerfiles(RV.chats.map(c=>c.id));
+}
+async function rCargarNotifs(){
+  const { data } = await RV.sb.from('notifs').select('*').order('created_at', {ascending:false}).limit(60);
+  RV.notifs = data||[]; RV.nNotifs = RV.notifs.filter(n=>!n.leida).length; await rTraerPerfiles(RV.notifs.map(n=>n.de));
+}
+function rCanal(on){
+  if (RV.canal){ RV.sb.removeChannel(RV.canal); RV.canal = null; }
+  if (!on) return; const uid = RV.user.id;
+  RV.canal = RV.sb.channel('yo-'+uid)
+    .on('postgres_changes', {event:'INSERT', schema:'public', table:'messages', filter:`para=eq.${uid}`}, async p=>{ const m = p.new; await rTraerPerfiles([m.de]);
+      if (RV.view==='chat' && RV.chat===m.de){ RV.msgs.push(m); RV.sb.from('messages').update({leido:true}).eq('id', m.id).then(()=>{}); rPintarChat(); }
+      else { toast(`💬 ${rPerfil(m.de).nombre}: ${m.texto.slice(0,40)}`); }
+      rCargarChats().then(()=>{ if (RV.view==='mensajes') renderReal(); else rBadges(); }); })
+    .on('postgres_changes', {event:'INSERT', schema:'public', table:'notifs', filter:`para=eq.${uid}`}, async p=>{ await rTraerPerfiles([p.new.de]); RV.notifs.unshift(p.new); RV.nNotifs++; if (RV.view==='notifs') renderReal(); else rBadges(); })
+    .subscribe();
+}
+
+/* ---------- pantallas ---------- */
+const RNAV = [['feed','Inicio','home'],['buscar','Buscar','search'],['crear','Crear','plus'],['mensajes','Mensajes','msg'],['perfil','Perfil','user']];
+function renderReal(){
+  const app = $('#app'); if (!app) return;
+  if (!RV.sb && RV.fase==='cargando'){ rIniciar(); }
+  const top = `<div class="protobar rprotobar"><b>En vivo</b><span>Cuentas reales · todo pasa por revisión de seguridad</span>${modosNav()}</div>`;
+  let cuerpo = '';
+  if (RV.fase==='cargando') cuerpo = `<div class="rcentro"><div class="rspin"></div><p class="muted">Conectando…</p></div>`;
+  else if (RV.fase==='sinred') cuerpo = `<div class="rcentro"><h2>Sin conexión</h2><p class="muted">No se pudo conectar con el servidor. Revisa tu internet e inténtalo de nuevo.</p><button class="btn pri" data-a="rRecargar">Reintentar</button></div>`;
+  else if (RV.fase==='login') cuerpo = rVLogin();
+  else if (RV.fase==='registro') cuerpo = rVRegistro();
+  else cuerpo = rVApp();
+  app.innerHTML = `<div class="rwrapv">${top}${cuerpo}</div>`;
+  rPintarHoja();
+  if (RV.view==='chat'){ const b=$('#rchat-b'); if (b) b.scrollTop=b.scrollHeight; }
+}
+function rBadges(){ const m=$('#rb-msg'), n=$('#rb-not'); if (m){ m.textContent=RV.noLeidos>9?'9+':RV.noLeidos; m.hidden=!RV.noLeidos; } if (n){ n.textContent=RV.nNotifs>9?'9+':RV.nNotifs; n.hidden=!RV.nNotifs; } }
+function rVApp(){
+  const v = RV.view; const V = {feed:rVFeed, buscar:rVBuscar, crear:rVCrear, mensajes:rVMensajes, chat:rVChat, perfil:rVPerfil, notifs:rVNotifs, editar:rVEditar, admin:rVAdmin, post:rVPost}[v] || rVFeed;
+  const on = k => (k===v || (k==='mensajes'&&v==='chat') || (k==='perfil'&&v==='editar')) ? 'on' : '';
+  return `<header class="rtop"><button class="rlogo" data-a="rGo" data-x="feed"><span class="mark">${esc(inits(S.cfg.marca))}</span>${esc(S.cfg.marca)}</button>
+      <nav class="rnav-top">${RNAV.map(([k,l,i])=>`<button class="${on(k)}" data-a="rGo" data-x="${k}">${ico[i]}<span>${l}</span>${k==='mensajes'?`<i class="rbadge" id="rb-msg" ${RV.noLeidos?'':'hidden'}>${RV.noLeidos}</i>`:''}</button>`).join('')}</nav>
+      <div class="rtop-r">${RV.est&&RV.est.rol==='admin'?`<button class="ibtn ${on('admin')}" data-a="rGo" data-x="admin" aria-label="Revisión">${ico.shield}</button>`:''}
+        <button class="ibtn ${on('notifs')}" data-a="rGo" data-x="notifs" aria-label="Notificaciones">${ico.bell}<i class="rbadge" id="rb-not" ${RV.nNotifs?'':'hidden'}>${RV.nNotifs}</i></button></div></header>
+    ${RV.est&&RV.est.suspendido?`<div class="cbanner bad rgut">${ico.shield}<span><b>Tu cuenta está suspendida</b><small>Una persona del equipo la está revisando. Mientras tanto no puedes publicar ni escribir.</small></span></div>`:''}
+    <main class="rmain">${V()}</main>
+    <nav class="rnav-bot">${RNAV.map(([k,l,i])=>`<button class="${on(k)}" data-a="rGo" data-x="${k}">${ico[i]}<span>${l}</span>${k==='mensajes'&&RV.noLeidos?`<i class="rbadge">${RV.noLeidos>9?'9+':RV.noLeidos}</i>`:''}</button>`).join('')}</nav>`;
+}
+function rVLogin(){
+  const env = RV.enviado && Date.now()-RV.enviado < 60000;
+  return `<div class="rcentro rlogin"><span class="mark big">${esc(inits(S.cfg.marca))}</span><h1>${esc(S.cfg.marca)}</h1>
+    <p class="muted">La red social y tienda de ${esc(S.cfg.ciudad)}. Entra con tu correo: te mandamos un enlace, sin contraseñas.</p>
+    ${env?`<div class="note ok"><b>¡Listo! Revisa tu correo</b><br>Te mandamos un enlace para entrar. Ábrelo <b>en este mismo teléfono o computadora</b>. Si no lo ves, busca en "Spam" o "Promociones".</div>`:''}
+    <form class="stack" data-form="rLogin" novalidate style="width:100%;max-width:380px;gap:10px">
+      <label class="f" for="rl-mail">Tu correo<input id="rl-mail" type="email" autocomplete="email" inputmode="email" placeholder="tucorreo@gmail.com" value="${esc(RV.mail||'')}"></label>
+      ${RV.err?`<div class="err" role="alert">${esc(RV.err)}</div>`:''}
+      <button class="btn pri block lg" type="submit" ${env?'disabled':''}>${env?'Enlace enviado (espera 1 min para pedir otro)':'Mandarme el enlace'}</button></form>
+    <p class="small muted" style="max-width:380px">Debes tener al menos 13 años. Al entrar aceptas las reglas: nada de contenido +18, ofensivo, enlaces, teléfonos ni publicidad sin permiso.</p></div>`;
+}
+function rVRegistro(){
+  return `<div class="rcentro"><div class="card stack" style="max-width:440px;width:100%;gap:12px"><h1 style="margin:0">Crea tu perfil</h1>
+    <p class="small muted" style="margin:0">Así te verán los demás. Tu fecha de nacimiento es privada: solo sirve para proteger a los menores de edad.</p>
+    <form class="stack" data-form="rRegistro" novalidate style="gap:12px">
+      <label class="f" for="rr-nom">Nombre<input id="rr-nom" type="text" maxlength="40" autocomplete="name" placeholder="Como te conocen"></label>
+      <label class="f" for="rr-usr">Usuario<input id="rr-usr" type="text" maxlength="24" autocapitalize="off" autocomplete="username" placeholder="ej. chuy.lm"><span class="h">De 3 a 24 letras minúsculas, números, punto o guion bajo.</span></label>
+      <label class="f" for="rr-nac">Fecha de nacimiento<input id="rr-nac" type="date" max="${new Date().toISOString().slice(0,10)}"><span class="h">No se muestra a nadie.</span></label>
+      <label class="chk"><input id="rr-ok" type="checkbox"> <span>Acepto las reglas de la comunidad y sé que todo lo que publico pasa por revisión de seguridad.</span></label>
+      ${RV.err?`<div class="err" role="alert">${esc(RV.err)}</div>`:''}
+      <button class="btn pri block lg" type="submit">Crear mi perfil</button>
+      <button class="btn block" type="button" data-a="rSalir">Usar otro correo</button></form></div></div>`;
+}
+function rPostCard(p){
+  const n = p.nlikes||0, yo = RV.misLikes.has(p.id), g = RV.guardados.has(p.id);
+  return `<article class="post" id="rp-${p.id}"><div class="post-h"><button class="who" data-a="rVer" data-x="${p.autor}">${rAv(p.autor,40)}<span style="min-width:0"><b>${rHandle(p.autor)}</b><span class="small muted"> · ${hace(rT(p.created_at))}</span></span></button>
+      ${p.autor!==RV.user.id && !RV.sigo.has(p.autor)?`<button class="btn sm pri" data-a="rSeguir" data-x="${p.autor}">Seguir</button>`:''}
+      <button class="ibtn" data-a="rOpc" data-x="${p.id}" aria-label="Opciones">${ico.dots}</button></div>
+    <div class="car" data-rdbl="${p.id}"><div class="car-track">${p.fotos.map(f=>`<div class="ph"><img src="${esc(rFoto(f))}" alt="" loading="lazy"></div>`).join('')}</div>${p.fotos.length>1?`<span class="car-n">${p.fotos.length} fotos</span>`:''}</div>
+    <div class="post-a"><button class="b-like ${yo?'on':''}" data-a="rLike" data-x="${p.id}" aria-label="Me gusta" aria-pressed="${yo}">${yo?ico.heartF:ico.heart}</button>
+      <button class="b-com" data-a="rComs" data-x="${p.id}" aria-label="Comentarios">${ico.com}</button><span class="sp"></span>
+      <button class="b-save ${g?'on':''}" data-a="rGuardar" data-x="${p.id}" aria-label="Guardar">${g?ico.saveF:ico.save}</button></div>
+    <div class="post-b"><button class="likes-n" data-a="rLikes" data-x="${p.id}">${n} Me gusta</button>
+      ${p.texto?`<div><b>${esc(rPerfil(p.autor).usuario)}</b> ${esc(p.texto)}</div>`:''}
+      ${p.ncoms?`<button class="lnk" data-a="rComs" data-x="${p.id}">Ver ${p.ncoms>1?'los '+p.ncoms+' comentarios':'1 comentario'}</button>`:''}</div></article>`;
+}
+function rVFeed(){
+  return `<div class="segs" role="tablist">${[['parati','Para ti'],['siguiendo','Siguiendo']].map(([k,t])=>`<button class="${RV.feed===k?'on':''}" data-a="rFeed" data-x="${k}">${t}</button>`).join('')}</div>
+    <button class="compose" data-a="rGo" data-x="crear">${rAv(RV.user.id,36)}<span class="t">¿Qué está pasando en ${esc(S.cfg.ciudad)}?</span><span class="btn pri sm">Publicar</span></button>
+    ${RV.cargandoFeed?'<div class="rcentro"><div class="rspin"></div></div>':RV.posts.length?RV.posts.map(rPostCard).join(''):`<div class="empty"><h2>${RV.feed==='siguiendo'?'Aún no sigues a nadie':'Todavía no hay publicaciones'}</h2><p class="muted">${RV.feed==='siguiendo'?'Busca a tus amigos y síguelos.':'¡Sé el primero en publicar algo!'}</p><button class="btn pri" data-a="rGo" data-x="${RV.feed==='siguiendo'?'buscar':'crear'}">${RV.feed==='siguiendo'?'Buscar personas':'Publicar'}</button></div>`}
+    <button class="btn block" data-a="rRefrescar">Actualizar</button>`;
+}
+function rVPost(){ const p = RV.posts.find(x=>x.id===RV.postId) || RV.postAbierto; return `<button class="btn back" data-a="rAtras">${ico.back||'←'}Volver</button>${p?rPostCard(p):'<p class="muted">No disponible.</p>'}`; }
+function rFila(id){
+  const p = rPerfil(id), sigo = RV.sigo.has(id), mio = id===RV.user.id;
+  return `<div class="lrow"><button class="who" data-a="rVer" data-x="${id}" style="flex:1;min-width:0">${rAv(id,44)}<span class="tx"><b>${rHandle(id)}</b><span class="small muted">${esc(p.nombre)}${RV.meSiguen.has(id)&&!mio?' · te sigue':''}</span></span></button>
+    ${mio?'':`<button class="btn sm ${sigo?'':'pri'}" data-a="rSeguir" data-x="${id}">${sigo?(rAmigo(id)?'Amigos ✓':'Siguiendo'):(RV.meSiguen.has(id)?'Seguir también':'Seguir')}</button>`}</div>`;
+}
+function rVBuscar(){
+  return `<h1>Buscar personas</h1><label class="search">${ico.search}<input id="rq" type="search" placeholder="Nombre o usuario" value="${esc(RV.q)}" autocomplete="off" aria-label="Buscar"></label>
+    <div class="stack" style="gap:8px" id="rres">${RV.res.map(rFila).join('') || `<p class="muted small">${RV.q.trim().length>=2?'Sin resultados.':'Escribe al menos 2 letras.'}</p>`}</div>`;
+}
+function rVCrear(){
+  if (RV.est && RV.est.suspendido) return `<div class="empty"><h2>No puedes publicar</h2><p class="muted">Tu cuenta está en revisión.</p></div>`;
+  return `<h1>Nueva publicación</h1><form class="stack" data-form="rPublicar" novalidate style="gap:12px">
+    <div class="f"><b>Fotos (hasta 4)</b><input id="rc-fotos" type="file" accept="image/*" multiple><span class="h">Se reducen antes de subirse. Nada de fotos de otras personas sin su permiso.</span></div>
+    <div class="drafts">${RV.draft.map((d,i)=>`<div class="ph"><img src="${d.url}" alt=""><button type="button" data-a="rQuitarFoto" data-x="${i}" aria-label="Quitar">×</button></div>`).join('')}</div>
+    <label class="f" for="rc-txt">Descripción<textarea id="rc-txt" maxlength="300" placeholder="Escribe algo (opcional)">${esc(RV.draftTxt||'')}</textarea></label>
+    <div class="note small">Tus primeras 3 publicaciones las revisa una persona antes de que salgan. Sin enlaces, teléfonos, contenido +18 ni publicidad.</div>
+    ${RV.err?`<div class="err" role="alert">${esc(RV.err)}</div>`:''}
+    <button class="btn pri block lg" type="submit" ${RV.subiendo?'disabled':''}>${RV.subiendo?'Subiendo…':'Publicar'}</button></form>`;
+}
+function rVMensajes(){
+  return `<h1>Mensajes</h1><p class="small muted" style="margin:0">Solo puedes escribir a tus amigos: personas que se siguen mutuamente. No se permiten enlaces, teléfonos, fotos ni audios.</p>
+    <div class="stack" style="gap:8px">${RV.chats.length?RV.chats.map(c=>`<button class="lrow" data-a="rChat" data-x="${c.id}">${rAv(c.id,48)}<span class="tx" style="flex:1;min-width:0"><b>${rHandle(c.id)}</b><span class="small muted">${c.ult?esc((c.ult.de===RV.user.id?'Tú: ':'')+c.ult.texto).slice(0,60):'Escríbele algo'}</span></span>${c.sinLeer?`<i class="rbadge static">${c.sinLeer}</i>`:''}</button>`).join('')
+      :`<div class="empty"><h2>Aún no tienes amigos aquí</h2><p class="muted">Busca a alguien y síguelo. Cuando te siga de vuelta, podrán escribirse.</p><button class="btn pri" data-a="rGo" data-x="buscar">Buscar personas</button></div>`}</div>`;
+}
+function rVChat(){
+  const id = RV.chat, amigo = rAmigo(id);
+  return `<div class="rchat"><div class="chat-h"><button class="ibtn" data-a="rGo" data-x="mensajes" aria-label="Volver">←</button><button class="who" data-a="rVer" data-x="${id}" style="flex:1;min-width:0">${rAv(id,36)}<b>${rHandle(id)}</b></button></div>
+    <div class="rchat-b" id="rchat-b">${rMsgsHTML()}</div>
+    ${amigo?`<form class="comform" data-form="rMsg" novalidate><input id="rm-txt" type="text" maxlength="1000" placeholder="Escribe un mensaje…" autocomplete="off" enterkeyhint="send" aria-label="Mensaje"><button class="btn pri" type="submit">Enviar</button></form>`
+      :`<div class="note small" style="margin:10px">Ya no son amigos (alguien dejó de seguir al otro), así que no pueden escribirse.</div>`}</div>`;
+}
+function rMsgsHTML(){ return RV.msgs.map(m=>`<div class="rbub ${m.de===RV.user.id?'yo':''} ${m.estado==='bloqueado'?'bloq':''}">${esc(m.texto)}<small>${m.estado==='bloqueado'?'No se envió: rompe las reglas':hace(rT(m.created_at))}</small></div>`).join('') || '<p class="muted small" style="text-align:center">Salúdale 👋</p>'; }
+function rPintarChat(){ const b=$('#rchat-b'); if(!b) return; b.innerHTML = rMsgsHTML(); b.scrollTop = b.scrollHeight; }
+function rVNotifs(){
+  const txt = n => n.tipo==='like'?'le dio me gusta a tu publicación.':n.tipo==='comentario'?`comentó: ${esc(n.texto||'')}`:n.tipo==='follow'?'empezó a seguirte.':esc(n.texto||'');
+  return `<h1>Notificaciones</h1><div class="stack" style="gap:8px">${RV.notifs.map(n=>`<div class="lrow ${n.leida?'':'nueva'}">${n.de?rAv(n.de,40):`<span class="ictile">${ico.shield}</span>`}<span class="tx" style="flex:1;min-width:0">${n.de?`<b>${rHandle(n.de)}</b> `:''}${txt(n)}<span class="small muted"> · ${hace(rT(n.created_at))}</span></span>${n.tipo==='follow'&&!RV.sigo.has(n.de)?`<button class="btn sm pri" data-a="rSeguir" data-x="${n.de}">Seguir</button>`:''}</div>`).join('') || '<p class="muted">Nada por ahora.</p>'}</div>`;
+}
+function rVPerfil(){
+  const id = RV.perfil || RV.user.id, p = rPerfil(id), mio = id===RV.user.id, d = RV.pdatos && RV.pdatos.id===id ? RV.pdatos : null;
+  if (!d){ rCargarPerfil(id); return '<div class="rcentro"><div class="rspin"></div></div>'; }
+  return `${!mio?`<button class="btn back" data-a="rAtras">${ico.back||'←'}Volver</button>`:''}
+    <div class="card pcab"><div class="prof">${rAv(id,96)}<div class="stack" style="gap:8px;min-width:0;flex:1">
+      <div><h1 class="pnom" style="margin:0">${esc(p.nombre)}${p.verif?`<span class="verif ${p.verif}">✓</span>`:''}</h1><div class="muted small">@${esc(p.usuario)}${!mio&&RV.meSiguen.has(id)?' · <span class="pill">Te sigue</span>':''}</div></div>
+      <div class="stats"><div><b>${d.posts.length}</b><span>publicaciones</span></div><div><b>${d.seg}</b><span>seguidores</span></div><div><b>${d.sig}</b><span>siguiendo</span></div></div></div></div>
+      ${p.bio?`<div>${esc(p.bio)}</div>`:''}
+      <div class="row">${mio?`<button class="btn soft" data-a="rGo" data-x="editar">Editar perfil</button><button class="btn" data-a="rSalir">Cerrar sesión</button>`
+        :`<button class="btn ${RV.sigo.has(id)?'':'pri'}" data-a="rSeguir" data-x="${id}">${RV.sigo.has(id)?(rAmigo(id)?'Amigos ✓':'Siguiendo'):'Seguir'}</button>${rAmigo(id)?`<button class="btn soft" data-a="rChat" data-x="${id}">Mensaje</button>`:'<span class="small muted">Síganse mutuamente para poder escribirse.</span>'}<button class="btn sm" data-a="rReportarCuenta" data-x="${id}">Reportar</button><button class="btn sm danger" data-a="rBloquear" data-x="${id}">Bloquear</button>`}</div></div>
+    <div class="pgrid">${d.posts.map(x=>`<button data-a="rAbrirPost" data-x="${x.id}" aria-label="Ver publicación"><div class="ph"><img src="${esc(rFoto(x.fotos[0]))}" alt="" loading="lazy"></div>${x.estado!=='aprobado'?`<span class="pill ${x.estado==='pendiente'?'warn':'bad'} st">${x.estado==='pendiente'?'En revisión':'Rechazada'}</span>`:''}</button>`).join('')}</div>
+    ${!d.posts.length?`<p class="muted" style="text-align:center">${mio?'Aún no publicas nada.':'Sin publicaciones.'}</p>`:''}`;
+}
+async function rCargarPerfil(id){
+  await rTraerPerfiles([id]);
+  const [po, s1, s2] = await Promise.all([ RV.sb.from('feed').select('*').eq('autor', id).order('created_at', {ascending:false}).limit(60),
+    RV.sb.from('follows').select('de', {count:'exact', head:true}).eq('a', id), RV.sb.from('follows').select('a', {count:'exact', head:true}).eq('de', id) ]);
+  RV.pdatos = {id, posts:po.data||[], seg:s1.count||0, sig:s2.count||0}; if (RV.view==='perfil') renderReal();
+}
+function rVEditar(){
+  const p = RV.me;
+  return `<button class="btn back" data-a="rGo" data-x="perfil">${ico.back||'←'}Volver</button><h1>Editar perfil</h1>
+    <form class="stack" data-form="rEditar" novalidate style="gap:12px">
+      <div class="row">${rAv(RV.user.id,72)}<label class="f" for="re-foto" style="flex:1">Foto de perfil<input id="re-foto" type="file" accept="image/*"></label></div>
+      <label class="f" for="re-nom">Nombre<input id="re-nom" type="text" maxlength="40" value="${esc(p.nombre)}"></label>
+      <label class="f" for="re-usr">Usuario<input id="re-usr" type="text" maxlength="24" autocapitalize="off" value="${esc(p.usuario)}"></label>
+      <label class="f" for="re-bio">Descripción<textarea id="re-bio" maxlength="150">${esc(p.bio||'')}</textarea><span class="h">Sin enlaces, correos ni teléfonos.</span></label>
+      ${RV.err?`<div class="err" role="alert">${esc(RV.err)}</div>`:''}
+      <button class="btn pri block" type="submit">Guardar</button></form>`;
+}
+function rVAdmin(){
+  if (!RV.est || RV.est.rol!=='admin') return '<p class="muted">Solo para el equipo.</p>';
+  if (!RV.admDatos){ rCargarAdmin(); return '<div class="rcentro"><div class="rspin"></div></div>'; }
+  const d = RV.admDatos;
+  const tabs = `<div class="segs">${[['revisar',`Por revisar (${d.pend.length})`],['reportes',`Reportes (${d.rep.length})`],['alertas',`Alertas (${d.al.length})`],['cuentas','Cuentas']].map(([k,l])=>`<button class="${RV.adm===k?'on':''}" data-a="rAdm" data-x="${k}">${l}</button>`).join('')}</div>`;
+  let c = '';
+  if (RV.adm==='revisar') c = d.pend.map(p=>`<div class="card stack" style="gap:8px"><div class="row">${rAv(p.autor,32)}<b>${rHandle(p.autor)}</b><span class="small muted">${hace(rT(p.created_at))}</span></div>
+      <div class="car"><div class="car-track">${p.fotos.map(f=>`<div class="ph"><img src="${esc(rFoto(f))}" alt=""></div>`).join('')}</div></div>${p.texto?`<div>${esc(p.texto)}</div>`:''}
+      <div class="row"><button class="btn sm ok" data-a="rDecidir" data-x="${p.id}" data-o="aprobado">Aprobar</button><select id="rmot-${p.id}" style="width:auto;padding:7px 9px;font-size:13px">${['Contenido +18','Ofensivo o violento','Publicidad','Enlaces o datos de contacto','Riesgo para menores','Fotos de otra persona sin permiso','Otro'].map(m=>`<option>${m}</option>`).join('')}</select><button class="btn sm danger" data-a="rDecidir" data-x="${p.id}" data-o="rechazado">Rechazar</button></div></div>`).join('') || '<p class="muted">Nada pendiente.</p>';
+  if (RV.adm==='reportes') c = d.rep.map(r=>`<div class="card small"><b>${esc(r.motivo)}</b> · ${hace(rT(r.created_at))}<br>Reportó: ${rHandle(r.quien)}${r.cuenta?` · Cuenta: ${rHandle(r.cuenta)}`:''}${r.post?` · <button class="lnk" data-a="rAbrirPost" data-x="${r.post}">ver publicación</button>`:''}<div class="row" style="margin-top:6px"><button class="btn sm" data-a="rRepListo" data-x="${r.id}">Marcar revisado</button></div></div>`).join('') || '<p class="muted">Sin reportes.</p>';
+  if (RV.adm==='alertas') c = d.al.map(a=>`<div class="card small"><b>${esc(a.motivo)}</b> en ${esc(a.lugar)} · ${hace(rT(a.created_at))}<br>${a.quien?rHandle(a.quien):''}<div class="quote">${esc(a.texto||'')}</div></div>`).join('') || '<p class="muted">Sin alertas.</p>';
+  if (RV.adm==='cuentas') c = d.cuentas.map(u=>`<div class="lrow"><span class="tx" style="flex:1;min-width:0"><b>@${esc(u.usuario)}</b><span class="small muted">${esc(u.nombre)} · ${u.menor?'menor de edad · ':''}${u.avisos} aviso(s)${u.rol==='admin'?' · admin':''}</span></span><button class="btn sm ${u.suspendido?'ok':'danger'}" data-a="rSuspender" data-x="${u.id}" data-o="${u.suspendido?'0':'1'}">${u.suspendido?'Quitar suspensión':'Suspender'}</button></div>`).join('');
+  return `<h1>Revisión</h1>${tabs}${c}`;
+}
+async function rCargarAdmin(){
+  const [pend, rep, al, cu] = await Promise.all([ RV.sb.from('posts').select('*').eq('estado','pendiente').order('created_at'), RV.sb.from('reportes').select('*').eq('estado','nuevo').order('created_at',{ascending:false}),
+    RV.sb.from('alertas').select('*').order('created_at',{ascending:false}).limit(50), RV.sb.rpc('admin_perfiles') ]);
+  RV.admDatos = {pend:pend.data||[], rep:rep.data||[], al:al.data||[], cuentas:cu.data||[]};
+  await rTraerPerfiles([...RV.admDatos.pend.map(p=>p.autor), ...RV.admDatos.rep.flatMap(r=>[r.quien,r.cuenta]), ...RV.admDatos.al.map(a=>a.quien)]);
+  if (RV.view==='admin') renderReal();
+}
+
+/* ---------- hojas (comentarios, me gusta, opciones, reportar) ---------- */
+function rPintarHoja(){
+  let l = $('#rlayer'); if (!l){ l = document.createElement('div'); l.id='rlayer'; document.body.appendChild(l); }
+  const h = RV.sheet; if (!h || ui.mode!=='real'){ l.innerHTML=''; document.body.style.overflow=''; return; }
+  let html = '';
+  if (h.t==='coms'){
+    html = `<div class="ov" data-a="rCerrar" data-self="1"><div class="sheet comsheet" role="dialog" aria-modal="true" aria-label="Comentarios"><div class="comh"><span class="grab"></span><h2>Comentarios</h2><button type="button" class="x" data-a="rCerrar" aria-label="Cerrar">×</button></div>
+      <div class="comlist" id="comlist">${h.lista?h.lista.map(c=>`<div class="cm">${rAv(c.autor,36)}<div class="tx"><b>${rHandle(c.autor)}</b> <span class="small muted">${hace(rT(c.created_at))}</span><div>${esc(c.texto)}</div>${c.estado==='bloqueado'?'<span class="small" style="color:var(--bad)">No se publicó: rompe las reglas</span>':''}</div></div>`).join('') || '<div class="comvacio"><b>Aún no hay comentarios</b><span class="small muted">Sé el primero.</span></div>':'<div class="rcentro"><div class="rspin"></div></div>'}</div>
+      ${RV.err?`<div class="err" role="alert" style="margin:0 16px 8px">${esc(RV.err)}</div>`:''}
+      <form class="comform" data-form="rComentar" novalidate>${rAv(RV.user.id,36)}<input id="rk-txt" type="text" maxlength="200" placeholder="Agrega un comentario…" autocomplete="off" enterkeyhint="send" aria-label="Comentario"><button class="btn pri" type="submit">Publicar</button></form></div></div>`;
+  } else if (h.t==='likes'){
+    html = hoja('Me gusta', h.lista ? (h.lista.length ? `<div class="stack" style="gap:8px">${h.lista.map(rFila).join('')}</div>` : '<p class="muted">Todavía nadie.</p>') : '<div class="rspin"></div>').replace(/data-a="closeSheet"/g,'data-a="rCerrar"');
+  } else if (h.t==='opc'){
+    const p = RV.posts.find(x=>x.id===h.id) || (RV.pdatos&&RV.pdatos.posts.find(x=>x.id===h.id)); const mio = p && p.autor===RV.user.id;
+    html = hoja('Opciones', `${mio||RV.est.rol==='admin'?`<button class="lrow" data-a="rBorrar" data-x="${h.id}" style="color:var(--bad)">${ico.block}<div class="tx"><b>Eliminar publicación</b></div></button>`:''}
+      ${!mio?`<button class="lrow" data-a="rReportar" data-x="${h.id}">${ico.flag}<div class="tx"><b>Reportar</b><div class="small muted">Una persona del equipo la revisa</div></div></button>`:''}`).replace(/data-a="closeSheet"/g,'data-a="rCerrar"');
+  } else if (h.t==='reportar'){
+    html = hoja('¿Por qué la reportas?', ['Contenido +18 o desnudos','Riesgo para menores','Acoso o amenazas','Ofensivo o violento','Venta de drogas o armas','Estafa o publicidad','Suplantación de identidad','Otro'].map(m=>`<button class="lrow" data-a="rEnviarReporte" data-x="${esc(m)}"><div class="tx"><b>${m}</b></div></button>`).join('')).replace(/data-a="closeSheet"/g,'data-a="rCerrar"');
+  }
+  l.innerHTML = html; document.body.style.overflow = html ? 'hidden' : '';
+  if (h.t==='coms'){ const cl=$('#comlist'); if (cl && h.bajar){ cl.scrollTop = cl.scrollHeight; h.bajar=false; } }
+}
+async function rComprimir(file, max=1280){
+  const url = URL.createObjectURL(file);
+  try { const img = await new Promise((ok,no)=>{ const i=new Image(); i.onload=()=>ok(i); i.onerror=no; i.src=url; });
+    const k = Math.min(1, max/Math.max(img.width, img.height)); const c=document.createElement('canvas'); c.width=Math.round(img.width*k); c.height=Math.round(img.height*k);
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height); return await new Promise(ok=>c.toBlob(ok,'image/jpeg',0.82));
+  } finally { URL.revokeObjectURL(url); }
+}
+
+/* ---------- acciones ---------- */
+function registrarAccionesReal(){
+  Object.assign(A, {
+    rRecargar: () => location.reload(),
+    rGo: x => { RV.err=''; RV.sheet=null; if (x==='perfil'){ RV.perfil=null; RV.pdatos=null; } if (x==='admin') RV.admDatos=null; if (x==='notifs' && RV.nNotifs){ RV.nNotifs=0; RV.sb.from('notifs').update({leida:true}).eq('para', RV.user.id).eq('leida', false).then(()=>{}); }
+      if (x==='mensajes') rCargarChats().then(()=>{ if(RV.view==='mensajes') renderReal(); });
+      RV.prev = RV.view; RV.view=x; renderReal(); window.scrollTo(0,0); },
+    rAtras: () => { RV.view = RV.prev && RV.prev!==RV.view ? RV.prev : 'feed'; RV.prev='feed'; renderReal(); },
+    rFeed: x => { RV.feed=x; RV.posts=[]; RV.cargandoFeed=true; renderReal(); rCargarFeed().then(renderReal); },
+    rRefrescar: () => { RV.cargandoFeed=true; renderReal(); Promise.all([rRelaciones(), rCargarFeed()]).then(renderReal); },
+    rVer: x => { RV.sheet=null; if (x===RV.user.id){ RV.perfil=null; } else RV.perfil=x; RV.pdatos=null; RV.prev=RV.view; RV.view='perfil'; renderReal(); window.scrollTo(0,0); },
+    rSeguir: async x => { if (RV.sigo.has(x)){ if (!confirmarSimple('¿Dejar de seguir?')) return; const {error} = await RV.sb.from('follows').delete().eq('de', RV.user.id).eq('a', x); if (error) return toast(rErr(error)); RV.sigo.delete(x); }
+      else { const {error} = await RV.sb.from('follows').insert({de:RV.user.id, a:x}); if (error) return toast(rErr(error)); RV.sigo.add(x); toast(RV.meSiguen.has(x)?'¡Ahora son amigos! Ya pueden escribirse':'Siguiendo'); }
+      if (RV.pdatos && RV.pdatos.id===x) RV.pdatos=null; renderReal(); rPintarHoja(); },
+    rLike: async x => { const p = RV.posts.find(o=>o.id===x) || (RV.pdatos&&RV.pdatos.posts.find(o=>o.id===x)); const on = RV.misLikes.has(x);
+      if (on){ RV.misLikes.delete(x); if (p) p.nlikes--; } else { RV.misLikes.add(x); if (p) p.nlikes++; } rRefrescarCard(x);
+      const {error} = on ? await RV.sb.from('likes').delete().eq('post', x).eq('usuario', RV.user.id) : await RV.sb.from('likes').insert({post:x, usuario:RV.user.id});
+      if (error){ if (on) RV.misLikes.add(x); else RV.misLikes.delete(x); if (p) p.nlikes += on?1:-1; rRefrescarCard(x); toast(rErr(error)); } },
+    rGuardar: async x => { const on = RV.guardados.has(x); if (on) RV.guardados.delete(x); else RV.guardados.add(x); rRefrescarCard(x);
+      const {error} = on ? await RV.sb.from('guardados').delete().eq('post', x).eq('usuario', RV.user.id) : await RV.sb.from('guardados').insert({post:x, usuario:RV.user.id});
+      if (error){ toast(rErr(error)); } else toast(on?'Quitado de guardados':'Guardado. Solo tú lo ves'); },
+    rComs: async x => { RV.err=''; RV.sheet={t:'coms', id:x, lista:null}; rPintarHoja(); const {data} = await RV.sb.from('comments').select('*').eq('post', x).order('created_at'); await rTraerPerfiles((data||[]).map(c=>c.autor)); if (RV.sheet&&RV.sheet.id===x){ RV.sheet.lista=data||[]; RV.sheet.bajar=true; rPintarHoja(); } },
+    rLikes: async x => { RV.sheet={t:'likes', id:x, lista:null}; rPintarHoja(); const {data} = await RV.sb.from('likes').select('usuario').eq('post', x).order('created_at',{ascending:false}).limit(200); const ids=(data||[]).map(l=>l.usuario); await rTraerPerfiles(ids); if (RV.sheet&&RV.sheet.id===x){ RV.sheet.lista=ids; rPintarHoja(); } },
+    rOpc: x => { RV.sheet={t:'opc', id:x}; rPintarHoja(); },
+    rCerrar: (x, el, e) => { if (el.dataset.self && e.target!==el) return; RV.sheet=null; RV.err=''; rPintarHoja(); },
+    rReportar: x => { RV.sheet={t:'reportar', post:x}; rPintarHoja(); },
+    rReportarCuenta: x => { RV.sheet={t:'reportar', cuenta:x}; rPintarHoja(); },
+    rEnviarReporte: async m => { const h=RV.sheet; const {error} = await RV.sb.from('reportes').insert({quien:RV.user.id, post:h.post||null, cuenta:h.cuenta||null, motivo:m}); RV.sheet=null; rPintarHoja(); toast(error?rErr(error):'Gracias. Una persona del equipo lo revisará.'); },
+    rBloquear: async x => { if (!confirmarSimple('¿Bloquear esta cuenta? Ya no se verán ni podrán escribirse.')) return; await RV.sb.from('follows').delete().eq('de', RV.user.id).eq('a', x); await RV.sb.from('follows').delete().eq('de', x).eq('a', RV.user.id);
+      const {error} = await RV.sb.from('bloqueos').insert({de:RV.user.id, a:x}); if (error) return toast(rErr(error)); RV.sigo.delete(x); RV.meSiguen.delete(x); toast('Cuenta bloqueada'); A.rGo('feed'); rCargarFeed().then(renderReal); },
+    rBorrar: async x => { if (!confirmarSimple('¿Eliminar esta publicación?')) return; const {error} = await RV.sb.from('posts').delete().eq('id', x); if (error) return toast(rErr(error)); RV.posts=RV.posts.filter(p=>p.id!==x); if (RV.pdatos) RV.pdatos.posts=RV.pdatos.posts.filter(p=>p.id!==x); RV.sheet=null; rPintarHoja(); renderReal(); toast('Publicación eliminada'); },
+    rAbrirPost: async x => { RV.sheet=null; let p = RV.posts.find(o=>o.id===x) || (RV.pdatos&&RV.pdatos.posts.find(o=>o.id===x)); if (!p){ const {data} = await RV.sb.from('feed').select('*').eq('id', x).maybeSingle(); p = data; if (p) await rTraerPerfiles([p.autor]); }
+      if (!p) return toast('Ya no está disponible'); RV.postAbierto=p; RV.postId=x; RV.prev=RV.view; RV.view='post'; renderReal(); window.scrollTo(0,0); },
+    rChat: async x => { RV.sheet=null; RV.chat=x; RV.msgs=[]; RV.prev='mensajes'; RV.view='chat'; renderReal();
+      const uid=RV.user.id; const {data} = await RV.sb.from('messages').select('*').or(`and(de.eq.${uid},para.eq.${x}),and(de.eq.${x},para.eq.${uid})`).order('created_at').limit(300);
+      RV.msgs = data||[]; rPintarChat(); const sinLeer = RV.msgs.filter(m=>m.para===uid && !m.leido).map(m=>m.id);
+      if (sinLeer.length){ await RV.sb.from('messages').update({leido:true}).in('id', sinLeer); rCargarChats().then(rBadges); } setTimeout(()=>$('#rm-txt')?.focus(), 50); },
+    rQuitarFoto: x => { const d=RV.draft.splice(+x,1)[0]; if (d) URL.revokeObjectURL(d.url); RV.draftTxt=$('#rc-txt')?.value||''; renderReal(); },
+    rAdm: x => { RV.adm=x; renderReal(); },
+    rDecidir: async (x, el) => { const est = el.dataset.o; const mot = est==='rechazado' ? $('#rmot-'+x)?.value : null; const {error} = await RV.sb.from('posts').update({estado:est, motivo:mot}).eq('id', x); if (error) return toast(rErr(error)); RV.admDatos.pend = RV.admDatos.pend.filter(p=>p.id!==x); renderReal(); toast(est==='aprobado'?'Aprobada':'Rechazada'); },
+    rRepListo: async x => { await RV.sb.from('reportes').update({estado:'revisado'}).eq('id', x); RV.admDatos.rep = RV.admDatos.rep.filter(r=>r.id!==x); renderReal(); },
+    rSuspender: async (x, el) => { const s = el.dataset.o==='1'; if (s && !confirmarSimple('¿Suspender esta cuenta?')) return; const {error} = await RV.sb.from('profiles').update({suspendido:s}).eq('id', x); if (error) return toast(rErr(error)); RV.admDatos=null; renderReal(); toast(s?'Cuenta suspendida':'Suspensión quitada'); },
+    rSalir: async () => { rCanal(false); await RV.sb.auth.signOut(); RV.user=null; RV.me=null; RV.perfiles={}; RV.posts=[]; RV.fase='login'; RV.view='feed'; renderReal(); }
+  });
+  Object.assign(F, {
+    rLogin: async () => { const mail = ($('#rl-mail').value||'').trim().toLowerCase(); RV.mail = mail; RV.err='';
+      if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(mail)){ RV.err='Escribe un correo válido.'; return renderReal(); }
+      const {error} = await RV.sb.auth.signInWithOtp({email:mail, options:{emailRedirectTo: location.origin + location.pathname, shouldCreateUser:true}});
+      if (error){ RV.err = /rate|seconds|security purposes/i.test(error.message) ? 'Espera un momento antes de pedir otro enlace (hay un límite de correos por hora).' : rErr(error); return renderReal(); }
+      RV.enviado = Date.now(); renderReal(); },
+    rRegistro: async () => { const nom=$('#rr-nom').value.trim(), usr=$('#rr-usr').value.trim().toLowerCase().replace(/^@/,''), nac=$('#rr-nac').value; RV.err='';
+      const fail = m => { RV.err=m; renderReal(); };
+      if (nom.length<2) return fail('Escribe tu nombre.'); if (!/^[a-z0-9._]{3,24}$/.test(usr)) return fail('El usuario debe tener de 3 a 24 letras minúsculas, números, punto o guion bajo.');
+      if (!nac) return fail('Escribe tu fecha de nacimiento.'); if (!$('#rr-ok').checked) return fail('Acepta las reglas para continuar.');
+      const e = rTextoOk(nom,'publico'); if (e) return fail(e);
+      const pr = await RV.sb.from('privado').insert({id:RV.user.id, nacimiento:nac}); if (pr.error && !/duplicate/i.test(pr.error.message)) return fail(rErr(pr.error));
+      const colores = ['#7C3AED','#0369A1','#B45309','#DB2777','#15803D','#C2410C','#0E7490','#4338CA','#BE123C'];
+      const {error} = await RV.sb.from('profiles').insert({id:RV.user.id, usuario:usr, nombre:nom, color:colores[Math.floor(Math.random()*colores.length)]}); if (error) return fail(rErr(error));
+      RV.me=null; const {data} = await RV.sb.auth.getSession(); await rSesion(data.session); toast('¡Bienvenido! Busca a tus amigos para seguirlos'); },
+    rPublicar: async () => { if (RV.subiendo) return; RV.draftTxt = $('#rc-txt').value.trim(); RV.err='';
+      const fail = m => { RV.err=m; RV.subiendo=false; renderReal(); };
+      if (!RV.draft.length) return fail('Agrega al menos una foto.'); const e = rTextoOk(RV.draftTxt,'publico'); if (e) return fail(e);
+      RV.subiendo=true; renderReal(); const rutas=[];
+      try { for (const d of RV.draft){ const ruta = `${RV.user.id}/${crypto.randomUUID()}.jpg`; const {error} = await RV.sb.storage.from('fotos').upload(ruta, d.blob, {contentType:'image/jpeg'}); if (error) throw error; rutas.push(ruta); } }
+      catch(err){ if (rutas.length) RV.sb.storage.from('fotos').remove(rutas); return fail('No se pudieron subir las fotos: ' + rErr(err)); }
+      const {data, error} = await RV.sb.from('posts').insert({autor:RV.user.id, texto:RV.draftTxt, fotos:rutas}).select('id,estado').single();
+      if (error){ RV.sb.storage.from('fotos').remove(rutas); return fail(rErr(error)); }
+      RV.draft.forEach(d=>URL.revokeObjectURL(d.url)); RV.draft=[]; RV.draftTxt=''; RV.subiendo=false;
+      if (data.estado==='rechazado'){ toast('No se publicó: rompe las reglas (enlaces, teléfonos o contenido prohibido).'); }
+      else toast(data.estado==='pendiente' ? 'Enviada. Una persona la revisa antes de que salga (solo las primeras 3).' : '¡Publicado!');
+      await rCargarFeed(); RV.perfil=null; RV.pdatos=null; RV.view='perfil'; renderReal(); },
+    rComentar: async () => { const i=$('#rk-txt'); const t=(i.value||'').trim(); if (!t) return; const e = rTextoOk(t,'publico'); if (e){ RV.err=e; return rPintarHoja(); }
+      const id = RV.sheet.id; i.value=''; const {data, error} = await RV.sb.from('comments').insert({post:id, autor:RV.user.id, texto:t}).select('*').single();
+      if (error){ RV.err=rErr(error); return rPintarHoja(); } RV.err = data.estado==='bloqueado' ? 'No se publicó: rompe las reglas.' : '';
+      RV.sheet.lista.push(data); RV.sheet.bajar=true; const p=RV.posts.find(o=>o.id===id); if (p && data.estado==='ok'){ p.ncoms++; rRefrescarCard(id); } rPintarHoja(); },
+    rMsg: async () => { const i=$('#rm-txt'); const t=(i.value||'').trim(); if (!t) return; const e = rTextoOk(t,'privado'); if (e){ toast(e); return; }
+      i.value=''; const {data, error} = await RV.sb.from('messages').insert({de:RV.user.id, para:RV.chat, texto:t}).select('*').single();
+      if (error){ i.value=t; return toast(rErr(error)); } RV.msgs.push(data); rPintarChat(); if (data.estado==='bloqueado') toast('No se envió: en los mensajes no se permiten enlaces, teléfonos ni contenido prohibido.'); },
+    rEditar: async () => { const nom=$('#re-nom').value.trim(), usr=$('#re-usr').value.trim().toLowerCase().replace(/^@/,''), bio=$('#re-bio').value.trim(); RV.err='';
+      const fail = m => { RV.err=m; renderReal(); };
+      if (nom.length<2) return fail('Escribe tu nombre.'); if (!/^[a-z0-9._]{3,24}$/.test(usr)) return fail('Usuario no válido.');
+      const e = rTextoOk(nom+' '+bio,'publico'); if (e) return fail(e);
+      const cambios = {nombre:nom, usuario:usr, bio}; const f = $('#re-foto').files[0];
+      if (f){ try { const blob = await rComprimir(f, 400); const ruta = `${RV.user.id}/perfil-${Date.now()}.jpg`; const up = await RV.sb.storage.from('fotos').upload(ruta, blob, {contentType:'image/jpeg'}); if (up.error) throw up.error; cambios.foto = ruta; } catch(err){ return fail('No se pudo subir la foto: '+rErr(err)); } }
+      const {data, error} = await RV.sb.from('profiles').update(cambios).eq('id', RV.user.id).select('id,usuario,nombre,bio,foto,color,priv,verif,created_at').single();
+      if (error) return fail(rErr(error)); RV.me = data; RV.perfiles[RV.user.id] = data; RV.pdatos=null; RV.view='perfil'; renderReal(); toast('Perfil guardado'); }
+  });
+  document.addEventListener('change', async e => { if (e.target.id!=='rc-fotos') return; const files=[...e.target.files].filter(f=>f.type.startsWith('image/')).slice(0, 4-RV.draft.length); RV.draftTxt=$('#rc-txt')?.value||'';
+    for (const f of files){ try { const blob = await rComprimir(f); RV.draft.push({blob, url:URL.createObjectURL(blob)}); } catch(err){ toast('No se pudo leer una foto'); } } renderReal(); });
+  let rqT=null; document.addEventListener('input', e => { if (e.target.id!=='rq') return; RV.q=e.target.value; clearTimeout(rqT); rqT=setTimeout(async ()=>{ const q=RV.q.trim().toLowerCase().replace(/[%_,()]/g,''); if (q.length<2){ RV.res=[]; } else { const {data} = await RV.sb.from('profiles').select('id,usuario,nombre,bio,foto,color,priv,verif,created_at').or(`usuario.ilike.%${q}%,nombre.ilike.%${q}%`).limit(20); (data||[]).forEach(p=>RV.perfiles[p.id]=p); RV.res=(data||[]).map(p=>p.id); } const box=$('#rres'); if (box) box.innerHTML = RV.res.map(rFila).join('') || `<p class="muted small">${q.length>=2?'Sin resultados.':'Escribe al menos 2 letras.'}</p>`; }, 300); });
+  let rTap=null; document.addEventListener('dblclick', e => { const c=e.target.closest('[data-rdbl]'); if (!c) return; const id=c.dataset.rdbl; if (!RV.misLikes.has(id)) A.rLike(id); });
+}
+function rRefrescarCard(id){ const el=$('#rp-'+id); const p = RV.posts.find(o=>o.id===id) || (RV.pdatos&&RV.pdatos.posts.find(o=>o.id===id)) || RV.postAbierto; if (el && p){ const t=document.createElement('div'); t.innerHTML=rPostCard(p); el.replaceWith(t.firstElementChild); } }
+
 
 /* ---------- render ---------- */
 const VISTAS = {verificar:vVerificar, guardados:vGuardados, home:vHome, buscar:vBuscar, inicio:vInicio, notifs:vNotifs, negocio:vNegocio, carrito:vCarrito, checkout:vCheckout, seguimiento:vSeguimiento, pedidos:vPedidos, vende:vVende, post:vPost, perfil:vPerfil, usuario:vUsuario, mensajes:vMensajes, ajustes:vAjustes, minegocio:vMiNegocio};
 const historial = [];
 function modosNav(){
   const act = ui.mode==='app' ? (soyNegocio()?'comercio':'app') : ui.mode;
-  return `<nav class="modes" aria-label="Vista del prototipo">${[['app','Cliente'],['comercio','Comercio'],['rep','Repartidor'],['admin','Admin']].map(([k,l])=>`<button class="${act===k?'on':''}" data-a="modo2" data-x="${k}">${l}</button>`).join('')}</nav>`;
+  return `<nav class="modes" aria-label="Vista del prototipo">${[['real','En vivo'],['app','Demo: Cliente'],['comercio','Comercio'],['rep','Repartidor'],['admin','Admin']].map(([k,l])=>`<button class="${act===k?'on':''}" data-a="modo2" data-x="${k}">${l}</button>`).join('')}</nav>`;
 }
 function protoBar(){
   return `<div class="protobar"><b>Prototipo</b><span>Datos de ejemplo · sin pagos ni cuentas reales</span>
     ${modosNav()}</div>`;
 }
 function render(){
+  if (ui.mode==='real') return renderReal();
   if (ui.mode==='rep'){
     $('#app').innerHTML = `<div class="rwrap">${protoBar()}${vRep()}</div>`; renderLayer(); return;
   }
@@ -3513,6 +3926,9 @@ const A = {
   adelantar: () => { const r=adelantarTiempo(); rerender(); toast(`Pasó 1 día: ${r.pedidos} pedidos, ${r.mensajes} mensajes, ${r.historias} historias y ${r.posts} publicaciones nuevas`); },
   reiniciar: () => { if (confirmarSimple('¿Reiniciar todo? Se borran tus pedidos, publicaciones y cambios, y vuelven los datos de ejemplo.')) reiniciarTodo(); },
   modo2: x => {
+    try { localStorage.setItem('lm-modo', x==='real'?'real':'demo'); } catch(e){}
+    if (x==='real'){ ui.mode='real'; ui.sheet=null; renderLayer(); render(); window.scrollTo(0,0); return; }
+    if (ui.mode==='real'){ RV.sheet=null; const l=$('#rlayer'); if(l) l.innerHTML=''; document.body.style.overflow=''; }
     if (x==='comercio'){ ui.mode='app'; const b = (ui.ultNeg && esNeg(ui.ultNeg)) ? ui.ultNeg : (S.misNegocios[0]||'b1'); S.yo=b; ui.pTab='pedidos'; ui.sheet=null; save(); go('minegocio',true); toast(`Estás como comercio: ${perfilDe(b).nombre}`); return; }
     if (x==='app'){ const era=ui.mode; ui.mode='app'; if (soyNegocio()){ ui.ultNeg=S.yo; S.yo=S.personal; save(); toast('Estás como cliente: '+perfilDe(S.yo).nombre); } ui.sheet=null; if(era!=='app'||ui.view==='minegocio') go('home',true); else render(); return; }
     A.mode(x);
@@ -3838,8 +4254,10 @@ Object.assign(A, {
   termAdd: () => { const t=$('#term-t').value.trim().toLowerCase(), c=$('#term-c').value; if(t.length<3) return toast('Escribe al menos 3 letras'); S.cfg.terminos.push({t:limpiarTexto(t), cat:c}); CACHE_RE.clear(); log('Admin','Agregó término al Escudo',c); save(); rerender(); },
   termDel: x => { S.cfg.terminos.splice(+x,1); save(); rerender(); }
 });
-registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12();
+registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal();
 aplicarPref();
+const EN_VIVO_OK = /github\.io$/.test(location.host) || /[?&]vivo=1/.test(location.search);
+try { if (EN_VIVO_OK && (localStorage.getItem('lm-modo')||'real')==='real') ui.mode='real'; } catch(e){ if (EN_VIVO_OK) ui.mode='real'; }
 render();
 cargarFotos();
 
