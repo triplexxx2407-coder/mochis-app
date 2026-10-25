@@ -568,7 +568,7 @@ mark{background:color-mix(in srgb,var(--accent) 35%,transparent);color:inherit;b
 /* íconos del menú con color */
 .side .nv[data-x="home"] svg{color:var(--brand)} .side .nv[data-x="inicio"] svg{color:var(--c-tienda)} .side .nv[data-x="mensajes"] svg{color:var(--c-msg)} .side .nv[data-x="notifs"] svg{color:var(--c-bell)}
 .side .nv[data-a="crear"] svg{color:var(--c-crear)} .side .nv[data-x="carrito"] svg{color:var(--c-cart)} .side .nv[data-x="pedidos"] svg{color:var(--c-ped)} .side .nv[data-x="minegocio"] svg{color:var(--c-tienda)}
-.mnav button[data-x="inicio"] svg{color:var(--c-tienda)} .mnav button[data-a="crear"] svg{color:var(--c-crear)} .mnav button[data-x="pedidos"] svg{color:var(--c-ped)} .mtop .ibtn[data-x="notifs"] svg{color:var(--c-bell)} .mtop .ibtn[data-x="mensajes"] svg{color:var(--c-msg)}
+.mnav button[data-x="inicio"] svg{color:var(--c-tienda)} .mnav button[data-a="crear"] svg{color:var(--c-crear)} .mtop .ibtn[data-x="pedidos"] svg{color:var(--c-ped)} .mtop .ibtn[data-x="notifs"] svg{color:var(--c-bell)} .mnav button[data-x="mensajes"] svg{color:var(--c-msg)} .mtop .ibtn.on{background:var(--surface-2)}
 .home-side .lk[data-a="seguir"]{background:color-mix(in srgb,var(--brand) 16%,transparent);padding:4px 10px;border-radius:999px;font-size:12.5px}
 .home-side .lk[data-a="neg"]{background:var(--c-pedir);color:#fff!important;padding:4px 12px;border-radius:999px;font-size:12.5px}
 .btn.pri[data-a="abrirChat"],.btn[data-a="abrirChat"]{background:color-mix(in srgb,var(--c-msg) 16%,var(--surface));color:var(--c-msg);border-color:transparent}
@@ -737,6 +737,9 @@ html,body,button,a,.car,input,textarea,select{touch-action:manipulation}
 .rmain .post .car .ph img{width:100%;height:100%;object-fit:cover}
 .pgrid .ph img{width:100%;height:100%;object-fit:cover}
 .rcentro .card{text-align:left}.rchat .who{border:0;background:none;padding:0;gap:10px;display:flex;align-items:center;color:var(--fg)}.rmain .segs{flex-wrap:wrap}
+.pmas{display:none;gap:6px;align-items:center}.pmas svg{width:16px;height:16px}
+@media (max-width:767px){.pmas{display:inline-flex}}
+@media (max-width:520px){.pcab{position:relative}.pcab .pmas{position:absolute;top:14px;right:14px}}
 .pill.ejm{background:color-mix(in srgb,#0EA5E9 14%,transparent);color:#0284C7;font-size:10.5px;padding:1px 7px;vertical-align:middle}.side .nv[data-a="rCrear"] svg,.mnav button[data-a="rCrear"] svg{color:var(--c-crear)}.side .nv[data-x="admin"] svg{color:var(--brand)}.prow .btn.sm svg{width:14px;height:14px}
 .protobar .modes{max-width:100%;min-width:0;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}.protobar .modes::-webkit-scrollbar{display:none}.protobar .modes button{white-space:nowrap;flex:none}.protobar{min-width:0;max-width:100%;box-sizing:border-box}
 .rxpasos{display:flex;gap:4px}.rxpasos span{flex:1;min-width:0;text-align:center;font-size:11.5px;font-weight:700;padding:6px 2px 0;border-top:4px solid var(--line);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rxpasos span.on{border-color:var(--ok);color:var(--ok)}
@@ -1835,7 +1838,7 @@ function cabPerfil(id){
   const a = perfilDe(id); const u = esNeg(id)?null:usr(id); const mio = id===S.yo;
   return `<div class="card pcab"><div class="prof">${avatar(a,150)}<div class="stack" style="gap:8px;min-width:0;flex:1">
       <div class="row between nowrap"><div style="min-width:0"><h1 class="pnom">${nombreV(a)}</h1>${typeof a.verificado==='string'?`<div class="vlabel ${a.verificado}">✓ ${esc(VERIF_TXT[a.verificado])}</div>`:''}<div class="muted small">@${esc(a.handle)}${!mio&&sigue(id,S.yo)?' · <span class="pill">Te sigue</span>':''}</div></div>
-        ${mio?`<button class="ibtn" data-a="go" data-x="ajustes" aria-label="Configuración">${ico.gear}</button>`:`<button class="ibtn" data-a="opcPerfil" data-x="${id}" aria-label="Opciones">${ico.dots}</button>`}</div>
+        ${mio?`<div class="row nowrap" style="gap:6px"><button class="btn soft sm pmas" data-a="mas" aria-label="Más opciones">${ico.menu}Más</button><button class="ibtn" data-a="go" data-x="ajustes" aria-label="Configuración">${ico.gear}</button></div>`:`<button class="ibtn" data-a="opcPerfil" data-x="${id}" aria-label="Opciones">${ico.dots}</button>`}</div>
       <div class="stats"><div><b>${npubs(id)}</b><span>publicaciones</span></div><button class="stat" data-a="verSeg" data-x="${id}" data-o="seguidores"><b>${seguidores(id)}</b><span>seguidores${listaVisible(id,'seguidores')?'':' 🔒'}</span></button><button class="stat" data-a="verSeg" data-x="${id}" data-o="seguidos"><b>${siguiendo(id)}</b><span>siguiendo${listaVisible(id,'seguidos')?'':' 🔒'}</span></button></div></div></div>
     ${u&&u.bio?`<div>${esc(u.bio)}</div>`:''}
     ${mio?`<div class="row"><button class="btn soft" data-a="go" data-x="ajustes">Editar perfil y configuración</button><button class="btn soft" data-a="publicar">+ Publicar</button></div>`
@@ -2153,7 +2156,7 @@ function vNegocio(){
   return `<div class="stack"><button class="btn back" data-a="atras">${ico.back}Volver</button>
   <div class="bhead"><div class="cv">${portada(n)}${avatar(a,76)}</div><div class="in">
     <div class="row between"><div><h1>${nombreV(a)}</h1><div class="small muted">@${esc(a.handle)} · ${esc(TIPOS[n.tipo].uno)}${n.estado!=='activo'?` · <span class="pill warn">${esc(n.estado)}</span>`:''}</div></div>
-      <div class="row">${mio?`<button class="btn pri sm" data-a="go" data-x="minegocio">${ico.biz} Mi negocio</button>`:`${botonSeguir(n.id)}${amigos(S.yo,n.id)?`<button class="btn soft sm" data-a="abrirChat" data-x="${n.id}">Mensaje</button>`:''}<button class="ibtn" data-a="opcPerfil" data-x="${n.id}" aria-label="Opciones">${ico.dots}</button>`}</div></div>
+      <div class="row">${mio?`<button class="btn pri sm" data-a="go" data-x="minegocio">${ico.biz} Mi negocio</button><button class="btn soft sm pmas" data-a="mas" aria-label="Más opciones">${ico.menu}Más</button>`:`${botonSeguir(n.id)}${amigos(S.yo,n.id)?`<button class="btn soft sm" data-a="abrirChat" data-x="${n.id}">Mensaje</button>`:''}<button class="ibtn" data-a="opcPerfil" data-x="${n.id}" aria-label="Opciones">${ico.dots}</button>`}</div></div>
     <div class="stats"><div><b>${npubs(n.id)}</b><span>publicaciones</span></div><div><b>${seguidores(n.id)}</b><span>seguidores</span></div><div><b>${c?c.avg.toFixed(1):'—'}</b><span>${c?c.n+' reseñas':'sin reseñas'}</span></div></div>
     <div>${n.desc?esc(n.desc):todoTag('descripción')}</div>
     <div class="row small" style="gap:6px">${n.entrega?'<span class="pill ok">Entrega a domicilio</span>':''}${n.recoger?'<span class="pill ok">Recoger en tienda</span>':''}${n.envioGratis?`<span class="pill acc">Envío gratis desde ${money(n.envioGratis)}</span>`:''}${sigue(n.id,S.yo)?'<span class="pill">Te sigue</span>':''}</div>
@@ -4274,7 +4277,8 @@ const LEGAL_DOCS = {
 <li>El negocio debe ser real y estar en Los Mochis o sus alrededores. El equipo lo revisa antes de publicarlo.</li>
 <li>Tus primeros productos los revisa una persona. Fotos y textos pasan por los mismos filtros que todo lo demás: sin teléfonos, enlaces ni cuentas de otras apps (tus clientes te contactan con los pedidos de MOCHI).</li>
 <li>Eres responsable de tus precios, existencias, calidad, permisos y de cumplir la ley de protección al consumidor.</li>
-<li>Productos prohibidos: alcohol para menores, tabaco y vapeadores, medicamentos controlados, armas, drogas, animales en riesgo, piratería, productos robados o cualquier cosa ilegal.</li>
+<li><b>Prohibido vender</b> (el sistema lo bloquea solo y avisa al equipo): drogas y productos con THC, armas, municiones y explosivos, pornografía o servicios sexuales, medicamentos controlados o con receta especial, vapeadores, piratería, réplicas, cuentas de streaming, dinero o documentos falsos, fauna silvestre, productos robados o cualquier cosa ilegal. Esconderlo con otras palabras también está prohibido y puede cerrar tu negocio.</li>
+<li><b>Con revisión de una persona</b>: alcohol, cigarros, lencería, navajas y artículos de defensa. Solo se venden a mayores de edad y con los permisos que pida la ley.</li>
 <li>Por ahora no hay pagos dentro de la app: el cliente recoge y paga en tu negocio.</li>
 </ul>` }
 };
@@ -4942,10 +4946,47 @@ function registrarAccionesVivo(){
   const apResolver = A.apResolver; A.apResolver = (x, el) => { apResolver(x, el); if (VIVO) vRecargarPronto(); };
   const nest = A.nest; A.nest = (x, el) => { nest(x, el); if (VIVO) vRecargarPronto(); };
   A.vRecargar = () => { toast('Actualizando…'); vRecargar(true).then(()=>toast('Listo')); };
-  Object.assign(F, { vPass: async () => { const pw=$('#vp-pass').value||'';
-    if (pw.length<8) return toast('La contraseña debe tener mínimo 8 caracteres.'); if (pw!==$('#vp-pass2').value) return toast('Las contraseñas no coinciden.');
-    const {error} = await RV.sb.auth.updateUser({password:pw}); if (error) return toast(/weak|pwned|leaked/i.test(error.message)?'Esa contraseña es muy fácil de adivinar.':rErr(error));
-    $('#vp-pass').value=''; $('#vp-pass2').value=''; toast('Contraseña guardada'); } });
+  // cambiar contraseña: pide la actual + un código que llega al correo con el que se registró la cuenta
+  const pwErr = e => { const m = (e && e.message)||''; return /weak|pwned|leaked/i.test(m) ? 'Esa contraseña es muy fácil de adivinar. Usa otra más larga.'
+    : /rate|seconds|security purposes|too many/i.test(m) ? 'Demasiados intentos o correos seguidos. Espera unos minutos y vuelve a intentar.'
+    : /nonce|otp|token|expired|invalid/i.test(m) ? 'El código no es correcto o ya venció. Revisa el correo más reciente o pide otro.'
+    : /same|different from the old/i.test(m) ? 'La nueva contraseña debe ser distinta a la actual.' : rErr(e); };
+  const pwPintar = () => { const bd = $('#vp-box'); if (bd) bd.innerHTML = vPassHTML(); };
+  const pwMandar = async () => { const {error} = await RV.sb.auth.reauthenticate(); if (error){ toast(pwErr(error)); return false; } VPW.enviado = Date.now(); return true; };
+  Object.assign(F, {
+    vPass: async () => { const old = $('#vp-old')?.value||'', pw = $('#vp-pass').value||'';
+      VPW.sin = !!$('#vp-sin')?.checked;
+      if (!VPW.sin && !old) return toast('Escribe tu contraseña actual.');
+      if (pw.length<8) return toast('La nueva contraseña debe tener mínimo 8 caracteres.'); if (pw!==$('#vp-pass2').value) return toast('Las contraseñas nuevas no coinciden.');
+      if (!VPW.sin && old===pw) return toast('La nueva contraseña debe ser distinta a la actual.');
+      const mail = RV.user && RV.user.email; if (!mail) return toast('Tu cuenta no tiene correo. Escríbenos desde Privacidad y legal.');
+      if (!VPW.sin){ const r = await RV.sb.auth.signInWithPassword({email:mail, password:old});
+        if (r.error) return toast(/invalid login/i.test(r.error.message||'') ? 'La contraseña actual no es correcta.' : pwErr(r.error)); }
+      if (!(await pwMandar())) return;
+      VPW.nueva = pw; VPW.paso = 2; pwPintar(); setTimeout(()=>$('#vp-cod')?.focus(), 50); toast('Te mandamos un código a tu correo'); },
+    vPass2: async () => { const cod = ($('#vp-cod').value||'').replace(/\s/g,'');
+      if (!/^\d{6,10}$/.test(cod)) return toast('Escribe el código de 6 dígitos que llegó a tu correo.');
+      const {error} = await RV.sb.auth.updateUser({password:VPW.nueva, nonce:cod}); if (error) return toast(pwErr(error));
+      Object.assign(VPW, {paso:1, nueva:'', sin:false, enviado:0}); pwPintar(); toast('Listo: tu contraseña cambió'); } });
+  Object.assign(A, {
+    vPassReenviar: async () => { if (Date.now() - VPW.enviado < 60000) return toast('Espera un minuto antes de pedir otro código.'); if (await pwMandar()) toast('Te mandamos otro código'); },
+    vPassCancelar: () => { Object.assign(VPW, {paso:1, nueva:'', sin:false, enviado:0}); pwPintar(); },
+    vPassSin: () => { VPW.sin = !!$('#vp-sin')?.checked; const n = $('#vp-pass')?.value||'', n2 = $('#vp-pass2')?.value||''; pwPintar(); $('#vp-pass').value = n; $('#vp-pass2').value = n2; } });
+}
+
+/* ---------- contraseña con verificación ---------- */
+const VPW = {paso:1, sin:false, nueva:'', enviado:0};
+function vMailOculto(){ const m = (RV.user && RV.user.email)||''; const [u, d] = m.split('@'); return u && d ? u.slice(0, 2) + '•••@' + d : 'tu correo'; }
+function vPassHTML(){
+  if (VPW.paso===2) return `<form class="stack" data-form="vPass2" novalidate style="gap:12px"><p class="small" style="margin:0">Paso 2 de 2 · Te mandamos un código a <b>${esc(vMailOculto())}</b>. Escríbelo aquí para confirmar que eres tú.</p>
+    <label class="f" for="vp-cod">Código del correo<input id="vp-cod" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="6 dígitos"></label>
+    <p class="small muted" style="margin:0">Si no llega en unos minutos, revisa spam o promociones. El código vence pronto.</p>
+    <div class="row" style="flex-wrap:wrap;gap:8px"><button class="btn pri" type="submit">Cambiar contraseña</button><button class="btn" type="button" data-a="vPassReenviar">Reenviar código</button><button class="btn ghost" type="button" data-a="vPassCancelar">Cancelar</button></div></form>`;
+  return `<form class="stack" data-form="vPass" novalidate style="gap:12px"><p class="small muted" style="margin:0">Paso 1 de 2 · Por seguridad te pedimos tu contraseña actual y luego un código que llega al correo de tu cuenta. No se la digas a nadie, ni al equipo.</p>
+    ${VPW.sin ? '' : `<label class="f" for="vp-old">Contraseña actual<input id="vp-old" type="password" autocomplete="current-password"></label>`}
+    <div class="grid2"><label class="f" for="vp-pass">Nueva contraseña<input id="vp-pass" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres"></label><label class="f" for="vp-pass2">Repítela<input id="vp-pass2" type="password" autocomplete="new-password"></label></div>
+    <label class="chk"><input id="vp-sin" type="checkbox" data-ch="vPassSin"${VPW.sin?' checked':''}> <span>No tengo contraseña o no recuerdo la actual (solo con el código del correo)</span></label>
+    <div class="row"><button class="btn pri" type="submit">Continuar</button></div></form>`;
 }
 
 /* ---------- ajustes finos sobre las pantallas de la demo ---------- */
@@ -4961,10 +5002,7 @@ function vLimpiar(root){
   if (S && S.misNegocios && S.misNegocios.length) root.querySelectorAll('[data-a="go"][data-x="vende"], [data-a="irVende"]').forEach(el=>{ const c = el.closest('.card'); if (c && c.querySelectorAll('button').length===1 && /negocio/i.test(c.textContent)) c.remove(); else el.remove(); });
   root.querySelectorAll('.verif.bot').forEach(el=>el.title='Cuenta automática (bot)');
   root.querySelectorAll('.vlabel.bot').forEach(el=>el.textContent='Bot · cuenta automática del equipo');
-  if (ui.view==='ajustes' && !root.querySelector('#vp-pass')){ const d = root.querySelector('details.set'); if (d){ d.insertAdjacentHTML('afterend', `<details class="set"><summary>${ico.shield}<span>Contraseña<small>Pon o cambia tu contraseña para entrar</small></span></summary><div class="bd">
-    <form class="stack" data-form="vPass" novalidate style="gap:12px"><p class="small muted" style="margin:0">No se la digas a nadie, ni al equipo.</p>
-    <div class="grid2"><label class="f" for="vp-pass">Nueva contraseña<input id="vp-pass" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres"></label><label class="f" for="vp-pass2">Repítela<input id="vp-pass2" type="password" autocomplete="new-password"></label></div>
-    <div class="row"><button class="btn pri" type="submit">Guardar contraseña</button></div></form></div></details>`); } }
+  if (ui.view==='ajustes' && !root.querySelector('#vp-box')){ const d = root.querySelector('details.set'); if (d){ d.insertAdjacentHTML('afterend', `<details class="set"${VPW.paso===2?' open':''}><summary>${ico.shield}<span>Contraseña<small>Cambia tu contraseña (con verificación por correo)</small></span></summary><div class="bd" id="vp-box">${vPassHTML()}</div></details>`); } }
   root.querySelectorAll('.small.muted').forEach(el=>{ if (/El negocio verá tu nombre, teléfono y dirección/.test(el.textContent)) el.textContent = 'Solo pedimos tu nombre: el negocio lo usa para entregarte tu pedido. Recoges en la tienda y pagas ahí.'; });
 }
 new MutationObserver(()=>vLimpiar($('#app'))).observe($('#app'), {childList:true});
@@ -5028,16 +5066,16 @@ function render(){
   <header class="mtop"><button class="logo2" data-a="go" data-x="home"><span class="mark">${esc(inits(S.cfg.marca))}</span><span class="txt">${esc(S.cfg.marca)}</span></button><span class="sp"></span>
     ${VIVO&&S.esAdmin?`<button class="ibtn" data-a="modo2" data-x="vadmin" aria-label="Administrar">${ico.shield}</button>`:`<button class="ibtn" data-a="toggleTema" aria-label="Cambiar tema">${temaActual()==='oscuro'?ico.sun:ico.moon}</button>`}
     <button class="ibtn" data-a="go" data-x="notifs" aria-label="Notificaciones">${ico.bell}${badge(nN)}</button>
-    <button class="ibtn" data-a="go" data-x="mensajes" aria-label="Mensajes">${ico.msg}${badge(nMsg)}</button>
+    ${soyNegocio()?'':`<button class="ibtn ${on(['pedidos','seguimiento'])}" data-a="go" data-x="pedidos" aria-label="Mis pedidos">${ico.list}${badge(nAct)}</button>`}
     ${!soyNegocio()&&tieneNegocio()?`<button class="ibtn" data-a="irMiNegocio" aria-label="Mi negocio">${ico.biz}</button>`:''}
-    ${soyNegocio()?`<button class="ibtn" data-a="go" data-x="minegocio" aria-label="Mi negocio">${ico.biz}${badge(nPed)}</button>`:`<button class="ibtn" data-a="go" data-x="carrito" aria-label="Carrito">${ico.bag}${badge(cartN)}</button>`}</header>
+    ${soyNegocio()?`<button class="ibtn ${on(['minegocio'])}" data-a="go" data-x="minegocio" aria-label="Mi negocio">${ico.biz}${badge(nPed)}</button>${cartN?`<button class="ibtn" data-a="go" data-x="carrito" aria-label="Carrito">${ico.bag}${badge(cartN)}</button>`:''}`:`<button class="ibtn ${on(['carrito','checkout'])}" data-a="go" data-x="carrito" aria-label="Carrito">${ico.bag}${badge(cartN)}</button>`}</header>
   <main class="igmain"><div class="igin stack">${protoBar()}${VISTAS[v]()}</div></main>
   ${showBar?`<button class="cartfloat" data-a="go" data-x="carrito"><span>${cartN} producto(s) · ${esc(neg(S.carrito.neg).nombre)}</span><span class="num">${money(subtotalCarrito())} →</span></button>`:''}
   <nav class="mnav" aria-label="Navegación">
     <button class="${on(['home','post','usuario'])}" data-a="go" data-x="home">${ico.home}Inicio</button>
     <button class="${on(['inicio','negocio','vende'])}" data-a="go" data-x="inicio">${ico.shop}Tienda</button>
     <button data-a="crear">${ico.plus}Crear</button>
-    ${soyNegocio()?`<button class="${on(['minegocio'])}" data-a="go" data-x="minegocio">${ico.biz}${badge(nPed)}Negocio</button>`:`<button class="${on(['pedidos','seguimiento','carrito','checkout'])}" data-a="go" data-x="pedidos">${ico.list}${badge(nAct)}Pedidos</button>`}
+    <button class="${on(['mensajes'])}" data-a="go" data-x="mensajes">${ico.msg}${badge(nMsg)}Mensajes</button>
     <button class="${on(['perfil','ajustes'])}" data-a="go" data-x="perfil">${avatar(me,24)}Perfil</button>
   </nav>`;
   renderLayer();
