@@ -3044,8 +3044,8 @@ function vAdmin(){
   const rep = S.posts.filter(p=>p.estado==='aprobado'&&S.reportes.some(r=>r.post===p.id)).length;
   return `<div class="stack"><div class="row between"><div><span class="small muted">Panel del administrador</span><h1>${esc(S.cfg.marca)}</h1></div><div class="row" style="gap:8px"><span class="pill ${S.cfg.autoMod?'ok':''}">Revisión automática: ${S.cfg.autoMod?'activada':'desactivada'}</span><button class="btn pri sm" data-a="adelantar" title="Simula que pasa un día">⏩ Adelantar 1 día</button><button class="btn danger sm" data-a="reiniciar">↺ Reiniciar</button></div></div>
   ${S.dias?`<div class="note small">Simulación: han pasado <b>${S.dias}</b> día(s). Revisa Pedidos, Comisiones, Repartidores y la App para ver la actividad.</div>`:''}
-  <div class="ptabs">${[['moderacion',`Por revisar (${pend})`],['seguridad',`Seguridad (${S.alertas.filter(a=>a.estado==='nueva').length})`],['reportes',`Reportes (${rep})`],['automaticas','Decisiones automáticas'],['comercios','Negocios'],['repartidores','Repartidores'],['usuarios','Usuarios'],['pedidos','Pedidos'],['comisiones','Comisiones'],['verificacion',`Verificación (${S.verifs.filter(v=>v.estado==='pendiente').length})`],['apelaciones',`Apelaciones (${S.apelaciones.filter(a=>a.estado==='pendiente').length})`],['bitacora','Bitácora'],['ajustes','Ajustes']].map(([k,l])=>`<button class="${ui.aTab===k?'on':''}" data-a="atab" data-x="${k}">${l}</button>`).join('')}</div>
-  ${ {moderacion:aModeracion, seguridad:aSeguridad, reportes:aReportes, automaticas:aAutomaticas, comercios:aComercios, repartidores:aRepartidores, usuarios:aUsuarios, pedidos:aPedidos, comisiones:aComisiones, bitacora:aBitacora, ajustes:aAjustes, verificacion:aVerificacion, apelaciones:aApelaciones}[ui.aTab]() }</div>`;
+  <div class="ptabs">${[['moderacion',`Por revisar (${pend})`],['seguridad',`Seguridad (${S.alertas.filter(a=>a.estado==='nueva').length})`],['reportes',`Reportes (${rep})`],['automaticas','Decisiones automáticas'],['comercios','Negocios'],['repartidores','Repartidores'],['usuarios','Usuarios'],['pedidos','Pedidos'],['comisiones','Comisiones'],['verificacion',`Verificación (${S.verifs.filter(v=>v.estado==='pendiente').length})`],['apelaciones',`Apelaciones (${S.apelaciones.filter(a=>a.estado==='pendiente').length})`],...(VIVO&&S.esAdmin?[['errores',`Errores (${errPend()})`]]:[]),['bitacora','Bitácora'],['ajustes','Ajustes']].map(([k,l])=>`<button class="${ui.aTab===k?'on':''}" data-a="atab" data-x="${k}">${l}</button>`).join('')}</div>
+  ${ {moderacion:aModeracion, seguridad:aSeguridad, reportes:aReportes, automaticas:aAutomaticas, comercios:aComercios, repartidores:aRepartidores, usuarios:aUsuarios, pedidos:aPedidos, comisiones:aComisiones, bitacora:aBitacora, ajustes:aAjustes, verificacion:aVerificacion, apelaciones:aApelaciones, errores:aErrores}[ui.aTab]() }</div>`;
 }
 function selMotivo(id, sug){ return `<select id="rej-${id}" aria-label="Motivo" style="width:auto;padding:7px 9px;font-size:13px">${Object.entries(MOTIVOS).map(([k,l])=>`<option value="${k}" ${k===sug?'selected':''}>${esc(l)}</option>`).join('')}</select>`; }
 function modItem(it, tipo, reportado){
@@ -3555,6 +3555,43 @@ document.addEventListener('dragstart', e=>{ if (e.target && (e.target.tagName===
 const RCFG = { url:'https://vhxisjkmkwgpvuqcbomt.supabase.co', key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoeGlzamtta3dncHZ1cWNib210Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4MDA0NDksImV4cCI6MjEwODM3NjQ0OX0.i-LPjHWSft5rvi2EXE5yQkZjVyPzFdbkdRp8Z2oPW2Y' };
 const SB_LIB = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.75.1/dist/umd/supabase.js';
 const SB_LIB_SRI = 'sha384-k5kwQoO9McjUumIYX4SkL2QuZrexERcRrE29/CQHjxNo8ODOzsxez5EzLnzyARYj';
+/* ---------- aviso de errores: las fallas de la app (de cualquier usuario) se guardan en el servidor para el admin ----------
+   Solo se manda el mensaje técnico, dónde pasó, el navegador y la versión. Antes de mandar se borran correos,
+   teléfonos, tokens y parámetros de URL (el servidor los vuelve a limpiar). Nunca textos de mensajes ni fotos. */
+const ERR_VER = '19.3';
+const ERRV = {n:0, vistos:new Set()};
+const errLimpio = (t, max) => String(t||'').replace(/eyJ[\w-]+\.[\w-]+\.[\w-]*/g,'[token]').replace(/[\w.%+-]+@[\w.-]+\.[a-z]{2,}/gi,'[correo]').replace(/\+?\d[\d\s().-]{6,}\d/g,'[número]').replace(/\?[^\s"']*/g,'').slice(0, max);
+function errReportar(tipo, mensaje, donde, pila){
+  try {
+    const m = errLimpio(mensaje, 400).trim(); if (!m || m==='Script error.' || ERRV.n >= 15) return; // máximo 15 por visita
+    const llave = tipo+'|'+m+'|'+donde; if (ERRV.vistos.has(llave)) return; ERRV.vistos.add(llave); ERRV.n++;
+    const body = JSON.stringify({p:{tipo, mensaje:m, donde:errLimpio(donde,200), pila:errLimpio(pila,1500), nav:navigator.userAgent.slice(0,160), ver:ERR_VER}});
+    let tok = '';
+    try { const k = Object.keys(localStorage).find(k=>/^sb-.*-auth-token$/.test(k)); const s = k && JSON.parse(localStorage.getItem(k)); if (s && s.access_token) tok = s.access_token; } catch(e){}
+    const mandar = t => fetch(RCFG.url+'/rest/v1/rpc/reportar_error', {method:'POST', keepalive:true, headers:{apikey:RCFG.key, Authorization:'Bearer '+(t||RCFG.key), 'Content-Type':'application/json'}, body});
+    mandar(tok).then(r=>{ if (r.status===401 && tok) mandar(''); }).catch(()=>{});
+  } catch(e){}
+}
+window.addEventListener('error', e => { if (!e.message) return; errReportar('js', e.message, `${String(e.filename||'').split('/').pop()}:${e.lineno||0}:${e.colno||0}`, e.error && e.error.stack); });
+window.addEventListener('unhandledrejection', e => { const r = e.reason; errReportar('promesa', (r && (r.message || r.error_description)) || String(r), '', r && r.stack); });
+// Las respuestas con error del servidor (Supabase). Los avisos normales (contraseña incorrecta, filtros del escudo) no cuentan.
+const ERR_AUTH_NORMAL = /invalid_credentials|user_already_exists|email_exists|weak_password|same_password|email_address_invalid|validation_failed|otp_expired|email_not_confirmed|user_not_found/;
+function errFetch(url, op){
+  return fetch(url, op).then(async r => {
+    try {
+      const ruta = String(url).replace(RCFG.url,'').split('?')[0];
+      if (r.status >= 400 && !ruta.includes('reportar_error')){
+        let j = {}; try { j = await r.clone().json(); } catch(e){}
+        const code = String(j.error_code || j.code || ''), msg = String(j.msg || j.message || j.error_description || j.error || '');
+        const auth = ruta.startsWith('/auth/');
+        const normal = code==='P0001' || (r.status===401 && /JWT|token/i.test(msg)) || (auth && r.status<500 && r.status!==429 && (ERR_AUTH_NORMAL.test(code) || r.status===401));
+        if (!normal) errReportar(auth?'auth':'api', `HTTP ${r.status} · ${code||'—'} · ${msg}`, `${(op&&op.method)||'GET'} ${ruta}`, '');
+      }
+    } catch(e){}
+    return r;
+  });
+}
+
 const RV = { sb:null, fase:'cargando', user:null, me:null, est:null, view:'feed', feed:'parati', posts:[], perfiles:{}, misLikes:new Set(), guardados:new Set(),
   sigo:new Set(), meSiguen:new Set(), sheet:null, err:'', perfil:null, chat:null, msgs:[], chats:[], noLeidos:0, notifs:[], nNotifs:0, q:'', res:[], adm:'revisar', canal:null, cargandoFeed:false, draft:[], enviado:0 };
 const rFoto = path => !path ? null : path.startsWith('u:') ? urlU(path.slice(2), 1080) : `${RCFG.url}/storage/v1/object/public/fotos/${path}`;
@@ -3575,7 +3612,7 @@ function rCargarLib(){ return new Promise((ok, no)=>{ if (window.supabase && win
 async function rIniciar(){
   if (RV.sb) return;
   try { await rCargarLib(); } catch(e){ RV.fase='sinred'; return renderReal(); }
-  RV.sb = window.supabase.createClient(RCFG.url, RCFG.key, { auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:true, flowType:'implicit' } });
+  RV.sb = window.supabase.createClient(RCFG.url, RCFG.key, { auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:true, flowType:'implicit' }, global:{ fetch:errFetch } });
   RV.sb.auth.onAuthStateChange((ev, ses) => { setTimeout(()=>rSesion(ses), 0); });
   const { data } = await RV.sb.auth.getSession(); await rSesion(data.session);
 }
@@ -4362,6 +4399,44 @@ async function revisarLegal(){
   if (!VIVO || typeof RV==='undefined' || !RV.sb || !RV.user) return;
   try { const {data} = await RV.sb.rpc('mi_legal'); if (!data) return;
     if (data.version !== LEGAL_VERSION || (data.menor && !data.tutor)) modalLegal(!!data.menor); } catch(e){}
+}
+
+/* ---------- admin: errores de la app y del servidor ---------- */
+const errPend = () => ui.errs ? ui.errs.lista.filter(e=>!e.visto).length : '…';
+async function errCargar(){
+  if (!VIVO || !RV.sb || ui.errsCargando) return; ui.errsCargando = true;
+  const { data, error } = await RV.sb.rpc('errores_admin'); ui.errsCargando = false;
+  ui.errs = error ? {lista:[], tema:'', fallo:rErr(error)} : {lista:data.lista||[], tema:data.tema||''};
+  if (ui.mode==='admin') rerender();
+}
+const ERR_TIPO = {js:'Pantalla (JavaScript)', promesa:'Pantalla (tarea en segundo plano)', api:'Servidor (datos)', auth:'Cuentas y correos', cron:'Tarea programada del servidor', otro:'Otro'};
+function errTexto(e){ return `Error de MOCHI (${e.origen}, ${ERR_TIPO[e.tipo]||e.tipo})\nMensaje: ${e.mensaje}\nDónde: ${e.donde||'—'}\nVeces: ${e.veces} · primera: ${e.creado} · última: ${e.ultimo}\nVersión: ${e.version||'—'} · Navegador: ${e.navegador||'—'}${e.pila?`\nPila:\n${e.pila}`:''}`; }
+function aErrores(){
+  if (!VIVO) return '<p class="muted">Los errores se ven en el modo En vivo.</p>';
+  if (!ui.errs){ errCargar(); return '<p class="muted">Cargando errores…</p>'; }
+  const E = ui.errs, abiertos = E.lista.filter(e=>!e.visto), vistos = E.lista.filter(e=>e.visto);
+  const fila = e => `<div class="card stack" style="gap:6px"><div class="row" style="flex-wrap:wrap;gap:6px"><span class="pill ${e.visto?'':'bad'}">${esc(ERR_TIPO[e.tipo]||e.tipo)}</span><span class="pill">${e.origen==='app'?'En el teléfono':'En el servidor'}</span>${e.veces>1?`<span class="pill warn">${e.veces} veces</span>`:''}<span class="small muted">${fecha(e.ultimo)}</span></div>
+    <div style="overflow-wrap:anywhere"><b>${esc(e.mensaje)}</b></div>${e.donde?`<div class="small muted" style="overflow-wrap:anywhere">Dónde: ${esc(e.donde)}</div>`:''}${e.navegador?`<div class="small muted" style="overflow-wrap:anywhere">${esc(e.navegador)}</div>`:''}
+    <div class="row" style="flex-wrap:wrap"><button class="btn sm" data-a="errCopiar" data-x="${e.id}">Copiar para Claude</button>${e.visto?'':`<button class="btn sm" data-a="errVisto" data-x="${e.id}">Ya lo vi</button>`}</div></div>`;
+  return `<div class="card stack" style="max-width:640px;gap:8px"><h2>Aviso al teléfono</h2>
+    <p class="small" style="margin:0">Cuando algo falla (a ti o a cualquier usuario), se guarda aquí y te llega un aviso al teléfono en la app gratuita <b>ntfy</b>. Para recibirlo: instala ntfy (App Store o Google Play), toca <b>+</b>, y escribe este nombre de tema:</p>
+    ${E.tema?`<div class="row" style="flex-wrap:wrap"><code style="overflow-wrap:anywhere;font-size:15px">${esc(E.tema)}</code><button class="btn sm" data-a="errCopiarTema">Copiar</button></div>`:''}
+    <p class="small muted" style="margin:0">No compartas ese nombre: quien lo tenga ve los avisos (solo dicen cuántos errores hubo, nunca datos de usuarios). Como mucho llega un aviso cada 10 minutos.</p>
+    <div class="row" style="flex-wrap:wrap"><button class="btn sm" data-a="errProbar">Mandar aviso de prueba</button><button class="btn sm" data-a="errRecargar">Actualizar</button>${abiertos.length?`<button class="btn sm" data-a="errTodo">Marcar todo como visto</button>`:''}</div></div>
+  ${E.fallo?`<div class="note warn">No se pudieron cargar los errores: ${esc(E.fallo)}</div>`:''}
+  <div class="sec-h"><h2>Nuevos</h2><span class="muted small">${abiertos.length}</span></div>${abiertos.map(fila).join('') || '<p class="muted">Nada nuevo. Todo bien. 👌</p>'}
+  ${vistos.length?`<div class="sec-h"><h2>Ya vistos</h2><span class="muted small">${vistos.length}</span></div>${vistos.slice(0,30).map(fila).join('')}`:''}`;
+}
+function registrarAccionesErrores(){
+  Object.assign(A, {
+    errRecargar: () => { ui.errs = null; errCargar(); },
+    errVisto: async x => { const {error} = await RV.sb.rpc('errores_marcar', {p_id:+x}); if (error) return toast(rErr(error)); ui.errs = null; errCargar(); },
+    errTodo: async () => { const {error} = await RV.sb.rpc('errores_marcar', {}); if (error) return toast(rErr(error)); ui.errs = null; errCargar(); toast('Listo'); },
+    errProbar: async () => { const {error} = await RV.sb.rpc('errores_probar'); if (error) return toast(rErr(error)); ui.errs = null; errCargar(); toast('Aviso de prueba enviado. Revisa ntfy en tu teléfono.'); },
+    errCopiar: x => { const e = ui.errs && ui.errs.lista.find(o=>String(o.id)===String(x)); if (!e) return; const t = errTexto(e);
+      (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(()=>toast('Copiado. Pégalo en el chat con Claude.'), ()=>toast('No se pudo copiar')); },
+    errCopiarTema: () => { const t = ui.errs && ui.errs.tema; if (!t) return; (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(()=>toast('Copiado'), ()=>toast('No se pudo copiar')); }
+  });
 }
 
 /* ---------- admin: datos del responsable y solicitudes ---------- */
@@ -5456,7 +5531,7 @@ Object.assign(A, {
   termAdd: () => { const t=$('#term-t').value.trim().toLowerCase(), c=$('#term-c').value; if(t.length<3) return toast('Escribe al menos 3 letras'); S.cfg.terminos.push({t:limpiarTexto(t), cat:c}); CACHE_RE.clear(); log('Admin','Agregó término al Escudo',c); save(); rerender(); },
   termDel: x => { S.cfg.terminos.splice(+x,1); save(); rerender(); }
 });
-registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal(); registrarAccionesV17(); registrarAccionesV18(); registrarAccionesLegal(); registrarAccionesVivo();
+registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal(); registrarAccionesV17(); registrarAccionesV18(); registrarAccionesLegal(); registrarAccionesErrores(); registrarAccionesVivo();
 aplicarPref();
 const EN_VIVO_OK = /github\.io$/.test(location.host) || /[?&]vivo=1/.test(location.search);
 try { if (EN_VIVO_OK && (localStorage.getItem('lm-modo')||'real')==='real') ui.mode='real'; } catch(e){ if (EN_VIVO_OK) ui.mode='real'; }
