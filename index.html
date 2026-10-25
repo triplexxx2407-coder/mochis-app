@@ -4426,6 +4426,17 @@ function vFotoObj(path){ if (!path) return {k:'parque', a:'#ddd', b:'#bbb'}; con
 const vEsAdmin = () => !!(S && S.esAdmin);
 
 /* ---------- carga completa desde el servidor ---------- */
+// El servidor entrega como máximo 1000 filas por consulta: pedir por páginas
+async function vTodo(armar){
+  let out = [];
+  for (let i = 0; i < 20; i++){
+    const {data, error} = await armar().range(i*1000, i*1000 + 999);
+    if (error) return {data: out.length ? out : null, error};
+    out = out.concat(data || []);
+    if (!data || data.length < 1000) break;
+  }
+  return {data: out, error: null};
+}
 async function vCargar(){
   if (VQ.cargando) return VQ.cargando;
   VQ.cargando = (async () => {
@@ -4436,19 +4447,19 @@ async function vCargar(){
     const pedir = {
       aj: sb.from('ajustes').select('*').eq('id',1).maybeSingle(),
       perf: sb.from('profiles').select(PCOLS).limit(2000),
-      fol: sb.from('follows').select('de,a').limit(20000),
+      fol: vTodo(() => sb.from('follows').select('de,a').order('de').order('a')),
       sneg: sb.from('siguen_neg').select('de,negocio').limit(20000),
       blo: sb.from('bloqueos').select('de,a'),
       negs: sb.from('negocios').select('*'),
       prods: sb.from('productos').select('*').limit(3000),
       posts: sb.from('feed2').select('*').order('created_at',{ascending:false}).limit(400),
-      likes: sb.from('likes').select('post,usuario').limit(20000),
+      likes: vTodo(() => sb.from('likes').select('post,usuario').order('post').order('usuario')),
       coms: sb.from('comments').select('id,post,autor,texto,estado,created_at,responde,eliminado').order('created_at').limit(5000),
       hist: sb.from('historias').select('*').order('created_at',{ascending:false}).limit(600),
       vistas: sb.from('hist_vistas').select('hist').limit(5000),
       hlikes: sb.from('hist_likes').select('hist').limit(5000),
       notas: sb.from('notas').select('*'),
-      reps: sb.from('reposts').select('usuario,post,created_at').limit(10000),
+      reps: vTodo(() => sb.from('reposts').select('usuario,post,created_at').order('usuario').order('post')),
       guard: sb.from('guardados').select('post,created_at'),
       msgs: sb.from('messages').select('id,de,para,texto,post,hist,nota,estado,leido,created_at,responde,borrado,hist_comp').order('created_at').limit(3000),
       ocultos: sb.from('msg_ocultos').select('mensaje').limit(5000),
