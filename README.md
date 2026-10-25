@@ -21,6 +21,3 @@ Es un proyecto en etapa de pruebas cerradas. Todavía no está abierto al públi
 
 El estado del proyecto, las decisiones, los pendientes y el historial de versiones están en los archivos privados del proyecto (empezando por `ESTADO-DEL-PROYECTO.md`), no en este repositorio.
 
-## Seguridad
-
-Si encuentras un problema de seguridad, no lo publiques en un issue: avisa por mensaje privado al dueño del repositorio.
