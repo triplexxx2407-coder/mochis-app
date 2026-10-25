@@ -3420,7 +3420,7 @@ function aVerificacion(){
 
 /* ---------- lista de "me gusta" ---------- */
 function quienesLike(p){
-  if (VIVO){ const l = (p.likedBy||[]).slice(); if (leGusta(p.id)) l.unshift(S.yo); return [...new Set(l)].filter(id=>!bloq(id)); }
+  if (VIVO){ const l = (VLIKERS[p.id]||p.likedBy||[]).slice(); if (leGusta(p.id)) l.unshift(S.yo); return [...new Set(l)].filter(id=>!bloq(id)); }
   const set = new Set(); if (leGusta(p.id)) set.add(S.yo); (p.likedBy||[]).forEach(x=>set.add(x));
   const am = new Set(misAmigos());
   const pool = S.usuarios.filter(u=>u.grupo!=='spam' && !u.suspendido && u.id!==p.autor && u.id!==S.yo).map(u=>u.id).sort((a,b)=>(am.has(b)-am.has(a)) || (hashStr(p.id+a)%997 - hashStr(p.id+b)%997));
@@ -3485,7 +3485,7 @@ new MutationObserver(()=>{ const g = $('#pgal'); if (g) g.scrollLeft = (ui.pfoto
 /* ---------- acciones ---------- */
 function registrarAccionesV12(){
   Object.assign(A, {
-    verLikes: x => { ui.sheet = {t:'likes', post:x}; renderLayer(); },
+    verLikes: x => { ui.sheet = {t:'likes', post:x}; renderLayer(); if (VIVO) vCargarLikers(x); },
     pgalMove: (x, el) => { const g = $('#pgal'); if (!g) return; const n = g.children.length; const i = ((ui.pfoto||0)+(+el.dataset.o)+n)%n; g.scrollTo({left:i*g.clientWidth, behavior:'smooth'}); },
     pgalGo: (x, el) => { const g = $('#pgal'); if (g) g.scrollTo({left:(+el.dataset.o)*g.clientWidth, behavior:'smooth'}); },
     estadoCuenta: () => { ui.abrirEstado = true; ui.sheet = null; go('ajustes'); ui.abrirEstado = false; setTimeout(()=>$('#estado-cuenta')?.scrollIntoView({behavior:'smooth', block:'start'}), 60); },
@@ -4453,13 +4453,11 @@ async function vCargar(){
       negs: sb.from('negocios').select('*'),
       prods: sb.from('productos').select('*').limit(3000),
       posts: sb.from('feed2').select('*').order('created_at',{ascending:false}).limit(400),
-      likes: vTodo(() => sb.from('likes').select('post,usuario').order('post').order('usuario')),
       coms: sb.from('comments').select('id,post,autor,texto,estado,created_at,responde,eliminado').order('created_at').limit(5000),
       hist: sb.from('historias').select('*').order('created_at',{ascending:false}).limit(600),
       vistas: sb.from('hist_vistas').select('hist').limit(5000),
       hlikes: sb.from('hist_likes').select('hist').limit(5000),
       notas: sb.from('notas').select('*'),
-      reps: vTodo(() => sb.from('reposts').select('usuario,post,created_at').order('usuario').order('post')),
       guard: sb.from('guardados').select('post,created_at'),
       msgs: sb.from('messages').select('id,de,para,texto,post,hist,nota,estado,leido,created_at,responde,borrado,hist_comp').order('created_at').limit(3000),
       ocultos: sb.from('msg_ocultos').select('mensaje').limit(5000),
@@ -4486,7 +4484,15 @@ async function vCargar(){
     const keys = Object.keys(pedir); const vals = await Promise.all(Object.values(pedir));
     const D = {}; keys.forEach((k,i)=>{ if (vals[i].error) console.warn('vivo', k, vals[i].error.message); D[k] = vals[i].data || []; });
     const postIds = (D.posts||[]).map(p=>p.id);
-    const cg = postIds.length ? await sb.rpc('conteo_guardados', {ids: postIds}) : {data:[]};
+    // Los totales de "me gusta" los cuenta el servidor; solo bajan los reposts de las publicaciones cargadas
+    const [cg, cl, rp] = postIds.length ? await Promise.all([
+      sb.rpc('conteo_guardados', {ids: postIds}),
+      sb.rpc('conteo_likes', {ids: postIds}),
+      vTodo(() => sb.rpc('reposts_de', {ids: postIds}).order('usuario').order('post'))
+    ]) : [{data:[]},{data:[]},{data:[]}];
+    if (cl.error) console.warn('vivo', 'conteo_likes', cl.error.message);
+    if (rp.error) console.warn('vivo', 'reposts_de', rp.error.message);
+    D.likes = cl.data || []; D.reps = rp.data || [];
     const pedClientes = [...new Set((D.peds||[]).map(p=>p.cliente))];
     const pc = pedClientes.length ? await sb.rpc('prom_clientes', {ids: pedClientes}) : {data:[]};
     vArmar(D, E, admin, cg.data||[], pc.data||[]);
@@ -4520,12 +4526,12 @@ function vArmar(D, E, admin, conteos, promCli){
     fotos:(p.fotos&&p.fotos.length?p.fotos:(p.foto?[p.foto]:[])).map(vFotoObj), estadoSrv:p.estado, k:TIPOS[(D.negs.find(n=>n.id===p.negocio)||{}).categoria]?.k||'tienda'}));
   productos.forEach(p=>{ if (!p.fotos.length) delete p.fotos; });
   // publicaciones, me gusta, comentarios
-  const likesDe = {}; D.likes.forEach(l=>{ (likesDe[l.post] = likesDe[l.post]||[]).push('u'+l.usuario); });
+  const likesDe = {}; D.likes.forEach(l=>likesDe[l.post] = l);
   const likes = {};
-  const posts = D.posts.map(p=>{ const lk = likesDe[p.id]||[]; const yoLe = lk.includes(me); if (yoLe) likes[me+'|q'+p.id] = true;
+  const posts = D.posts.map(p=>{ const lk = likesDe[p.id] || {n:0, yo:false, muestra:[]}; const yoLe = !!lk.yo; if (yoLe) likes[me+'|q'+p.id] = true;
     const mod = p.mod||null;
     return {id:'q'+p.id, sid:p.id, autor:p.negocio?negDe(p.negocio):'u'+p.autor, autorU:'u'+p.autor, tipo:p.negocio?'negocio':'usuario', fotos:(p.fotos||[]).map(vFotoObj), texto:p.texto||'',
-      likes:lk.length - (yoLe?1:0), likedBy:lk.filter(x=>x!==me).slice(0,50), estado:p.estado, motivo:p.motivo, t:vMs(p.created_at), prod:p.prod?'p'+p.prod:null, etiq:p.etiq||[],
+      likes:lk.n - (yoLe?1:0), likedBy:(lk.muestra||[]).map(x=>'u'+x), estado:p.estado, motivo:p.motivo, t:vMs(p.created_at), prod:p.prod?'p'+p.prod:null, etiq:p.etiq||[],
       mod:mod?{por:mod.por, razon:mod.razon, t:mod.t, antes:mod.antes}:null}; });
   const comentarios = D.coms.filter(c=>c.estado==='ok').map(c=>({id:'k'+c.id, sid:c.id, post:'q'+c.post, autor:'u'+c.autor, texto:c.eliminado?'':c.texto, t:vMs(c.created_at), resp:c.responde?'k'+c.responde:undefined, eliminado:!!c.eliminado}));
   const decisiones = posts.filter(p=>p.mod && p.mod.por==='auto').map(p=>({tipo:'post', id:p.id, d:p.estado==='aprobado'?'aprobado':p.estado==='rechazado'?'rechazado':'pendiente', razon:p.mod.razon||'', t:p.mod.t||p.t, revisarFoto:!!(p.mod&&p.mod.revisarFoto)}));
@@ -4600,6 +4606,16 @@ function vArmar(D, E, admin, conteos, promCli){
   S = SV = S2; SNAP = vFoto(S);
 }
 let SV = null;
+
+/* ---------- lista de "a quién le gustó": se pide solo al abrirla ---------- */
+const VLIKERS = {};
+async function vCargarLikers(pid){
+  const p = post(pid); if (!p || !p.sid) return;
+  const {data, error} = await RV.sb.from('likes').select('usuario').eq('post', p.sid).order('created_at',{ascending:false}).limit(1000);
+  if (error){ console.warn('vivo', 'likers', error.message); return; }
+  VLIKERS[pid] = (data||[]).map(l=>'u'+l.usuario).filter(x=>x!==vMe());
+  if (ui.sheet && ui.sheet.t==='likes' && ui.sheet.post===pid) renderLayer();
+}
 
 /* ---------- foto del estado para comparar ---------- */
 function vFoto(s){
