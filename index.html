@@ -3554,6 +3554,7 @@ document.addEventListener('dragstart', e=>{ if (e.target && (e.target.tagName===
    ============================================================ */
 const RCFG = { url:'https://vhxisjkmkwgpvuqcbomt.supabase.co', key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoeGlzamtta3dncHZ1cWNib210Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4MDA0NDksImV4cCI6MjEwODM3NjQ0OX0.i-LPjHWSft5rvi2EXE5yQkZjVyPzFdbkdRp8Z2oPW2Y' };
 const SB_LIB = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.75.1/dist/umd/supabase.js';
+const SB_LIB_SRI = 'sha384-k5kwQoO9McjUumIYX4SkL2QuZrexERcRrE29/CQHjxNo8ODOzsxez5EzLnzyARYj';
 /* ---------- aviso de errores: las fallas de la app (de cualquier usuario) se guardan en el servidor para el admin ----------
    Solo se manda el mensaje técnico, dónde pasó, el navegador y la versión. Antes de mandar se borran correos,
    teléfonos, tokens y parámetros de URL (el servidor los vuelve a limpiar). Nunca textos de mensajes ni fotos. */
@@ -3607,7 +3608,7 @@ function rTextoOk(t, lugar){ // filtro rápido en el teléfono (el servidor revi
 }
 
 /* ---------- arranque ---------- */
-function rCargarLib(){ return new Promise((ok, no)=>{ if (window.supabase && window.supabase.createClient) return ok(); const s=document.createElement('script'); s.src=SB_LIB; s.crossOrigin='anonymous'; s.onload=()=>ok(); s.onerror=()=>no(new Error('No se pudo cargar')); document.head.appendChild(s); }); }
+function rCargarLib(){ return new Promise((ok, no)=>{ if (window.supabase && window.supabase.createClient) return ok(); const s=document.createElement('script'); s.src=SB_LIB; s.integrity=SB_LIB_SRI; s.crossOrigin='anonymous'; s.onload=()=>ok(); s.onerror=()=>no(new Error('No se pudo cargar')); document.head.appendChild(s); }); }
 async function rIniciar(){
   if (RV.sb) return;
   try { await rCargarLib(); } catch(e){ RV.fase='sinred'; return renderReal(); }
@@ -4136,9 +4137,17 @@ function barraRespIn(pid){
 const ESC_FOTO = {modelo:null, ocr:null, cargando:null};
 const EF_NSFW = 'https://cdn.jsdelivr.net/npm/nsfwjs@4.4.0/dist/';
 const EF_TESS = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/';
+// Huellas SRI: el navegador rechaza el archivo si el CDN entrega algo distinto
+const EF_SRI = {
+  'browser/nsfwjs.min.js': 'sha384-AgEYUP1dk2mGxhfUGZ4muudxnzuhFD4HFvGAOgeRu1a/78Ls+Jmx/TWEF4qU3aOF',
+  'models/mobilenet_v2/model.min.js': 'sha384-VsoJuRePCgpUmSlvPwW/IXzJGJk8PP0RQuAAGfhwKz2sGb7NroFRHBqD/EySC0vU',
+  'models/mobilenet_v2/group1-shard1of1.min.js': 'sha384-5F6gcz+dyppqYc8BDH0IbKZcRbVl2c+nUSShQMb1AFhdQES+d3bG5hHNOOIE5Yha',
+  'tesseract.min.js': 'sha384-GJqSu7vueQ9qN0E9yLPb3Wtpd7OrgK8KmYzC8T1IysG1bcvxvIO4qtYR/D3A991F'
+};
 function efScript(src){ return new Promise((ok, mal) => {
   if (document.querySelector(`script[data-ef="${src}"]`)) return ok();
-  const s = document.createElement('script'); s.src = src; s.async = true; s.dataset.ef = src; s.onload = ok; s.onerror = () => { s.remove(); mal(new Error('red')); }; document.head.appendChild(s); }); }
+  const s = document.createElement('script'); s.src = src; s.async = true; s.dataset.ef = src;
+  const sri = EF_SRI[src.replace(EF_NSFW, '').replace(EF_TESS, '')]; if (sri){ s.integrity = sri; s.crossOrigin = 'anonymous'; } s.onload = ok; s.onerror = () => { s.remove(); mal(new Error('red')); }; document.head.appendChild(s); }); }
 function prepararEscudoFoto(){
   if (ESC_FOTO.modelo && ESC_FOTO.ocr) return Promise.resolve();
   if (ESC_FOTO.cargando) return ESC_FOTO.cargando;
