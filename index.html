@@ -4897,7 +4897,7 @@ async function vEntrar(){
   if (!ui.vivoVista){ ui.view = soyNegocio() ? 'minegocio' : 'home'; ui.vivoVista = true; }
   ui.sheet = null; render(); renderLayer();
 }
-function vSalirVivo(){ vCanal(false); clearInterval(VQ.intervalo); VQ.listo = false; SV = null; SNAP = null; ui.vivoVista = false; RPV.app = RPV.panel = RPV.admin = null; if (ui.mode==='vrep') ui.mode = 'real';
+function vSalirVivo(){ vCanal(false); clearInterval(VQ.intervalo); VQ.listo = false; SV = null; SNAP = null; ui.vivoVista = false; RPV.app = RPV.panel = RPV.admin = null; if (typeof repGpsSync==='function') repGpsSync(); if (ui.mode==='vrep') ui.mode = 'real';
   if (VIVO){ VIVO = false; S = SDEMO; document.body.classList.remove('vivo'); } }
 async function vRecargar(forzar){
   if (!VQ.listo || !RV.user) return;
@@ -5063,7 +5063,7 @@ const VEH = {moto:'Moto', bici:'Bici', auto:'Auto', pie:'A pie'};
 const rpvRpc = async (fn, args) => { const {data, error} = await RV.sb.rpc(fn, args||{}); if (error) throw error; return data; };
 const soyRepVivo = () => !!(VIVO && RPV.app && RPV.app.soyRep && RPV.app.soyRep!=='rechazado');
 async function vRepEstado(){ if (!RV.sb || !RV.user) return; try { RPV.app = await rpvRpc('reparto_estado_app'); } catch(e){ RPV.app = null; } }
-async function vRepPanel(){ try { RPV.panel = await rpvRpc('rep_panel'); } catch(e){ console.warn(e); } }
+async function vRepPanel(){ try { RPV.panel = await rpvRpc('rep_panel'); } catch(e){ console.warn(e); } if (typeof repGpsSync==='function') repGpsSync(); }
 async function vRepAdmin(){ if (RPV.cargandoAdmin) return; RPV.cargandoAdmin = true; try { RPV.admin = await rpvRpc('admin_repartidores'); } catch(e){ toast(vMsgError(e)); } RPV.cargandoAdmin = false; }
 
 /* ---------- Tienda: "¿Quieres ser repartidor?" ---------- */
@@ -5248,6 +5248,7 @@ function repAplicar(D){
     p.rep = {estado:I.estado, oferta:vCent(I.oferta), minimo:vCent(I.minimo), seguro:vCent(I.seguro), km:Number(I.km)||0, expira:I.expira?vMs(I.expira):0, rep:rid, srv:true,
       pasos:(I.pasos||[]).map(x=>({s:x.s, t:typeof x.t==='number'?x.t:vMs(x.t)})), ofertas:(I.contraofertas||[]).map(o=>({id:o.id, monto:vCent(o.monto), nombre:o.nombre, vehiculo:VEH[o.vehiculo]||o.vehiculo, calif:o.calif, entregas:o.entregas})), msgs:I.msgs||[], intentos:0};
     if (!p.rep.pasos.length) p.rep.pasos = [{s:I.estado, t:Date.now()}];
+    if (REP_FIN.includes(I.estado)) try { localStorage.removeItem('lm-casa-'+p.sid); } catch(e){}
     p.envio = p.rep.oferta; p.total = p.subtotal + p.envio + p.rep.seguro; p.cliente.colonia = I.colonia||p.cliente.colonia; });
 }
 // Pide al servidor el estado del reparto de mis pedidos (solo los que siguen en curso o recién terminados)
@@ -5285,7 +5286,7 @@ function vCheckoutVivo(){
         <label class="f" for="rk-col">Colonia<input id="rk-col" type="text" maxlength="60" value="${esc(k.colonia||'')}"></label>
         <label class="f" for="rk-ref">Referencias <span class="h">Opcional. Sin teléfonos: el repartidor te avisa por la app.</span><input id="rk-ref" type="text" maxlength="120" placeholder="Portón verde, frente a la tienda" value="${esc(k.ref||'')}"></label>
         <div class="row nowrap"><button type="button" class="btn ${k.lat!=null?'':'pri'}" data-a="vCkUbic">${k.buscando?'Buscando tu ubicación…':k.lat!=null?'Volver a tomar mi ubicación':'Usar mi ubicación actual'}</button>${k.lat!=null?`<span class="small muted">Ubicación lista${k.prec?` (±${k.prec} m)`:''}</span>`:''}</div>
-        <span class="small muted">Tómala estando en el lugar donde recibirás el pedido. Con ella calculamos la distancia y el envío mínimo.</span>
+        ${k.lat!=null?`${mapaHTML('ck','ck')}<span class="small muted">Mueve el mapa hasta que el punto verde quede en tu casa. Con él calculamos la distancia y el envío mínimo.</span>`:'<span class="small muted">Tómala estando en el lugar donde recibirás el pedido, o cerca: después puedes acomodar el punto en el mapa.</span>'}
         ${q && q.lejos?'<div class="note bad">Tu ubicación está muy lejos de este negocio.</div>':''}
         ${q && !q.lejos?`<label class="f" for="rk-oferta">¿Cuánto ofreces por el envío? ($)<input id="rk-oferta" type="number" min="${minC/100}" step="1" inputmode="numeric" value="${of/100}"></label>
         <span class="small muted">Mínimo <b>${money(minC)}</b> por la distancia (~${Number(q.km).toFixed(1)} km). Si ofreces un poco más, lo toman más rápido. Los repartidores pueden aceptar o pedirte más. Si nadie lo toma en ${RC().espera} min, se cancela solo y no pagas nada.</span>`:''}</div>`:''}</div>
@@ -5327,6 +5328,7 @@ function repClienteVivo(p){
     <span class="small muted">Si nadie acepta en ${RC().espera} min, el pedido se cancela solo y no pagas nada.</span></div>`;
   const pasos = ['asignado','en_tienda','en_camino','llego','entregado'];
   return `<div class="card"><div class="row between"><h2>${esc(REP_EST[R.estado]||'')}</h2>${R.estado==='entregado'?'<span class="pill ok">Entregado</span>':''}</div>
+    ${['asignado','en_tienda','en_camino','llego'].includes(R.estado)?mapaHTML('cli-'+p.sid):''}
     ${r?`<div class="row nowrap"><span class="avatar" style="--c:${r.color};--s:44px">${esc(inits(r.nombre))}</span><div style="flex:1"><b>${esc(nombrePila(r.nombre))}</b><div class="small muted">${esc(r.vehiculo)}${r.placa!=='—'?' · placas '+esc(r.placa):''} · ★ ${r.calif?r.calif.toFixed(1):'Nuevo'}</div></div></div>`:''}
     <div class="steps">${pasos.map(s=>`<span class="${pasos.indexOf(s)<=pasos.indexOf(R.estado)?'on':''}">${esc({asignado:'Va a la tienda',en_tienda:'En tienda',en_camino:'En camino',llego:'Llegó',entregado:'Entregado'}[s])}</span>`).join('')}</div>
     ${R.estado!=='entregado'&&p.codigo?`<div class="codebox"><span>Tu código de entrega</span><b class="num">${esc(p.codigo)}</b><small>Dáselo al repartidor <b>solo cuando tengas tu pedido en la mano</b>. Sin este código no puede marcarlo como entregado.</small></div>`:''}
@@ -5384,6 +5386,7 @@ function repVivoActivo(a){
     no_pago:`<div class="note bad">Reportaste que el cliente no quiso pagar. El equipo lo está revisando; ya no tienes que hacer nada con este pedido.</div>`
   }[e] || '';
   return `<div class="stack"><div class="row between"><h1 style="font-size:22px;margin:0">Pedido #LM-${esc(a.folio)}</h1><span class="pill">${esc(REP_EST_R[e]||e)}</span></div>
+    ${e!=='no_pago'?mapaHTML('rep-'+a.pedido):''}
     <div class="card" style="gap:6px"><div class="row nowrap"><span class="avatar" style="--c:${esc(ng.color||'#C2410C')};--s:34px">${esc(inits(ng.nombre))}</span><div style="flex:1"><b>${esc(ng.nombre)}</b><div class="small muted">${esc(ng.direccion||'')}</div></div>${!recogido&&ng.lat!=null?`<a class="btn sm" style="text-decoration:none;color:inherit" href="${repMapsUrl(ng.lat, ng.lng)}" target="_blank" rel="noopener">Cómo llegar</a>`:''}</div>
       <div class="rsep"></div>
       <div><b>${esc(a.cliente)}</b> <span class="small muted">· cliente</span></div>
@@ -5434,6 +5437,7 @@ function registrarAccionesRepVivo3(){
     const p = {negocio:n.sid, items, nombre, nota, cambio:k.cambio?Math.round(+k.cambio):0, origen:S.carrito.origen?post2sid(S.carrito.origen):null, calle, colonia, ref, lat:k.lat, lng:k.lng, oferta:of/100};
     k.enviando = true; ui.err = ''; rerender();
     let pid; try { pid = await rpvRpc('crear_pedido_reparto', {p}); } catch(e){ k.enviando = false; return fail(vMsgError(e)); }
+    try { localStorage.setItem('lm-casa-'+pid, JSON.stringify({lat:k.lat, lng:k.lng})); } catch(e){}
     const f = await RV.sb.from('pedidos').select('folio').eq('id', pid).maybeSingle();
     S.carrito = null; ui.ck = null; ui.err = ''; save(); SNAP = vFoto(S);
     await vRecargar(true); await vRepInfos();
@@ -5478,6 +5482,105 @@ function registrarAccionesRepVivo3(){
     if (!S.pedidos.some(p=>p.modo==='reparto' && p.rep && !REP_FIN.includes(p.rep.estado) && enCurso(p))) return;
     vRepInfos().then(c=>{ if (c) render(); }); }, 10000);
 }
+
+/* ---------- REPARTO EN VIVO · paso 4: mapa y ubicación en vivo ----------
+   Leaflet + mapa de OpenStreetMap con el estilo Voyager de CARTO, solo para las pruebas (antes de abrir al público: Mapbox, ver reparto-en-vivo.md).
+   La ubicación del repartidor solo se manda mientras lleva un pedido (el servidor también lo revisa) y se borra al terminar.
+   En la app de las tiendas (Capacitor) este mismo envío se hará con el plugin de ubicación en segundo plano;
+   en el navegador solo funciona con la pantalla encendida. */
+const LF_JS = 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js', LF_JS_SRI = 'sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH';
+const LF_CSS = 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css', LF_CSS_SRI = 'sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H';
+document.head.insertAdjacentHTML('beforeend', '<style>.lmapa{height:230px;border-radius:14px;overflow:hidden;position:relative;z-index:0;isolation:isolate;background:var(--surface-2);display:flex;align-items:center;justify-content:center}.lmapa.ck::after{content:"";position:absolute;left:50%;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:#0D6B5B;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);z-index:500;pointer-events:none}.lmapa{height:260px;box-shadow:0 2px 10px rgba(0,0,0,.08)}.lmapa .leaflet-control-attribution{font-size:9px;opacity:.75}.mpin{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3)}.mpin.t{background:#FB923C}.mpin.c{background:#0D6B5B}.mpin.r{background:#2563EB;width:40px;height:40px;font-size:20px}.mchip{position:absolute;left:10px;right:10px;top:10px;z-index:600;background:var(--surface,#fff);color:var(--fg,#111);border-radius:12px;padding:8px 12px;font-size:13px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.15);pointer-events:none}.mchip:empty{display:none}</style>');
+const MAPA = {cargando:null, m:{}, ubic:{}, gps:null, gpsPid:null, gpsUlt:0, yo:null, ckT:null};
+function mapaLib(){
+  if (window.L && window.L.map) return Promise.resolve();
+  if (MAPA.cargando) return MAPA.cargando;
+  MAPA.cargando = new Promise((ok, no) => {
+    const c = document.createElement('link'); c.rel = 'stylesheet'; c.href = LF_CSS; c.integrity = LF_CSS_SRI; c.crossOrigin = 'anonymous'; document.head.appendChild(c);
+    const s = document.createElement('script'); s.src = LF_JS; s.integrity = LF_JS_SRI; s.crossOrigin = 'anonymous';
+    s.onload = () => ok(); s.onerror = () => { MAPA.cargando = null; s.remove(); no(new Error('mapa')); }; document.head.appendChild(s); });
+  return MAPA.cargando;
+}
+const mapaHTML = (key, cls) => `<div class="lmapa ${cls||''}" data-mapa="${esc(key)}"><span class="small muted">Cargando mapa…</span></div>`;
+const casaDe = sid => { try { const v = JSON.parse(localStorage.getItem('lm-casa-'+sid)||'null'); return v && v.lat!=null ? [v.lat, v.lng] : null; } catch(e){ return null; } };
+// Qué puntos lleva cada mapa: tienda, casa del cliente y repartidor
+function mapaDatos(key){
+  if (key==='ck'){ const k = ui.ck; return k && k.lat!=null ? {centro:[k.lat, k.lng], ck:true} : null; }
+  if (key.startsWith('cli-')){ const sid = key.slice(4), p = S.pedidos.find(o=>o.sid===sid); if (!p) return null; const n = neg(p.neg);
+    const u = MAPA.ubic[sid], e = p.rep && p.rep.estado, va = ['en_camino','llego'].includes(e) ? 'casa' : 'tienda';
+    return {tienda:n && n.lat!=null ? [n.lat, n.lng] : null, casa:casaDe(sid), rep:u ? [u.lat, u.lng] : null, va,
+      chip:!u ? 'Esperando la ubicación del repartidor…' : ({asignado:'🛵 Tu repartidor va a la tienda', en_tienda:'🏪 Tu repartidor está en la tienda', en_camino:'🛵 Tu pedido va en camino', llego:'🏠 Tu repartidor llegó'}[e]||'')}; }
+  if (key.startsWith('rep-')){ const a = RPV.panel && RPV.panel.activo; if (!a || 'rep-'+a.pedido!==key) return null; const ng = a.negocio || {};
+    const va = ['en_camino','llego'].includes(a.estado) ? 'casa' : 'tienda';
+    return {tienda:ng.lat!=null ? [ng.lat, ng.lng] : null, casa:a.dir && a.dir.lat!=null ? [a.dir.lat, a.dir.lng] : null, rep:MAPA.yo, va,
+      chip:!MAPA.yo ? 'Activa tu ubicación para ver tu posición' : va==='casa' ? '🏠 Lleva el pedido al cliente' : '🏪 Ve a la tienda'}; }
+  return null;
+}
+const MPIN = {tienda:['t','🏪',34], casa:['c','🏠',34], rep:['r','🛵',40]};
+function mapaPunto(m, nombre, ll){
+  if (!ll){ if (m.capas[nombre]){ m.map.removeLayer(m.capas[nombre]); delete m.capas[nombre]; } return; }
+  if (m.capas[nombre]) return m.capas[nombre].setLatLng(ll);
+  const [c, e, t] = MPIN[nombre];
+  m.capas[nombre] = L.marker(ll, {icon:L.divIcon({className:'', html:`<div class="mpin ${c}">${e}</div>`, iconSize:[t,t], iconAnchor:[t/2,t/2]}), keyboard:false, zIndexOffset:nombre==='rep'?1000:0}).addTo(m.map);
+}
+function mapaLinea(m, nombre, pts, estilo){
+  if (m.capas[nombre]){ m.map.removeLayer(m.capas[nombre]); delete m.capas[nombre]; }
+  if (pts.filter(Boolean).length===2) m.capas[nombre] = L.polyline(pts, estilo).addTo(m.map);
+}
+function mapaActualizar(key){
+  const m = MAPA.m[key]; if (!m || !window.L) return; const d = mapaDatos(key); if (!d) return;
+  if (d.ck){ if (!m.listo){ m.map.setView(d.centro, 17); m.listo = true; } return; }
+  mapaLinea(m, 'ruta', [d.tienda, d.casa], {color:'#9CA3AF', weight:3, dashArray:'2 8', lineCap:'round'});
+  mapaLinea(m, 'va', [d.rep, d.va==='casa'?d.casa:d.tienda], {color:'#2563EB', weight:4, dashArray:'1 9', lineCap:'round'});
+  mapaPunto(m, 'tienda', d.tienda); mapaPunto(m, 'casa', d.casa); mapaPunto(m, 'rep', d.rep);
+  const chip = m.el.querySelector('.mchip'); if (chip) chip.textContent = d.chip || '';
+  const pts = [d.tienda, d.casa, d.rep].filter(Boolean);
+  if (!m.listo && pts.length){ if (pts.length===1) m.map.setView(pts[0], 16); else m.map.fitBounds(pts, {padding:[30,30], maxZoom:17}); m.listo = true; }
+}
+// Después de cada render: el mapa ya creado se vuelve a colocar (no se crea otro), así no parpadea ni vuelve a descargar
+function mapasMontar(root){
+  if (!root || !VIVO) return;
+  root.querySelectorAll('[data-mapa]').forEach(ph => {
+    const key = ph.dataset.mapa, m = MAPA.m[key];
+    if (m){ if (m.el!==ph){ ph.replaceWith(m.el); setTimeout(()=>m.map.invalidateSize(), 0); } mapaActualizar(key); return; }
+    if (!mapaDatos(key)) return;
+    mapaLib().then(() => { if (!ph.isConnected || MAPA.m[key]) return;
+      ph.innerHTML = '';
+      const map = L.map(ph, {zoomControl:false, attributionControl:true, scrollWheelZoom:false});
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {maxZoom:19, subdomains:'abcd', attribution:'© OpenStreetMap · © CARTO'}).addTo(map);
+      ph.insertAdjacentHTML('beforeend', '<div class="mchip"></div>');
+      MAPA.m[key] = {el:ph, map, capas:{}, listo:false};
+      if (key==='ck') map.on('moveend', () => { const k = ui.ck; if (!k || !MAPA.m.ck || !MAPA.m.ck.listo) return; const c = map.getCenter();
+        if (Math.abs(c.lat-k.lat)<1e-6 && Math.abs(c.lng-k.lng)<1e-6) return; k.lat = c.lat; k.lng = c.lng; k.prec = 0;
+        clearTimeout(MAPA.ckT); MAPA.ckT = setTimeout(vCkCotizar, 700); });
+      mapaActualizar(key); }).catch(() => { if (ph.isConnected) ph.innerHTML = '<span class="small muted">No se pudo cargar el mapa. Revisa tu conexión.</span>'; });
+  });
+  Object.keys(MAPA.m).forEach(k => { if (!MAPA.m[k].el.isConnected && !root.querySelector(`[data-mapa="${k}"]`)){ /* se queda guardado para cuando vuelva a aparecer */ } });
+}
+new MutationObserver(()=>mapasMontar($('#app'))).observe($('#app'), {childList:true});
+async function vCkCotizar(){ const k = ui.ck; if (!k || k.lat==null || !S.carrito) return; const n = neg(S.carrito.neg); if (!n) return;
+  try { vCkGuardar(); k.cot = await rpvRpc('reparto_cotizar', {neg:n.sid, p_lat:k.lat, p_lng:k.lng}); } catch(e){ return toast(vMsgError(e)); }
+  if (ui.view==='checkout' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) rerender(); }
+
+/* GPS del repartidor: solo con pedido activo, una vez cada 5 s como máximo */
+function repGpsSync(){
+  const a = VIVO && RPV.panel && RPV.panel.activo, activo = a && ['asignado','en_tienda','en_camino','llego'].includes(a.estado);
+  if (!activo || !navigator.geolocation){ if (MAPA.gps!=null){ navigator.geolocation.clearWatch(MAPA.gps); MAPA.gps = null; MAPA.gpsPid = null; MAPA.yo = null; } return; }
+  if (MAPA.gps!=null && MAPA.gpsPid===a.pedido) return;
+  if (MAPA.gps!=null) navigator.geolocation.clearWatch(MAPA.gps);
+  MAPA.gpsPid = a.pedido;
+  MAPA.gps = navigator.geolocation.watchPosition(pos => {
+    MAPA.yo = [pos.coords.latitude, pos.coords.longitude]; mapaActualizar('rep-'+MAPA.gpsPid);
+    if (Date.now() - MAPA.gpsUlt < 5000) return; MAPA.gpsUlt = Date.now();
+    RV.sb.rpc('rep_ubicacion', {pid:MAPA.gpsPid, p_lat:MAPA.yo[0], p_lng:MAPA.yo[1]}).then(({data}) => { if (data==='no') vRepPanel(); }, ()=>{});
+  }, e => { if (e && e.code===1) toast('Activa la ubicación para que el cliente vea por dónde vas.'); }, {enableHighAccuracy:true, maximumAge:4000, timeout:20000});
+}
+// Cliente: posición del repartidor cada 5 s mientras ve el seguimiento
+setInterval(() => {
+  if (!VIVO || document.visibilityState!=='visible' || ui.view!=='seguimiento') return;
+  const p = S.pedidos.find(o=>o.id===ui.pedido); if (!p || !p.rep || !['asignado','en_tienda','en_camino','llego'].includes(p.rep.estado)) return;
+  RV.sb.rpc('reparto_ubicacion', {pid:p.sid}).then(({data}) => { if (data && data.lat!=null){ MAPA.ubic[p.sid] = data; mapaActualizar('cli-'+p.sid); } }, ()=>{});
+}, 5000);
 
 /* ---------- render ---------- */
 const VISTAS = {verificar:vVerificar, guardados:vGuardados, home:vHome, buscar:vBuscar, inicio:vInicio, notifs:vNotifs, negocio:vNegocio, carrito:vCarrito, checkout:vCheckout, seguimiento:vSeguimiento, pedidos:vPedidos, vende:vVende, repalta:vRepAlta, post:vPost, perfil:vPerfil, usuario:vUsuario, mensajes:vMensajes, ajustes:vAjustes, minegocio:vMiNegocio};
