@@ -4183,7 +4183,7 @@ document.addEventListener('pointerdown', e => { const t = e.target.closest && e.
    Los datos del responsable se capturan en Admin → Ajustes → Datos legales.
    Nota: es un borrador cuidadoso; conviene que un abogado lo revise antes del lanzamiento público.
    ============================================================ */
-const LEGAL_VERSION = '2026-10-26';
+const LEGAL_VERSION = '2026-10-26.2';
 let LEGAL_DATOS = null; // {responsable, domicilio, correo}
 function legalDatos(){
   const d = Object.assign({}, (S && S.cfg && S.cfg.legal) || {}, LEGAL_DATOS || {});
@@ -4203,7 +4203,7 @@ const LEGAL_DOCS = {
 <li><b>Lo que publicas y haces:</b> publicaciones, historias, notas, comentarios, mensajes, me gusta, guardados, a quién sigues, reportes y apelaciones.</li>
 <li><b>Tienda:</b> si tienes un negocio (solo mayores de 18): nombre, descripción, dirección, horario y productos. Si haces un pedido: el nombre para recogerlo y tus notas.</li>
 <li><b>Pedidos con repartidor:</b> la dirección, las referencias y el punto que marcas en el mapa, solo para que el repartidor te entregue. El repartidor ve tu nombre de pila y tu colonia; tu dirección exacta la ve hasta que recoge tu pedido, y se borra al entregarlo.</li>
-<li><b>Si eres repartidor</b> (solo mayores de 18): nombre completo, fecha de nacimiento, teléfono, vehículo, placa y zona, y tu ubicación <b>solo mientras llevas un pedido</b> (se borra al terminar). Revisamos tu INE <b>en persona</b> y no guardamos fotos de ella. Usamos tu placa y tu teléfono para detectar si alguien intenta registrarse con los mismos datos en otra cuenta.</li>
+<li><b>Si eres repartidor</b> (solo mayores de 18): nombre completo, fecha de nacimiento, teléfono, vehículo, placa y zona, y tu ubicación <b>solo mientras llevas un pedido</b> (se borra al terminar). Verificas tu INE y tu cara con <b>Didit</b>, un proveedor de verificación de identidad: en su página tomas la foto de tu INE y una selfie en video, y Didit revisa que la INE sea real y vigente, que la cara coincida y que no esté en otra cuenta. Esas imágenes las guarda Didit conforme a su propio aviso de privacidad; <b>MOCHI solo recibe el resultado</b> y no guarda fotos de tu INE. Usamos tu placa y tu teléfono para detectar si alguien intenta registrarse con los mismos datos en otra cuenta.</li>
 <li><b>Datos técnicos:</b> registros del servidor (como fecha, hora y dirección IP de conexión) que sirven para la seguridad y para evitar abusos.</li>
 </ul>
 <p><b>No pedimos ni guardamos</b> datos sensibles (salud, religión, origen, preferencias, etc.), ni datos bancarios. Tu ubicación solo se usa en los pedidos con repartidor, como se explica arriba. Antes de subir una foto, la app le quita los datos ocultos (como la ubicación GPS).</p>
@@ -4213,7 +4213,7 @@ const LEGAL_DOCS = {
 <h3>4. Revisión automática de seguridad</h3>
 <p>Para proteger a la comunidad, los textos (mensajes, comentarios, publicaciones, notas, perfil y negocio) pasan por filtros automáticos que bloquean teléfonos, enlaces, correos, cuentas de otras apps, contenido sexual, drogas, armas y frases de acoso a menores. Las fotos se revisan en tu propio teléfono antes de subirse (desnudos y texto dentro de la imagen). Si algo se bloquea, queda un registro para que una persona del equipo lo revise, y siempre puedes <b>apelar</b> desde Configuración.</p>
 <h3>5. ¿Con quién compartimos tus datos?</h3>
-<p>Solo con proveedores que nos ayudan a que la app funcione y que actúan por nuestra cuenta: <b>Supabase</b> (base de datos, cuentas y archivos; servidores en Estados Unidos), <b>GitHub</b> (donde se publica la página y donde guardamos una copia de respaldo semanal de la base de datos, <b>cifrada</b> con una clave que solo tiene el responsable; servidores en Estados Unidos) y <b>jsDelivr</b> (entrega de programas de la página). Los mapas de los pedidos con repartidor se dibujan con <b>OpenStreetMap</b> y <b>CARTO</b>: tu teléfono les pide la imagen de la zona del mapa, sin tus datos de cuenta. La app también carga fotos de ejemplo de <b>Unsplash</b> y el clima de <b>Open-Meteo</b>, sin enviarles tus datos de cuenta. Lo que publicas lo ven las personas según las reglas de la app (por ejemplo, los mensajes solo los ven tú y tu amigo). Podremos entregar información a autoridades cuando la ley lo exija, sobre todo si hay riesgo para un menor.</p>
+<p>Solo con proveedores que nos ayudan a que la app funcione y que actúan por nuestra cuenta: <b>Supabase</b> (base de datos, cuentas y archivos; servidores en Estados Unidos), <b>GitHub</b> (donde se publica la página y donde guardamos una copia de respaldo semanal de la base de datos, <b>cifrada</b> con una clave que solo tiene el responsable; servidores en Estados Unidos) y <b>jsDelivr</b> (entrega de programas de la página). Si quieres ser repartidor, <b>Didit</b> verifica tu identidad como se explica arriba. Los mapas de los pedidos con repartidor se dibujan con <b>OpenStreetMap</b> y <b>CARTO</b>: tu teléfono les pide la imagen de la zona del mapa, sin tus datos de cuenta. La app también carga fotos de ejemplo de <b>Unsplash</b> y el clima de <b>Open-Meteo</b>, sin enviarles tus datos de cuenta. Lo que publicas lo ven las personas según las reglas de la app (por ejemplo, los mensajes solo los ven tú y tu amigo). Podremos entregar información a autoridades cuando la ley lo exija, sobre todo si hay riesgo para un menor.</p>
 <h3>6. Menores de edad</h3>
 <p>MOCHI es para personas de <b>13 años o más</b>. Si tienes entre 13 y 17 años, necesitas que tu mamá, papá o tutor lea este aviso y te dé permiso; por eso te lo pedimos al crear tu cuenta. Tu mamá, papá o tutor puede pedirnos en cualquier momento ver, corregir o borrar tus datos, o cerrar tu cuenta.</p>
 <h3>7. ¿Cuánto tiempo guardamos tus datos?</h3>
@@ -5085,7 +5085,7 @@ function vRepAlta(){
   if (tieneNegocio()) return `<div class="stack" style="max-width:640px;margin:0 auto;width:100%"><button class="btn back" data-a="atras">${ico.back}Volver</button><div class="card"><h1>Tu cuenta tiene un negocio</h1><p class="muted" style="margin:0">Una cuenta no puede ser negocio y repartidor a la vez.</p></div></div>`;
   return `<div class="stack" style="max-width:640px;margin:0 auto;width:100%"><button class="btn back" data-a="atras">${ico.back}Volver</button>
   <div class="card"><h1>Quiero ser repartidor</h1>
-   <p class="muted" style="margin:0">Llevas pedidos de los negocios de ${esc(S.cfg.ciudad)} cuando tú quieras. Antes de aprobarte, una persona del equipo revisa <b>en persona</b> tu INE, que seas tú y tu vehículo. No subimos ni guardamos fotos de tu INE.</p>
+   <p class="muted" style="margin:0">Llevas pedidos de los negocios de ${esc(S.cfg.ciudad)} cuando tú quieras. Después de mandar tu solicitud verificas tu identidad con <b>Didit</b> (foto de tu INE y una selfie) y una persona del equipo aprueba tu cuenta. MOCHI no guarda fotos de tu INE.</p>
    <form class="stack" data-form="repAlta" novalidate>
     <label class="f" for="ra-nombre">Nombre completo (como en tu INE)<input id="ra-nombre" type="text" maxlength="80" autocomplete="name" value="${esc(R.nombre||'')}"></label>
     <label class="f" for="ra-nac">Fecha de nacimiento<input id="ra-nac" type="date" value="${esc(R.nacimiento||'')}"></label>
@@ -5095,7 +5095,7 @@ function vRepAlta(){
     <label class="f" for="ra-placa" id="ra-placa-l" ${['bici','pie'].includes(R.vehiculo)?'style="display:none"':''}>Placa<input id="ra-placa" type="text" maxlength="12" autocapitalize="characters" value="${esc(R.placa||'')}"></label>
     <label class="f" for="ra-zona">Colonias o zona donde quieres repartir<input id="ra-zona" type="text" maxlength="120" placeholder="Ej.: Centro, Jiquilpan, Scally" value="${esc(R.zona||'')}"></label>
     <details class="set"><summary style="padding:12px 14px;font-size:14px">Términos del repartidor</summary><div class="bd"><ul class="small" style="margin:0;padding-left:18px;line-height:1.6">
-      <li>Debes ser mayor de 18 años y tener tu INE vigente. La revisamos en persona antes de aprobarte.</li>
+      <li>Debes ser mayor de 18 años y tener tu INE vigente. Verificas tu identidad con Didit (foto de tu INE y una selfie) y después una persona del equipo aprueba tu cuenta.</li>
       <li>Eres independiente: tú decides cuándo conectarte. La app no te cobra comisión; el envío es para ti.</li>
       <li>Mientras la tienda tiene "modo prueba", los pedidos se pagan en efectivo: pagas en la tienda y cobras al cliente.</li>
       <li>Solo ves el nombre de pila del cliente y su colonia. Su dirección exacta aparece cuando recoges el pedido y se oculta al entregar. Nunca ves su perfil, ni él el tuyo.</li>
@@ -5111,6 +5111,17 @@ function vRepAlta(){
     <button class="btn acc lg" type="submit">Enviar solicitud</button></form></div></div>`;
 }
 
+/* ---------- verificación digital con Didit ----------
+   La foto de la INE y la selfie se toman en la página de Didit y se quedan allá: a MOCHI solo llega el resultado
+   (función del servidor "verificar-repartidor", repo privado). Mientras no haya cuenta de Didit, la función responde "apagado". */
+const DIDIT_EST = {'Not Started':'Sin empezar', 'In Progress':'Sin terminar', 'In Review':'Didit la está revisando', 'Approved':'Aprobada por Didit', 'Declined':'Didit no pudo verificarte', 'Abandoned':'Sin terminar', 'Expired':'Venció', 'Resubmitted':'Didit te pide repetir un paso'};
+function repDiditCard(r){
+  const d = (r.verif||{}).didit, e = d && d.estado, listo = ['Approved','In Review'].includes(e);
+  return `<div class="card" style="gap:8px"><b>Verifica tu identidad</b>
+    <span class="small muted">Tomas foto de tu INE y una selfie en video con <b>Didit</b>, un servicio especializado. Revisa que tu INE sea real y vigente y que seas tú. MOCHI no guarda esas fotos. Después, una persona del equipo aprueba tu cuenta.</span>
+    ${e?`<span class="pill ${e==='Approved'?'ok':e==='Declined'?'bad':'warn'}" style="align-self:flex-start">${esc(DIDIT_EST[e]||e)}</span>`:''}
+    ${listo?'':`<button class="btn pri" data-a="vRepDidit">${e?'Intentar de nuevo':'Verificar mi identidad'}</button>`}</div>`;
+}
 /* ---------- modo Repartidor (en vivo) ---------- */
 function vRepVivo(){
   const P = RPV.panel; if (!P) return `<div class="rapp"><main class="rbody"><div class="rcentro"><div class="rspin"></div><p class="muted">Cargando…</p></div></main></div>`;
@@ -5118,8 +5129,8 @@ function vRepVivo(){
   const it = (ok,t,d) => `<div class="rchk ${ok?'ok':''}"><span>${ok?'✓':'•'}</span><div><b>${t}</b><div class="small muted">${d}</div></div></div>`;
   const v = r.verif || {};
   const cuerpo = r.estado!=='aprobado' ? `<div class="stack"><h1>${r.estado==='suspendido'?'Cuenta suspendida':r.estado==='rechazado'?'Solicitud no aprobada':'Verificando tu cuenta'}</h1>
-    ${r.estado==='suspendido'?`<div class="note bad">Tu cuenta está suspendida${r.faltas>=3?' (3 faltas)':''}. ${esc(r.motivo||'El equipo la está revisando.')}</div>`:r.estado==='rechazado'?`<div class="note bad">${esc(r.motivo||'Tu solicitud no fue aprobada.')}</div>`:`<p class="muted" style="margin:0">Antes de recibir pedidos, una persona del equipo revisa en persona tu INE, que seas tú y tu vehículo. Te avisamos por notificación.</p>`}
-    <div class="card">${it(true,'Solicitud enviada','Tus datos llegaron al equipo')}${it(v.ine,'INE vigente','Revisada en persona, sin guardar fotos')}${it(v.selfie,'Eres tú','La persona de la INE es quien se registra')}${it(v.vehiculo||r.vehiculo==='pie'||r.vehiculo==='bici','Vehículo y placas','Tarjeta de circulación y vehículo')}${it(r.estado==='aprobado','Aprobado por el administrador','Lo revisa una persona del equipo')}</div></div>`
+    ${r.estado==='suspendido'?`<div class="note bad">Tu cuenta está suspendida${r.faltas>=3?' (3 faltas)':''}. ${esc(r.motivo||'El equipo la está revisando.')}</div>`:r.estado==='rechazado'?`<div class="note bad">${esc(r.motivo||'Tu solicitud no fue aprobada.')}</div>`:repDiditCard(r)}
+    <div class="card">${it(true,'Solicitud enviada','Tus datos llegaron al equipo')}${it(v.ine,'INE vigente','Verificada con Didit, sin guardar fotos en MOCHI')}${it(v.selfie,'Eres tú','Selfie con prueba de vida que coincide con tu INE')}${it(r.estado==='aprobado','Aprobado por el administrador','Lo revisa una persona del equipo')}</div></div>`
     : repVivoAprobado(P);
   return `<div class="rapp">
     <header class="rtop"><div class="rlogo"><span class="mark">${esc(inits(S.cfg.marca))}</span><b>${esc(S.cfg.marca)} <i>Repartidor</i></b></div>
@@ -5132,6 +5143,16 @@ function repRepetidos(r){
   const l = r.repetidos || []; if (!l.length) return '';
   return `<div class="note bad small" style="margin-top:6px">${l.map(e=>`<div>⚠️ ${e.tipo==='placa'?'Placa':'Teléfono'} <b>${esc(e.valor)}</b>${e.vetado?` <b>vetad${e.tipo==='placa'?'a':'o'}</b>: ${esc(e.vetado)}`:''}${(e.con||[]).length?` · también ${e.tipo==='placa'?'la':'lo'} usa ${e.con.map(c=>`@${esc(c.usuario)} (${esc(c.estado)})`).join(', ')}`:''}</div>`).join('')}</div>`;
 }
+// Resultado de Didit para el admin (sin fotos: para verlas, entra a la consola de Didit)
+function repDiditAdmin(v){
+  const d = v.didit; if (!d) return '<div class="muted">Aún no hace su verificación con Didit.</div>';
+  const si = (ok, t) => `<div>${ok?'✓':'✗'} ${t}</div>`;
+  return `<div><span class="pill ${d.estado==='Approved'?'ok':d.estado==='Declined'?'bad':'warn'}">Didit: ${esc(d.estado==='Declined'?'rechazada':DIDIT_EST[d.estado]||d.estado)}</span>
+    ${d.estado==='Approved'||d.estado==='Declined'||d.estado==='In Review'?`${si(d.ine,'INE real')}${d.registro?si(d.registro==='Approved','Vigente en el registro del INE'):''}${si(d.vida,'Prueba de vida')}${si(d.cara,'La cara coincide con la INE')}${si(d.nombre_ok,'Nombre igual al de la solicitud')}${si(d.nac_ok,'Fecha de nacimiento igual')}
+    ${d.vetado?'<div style="color:var(--bad)"><b>⚠️ Su cara está en la lista de bloqueo de Didit</b></div>':''}${d.duplicado?'<div style="color:var(--bad)"><b>⚠️ Su cara se parece a otra cuenta ya verificada</b></div>':''}
+    ${(d.avisos||[]).length?`<div class="muted">${d.avisos.map(esc).join(' · ')}</div>`:''}`:''}
+    <div class="muted">Sesión ${esc(String(d.sesion||'').slice(0,8))} · fotos en la consola de Didit</div></div>`;
+}
 function aRepVivo(){
   const D = RPV.admin;
   if (!D){ vRepAdmin().then(()=>{ if (ui.mode==='admin' && ui.aTab==='repartidores') render(); }); return `<div class="rcentro"><div class="rspin"></div><p class="muted">Cargando repartidores…</p></div>`; }
@@ -5141,7 +5162,7 @@ function aRepVivo(){
   const fila = r => { const v = r.verif||{}; const pend = r.estado==='pendiente';
     return `<tr><td><b>${esc(r.nombre)}</b><div class="small muted">@${esc(r.usuarioArroba)} · ${edad(r.nacimiento)} años${v.nac_coincide===false?' · <b style="color:var(--bad)">la fecha no coincide con la de su cuenta</b>':''}</div><div class="small muted">Tel. ${esc(r.telefono)}${r.prueba?' · <span class="pill">prueba</span>':''}</div>${repRepetidos(r)}</td>
       <td>${esc(VEH[r.vehiculo]||r.vehiculo)}<div class="small muted">${esc(r.placa||'—')}</div><div class="small muted">${esc(r.zona)}</div></td>
-      <td class="small">${pend?`<label class="chk"><input type="checkbox" id="rv-ine-${r.usuario}"> INE vista en persona</label><label class="chk"><input type="checkbox" id="rv-cara-${r.usuario}"> Es la misma persona</label><label class="chk"><input type="checkbox" id="rv-veh-${r.usuario}"> Vehículo y placa</label>`
+      <td class="small">${pend?`${repDiditAdmin(v)}${v.metodo==='didit'?'':`<details><summary class="muted">Sin Didit (solo pruebas)</summary><label class="chk"><input type="checkbox" id="rv-ine-${r.usuario}"> INE revisada</label><label class="chk"><input type="checkbox" id="rv-cara-${r.usuario}"> Es la misma persona</label><label class="chk"><input type="checkbox" id="rv-veh-${r.usuario}"> Vehículo y placa</label></details>`}`
         :`INE ${v.ine?'✓':'✗'} · Cara ${v.selfie?'✓':'✗'} · Vehículo ${v.vehiculo?'✓':'✗'}${v.t?`<div class="muted">${fecha(new Date(v.t).getTime())}</div>`:''}`}</td>
       <td class="r num">${r.entregas}<div class="small muted">★ ${r.calif?Number(r.calif).toFixed(1):'—'}</div></td><td>${r.faltas}/3</td>
       <td><span class="pill ${r.estado==='aprobado'?'ok':r.estado==='pendiente'?'warn':'bad'}">${r.estado}</span>${r.online?'<div class="small muted">conectado</div>':''}</td>
@@ -5161,8 +5182,8 @@ function aRepVivo(){
   <div class="card"><h2>Cuentas de prueba</h2><p class="small muted" style="margin:0">Pueden pedir con repartidor aunque el reparto esté apagado. Usa cuentas de adultos marcadas como prueba.</p>
     <div class="row nowrap"><input type="text" id="rp-usr" placeholder="@usuario" autocapitalize="none" style="flex:1"><button class="btn sm" data-a="vRepProbador" data-o="1">Agregar</button></div>
     ${(D.probadores||[]).length?`<div class="row" style="gap:6px">${D.probadores.map(p=>`<span class="pill">@${esc(p.usuario)} <button class="lk" data-a="vRepProbador" data-x="${esc(p.usuario)}" data-o="0" aria-label="Quitar">✕</button></span>`).join('')}</div>`:''}</div>
-  ${rs.length?`<div class="tbl"><table><thead><tr><th>Repartidor</th><th>Vehículo y zona</th><th>Verificación en persona</th><th class="r">Entregas</th><th>Faltas</th><th>Estado</th><th></th></tr></thead><tbody>${rs.map(fila).join('')}</tbody></table></div>`:'<div class="empty"><h2>Aún no hay solicitudes</h2><p class="muted">Llegan desde Tienda → "Quiero ser repartidor".</p></div>'}
-  <div class="note">La INE y la cara se revisan en persona (lo hace el adulto responsable): no se toman ni se guardan fotos. Antes de abrir al público se conecta un servicio de verificación (Didit).</div></div>`;
+  ${rs.length?`<div class="tbl"><table><thead><tr><th>Repartidor</th><th>Vehículo y zona</th><th>Verificación</th><th class="r">Entregas</th><th>Faltas</th><th>Estado</th><th></th></tr></thead><tbody>${rs.map(fila).join('')}</tbody></table></div>`:'<div class="empty"><h2>Aún no hay solicitudes</h2><p class="muted">Llegan desde Tienda → "Quiero ser repartidor".</p></div>'}
+  <div class="note">La INE y la cara las verifica Didit; aquí solo llega el resultado (las fotos se ven en la consola de Didit). Tú das el clic final. Mientras no haya cuenta de Didit, en "Sin Didit (solo pruebas)" puedes aprobar cuentas de prueba.</div></div>`;
 }
 
 // mientras está abierto el modo Repartidor, se actualiza cada 10 s (solo lo del repartidor, no toda la app)
@@ -5187,14 +5208,23 @@ function registrarAccionesRepVivo(){
   });
   Object.assign(A, {
     repVeh: v => { const l = $('#ra-placa-l'); if (l) l.style.display = ['moto','auto'].includes(v) ? '' : 'none'; },
+    vRepDidit: async () => { let r;
+      try { r = await RV.sb.functions.invoke('verificar-repartidor', {body:{}}); } catch(e){ r = {error:e}; }
+      const d = r && r.data;
+      if (d && d.url) return void (location.href = d.url);
+      if (d && d.error) return toast(d.error);
+      toast('La verificación digital todavía no está lista. Te avisamos por notificación cuando puedas hacerla.'); },
     vRepOnline: async () => { const r = RPV.panel && RPV.panel.yo; if (!r) return;
       try { r.online = await rpvRpc('rep_conectar', {si:!r.online}); } catch(e){ return toast(vMsgError(e)); }
       await vRepPanel(); render(); toast(r.online?'Conectado: verás los pedidos disponibles':'Desconectado'); },
-    vRepAprobar: async x => { const ch = k => !!$(`#rv-${k}-${x}`)?.checked; const verif = {ine:ch('ine'), selfie:ch('cara'), vehiculo:ch('veh')};
-      if (!verif.ine || !verif.selfie) return toast('Primero revisa en persona la INE y que sea la misma persona.');
-      const r = (RPV.admin?.repartidores||[]).find(o=>o.usuario===x);
+    vRepAprobar: async x => { const r = (RPV.admin?.repartidores||[]).find(o=>o.usuario===x), rv = (r && r.verif) || {};
+      const ch = k => !!$(`#rv-${k}-${x}`)?.checked; let verif = {ine:ch('ine'), selfie:ch('cara'), vehiculo:ch('veh')};
+      // con Didit, el servidor ya tiene el resultado: no se mandan casillas
+      if (rv.metodo==='didit'){ if (!rv.ine || !rv.selfie) return toast('Didit no aprobó su INE o su cara. Pídele que lo intente de nuevo o rechaza la solicitud.'); verif = null; }
+      else if (!verif.ine || !verif.selfie) return toast('Primero tiene que verificarse con Didit.');
+      if (rv.didit && (rv.didit.duplicado || rv.didit.vetado) && !confirmarSimple('Didit encontró su cara en otra cuenta o en la lista de bloqueo. ¿Aprobarlo de todos modos?')) return;
       if (r && (r.repetidos||[]).length && !confirmarSimple('Su placa o teléfono ya lo usa otra cuenta o está vetado. ¿Aprobarlo de todos modos?')) return;
-      try { await rpvRpc('admin_rep_estado', {u:x, p_estado:'aprobado', p_verif:verif}); } catch(e){ return toast(vMsgError(e)); }
+      try { await rpvRpc('admin_rep_estado', verif ? {u:x, p_estado:'aprobado', p_verif:verif} : {u:x, p_estado:'aprobado'}); } catch(e){ return toast(vMsgError(e)); }
       toast('Repartidor aprobado'); repRecargarAdm(); },
     vRepEstadoAdm: async (x, el) => { const est = el.dataset.o; let motivo = null;
       if (est!=='aprobado'){ try { motivo = window.prompt(est==='suspendido'?'Razón de la suspensión (la verá el repartidor):':'Razón para anular o rechazar (la verá el repartidor):', '') ; } catch(e){} if (motivo===null) return; motivo = motivo.trim().slice(0,200);
