@@ -1282,6 +1282,15 @@ function nombreSeguro(nombre, usuario){
   return '';
 }
 const RATE = {}; // límite de velocidad: máximo 6 mensajes cada 20 segundos
+// Topes diarios (Plan MOCHI): el servidor es quien manda; aquí solo se avisa antes de subir fotos o escribir de más
+const TOPES = {foto:[5,'publicaciones con foto'], hist:[5,'historias'], msg:[100,'mensajes'], com:[100,'comentarios']};
+function inicioDia(){ const p = {}; new Intl.DateTimeFormat('en-US',{timeZone:'America/Mazatlan', hourCycle:'h23', hour:'numeric', minute:'numeric', second:'numeric'}).formatToParts(new Date()).forEach(x=>{ p[x.type] = +x.value || 0; });
+  const d = new Date(); return d.getTime() - d.getMilliseconds() - ((p.hour*60 + p.minute)*60 + p.second)*1000; }
+function topeLleno(tipo, extra){ if (!VIVO || vEsAdmin()) return ''; const [max, que] = TOPES[tipo], d = inicioDia(), mios = new Set(['u'+vUid(), ...S.misNegocios]);
+  const hoy = x => mios.has(x.autor || x.de) && (x.t||0) >= d;
+  const n = tipo==='foto' ? S.posts.filter(p=>hoy(p) && (p.fotos||[]).length).length : tipo==='hist' ? S.historias.filter(hoy).length
+    : tipo==='com' ? S.comentarios.filter(hoy).length : S.chats.reduce((a,c)=>a + c.msgs.filter(hoy).length, 0);
+  return n + (extra||1) > max ? `Llegaste al límite de hoy: ${max} ${que}. Se reinicia a las 12 de la noche.` : ''; }
 function permitirEnvio(){ const now=Date.now(); const l=(RATE[S.yo]||[]).filter(t=>now-t<20000); if (l.length>=6) return false; l.push(now); RATE[S.yo]=l; return true; }
 function senalesPublicidad(texto){
   const t = limpiarTexto(texto); const s = [];
@@ -3025,6 +3034,7 @@ function registrarAccionesExtras(){ Object.assign(A, {
   untagHist: x => { ui.draftHT = (ui.draftHT||[]).filter(i=>i!==x); renderLayer(); },
   compartirHist: x => { const h = S.historias.find(h=>h.id===x); if (!h) return;
     if (S.historias.some(o=>o.autor===S.yo && o.origen?.hist===x)) return toast('Ya la compartiste en tu historia');
+    const tl = topeLleno('hist'); if (tl) return toast(tl);
     const n = {id:'h'+Date.now().toString(36), autor:S.yo, t:Date.now(), foto:h.foto, origen:{autor:h.autor, hist:h.id}, etiq:[], estado:'aprobado', prod:null};
     S.historias.push(n); notif(h.autor,'sistema',null,{texto:`${perfilDe(S.yo).nombre} compartió tu historia.`}); save(); toast('Compartida en tu historia (24 h). Muestra quién la subió.'); },
   compartirEtiqueta: x => { const n = S.notifs.find(n=>n.id===x); if(!n) return;
@@ -3883,6 +3893,7 @@ function registrarAccionesV17(){
       const txt = ($('#eh-txt')?.value||'').trim();
       if (txt){ const r=revisar(txt,'privado',{para:x,donde:'mensaje'}); if(!r.ok){ ui.err=msgBloqueo(r); renderLayer(); return; } }
       if (!permitirEnvio()){ ui.err='Vas muy rápido. Espera unos segundos.'; renderLayer(); return; }
+      const tl = topeLleno('msg'); if (tl){ ui.err=tl; renderLayer(); return; }
       const c = chatNuevo(x); c.msgs.push({id:nuevoId('m'), de:S.yo, histComp:hid, texto:txt, t:Date.now()});
       cerrarHoja(); save(); toast(`Historia enviada a ${perfilDe(x).nombre}`); },
     repRevisado: x => { S.reportes = S.reportes.filter(r=>r.id!==x); save(); rerender(); toast('Marcado como revisado'); },
@@ -3896,6 +3907,7 @@ function registrarAccionesV17(){
       if (!amigos(S.yo,ui.chat) || bloq(ui.chat)) return toast('Solo puedes escribir a tus amigos');
       const r=revisar(t,'privado',{para:ui.chat,donde:'mensaje'}); if (!r.ok){ ui.err=msgBloqueo(r); render(); $('#m-txt').value=t; return; }
       if (!permitirEnvio()){ ui.err='Vas muy rápido. Espera unos segundos.'; render(); return; }
+      const tl = topeLleno('msg'); if (tl){ ui.err=tl; render(); $('#m-txt').value=t; return; }
       const m = {id:nuevoId('m'), de:S.yo, texto:t, t:Date.now()};
       if (ui.respMsg && ui.respMsg.chat===ui.chat && buscarMsg(ui.respMsg.id)) m.resp = ui.respMsg.id;
       ui.respMsg = null; chatNuevo(ui.chat).msgs.push(m); ui.err=''; save(); render(); $('#m-txt')?.focus();
@@ -3903,6 +3915,7 @@ function registrarAccionesV17(){
     comentario: () => {
       if (necesitaSesion()) return; const inp = (ui.sheet && $('#layer #c-txt')) || $('#c-txt'); const t=(inp?.value||'').trim(); if(!t) return; const pid = (ui.sheet && ui.sheet.post) || ui.post;
       const r=revisar(t,'publico',{donde:'comentario', post:pid}); if (!r.ok){ ui.err=msgBloqueo(r); ui.sheet?renderLayer():rerender(); return; }
+      const tl = topeLleno('com'); if (tl){ ui.err=tl; ui.sheet?renderLayer():rerender(); return; }
       const c = {id:nuevoId('k'), post:pid, autor:S.yo, texto:t, t:Date.now()};
       if (ui.respCom && ui.respCom.post===pid && comPorId(ui.respCom.id)){ c.resp = ui.respCom.id; const pa = comPorId(c.resp); if (pa.autor!==S.yo) notif(pa.autor,'comentario',S.yo,{post:pid,texto:'te respondió: '+t}); }
       ui.respCom = null; S.comentarios.push(c); notif(post(pid).autor,'comentario',S.yo,{post:pid,texto:t}); ui.err=''; save();
@@ -5828,6 +5841,7 @@ const A = {
     if (!amigos(S.yo,x)) return toast('Solo puedes enviar a tus amigos');
     if (txt){ const r=revisar(txt,'privado',{para:x,donde:'mensaje'}); if(!r.ok){ ui.err=msgBloqueo(r); renderLayer(); return; } }
     if (!permitirEnvio()) { ui.err='Vas muy rápido. Espera unos segundos.'; renderLayer(); return; }
+    const tl = topeLleno('msg', txt?2:1); if (tl){ ui.err=tl; renderLayer(); return; }
     const c=chatNuevo(x); if (txt) c.msgs.push({de:S.yo, texto:txt, t:Date.now()}); c.msgs.push({de:S.yo, post:p, t:Date.now()}); cerrarHoja(); save(); toast(`Enviado a ${perfilDe(x).nombre}`); },
   pedirPost: x => { const p=post(x); A.neg(p.autor); ui.origen=x; if(p.prod && prod(p.prod)) A.ver(p.prod); },
   seguir: x => { if(necesitaSesion()) return;
@@ -5932,6 +5946,7 @@ const F = {
     if (!amigos(S.yo,id)) { ui.err='Solo puedes responder a tus amigos.'; return renderLayer(); }
     const r=revisar(t,'privado',{para:id,donde:'respuesta a nota'}); if(!r.ok){ ui.err=msgBloqueo(r); return renderLayer(); }
     if (!permitirEnvio()){ ui.err='Vas muy rápido. Espera unos segundos.'; return renderLayer(); }
+    const tl = topeLleno('msg'); if (tl){ ui.err=tl; return renderLayer(); }
     const n=notaDe(id); chatNuevo(id).msgs.push({de:S.yo, texto:t, nota:n?n.texto:'', t:Date.now()}); save(); cerrarHoja(); toast('Respuesta enviada a su chat'); },
   checkout: () => {
     const v = id => ($('#'+id)?.value||'').trim(); const modo = document.querySelector('input[name=modo]:checked')?.value;
@@ -5956,6 +5971,7 @@ const F = {
     if (!ui.draft.length && !texto) return err('Escribe algo o agrega una foto.');
     if (!$('#pub-ok').checked) return err('Confirma que lo que publicas respeta las reglas.');
     const r = revisar(texto,'publico'); if (!r.ok) return err(msgBloqueo(r));
+    if (ui.draft.length){ const tl = topeLleno('foto'); if (tl) return err(tl); }
     const et = etiquetasDeTexto(texto);
     const p = {id:'q'+Date.now().toString(36), autor:S.yo, tipo:soyNegocio()?'negocio':'usuario', texto, likes:0, likedBy:[], t:Date.now(), prod:$('#pub-prod')?.value||null, etiq:et.ids};
     try { p.fotos = []; for (const d of ui.draft) p.fotos.push(await guardarFoto(d)); } catch(e){ return err('Este navegador no permitió guardar las fotos. Prueba con fotos de ejemplo.'); }
@@ -5969,6 +5985,7 @@ const F = {
   historia: async () => {
     const err=m=>{ ui.err=m; renderLayer(); };
     if (!ui.draftH) return err('Elige una foto.'); if (!$('#hist-ok').checked) return err('Confirma que tu foto respeta las reglas.');
+    const tl = topeLleno('hist'); if (tl) return err(tl);
     const h = {id:'h'+Date.now().toString(36), autor:S.yo, t:Date.now(), etiq:(ui.draftHT||[]).filter(permiteEtiqueta)};
     try { h.foto = await guardarFoto(ui.draftH); } catch(e){ return err('Este navegador no permitió guardar la foto. Usa una de ejemplo.'); }
     S.historias.push(h); const est = moderarNuevo(h,'hist'); if (est==='aprobado') h.etiq.forEach(id=>notif(id,'etiqueta_hist',S.yo,{hist:h.id})); ui.draftH=null; ui.draftHT=[]; cerrarHoja(); save(); rerender();
@@ -5983,11 +6000,13 @@ const F = {
     const inp=$('#st-resp'); const t=inp.value.trim(); if(!t) return; const {uid,h}=stActual();
     if (!amigos(S.yo,uid)) return toast('Síganse mutuamente para responder');
     const r=revisar(t,'privado',{para:uid,donde:'respuesta a historia'}); if (!r.ok) return toast(msgBloqueo(r)); if (!permitirEnvio()) return toast('Vas muy rápido. Espera unos segundos.');
+    const tl = topeLleno('msg'); if (tl) return toast(tl);
     chatNuevo(uid).msgs.push({de:S.yo, texto:t, hist:h.id, t:Date.now()}); notif(uid,'resp_hist',S.yo); save(); inp.value=''; inp.blur(); ui.story.paused=false; toast('Respuesta enviada a sus mensajes');
   },
   comentario: () => {
     if (necesitaSesion()) return; const t=$('#c-txt').value.trim(); if(!t) return; const pid = ui.sheet?.post || ui.post;
     const r=revisar(t,'publico',{donde:'comentario'}); if (!r.ok){ ui.err=msgBloqueo(r); ui.sheet?renderLayer():rerender(); return; }
+    const tl = topeLleno('com'); if (tl){ ui.err=tl; ui.sheet?renderLayer():rerender(); return; }
     S.comentarios.push({id:'k'+Date.now().toString(36), post:pid, autor:S.yo, texto:t, t:Date.now()}); notif(post(pid).autor,'comentario',S.yo,{post:pid,texto:t}); ui.err=''; save();
     if (ui.sheet){ renderLayer(); const art=$('#post-'+pid); if(art){ const tmp=document.createElement('div'); tmp.innerHTML=postCard(post(pid),false); art.replaceWith(tmp.firstElementChild); } setTimeout(()=>$('#c-txt')?.focus(),20); } else { rerender(); }
   },
@@ -5996,6 +6015,7 @@ const F = {
     if (!amigos(S.yo,ui.chat) || bloq(ui.chat)) return toast('Solo puedes escribir a tus amigos');
     const r=revisar(t,'privado',{para:ui.chat,donde:'mensaje'}); if (!r.ok){ ui.err=msgBloqueo(r); render(); $('#m-txt').value=t; return; }
     if (!permitirEnvio()){ ui.err='Vas muy rápido. Espera unos segundos.'; render(); return; }
+    const tl = topeLleno('msg'); if (tl){ ui.err=tl; render(); $('#m-txt').value=t; return; }
     chatNuevo(ui.chat).msgs.push({de:S.yo, texto:t, t:Date.now()}); ui.err=''; save(); render(); $('#m-txt')?.focus();
   },
   perfilU: async () => {
