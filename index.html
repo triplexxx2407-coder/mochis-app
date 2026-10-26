@@ -1804,7 +1804,7 @@ function vHome(){
     ${misPend?`<div class="note">Tienes ${misPend} publicación(es) en revisión. Aparecen en cuanto se aprueban.</div>`:''}
     ${ui.feed!=='siguiendo'?`<div class="stack" style="gap:10px">${negociosDestacados('Negocios destacados')}</div>`:''}
     <div class="feed">${html || `<div class="empty"><h2>Nada por aquí</h2><p class="muted">${ui.feed==='siguiendo'?'Sigue perfiles para ver sus publicaciones.':'Todavía no hay publicaciones.'}</p></div>`}
-    ${l.length>ui.feedN?`<button class="btn block" data-a="masFeed">Ver más publicaciones</button>`:(l.length?'<p class="small muted" style="text-align:center">Ya viste todo. ¡Vuelve más tarde!</p>':'')}</div>
+    ${l.length>ui.feedN || (VIVO && VPAG.hayMas)?`<button class="btn block" data-a="masFeed">Ver más publicaciones</button>`:(l.length?'<p class="small muted" style="text-align:center">Ya viste todo. ¡Vuelve más tarde!</p>':'')}</div>
   </div>${columnaDerecha()}</div>`;
 }
 function vPost(){
@@ -4051,6 +4051,7 @@ function listaFeed(){
   if (ui.feed==='negocios') l = l.filter(p=>p.tipo==='negocio');
   const pen = new Set(ui.penal||[]); const H = 3600e3;
   if (VIVO){ // en vivo: lo más nuevo arriba, de todos (sigas o no), con una mezcla ligera
+    if (VPAG.hayMas) l = l.filter(p=>!p.sid || p.t >= VPAG.corte); // lo más viejo llega con "Ver más", en orden
     const sc = p => p.t + (sigue(S.yo,p.autor)?0.15*H:0) + (amigoQueCompartio(p.id)?0.1*H:0) + jit(p.id, 0.1*H) - (pen.has(p.id)?3*H:0);
     return l.sort((a,b)=>sc(b)-sc(a));
   }
@@ -4469,7 +4470,10 @@ async function vCargar(){
       blo: sb.from('bloqueos').select('de,a'),
       negs: sb.from('negocios').select('*'),
       prods: sb.from('productos').select('*').limit(3000),
-      posts: sb.from('feed2').select('*').order('created_at',{ascending:false}).limit(400),
+      posts: sb.from('feed2').select('*').order('created_at',{ascending:false}).limit(VPAG.lim + 1),
+      misPosts: sb.from('feed2').select('*').eq('autor', uid).order('created_at',{ascending:false}).limit(100),
+      ...(VPAG.autores.size ? {pfPosts: sb.from('feed2').select('*').in('autor', [...VPAG.autores]).order('created_at',{ascending:false}).limit(300)} : {}),
+      ...(VPAG.negs.size ? {ngPosts: sb.from('feed2').select('*').in('negocio', [...VPAG.negs]).order('created_at',{ascending:false}).limit(300)} : {}),
       coms: sb.from('comments').select('id,post,autor,texto,estado,created_at,responde,eliminado').order('created_at').limit(5000),
       hist: sb.from('historias').select('*').order('created_at',{ascending:false}).limit(600),
       vistas: sb.from('hist_vistas').select('hist').limit(5000),
@@ -4495,11 +4499,18 @@ async function vCargar(){
         reportes: sb.from('reportes').select('*').order('created_at',{ascending:false}).limit(500),
         bit: sb.from('bitacora').select('*').order('t',{ascending:false}).limit(300),
         adm: sb.rpc('admin_perfiles2'),
+        pendPosts: sb.from('feed2').select('*').eq('estado','pendiente').order('created_at',{ascending:false}).limit(300),
         repdet: sb.rpc('admin_reportes_detalle')
       } : {})
     };
     const keys = Object.keys(pedir); const vals = await Promise.all(Object.values(pedir));
     const D = {}; keys.forEach((k,i)=>{ if (vals[i].error) console.warn('vivo', k, vals[i].error.message); D[k] = vals[i].data || []; });
+    // Inicio por partes: las más nuevas + las mías + las de perfiles abiertos + las que se usan en guardados, mensajes y avisos
+    VPAG.hayMas = D.posts.length > VPAG.lim; D.posts = D.posts.slice(0, VPAG.lim); VPAG.corte = D.posts.length ? vMs(D.posts[D.posts.length-1].created_at) : 0;
+    const vistos = new Set(), unir = l => l.filter(p=>!vistos.has(p.id) && vistos.add(p.id));
+    D.posts = unir([...D.posts, ...D.misPosts, ...(D.pfPosts||[]), ...(D.ngPosts||[]), ...(D.pendPosts||[])]);
+    const faltan = [...new Set([...D.guard.map(g=>g.post), ...D.msgs.map(m=>m.post), ...D.notifs.map(n=>n.post), ...(D.reportes||[]).map(r=>r.post)].filter(id=>id && !vistos.has(id)))].slice(0, 150);
+    if (faltan.length){ const fx = await sb.from('feed2').select('*').in('id', faltan); if (fx.error) console.warn('vivo', 'posts sueltos', fx.error.message); D.posts = D.posts.concat(unir(fx.data||[])); }
     const postIds = (D.posts||[]).map(p=>p.id);
     // Los totales de "me gusta" los cuenta el servidor; solo bajan los reposts de las publicaciones cargadas
     const [cg, cl, rp] = postIds.length ? await Promise.all([
@@ -4545,11 +4556,7 @@ function vArmar(D, E, admin, conteos, promCli){
   // publicaciones, me gusta, comentarios
   const likesDe = {}; D.likes.forEach(l=>likesDe[l.post] = l);
   const likes = {};
-  const posts = D.posts.map(p=>{ const lk = likesDe[p.id] || {n:0, yo:false, muestra:[]}; const yoLe = !!lk.yo; if (yoLe) likes[me+'|q'+p.id] = true;
-    const mod = p.mod||null;
-    return {id:'q'+p.id, sid:p.id, autor:p.negocio?negDe(p.negocio):'u'+p.autor, autorU:'u'+p.autor, tipo:p.negocio?'negocio':'usuario', fotos:(p.fotos||[]).map(vFotoObj), texto:p.texto||'',
-      likes:lk.n - (yoLe?1:0), likedBy:(lk.muestra||[]).map(x=>'u'+x), estado:p.estado, motivo:p.motivo, t:vMs(p.created_at), prod:p.prod?'p'+p.prod:null, etiq:p.etiq||[],
-      mod:mod?{por:mod.por, razon:mod.razon, t:mod.t, antes:mod.antes}:null}; });
+  const posts = D.posts.map(p=>{ const lk = likesDe[p.id]; if (lk && lk.yo) likes[me+'|q'+p.id] = true; return vPostObj(p, lk); });
   const comentarios = D.coms.filter(c=>c.estado==='ok').map(c=>({id:'k'+c.id, sid:c.id, post:'q'+c.post, autor:'u'+c.autor, texto:c.eliminado?'':c.texto, t:vMs(c.created_at), resp:c.responde?'k'+c.responde:undefined, eliminado:!!c.eliminado}));
   const decisiones = posts.filter(p=>p.mod && p.mod.por==='auto').map(p=>({tipo:'post', id:p.id, d:p.estado==='aprobado'?'aprobado':p.estado==='rechazado'?'rechazado':'pendiente', razon:p.mod.razon||'', t:p.mod.t||p.t, revisarFoto:!!(p.mod&&p.mod.revisarFoto)}));
   // historias
@@ -4623,6 +4630,55 @@ function vArmar(D, E, admin, conteos, promCli){
   S = SV = S2; SNAP = vFoto(S);
 }
 let SV = null;
+
+/* ---------- inicio por partes (Plan MOCHI paso 3a) ---------- */
+// Al abrir solo bajan las 40 publicaciones más nuevas; "Ver más" pide las siguientes 40 al servidor.
+const VPAG = {lim:40, hayMas:false, corte:0, cargando:false, autores:new Set(), negs:new Set()};
+function vPostObj(p, lk){ lk = lk || {n:0, yo:false, muestra:[]}; const yoLe = !!lk.yo, mod = p.mod||null;
+  return {id:'q'+p.id, sid:p.id, autor:p.negocio?'b'+p.negocio:'u'+p.autor, autorU:'u'+p.autor, tipo:p.negocio?'negocio':'usuario', fotos:(p.fotos||[]).map(vFotoObj), texto:p.texto||'',
+    likes:lk.n - (yoLe?1:0), likedBy:(lk.muestra||[]).map(x=>'u'+x), estado:p.estado, motivo:p.motivo, t:vMs(p.created_at), prod:p.prod?'p'+p.prod:null, etiq:p.etiq||[],
+    mod:mod?{por:mod.por, razon:mod.razon, t:mod.t, antes:mod.antes}:null}; }
+// Suma publicaciones que llegaron después (sin volver a bajar todo) con sus "me gusta", guardados y compartidos
+async function vAgregarPosts(rows){
+  const sb = RV.sb, me = 'u'+vUid(); let nuevas = (rows||[]).filter(p=>!S.posts.some(x=>x.sid===p.id)); if (!nuevas.length) return 0;
+  const ids = nuevas.map(p=>p.id);
+  const [cg, cl, rp] = await Promise.all([sb.rpc('conteo_guardados', {ids}), sb.rpc('conteo_likes', {ids}), vTodo(() => sb.rpc('reposts_de', {ids}).order('usuario').order('post'))]);
+  if (VQ.cargando) await VQ.cargando;
+  if (!VIVO || !S || S===SDEMO) return 0;
+  nuevas = nuevas.filter(p=>!S.posts.some(x=>x.sid===p.id)); if (!nuevas.length) return 0;
+  const likesDe = {}; (cl.data||[]).forEach(l=>likesDe[l.post] = l);
+  nuevas.forEach(p=>{ const o = vPostObj(p, likesDe[p.id]); if (likesDe[p.id] && likesDe[p.id].yo) S.likes[me+'|'+o.id] = true; S.posts.push(o); });
+  const misG = new Set(S.guardados.filter(g=>g.u===me).map(g=>g.post));
+  (cg.data||[]).forEach(c=>{ const k = 'q'+c.post; const otros = c.n - (misG.has(k)?1:0); for (let i=0;i<otros;i++) S.guardados.push({u:'anon'+i, post:k, t:0}); });
+  const yaR = new Set(S.reposts.map(r=>r.u+'|'+r.post));
+  (rp.data||[]).forEach(r=>{ if (!yaR.has('u'+r.usuario+'|q'+r.post)) S.reposts.push({u:'u'+r.usuario, post:'q'+r.post, t:vMs(r.created_at)}); });
+  // lo que vino del servidor ya está guardado: que no se mande de regreso
+  const f = vFoto(S); ['posts','likes','guardados','reposts'].forEach(k=>{ SNAP[k] = f[k]; });
+  return nuevas.length;
+}
+async function vMasPosts(){
+  if (VPAG.cargando || !VPAG.hayMas) return; VPAG.cargando = true;
+  try {
+    let {data, error} = await RV.sb.from('feed2').select('*').lt('created_at', new Date(VPAG.corte).toISOString()).order('created_at',{ascending:false}).limit(41);
+    if (error) return toast(vMsgError(error));
+    VPAG.hayMas = data.length > 40; data = data.slice(0, 40);
+    if (data.length){ VPAG.lim += data.length; VPAG.corte = vMs(data[data.length-1].created_at); }
+    await vAgregarPosts(data);
+  } finally { VPAG.cargando = false; }
+}
+// Al abrir un perfil o un negocio: bajar sus publicaciones (se recuerdan los últimos 8 que abriste)
+async function vPostsDe(campo, id){
+  const set = campo==='negocio' ? VPAG.negs : VPAG.autores; if (!id || set.has(id)) return;
+  set.add(id); if (set.size > 8) set.delete(set.values().next().value);
+  const {data, error} = await RV.sb.from('feed2').select('*').eq(campo, id).order('created_at',{ascending:false}).limit(60);
+  if (error) return console.warn('vivo', 'posts de', error.message);
+  if (await vAgregarPosts(data)) rerender();
+}
+async function vPostSuelto(sid){
+  const {data, error} = await RV.sb.from('feed2').select('*').eq('id', sid);
+  if (error) { console.warn('vivo', 'post', error.message); return 0; }
+  return vAgregarPosts(data);
+}
 
 /* ---------- lista de "a quién le gustó": se pide solo al abrirla ---------- */
 const VLIKERS = {};
@@ -4971,6 +5027,12 @@ function registrarAccionesVivo(){
     if (VIVO){ VIVO=false; S=SDEMO; document.body.classList.remove('vivo'); ui.sheet=null; ui.chat=null; ui.view='home'; renderLayer(); }
     return modo2(x);
   };
+  A.masFeed = (orig => async () => { if (!VIVO) return orig(); ui.feedN += 12;
+    if (VPAG.hayMas && listaFeed().length < ui.feedN + 12){ const b = $('[data-a="masFeed"]'); if (b){ b.disabled = true; b.textContent = 'Cargando…'; } await vMasPosts(); }
+    rerender(); })(A.masFeed);
+  A.verPerfil = (orig => x => { orig(x); if (VIVO && x && x[0]==='u' && x!==S.personal) vPostsDe('autor', x.slice(1)); })(A.verPerfil);
+  A.neg = (orig => (x, ...r) => { const res = orig(x, ...r); if (VIVO && x && x[0]==='b'){ const n = S.negocios.find(o=>o.id===x); if (n && n.sid) vPostsDe('negocio', n.sid); } return res; })(A.neg);
+  A.verPost = (orig => (x, ...r) => { if (VIVO && x && x[0]==='q' && !post(x)) return vPostSuelto(x.slice(1)).then(()=>orig(x, ...r)); return orig(x, ...r); })(A.verPost);
   A.mode = (orig => x => { if (VIVO && x==='app'){ ui.mode='app'; ui.err=''; render(); window.scrollTo(0,0); return; } return orig(x); })(A.mode);
   ['simularAct','simularFollow','adelantar','reiniciar','resetSi','reset','negDemo','fotosEjemplo','histEjemplo','fotosProdEjemplo'].forEach(k=>{ const o = A[k]; A[k] = (...a) => VIVO ? toast('En vivo no hay datos de ejemplo.') : o && o(...a); });
   const logout = A.logout; A.logout = () => VIVO ? A.rSalir() : logout();
