@@ -4415,7 +4415,7 @@ function registrarAccionesLegal(){
 let SDEMO = S, SNAP = null;
 const VQ = {cola:Promise.resolve(), cargando:null, timer:null, canal:null, intervalo:null, listo:false, ultimaCarga:0};
 const PCOLS = 'id,usuario,nombre,bio,foto,color,priv,verif,created_at,ejemplo,verif_t';
-const PEDCOLS = 'id,cliente,negocio,items,total,nota,estado,created_at,actualizado,folio,hist,nombre,cambio,origen,cancelado_por,intentos';
+const PEDCOLS = 'id,cliente,negocio,items,total,nota,estado,created_at,actualizado,folio,hist,nombre,cambio,origen,cancelado_por,intentos,modo';
 const vUid = () => RV.user && RV.user.id;
 const vMe = () => 'u' + vUid();
 const vSid = x => x ? String(x).slice(1) : null;
@@ -4887,7 +4887,7 @@ async function vEntrar(){
   if (!VQ.listo){
     $('#app').innerHTML = `<div class="rwrapv"><div class="protobar rprotobar"><b>En vivo</b><span>Cargando tu cuenta…</span></div><div class="rcentro"><div class="rspin"></div><p class="muted">Conectando…</p></div></div>`;
     try { await vCargar(); } catch(e){ console.error(e); RV.fase='sinred'; return renderReal(); }
-    await vRepEstado();
+    await vRepEstado(); repAplicar(); SNAP = vFoto(SV); vRepInfos().then(c=>{ if (c && VIVO) render(); });
     VQ.listo = true; vCanal(true); setTimeout(()=>{ if (typeof revisarLegal==='function') revisarLegal(); }, 800);
     clearInterval(VQ.intervalo); VQ.intervalo = setInterval(()=>{ if (VIVO && document.visibilityState==='visible' && Date.now()-VQ.ultimaCarga>240000) vRecargar(); }, 30000);
   }
@@ -4902,7 +4902,7 @@ function vSalirVivo(){ vCanal(false); clearInterval(VQ.intervalo); VQ.listo = fa
 async function vRecargar(forzar){
   if (!VQ.listo || !RV.user) return;
   const era = S===SV; try { await vCargar(); } catch(e){ console.warn(e); return; }
-  await vRepEstado(); if (ui.mode==='vrep') await vRepPanel();
+  await vRepEstado(); repAplicar(); SNAP = vFoto(SV); vRepInfos().then(c=>{ if (c && VIVO) render(); }); if (ui.mode==='vrep') await vRepPanel();
   if (VIVO && era){ S = SV; vRefrescar(forzar); }
 }
 let vPronto = null; function vRecargarPronto(){ clearTimeout(vPronto); const falta = Math.max(1200, 20000 - (Date.now() - VQ.ultimaCarga)); vPronto = setTimeout(()=>vRecargar(), falta); }
@@ -5122,13 +5122,6 @@ function vRepVivo(){
       ${r.estado==='aprobado'?`<button class="rsw ${r.online?'on':''}" data-a="vRepOnline" aria-pressed="${r.online}"><span></span>${r.online?'Conectado':'Desconectado'}</button>`:''}</header>
     <main class="rbody">${cuerpo}</main></div>`;
 }
-// (la app completa del repartidor aprobado llega en el siguiente PR)
-function repVivoAprobado(P){
-  const r = P.yo;
-  return `<div class="stack"><div class="rstats"><div><span>Hoy</span><b class="num">${money(Math.round((P.hoy?.ganado||0)*100))}</b></div><div><span>Entregas</span><b class="num">${r.entregas}</b></div><div><span>Calificación</span><b>★ ${r.calif?Number(r.calif).toFixed(1):'Nuevo'}</b></div></div>
-    <div class="empty" style="padding:30px 10px"><h2>${r.online?'Conectado':'Estás desconectado'}</h2><p class="muted">Tu cuenta está aprobada. Los pedidos aparecerán aquí cuando el reparto se abra en ${esc(S.cfg.ciudad)}.</p></div></div>`;
-}
-
 /* ---------- ADMIN → Repartidores (en vivo) ---------- */
 function aRepVivo(){
   const D = RPV.admin;
@@ -5163,9 +5156,9 @@ function aRepVivo(){
   <div class="note">La INE y la cara se revisan en persona (lo hace el adulto responsable): no se toman ni se guardan fotos. Antes de abrir al público se conecta un servicio de verificación (Didit).</div></div>`;
 }
 
-// mientras está abierto el modo Repartidor, se actualiza cada 15 s (solo lo del repartidor, no toda la app)
+// mientras está abierto el modo Repartidor, se actualiza cada 10 s (solo lo del repartidor, no toda la app)
 setInterval(()=>{ if (!VIVO || ui.mode!=='vrep' || document.visibilityState!=='visible' || ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) return;
-  vRepPanel().then(()=>{ if (ui.mode==='vrep') render(); }); }, 15000);
+  vRepPanel().then(()=>{ if (ui.mode==='vrep') render(); }); }, 10000);
 function registrarAccionesRepVivo(){
   const repRecargarAdm = async () => { await vRepAdmin(); if (ui.mode==='admin') render(); };
   Object.assign(F, {
@@ -5219,6 +5212,271 @@ function registrarAccionesRepVivo(){
     }
     return modo2(x);
   };
+}
+
+/* ---------- REPARTO EN VIVO · paso 3: pedir con repartidor, seguimiento, Mi negocio y app del repartidor ----------
+   El servidor decide todo: aquí solo se muestra lo que devuelven reparto_info y rep_panel.
+   La dirección exacta solo viaja al servidor; el repartidor la recibe hasta que recoge el pedido. */
+const RPI = {}; // reparto_info por pedido (sid), para no perderlo cuando se vuelve a armar S
+let vCheckoutDemo = null;
+const MSG_REP = {voy_tienda:'Voy a la tienda', en_tienda:'Ya estoy en la tienda', en_camino:'Voy en camino', afuera:'Estoy afuera', no_encuentro:'No encuentro el domicilio', tardo:'Me voy a tardar unos minutos'};
+const MSG_CLI = {ya_salgo:'Ya salgo', espera:'Espérame un momento, por favor', porton:'Toca el portón', gracias:'¡Gracias!'};
+const REP_FIN = ['entregado','sin_repartidor','cancelado','no_pago'];
+const REP_EST_R = {asignado:'Ve a la tienda', en_tienda:'En la tienda', en_camino:'Llévalo al cliente', llego:'Con el cliente', no_pago:'Problema de pago'};
+const repMapsUrl = (lat, lng) => `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(Number(lat).toFixed(6)+','+Number(lng).toFixed(6))}`;
+function repGeo(){ return new Promise((ok, no) => {
+  if (!navigator.geolocation) return no(new Error('Tu navegador no permite saber tu ubicación.'));
+  navigator.geolocation.getCurrentPosition(p => ok({lat:p.coords.latitude, lng:p.coords.longitude, prec:Math.round(p.coords.accuracy||0)}),
+    e => no(new Error(e && e.code===1 ? 'Da permiso de ubicación a MOCHI en tu navegador (en el candado junto a la dirección de la página).' : 'No pudimos obtener tu ubicación. Intenta de nuevo con buena señal.')),
+    {enableHighAccuracy:true, timeout:15000, maximumAge:30000}); }); }
+const repMsgs = (lista, propios) => (lista||[]).length ? `<div class="stack" style="gap:4px">${lista.slice(-4).map(m=>`<div class="small"><b>${m.de===propios?'Tú':m.de==='cliente'?'Cliente':'Repartidor'}:</b> ${esc((m.de==='cliente'?MSG_CLI:MSG_REP)[m.clave]||'')} <span class="muted">${hora(vMs(m.t))}</span></div>`).join('')}</div>` : '';
+const repBotonesMsg = (pid, claves, de) => `<div class="row" style="gap:6px">${Object.entries(claves).map(([k,l])=>`<button class="btn sm soft" data-a="vRepMsg" data-x="${pid}" data-o="${k}" data-de="${de}">${esc(l)}</button>`).join('')}</div>`;
+
+// Pasa lo del servidor a los pedidos ya armados (cliente y negocio usan las mismas pantallas de la demo)
+function repAplicar(D){
+  const T = SV; if (!T || !T.pedidos) return;
+  const A0 = RPV.app || {};
+  T.cfg.reparto = Object.assign({}, T.cfg.reparto||{}, {espera:Number(A0.espera)||5, seguroPct:Number(A0.seguroPct)||0, base:vCent(A0.base), porKm:vCent(A0.porKm)});
+  if (D && D.negs) D.negs.forEach(n=>{ const x = T.negocios.find(b=>b.sid===n.id); if (x){ x.repartoSrv = !!n.reparto_app; x.lat = n.lat; x.lng = n.lng; } });
+  T.negocios.forEach(x=>{ x.repartoApp = !!(x.repartoSrv && x.lat!=null && A0.puedo); });
+  if (D && D.peds) D.peds.forEach(p=>{ if (p.modo==='reparto'){ const x = T.pedidos.find(o=>o.sid===p.id); if (x) x.modo = 'reparto'; } });
+  T.repartidores = T.repartidores || [];
+  T.pedidos.forEach(p=>{ if (p.modo!=='reparto') return; const I = RPI[p.sid]; if (!I) { if (!p.rep) p.rep = {estado:'esperando_tienda', ofertas:[], pasos:[], rep:null, oferta:0, seguro:0, srv:false}; return; }
+    const rid = I.rep ? 'rv'+p.sid : null;
+    if (rid){ const r = {id:rid, nombre:I.rep.nombre, vehiculo:VEH[I.rep.vehiculo]||I.rep.vehiculo, placa:I.rep.placa||'—', color:'#0D6B5B', entregas:I.rep.entregas||0, calif:I.rep.calif?Number(I.rep.calif):null, estado:'aprobado'};
+      const i = T.repartidores.findIndex(x=>x.id===rid); if (i>=0) T.repartidores[i] = r; else T.repartidores.push(r); }
+    p.rep = {estado:I.estado, oferta:vCent(I.oferta), minimo:vCent(I.minimo), seguro:vCent(I.seguro), km:Number(I.km)||0, expira:I.expira?vMs(I.expira):0, rep:rid, srv:true,
+      pasos:(I.pasos||[]).map(x=>({s:x.s, t:typeof x.t==='number'?x.t:vMs(x.t)})), ofertas:(I.contraofertas||[]).map(o=>({id:o.id, monto:vCent(o.monto), nombre:o.nombre, vehiculo:VEH[o.vehiculo]||o.vehiculo, calif:o.calif, entregas:o.entregas})), msgs:I.msgs||[], intentos:0};
+    if (!p.rep.pasos.length) p.rep.pasos = [{s:I.estado, t:Date.now()}];
+    p.envio = p.rep.oferta; p.total = p.subtotal + p.envio + p.rep.seguro; p.cliente.colonia = I.colonia||p.cliente.colonia; });
+}
+// Pide al servidor el estado del reparto de mis pedidos (solo los que siguen en curso o recién terminados)
+let repInfosCorriendo = false;
+async function vRepInfos(){
+  if (!VIVO || !S || !S.pedidos || repInfosCorriendo) return false;
+  const ahora = Date.now();
+  const ps = S.pedidos.filter(p=>p.modo==='reparto' && p.sid && (enCurso(p) || ahora - (p.hist.at(-1)?.t||p.creado) < 3*DIA)).slice(0, 12);
+  if (!ps.length) return false;
+  repInfosCorriendo = true; let cambio = false;
+  try { await Promise.all(ps.map(async p => { const {data, error} = await RV.sb.rpc('reparto_info', {pid:p.sid}); if (error || !data) return;
+    const antes = RPI[p.sid]; if (!antes || JSON.stringify(antes)!==JSON.stringify(data)) cambio = true;
+    if (antes && antes.estado!==data.estado) vRecargarPronto(); RPI[p.sid] = data; })); }
+  finally { repInfosCorriendo = false; }
+  if (cambio){ repAplicar(); SNAP = vFoto(SV); }
+  return cambio;
+}
+
+/* ---------- checkout con repartidor ---------- */
+function vCheckoutVivo(){
+  const c = S.carrito; if (!VIVO || !c || !c.items.length) return vCheckoutDemo();
+  const n = neg(c.neg); if (!n || !n.repartoApp) return vCheckoutDemo();
+  const k = ui.ck && ui.ck.neg===n.id ? ui.ck : (ui.ck = {neg:n.id, modo:'reparto', nombre:nombrePila(yo().nombre)});
+  const sub = subtotalCarrito(), q = k.cot, rep = k.modo==='reparto';
+  const minC = q ? vCent(q.minimo) : 0, of = q ? Math.max(minC, k.oferta||minC) : 0, seg = q ? Math.round(of*(Number(q.seguroPct)||0)/100) : 0;
+  return `<div class="stack"><button class="btn back" data-a="go" data-x="carrito">${ico.back}Carrito</button><h1>Confirmar pedido</h1>
+  <form class="cols" data-form="checkout" novalidate><div class="stack">
+    <div class="card"><h2>1. Tu nombre</h2><label class="f" for="f-nombre">Nombre<input id="f-nombre" type="text" autocomplete="given-name" maxlength="60" value="${esc(k.nombre||'')}"></label>
+      <span class="small muted">${rep?'El repartidor solo ve tu nombre de pila y tu colonia; tu dirección exacta la ve cuando recoge el pedido y se borra al entregar.':'Solo pedimos tu nombre: el negocio lo usa para entregarte tu pedido.'}</span></div>
+    <div class="card"><h2>2. ¿Cómo lo recibes?</h2><div class="radio">
+      <label><input type="radio" name="rmodo" value="reparto" data-ch="vCkModo" ${rep?'checked':''}><span>Repartidor de la app<small>Tú ofreces cuánto pagas el envío · un repartidor de ${esc(S.cfg.ciudad)} lo acepta</small></span></label>
+      <label><input type="radio" name="rmodo" value="recoger" data-ch="vCkModo" ${rep?'':'checked'}><span>Recoger en tienda<small>Sin costo · te damos un código para recogerlo</small></span></label></div>
+      ${rep?`<div class="stack">
+        <label class="f" for="rk-calle">Calle y número<input id="rk-calle" type="text" maxlength="120" autocomplete="street-address" value="${esc(k.calle||'')}"></label>
+        <label class="f" for="rk-col">Colonia<input id="rk-col" type="text" maxlength="60" value="${esc(k.colonia||'')}"></label>
+        <label class="f" for="rk-ref">Referencias <span class="h">Opcional. Sin teléfonos: el repartidor te avisa por la app.</span><input id="rk-ref" type="text" maxlength="120" placeholder="Portón verde, frente a la tienda" value="${esc(k.ref||'')}"></label>
+        <div class="row nowrap"><button type="button" class="btn ${k.lat!=null?'':'pri'}" data-a="vCkUbic">${k.buscando?'Buscando tu ubicación…':k.lat!=null?'Volver a tomar mi ubicación':'Usar mi ubicación actual'}</button>${k.lat!=null?`<span class="small muted">Ubicación lista${k.prec?` (±${k.prec} m)`:''}</span>`:''}</div>
+        <span class="small muted">Tómala estando en el lugar donde recibirás el pedido. Con ella calculamos la distancia y el envío mínimo.</span>
+        ${q && q.lejos?'<div class="note bad">Tu ubicación está muy lejos de este negocio.</div>':''}
+        ${q && !q.lejos?`<label class="f" for="rk-oferta">¿Cuánto ofreces por el envío? ($)<input id="rk-oferta" type="number" min="${minC/100}" step="1" inputmode="numeric" value="${of/100}"></label>
+        <span class="small muted">Mínimo <b>${money(minC)}</b> por la distancia (~${Number(q.km).toFixed(1)} km). Si ofreces un poco más, lo toman más rápido. Los repartidores pueden aceptar o pedirte más. Si nadie lo toma en ${RC().espera} min, se cancela solo y no pagas nada.</span>`:''}</div>`:''}</div>
+    <div class="card"><h2>3. Pago</h2><div class="radio"><label><input type="radio" name="rpago" value="efectivo" checked><span>Efectivo<small>${rep?'Al recibir, al repartidor':'Al recoger'}</small></span></label></div>
+      <label class="f" for="f-cambio">¿Con cuánto pagas? <span class="h">Opcional, para llevar cambio.</span><input id="f-cambio" type="number" min="0" step="1" inputmode="numeric" value="${esc(k.cambio||'')}"></label>
+      <label class="f" for="f-nota">Nota para el negocio <span class="h">Opcional</span><input id="f-nota" type="text" maxlength="140" value="${esc(k.nota||'')}"></label></div></div>
+   <div class="card" style="position:sticky;top:16px"><h2>Resumen</h2><div class="row">${avatar(perfilDe(n.id),30)}<b>${esc(n.nombre)}</b></div>
+     ${c.items.map(it=>`<div class="line small"><span>${esc(String(it.qty).replace('.',','))} × ${esc(prod(it.pid).nombre)}</span><span class="num">${money(Math.round(precioUnitario(prod(it.pid),it.sel)*it.qty))}</span></div>`).join('')}
+     <div class="line"><span>Subtotal</span><span class="num">${money(sub)}</span></div>
+     ${rep?`<div class="line"><span>Envío</span><span class="num" id="rk-env">${q&&!q.lejos?money(of):'—'}</span></div>
+     <div class="line"><span>Seguro del repartidor <span class="small muted">(${Number(q?.seguroPct||0)}%)</span></span><span class="num" id="rk-seg">${q&&!q.lejos?money(seg):'—'}</span></div>`:''}
+     <div class="line tot"><span>Total</span><span class="num" id="rk-tot">${money(sub + (rep&&q&&!q.lejos ? of+seg : 0))}</span></div>
+     ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}
+     <button class="btn pri block lg" type="submit" ${k.enviando?'disabled':''}>${k.enviando?'Enviando…':'Hacer pedido'}</button>
+     <span class="small muted">Al confirmar aceptas los Términos y el Aviso de privacidad.</span></div>
+  </form></div>`;
+}
+function vCkGuardar(){ const k = ui.ck; if (!k) return; const v = id => { const e = $('#'+id); return e ? e.value : undefined; };
+  [['nombre','f-nombre'],['calle','rk-calle'],['colonia','rk-col'],['ref','rk-ref'],['cambio','f-cambio'],['nota','f-nota']].forEach(([a,b])=>{ const x = v(b); if (x!==undefined) k[a] = x; });
+  const o = v('rk-oferta'); if (o!==undefined && o!=='') k.oferta = Math.round(+o)*100; }
+function vCkTotales(){ const k = ui.ck, q = k && k.cot; if (!q || q.lejos) return;
+  const minC = vCent(q.minimo), of = Math.max(minC, Math.round(+($('#rk-oferta')?.value||0))*100), seg = Math.round(of*(Number(q.seguroPct)||0)/100);
+  const s = (id, t) => { const e = $('#'+id); if (e) e.textContent = t; }; s('rk-env', money(of)); s('rk-seg', money(seg)); s('rk-tot', money(subtotalCarrito()+of+seg)); }
+document.addEventListener('input', e => { if (e.target && e.target.id==='rk-oferta') vCkTotales(); });
+
+/* ---------- seguimiento del cliente (en vivo) ---------- */
+function repClienteVivo(p){
+  const R = p.rep; if (!R) return '';
+  if (!R.srv) return enCurso(p) ? `<div class="card"><h2>Repartidor</h2><p class="small muted" style="margin:0">Cargando…</p></div>` : '';
+  const r = R.rep && rep(R.rep);
+  if (R.estado==='esperando_tienda') return `<div class="card"><h2>Repartidor</h2><p class="small muted" style="margin:0">Cuando la tienda acepte tu pedido, lo ofrecemos a los repartidores de ${esc(S.cfg.ciudad)} por ${money(R.oferta)}. Tienes ${RC().espera} min para conseguir repartidor.</p></div>`;
+  if (R.estado==='sin_repartidor') return `<div class="note bad"><b>No hubo repartidores disponibles.</b> Tu pedido se canceló y no se te cobra nada. Puedes volver a pedir ofreciendo un poco más o elegir recoger en tienda.</div>`;
+  if (R.estado==='cancelado') return '';
+  if (R.estado==='no_pago') return `<div class="note bad"><b>El repartidor reportó un problema de pago.</b> Una persona del equipo lo está revisando.</div>`;
+  if (R.estado==='buscando') return `<div class="card"><div class="row between"><h2>Buscando repartidor</h2><span class="pill warn num" data-exp="${R.expira}">${mmss(R.expira-Date.now())}</span></div>
+    <div class="line"><span>Tu oferta de envío</span><b class="num">${money(R.oferta)}</b></div>
+    <div class="row"><span class="small muted">¿Quieres que sea más atractivo?</span>${[500,1000,1500].map(v=>`<button class="btn sm" data-a="vCliSubir" data-x="${p.id}" data-o="${v}">+${money(v)}</button>`).join('')}</div>
+    ${R.ofertas.length?`<div class="stack" style="gap:8px"><b class="small">Contraofertas</b>${R.ofertas.map(o=>`<div class="rofer"><span class="avatar" style="--c:#0D6B5B;--s:36px">${esc(inits(o.nombre))}</span><div style="flex:1"><b>${esc(nombrePila(o.nombre))}</b> <span class="small muted">· ${esc(o.vehiculo)} · ★ ${o.calif?Number(o.calif).toFixed(1):'Nuevo'} · ${o.entregas} entregas</span><div class="small">Pide <b class="num">${money(o.monto)}</b></div></div><button class="btn pri sm" data-a="vCliContra" data-x="${p.id}" data-o="${o.id}">Aceptar</button></div>`).join('')}</div>`:'<p class="small muted" style="margin:0">Aún no hay contraofertas. Los repartidores pueden aceptar tu precio o pedirte más.</p>'}
+    <span class="small muted">Si nadie acepta en ${RC().espera} min, el pedido se cancela solo y no pagas nada.</span></div>`;
+  const pasos = ['asignado','en_tienda','en_camino','llego','entregado'];
+  return `<div class="card"><div class="row between"><h2>${esc(REP_EST[R.estado]||'')}</h2>${R.estado==='entregado'?'<span class="pill ok">Entregado</span>':''}</div>
+    ${r?`<div class="row nowrap"><span class="avatar" style="--c:${r.color};--s:44px">${esc(inits(r.nombre))}</span><div style="flex:1"><b>${esc(nombrePila(r.nombre))}</b><div class="small muted">${esc(r.vehiculo)}${r.placa!=='—'?' · placas '+esc(r.placa):''} · ★ ${r.calif?r.calif.toFixed(1):'Nuevo'}</div></div></div>`:''}
+    <div class="steps">${pasos.map(s=>`<span class="${pasos.indexOf(s)<=pasos.indexOf(R.estado)?'on':''}">${esc({asignado:'Va a la tienda',en_tienda:'En tienda',en_camino:'En camino',llego:'Llegó',entregado:'Entregado'}[s])}</span>`).join('')}</div>
+    ${R.estado!=='entregado'&&p.codigo?`<div class="codebox"><span>Tu código de entrega</span><b class="num">${esc(p.codigo)}</b><small>Dáselo al repartidor <b>solo cuando tengas tu pedido en la mano</b>. Sin este código no puede marcarlo como entregado.</small></div>`:''}
+    ${R.estado!=='entregado'?`${repMsgs(R.msgs,'cliente')}${repBotonesMsg(p.id, MSG_CLI, 'cli')}`:''}
+    <span class="small muted">Por tu seguridad, el repartidor solo ve tu nombre de pila y tu dirección mientras lleva tu pedido. Nunca ve tu perfil, ni tú el suyo. No hay llamadas: usen los mensajes rápidos.</span></div>`;
+}
+
+/* ---------- Mi negocio → Perfil y envíos: repartidores de la app ---------- */
+function repNegocioCard(n){
+  if (!VIVO || !n || !n.sid) return '';
+  const A0 = RPV.app || {};
+  return `<div class="card" id="rep-neg"><h2>Repartidores de la app</h2>
+    <p class="small muted" style="margin:0">Tus clientes pueden pedir que un repartidor de ${esc(S.cfg.ciudad)} lleve su pedido. Tú solo lo preparas cuando un repartidor lo acepta, y se lo entregas cuando llegue.${A0.activo?'':' <b>Todavía está en pruebas:</b> por ahora solo lo ven las cuentas de prueba.'}</p>
+    <label class="chk"><input type="checkbox" data-ch="vNegReparto" ${n.repartoSrv?'checked':''}> <span>Ofrecer envío con repartidores de la app</span></label>
+    <div class="row nowrap"><button class="btn ${n.lat!=null?'':'pri'} sm" data-a="vNegUbic">${n.lat!=null?'Volver a guardar la ubicación':'Guardar la ubicación de mi negocio'}</button><span class="small muted">${n.lat!=null?'Ubicación guardada':'Sin ubicación: el envío no se activa sin ella'}</span></div>
+    <span class="small muted">Pícale estando dentro de tu negocio. Con ella se calcula la distancia de cada envío. Es pública, igual que tu dirección.</span></div>`;
+}
+
+/* ---------- app del repartidor aprobado ---------- */
+function repVivoAprobado(P){
+  const r = P.yo, a = P.activo, tab = ui.rvTab || 'inicio';
+  const stats = `<div class="rstats"><div><span>Hoy</span><b class="num">${money(vCent(P.hoy?.ganado))}</b></div><div><span>Entregas</span><b class="num">${r.entregas}</b></div><div><span>Calificación</span><b>★ ${r.calif?Number(r.calif).toFixed(1):'Nuevo'}</b></div></div>`;
+  const nav = `<div class="ptabs">${[['inicio', a?'Pedido activo':'Pedidos'],['ganancias','Ganancias']].map(([k,l])=>`<button class="${tab===k?'on':''}" data-a="vRepTab" data-x="${k}">${l}</button>`).join('')}</div>`;
+  if (tab==='ganancias') return `<div class="stack">${stats}${nav}${repVivoGanancias()}</div>`;
+  const pend = (P.pendientesCalif||[]).slice(0,3);
+  const calif = pend.length ? `<div class="card rcalif"><h2>Califica a tus clientes</h2><span class="small muted">Tu calificación solo la ven negocios y otros repartidores. Ayuda a saber quién paga y recibe bien.</span>
+    ${pend.map(x=>`<div class="rateb"><div class="tx"><b>${esc(x.cliente)} · #LM-${esc(x.folio)}</b><small>Col. ${esc(x.colonia||'')}</small></div><div class="rstars" role="group" aria-label="Califica a ${esc(x.cliente)}">${[1,2,3,4,5].map(i=>`<button type="button" data-a="vRepCalif" data-x="${x.pedido}|${i}" aria-label="${i} de 5 estrellas">★</button>`).join('')}</div></div>`).join('')}</div>` : '';
+  if (a) return `<div class="stack">${stats}${nav}${calif}${repVivoActivo(a)}</div>`;
+  const disp = P.disponibles || [];
+  return `<div class="stack">${stats}${nav}${calif}
+    <div class="row between"><h2 style="margin:0">Pedidos disponibles</h2><span class="small muted">${r.online?disp.length:''}</span></div>
+    ${!r.online?`<div class="empty" style="padding:30px 10px"><h2>Estás desconectado</h2><p class="muted">Conéctate arriba para ver pedidos de ${esc(S.cfg.ciudad)}.</p></div>`
+     : disp.length ? disp.map(repVivoOferta).join('') : `<div class="empty" style="padding:30px 10px"><h2>Sin pedidos por ahora</h2><p class="muted">Cuando alguien pida con repartidor y la tienda lo acepte, aparecerá aquí. Se actualiza solo.</p></div>`}
+    <div class="note small">La app no te cobra comisión: el envío completo es para ti.</div></div>`;
+}
+function repVivoOferta(o){
+  const exp = vMs(o.expira);
+  return `<div class="rcard"><div class="row between"><div class="row nowrap"><span class="avatar" style="--c:${esc(o.negColor||'#C2410C')};--s:38px">${esc(inits(o.negocio))}</span><div><b>${esc(o.negocio)}</b><div class="small muted">${o.productos} producto(s) · efectivo</div></div></div><span class="pill warn num" data-exp="${exp}">${mmss(exp-Date.now())}</span></div>
+    <div class="rruta"><span>🏪 ${esc(o.negocio)}</span><span>→</span><span>🏠 Col. ${esc(o.colonia)}</span></div>
+    <div class="small muted">Cliente: ${o.clienteN?`★ ${Number(o.clienteCalif).toFixed(1)} (${o.clienteN})`:'nuevo'}</div>
+    <div class="row between"><span class="small muted">~${Number(o.km).toFixed(1)} km · la dirección exacta se muestra al recoger</span><b class="rprecio num">${money(vCent(o.oferta))}</b></div>
+    ${o.miContra!=null?`<div class="note">Tu contraoferta: <b class="num">${money(vCent(o.miContra))}</b> · esperando al cliente</div>`:
+      `<div class="row"><button class="btn pri" data-a="vRepAceptar" data-x="${o.pedido}">Aceptar ${money(vCent(o.oferta))}</button>${[500,1000,1500].map(v=>`<button class="btn sm" data-a="vRepContra" data-x="${o.pedido}" data-o="${vCent(o.oferta)+v}">Pedir ${money(vCent(o.oferta)+v)}</button>`).join('')}<button class="lk" data-a="vRepOcultar" data-x="${o.pedido}">Ocultar</button></div>`}</div>`;
+}
+function repVivoActivo(a){
+  const e = a.estado, ng = a.negocio || {}, d = a.dir, recogido = ['en_camino','llego','no_pago'].includes(e);
+  const tot = vCent(a.total), env = vCent(a.oferta), seg = vCent(a.seguro);
+  const paso = {
+    asignado:`<button class="btn pri block lg" data-a="vRepPaso" data-x="${a.pedido}" data-o="en_tienda">Llegué a la tienda</button>`,
+    en_tienda: a.estadoPedido==='listo' ? `<button class="btn pri block lg" data-a="vRepPaso" data-x="${a.pedido}" data-o="en_camino">Recogí el pedido</button>` : `<div class="note">La tienda lo está preparando (${esc((ESTADOS[a.estadoPedido]||{l:a.estadoPedido}).l.toLowerCase())}). Te avisamos cuando esté listo.</div>`,
+    en_camino:`<button class="btn pri block lg" data-a="vRepPaso" data-x="${a.pedido}" data-o="llego">Llegué con el cliente</button>`,
+    llego:`<div class="card" style="gap:8px"><b>Pide el código al cliente</b><span class="small muted">Escríbelo cuando le entregues el pedido. Sin código no se puede marcar como entregado.</span>
+      <div class="row nowrap"><input type="text" id="rcod" inputmode="numeric" maxlength="4" placeholder="0000" class="codein" autocomplete="off"><button class="btn pri" data-a="vRepEntregar" data-x="${a.pedido}">Entregar</button></div>
+      ${a.intentos?`<span class="small" style="color:var(--bad)">Código incorrecto (${a.intentos}/3)</span>`:''}</div>`,
+    no_pago:`<div class="note bad">Reportaste que el cliente no quiso pagar. El equipo lo está revisando; ya no tienes que hacer nada con este pedido.</div>`
+  }[e] || '';
+  return `<div class="stack"><div class="row between"><h1 style="font-size:22px;margin:0">Pedido #LM-${esc(a.folio)}</h1><span class="pill">${esc(REP_EST_R[e]||e)}</span></div>
+    <div class="card" style="gap:6px"><div class="row nowrap"><span class="avatar" style="--c:${esc(ng.color||'#C2410C')};--s:34px">${esc(inits(ng.nombre))}</span><div style="flex:1"><b>${esc(ng.nombre)}</b><div class="small muted">${esc(ng.direccion||'')}</div></div>${!recogido&&ng.lat!=null?`<a class="btn sm" style="text-decoration:none;color:inherit" href="${repMapsUrl(ng.lat, ng.lng)}" target="_blank" rel="noopener">Cómo llegar</a>`:''}</div>
+      <div class="rsep"></div>
+      <div><b>${esc(a.cliente)}</b> <span class="small muted">· cliente</span></div>
+      <div class="row nowrap"><div class="small" style="flex:1">${d?`${esc(d.calle)}, Col. ${esc(d.colonia)}${d.ref?' · '+esc(d.ref):''}`:`Col. ${esc(a.colonia)} · <span class="muted">la dirección exacta aparece cuando recojas el pedido</span>`}</div>${d&&d.lat!=null?`<a class="btn sm" style="text-decoration:none;color:inherit" href="${repMapsUrl(d.lat, d.lng)}" target="_blank" rel="noopener">Cómo llegar</a>`:''}</div>
+      <div class="small muted">${(a.items||[]).map(it=>`${esc(String(it.cant))} × ${esc(it.nombre)}`).join(' · ')}</div>
+      <div class="line"><span>Paga en la tienda</span><b class="num">${money(tot)}</b></div><div class="line"><span>Cobra al cliente</span><b class="num">${money(tot+env+seg)}</b></div>
+      <div class="line small muted"><span>Tu ganancia (envío)</span><span class="num">${money(env)}</span></div>${a.cambio>0?`<div class="small muted">El cliente paga con ${money(vCent(a.cambio))}: lleva cambio.</div>`:''}</div>
+    ${paso}
+    ${e!=='no_pago'?`<div class="card" style="gap:8px"><b>Mensajes rápidos</b>${repMsgs(a.msgs,'repartidor')}${repBotonesMsg(a.pedido, MSG_REP, 'rep')}</div>`:''}
+    ${e!=='no_pago'?`<div class="row between"><button class="lk" data-a="vRepEmergencia" data-x="${a.pedido}" style="color:var(--bad)">Tengo una emergencia</button>${e==='llego'?`<button class="lk" data-a="vRepNoPago" data-x="${a.pedido}">El cliente no quiere pagar</button>`:''}</div>
+    <span class="small muted">No puedes cancelar un pedido aceptado. En una emergencia lo pasamos a otro repartidor (o avisamos al equipo si ya lo recogiste) y cuenta como falta: 3 faltas = suspensión.</span>`:''}</div>`;
+}
+function repVivoGanancias(){
+  const H = RPV.hist;
+  if (!H){ rpvRpc('rep_historial', {lim:30}).then(d=>{ RPV.hist = d||[]; if (ui.mode==='vrep') render(); }).catch(e=>toast(vMsgError(e))); return `<div class="rcentro"><div class="rspin"></div></div>`; }
+  const tot = H.reduce((s,x)=>s+vCent(x.oferta),0);
+  return `<div class="stack"><div class="rstats"><div><span>Últimas ${H.length} entregas</span><b class="num">${money(tot)}</b></div><div><span>Comisión de la app</span><b>$0</b></div></div>
+    ${H.length?`<div class="card" style="gap:0">${H.map(x=>`<div class="line"><span>#LM-${esc(x.folio)} · ${esc(x.negocio)}<br><span class="small muted">${fecha(vMs(x.t))}</span></span><b class="num">${money(vCent(x.oferta))}</b></div>`).join('')}</div>`:'<p class="muted">Aún no tienes entregas.</p>'}</div>`;
+}
+
+function registrarAccionesRepVivo3(){
+  // la demo simula repartidores y vencimientos; en vivo eso lo hace el servidor
+  const tick = tickReparto; tickReparto = () => VIVO ? false : tick();
+  const armar = vArmar; vArmar = (D, ...resto) => { armar(D, ...resto); try { repAplicar(D); SNAP = vFoto(SV); } catch(e){ console.warn('reparto', e); } };
+  const rc = repCliente; repCliente = p => VIVO ? repClienteVivo(p) : rc(p);
+  const pp = pPerfil; pPerfil = n => pp(n) + (VIVO ? repNegocioCard(n) : '');
+  Object.assign(REP_EST, {cancelado:'Cancelado', no_pago:'Problema de pago'});
+  vCheckoutDemo = vCheckout; VISTAS.checkout = vCheckoutVivo;
+  const ped = async (fn, args, ok) => { try { const r = await rpvRpc(fn, args); if (ok) ok(r); } catch(e){ toast(vMsgError(e)); } };
+  const panel = async () => { await vRepPanel(); if (ui.mode==='vrep') render(); };
+  const sidDe = x => (S.pedidos.find(o=>o.id===x)||{}).sid;
+  const infoDe = async x => { const s = sidDe(x); if (!s) return; delete RPI[s]; await vRepInfos(); render(); };
+  const ck = F.checkout; F.checkout = async () => {
+    const n = S.carrito && neg(S.carrito.neg); const k = ui.ck;
+    if (!VIVO || !n || !n.repartoApp || !k || k.modo!=='reparto') return ck();
+    vCkGuardar();
+    if (soyNegocio()) return fail('Cambia a tu cuenta personal para hacer pedidos.');
+    const nombre = (k.nombre||'').trim(), calle = (k.calle||'').trim(), colonia = (k.colonia||'').trim(), ref = (k.ref||'').trim(), nota = (k.nota||'').trim();
+    if (nombre.length<2) return fail('Escribe tu nombre.');
+    if (calle.length<3) return fail('Escribe tu calle y número.');
+    if (colonia.length<2) return fail('Escribe tu colonia.');
+    if (k.lat==null || !k.cot) return fail('Toca "Usar mi ubicación actual" para calcular el envío.');
+    if (k.cot.lejos) return fail('Tu ubicación está muy lejos de este negocio.');
+    for (const t of [nombre,calle,colonia,ref,nota]) { const r = revisar(t,'privado'); if (!r.ok) return fail(msgBloqueo(r)); }
+    const minC = vCent(k.cot.minimo), of = k.oferta || minC;
+    if (of < minC) return fail(`El envío mínimo a tu dirección es ${money(minC)}.`);
+    const items = S.carrito.items.map(it=>({producto:(S.productos.find(x=>x.id===it.pid)||{}).sid, cant:it.qty, v:it.sel.v, m:it.sel.m, nota:it.nota||''}));
+    const p = {negocio:n.sid, items, nombre, nota, cambio:k.cambio?Math.round(+k.cambio):0, origen:S.carrito.origen?post2sid(S.carrito.origen):null, calle, colonia, ref, lat:k.lat, lng:k.lng, oferta:of/100};
+    k.enviando = true; ui.err = ''; rerender();
+    let pid; try { pid = await rpvRpc('crear_pedido_reparto', {p}); } catch(e){ k.enviando = false; return fail(vMsgError(e)); }
+    const f = await RV.sb.from('pedidos').select('folio').eq('id', pid).maybeSingle();
+    S.carrito = null; ui.ck = null; ui.err = ''; save(); SNAP = vFoto(S);
+    await vRecargar(true); await vRepInfos();
+    if (f.data){ ui.pedido = 'LM-'+f.data.folio; go('seguimiento'); } else go('pedidos');
+    toast('Pedido enviado. Cuando la tienda lo acepte buscamos repartidor.'); };
+  Object.assign(A, {
+    vCkModo: v => { vCkGuardar(); ui.ck.modo = v==='recoger' ? 'recoger' : 'reparto'; ui.err = ''; rerender(); },
+    vCkUbic: async () => { vCkGuardar(); const k = ui.ck, n = neg(S.carrito.neg); k.buscando = true; rerender();
+      try { const g = await repGeo(); Object.assign(k, g); k.cot = await rpvRpc('reparto_cotizar', {neg:n.sid, p_lat:g.lat, p_lng:g.lng}); if (!k.cot) toast('Este negocio ya no tiene envío con repartidor.'); }
+      catch(e){ toast(e.message || vMsgError(e)); }
+      k.buscando = false; ui.err = ''; rerender(); },
+    vCliSubir: async (x, el) => { const p = S.pedidos.find(o=>o.id===x); if (!p || !p.rep) return; const nuevo = (p.rep.oferta + (+el.dataset.o))/100;
+      await ped('cli_subir_oferta', {pid:p.sid, nuevo}, ()=>toast(`Ahora ofreces ${money(nuevo*100)}`)); infoDe(x); },
+    vCliContra: async (x, el) => { await ped('cli_aceptar_contra', {p_oferta:el.dataset.o}, ()=>toast('¡Listo! Tu repartidor va a la tienda.')); infoDe(x); vRecargarPronto(); },
+    vRepMsg: async (x, el) => { const pid = el.dataset.de==='cli' ? sidDe(x) : x; if (!pid) return;
+      await ped('reparto_msg', {pid, clave:el.dataset.o}, ()=>toast('Mensaje enviado')); if (el.dataset.de==='cli') infoDe(x); else panel(); },
+    vNegReparto: async () => { const n = neg(S.yo); if (!n || !n.sid) return; const si = !n.repartoSrv;
+      const {error} = await RV.sb.from('negocios').update({reparto_app:si}).eq('id', n.sid); if (error) return toast(vMsgError(error));
+      n.repartoSrv = si; SNAP = vFoto(S); rerender(); toast(si?'Listo: tus clientes podrán pedir con repartidor.':'Ya no ofreces envío con repartidores de la app.'); },
+    vNegUbic: async () => { const n = neg(S.yo); if (!n || !n.sid) return;
+      if (!confirmarSimple('¿Estás dentro de tu negocio ahora? Guardaremos este punto como su ubicación.')) return;
+      try { const g = await repGeo(); const {error} = await RV.sb.from('negocios').update({lat:g.lat, lng:g.lng}).eq('id', n.sid); if (error) throw error;
+        n.lat = g.lat; n.lng = g.lng; SNAP = vFoto(S); rerender(); toast('Ubicación guardada'); } catch(e){ toast(e.message || vMsgError(e)); } },
+    vRepTab: x => { ui.rvTab = x; if (x==='ganancias') RPV.hist = null; render(); window.scrollTo(0,0); },
+    vRepAceptar: async x => { await ped('rep_aceptar', {pid:x}, ()=>{ toast('¡Pedido tuyo! Ve a la tienda.'); ui.rvTab = 'inicio'; }); panel(); },
+    vRepContra: async (x, el) => { await ped('rep_contraoferta', {pid:x, nuevo:(+el.dataset.o)/100}, ()=>toast('Contraoferta enviada al cliente')); panel(); },
+    vRepOcultar: async x => { await ped('rep_ocultar', {pid:x}); panel(); },
+    vRepPaso: async (x, el) => { await ped('rep_avanzar', {pid:x, paso:el.dataset.o}); panel(); },
+    vRepEntregar: async x => { const cod = ($('#rcod')?.value||'').replace(/\D/g,''); if (cod.length!==4) return toast('Escribe los 4 números del código');
+      await ped('rep_entregar', {pid:x, cod}, r=>toast(r==='ok'?'Entregado. ¡Gracias!':r)); RPV.hist = null; panel(); },
+    vRepEmergencia: async x => { if (!confirmarSimple('¿Seguro? Si aún no lo recoges, se lo pasamos a otro repartidor; si ya lo traes, avisamos al equipo. Cuenta como falta.')) return;
+      await ped('rep_emergencia', {pid:x}, r=>toast(r==='equipo'?'Avisamos al equipo. Te van a contactar.':'Lo pasamos a otro repartidor. Cuídate.')); panel(); },
+    vRepNoPago: async x => { if (!confirmarSimple('¿El cliente no quiere pagar? Guardamos tu ubicación y la hora como prueba, y su cuenta queda en pausa mientras el equipo lo revisa.')) return;
+      let g = {lat:null, lng:null}; try { g = await repGeo(); } catch(e){}
+      await ped('rep_no_pago', {pid:x, p_lat:g.lat, p_lng:g.lng}, ()=>toast('Reporte enviado. El equipo lo revisa.')); panel(); },
+    vRepCalif: async x => { const [pid, n] = x.split('|'); const {error} = await RV.sb.from('calif').insert({pedido:pid, rol:'cli_r', est:+n});
+      if (error && !/duplicate/i.test(error.message)) return toast(vMsgError(error)); toast('¡Gracias por calificar!'); panel(); }
+  });
+  // cliente y negocio: mientras ven un pedido con repartidor en curso, se actualiza cada 10 s (solo ese dato)
+  setInterval(()=>{ if (!VIVO || document.visibilityState!=='visible' || ui.mode==='vrep' || ui.sheet || ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) return;
+    if (!['seguimiento','pedidos','minegocio'].includes(ui.view)) return;
+    if (!S.pedidos.some(p=>p.modo==='reparto' && p.rep && !REP_FIN.includes(p.rep.estado) && enCurso(p))) return;
+    vRepInfos().then(c=>{ if (c) render(); }); }, 10000);
 }
 
 /* ---------- render ---------- */
@@ -5663,7 +5921,7 @@ Object.assign(A, {
   termAdd: () => { const t=$('#term-t').value.trim().toLowerCase(), c=$('#term-c').value; if(t.length<3) return toast('Escribe al menos 3 letras'); S.cfg.terminos.push({t:limpiarTexto(t), cat:c}); CACHE_RE.clear(); log('Admin','Agregó término al Escudo',c); save(); rerender(); },
   termDel: x => { S.cfg.terminos.splice(+x,1); save(); rerender(); }
 });
-registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal(); registrarAccionesV17(); registrarAccionesV18(); registrarAccionesLegal(); registrarAccionesVivo(); registrarAccionesRepVivo();
+registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal(); registrarAccionesV17(); registrarAccionesV18(); registrarAccionesLegal(); registrarAccionesVivo(); registrarAccionesRepVivo(); registrarAccionesRepVivo3();
 aplicarPref();
 const EN_VIVO_OK = /github\.io$/.test(location.host) || /[?&]vivo=1/.test(location.search);
 try { if (EN_VIVO_OK && (localStorage.getItem('lm-modo')||'real')==='real') ui.mode='real'; } catch(e){ if (EN_VIVO_OK) ui.mode='real'; }
