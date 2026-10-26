@@ -1736,7 +1736,7 @@ function columnaDerecha(){
       <div class="tx"><b>${nombreV(perfilDe(n.id))}</b><span>${c?'★ '+c.avg.toFixed(1)+' · ':''}${esc(TIPOS[n.tipo].uno)}${n.tiempo?' · '+esc(n.tiempo):''}</span></div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">${sigue(S.yo,n.id)?'':`<button class="lk" data-a="seguir" data-x="${n.id}">Seguir</button>`}<button class="lk" data-a="neg" data-x="${n.id}" style="color:var(--accent)">Pedir</button></div></div>`; }).join('')}
     ${amigosDeAmigos.length?`<b class="small muted" style="font-size:14px;margin-top:6px">Quizá conoces</b>${amigosDeAmigos.map(id=>{ const a=perfilDe(id); const comun=misAmigos().filter(m=>sigue(m,id)).length; return `<div class="srow"><button style="background:none;border:0;padding:0" data-a="verPerfil" data-x="${id}">${avatar(a,34)}</button><div class="tx"><b>${esc(a.handle)}</b><span>${comun} amigo(s) en común</span></div><button class="lk" data-a="seguir" data-x="${id}">Seguir</button></div>`; }).join('')}`:''}
-    <div class="foot">${typeof linksLegales==='function'?linksLegales():''} · <button class="lk mut" data-a="go" data-x="vende" style="font-size:11.5px">Vende con nosotros</button><br>© 2026 ${esc(S.cfg.marca.toUpperCase())} · ${esc(S.cfg.ciudad)}, Sinaloa</div>
+    <div class="foot">${typeof linksLegales==='function'?linksLegales():''} · <button class="lk mut" data-a="go" data-x="vende" style="font-size:11.5px">Vende con nosotros</button>${VIVO?` · <button class="lk mut" data-a="go" data-x="repalta" style="font-size:11.5px">Sé repartidor</button>`:''}<br>© 2026 ${esc(S.cfg.marca.toUpperCase())} · ${esc(S.cfg.ciudad)}, Sinaloa</div>
   </aside>`;
 }
 function visibles(){ return S.posts.filter(p=>p.estado==='aprobado' && !bloq(p.autor) && (p.tipo!=='negocio'||neg(p.autor)?.estado==='activo')); }
@@ -2139,6 +2139,7 @@ function vInicio(){
     <div class="sec-h"><h2>${ui.cat==='todos'?'Todos los negocios':esc(TIPOS[ui.cat].label)}</h2><span class="muted small">${l.length}</span></div>
     <div class="bizgrid">${l.map(bizCard2).join('') || '<p class="muted">Aún no hay negocios en esta categoría.</p>'}</div>
     <div class="card" style="flex-direction:row;align-items:center;flex-wrap:wrap;justify-content:space-between"><div><h2>¿Tienes un negocio en ${esc(S.cfg.ciudad)}?</h2><div class="muted small">Publica tu catálogo y recibe pedidos. Plan desde ${money(S.cfg.planCents)} al mes.</div></div><button class="btn acc" data-a="go" data-x="vende">Quiero vender aquí</button></div>
+    ${VIVO?repTarjetaTienda():''}
   </div>`;
 }
 function vNegocio(){
@@ -2735,6 +2736,7 @@ function confirmarSimple(msg){ try { return window.confirm(msg); } catch(e){ ret
 
 /* ---------- ADMIN: repartidores ---------- */
 function aRepartidores(){
+  if (VIVO) return aRepVivo();
   const ps = S.pedidos.filter(p=>p.modo==='reparto'&&p.rep); const fondo = ps.filter(p=>p.rep.estado==='entregado').reduce((a,p)=>a+p.rep.seguro,0);
   const c = RC(); const ej = Math.round(minimoEnvio(3));
   return `<div class="stack">
@@ -4885,20 +4887,22 @@ async function vEntrar(){
   if (!VQ.listo){
     $('#app').innerHTML = `<div class="rwrapv"><div class="protobar rprotobar"><b>En vivo</b><span>Cargando tu cuenta…</span></div><div class="rcentro"><div class="rspin"></div><p class="muted">Conectando…</p></div></div>`;
     try { await vCargar(); } catch(e){ console.error(e); RV.fase='sinred'; return renderReal(); }
+    await vRepEstado();
     VQ.listo = true; vCanal(true); setTimeout(()=>{ if (typeof revisarLegal==='function') revisarLegal(); }, 800);
     clearInterval(VQ.intervalo); VQ.intervalo = setInterval(()=>{ if (VIVO && document.visibilityState==='visible' && Date.now()-VQ.ultimaCarga>240000) vRecargar(); }, 30000);
   }
-  if (ui.mode!=='real' && ui.mode!=='app' && ui.mode!=='admin') return; // está viendo la demo
+  if (ui.mode!=='real' && ui.mode!=='app' && ui.mode!=='admin' && ui.mode!=='vrep') return; // está viendo la demo
   VIVO = true; S = SV; document.body.classList.add('vivo');
   if (ui.mode==='real') ui.mode = 'app';
   if (!ui.vivoVista){ ui.view = soyNegocio() ? 'minegocio' : 'home'; ui.vivoVista = true; }
   ui.sheet = null; render(); renderLayer();
 }
-function vSalirVivo(){ vCanal(false); clearInterval(VQ.intervalo); VQ.listo = false; SV = null; SNAP = null; ui.vivoVista = false;
+function vSalirVivo(){ vCanal(false); clearInterval(VQ.intervalo); VQ.listo = false; SV = null; SNAP = null; ui.vivoVista = false; RPV.app = RPV.panel = RPV.admin = null; if (ui.mode==='vrep') ui.mode = 'real';
   if (VIVO){ VIVO = false; S = SDEMO; document.body.classList.remove('vivo'); } }
 async function vRecargar(forzar){
   if (!VQ.listo || !RV.user) return;
   const era = S===SV; try { await vCargar(); } catch(e){ console.warn(e); return; }
+  await vRepEstado(); if (ui.mode==='vrep') await vRepPanel();
   if (VIVO && era){ S = SV; vRefrescar(forzar); }
 }
 let vPronto = null; function vRecargarPronto(){ clearTimeout(vPronto); const falta = Math.max(1200, 20000 - (Date.now() - VQ.ultimaCarga)); vPronto = setTimeout(()=>vRecargar(), falta); }
@@ -5030,12 +5034,15 @@ function vLimpiar(root){
   if (!VIVO || !root) return;
   root.querySelectorAll('.note, .small, p').forEach(el=>{ const t = el.textContent||'';
     if (/^\s*Prototipo|Inicio de sesión simulado|Cargos del mes|Plan profesional|Solo en el prototipo|se guardan solo en este navegador|Simulación: han pasado/.test(t)) el.remove(); });
-  root.querySelectorAll('[data-a="atab"][data-x="repartidores"],[data-a="atab"][data-x="comisiones"],[data-a="adelantar"],[data-a="reiniciar"],[data-a="reset"],[data-a="simularAct"],[data-a="simularFollow"],[data-a="fotosEjemplo"],[data-a="histEjemplo"],[data-a="fotosProdEjemplo"]').forEach(el=>el.remove());
+  root.querySelectorAll('[data-a="atab"][data-x="comisiones"],[data-a="adelantar"],[data-a="reiniciar"],[data-a="reset"],[data-a="simularAct"],[data-a="simularFollow"],[data-a="fotosEjemplo"],[data-a="histEjemplo"],[data-a="fotosProdEjemplo"]').forEach(el=>el.remove());
   root.querySelectorAll('select[data-ch="negDemo"]').forEach(el=>{ const l = el.closest('label'); (l||el).remove(); });
   root.querySelectorAll('label[for="f-tel"],label[for="a-com"],label[for="a-plan"]').forEach(el=>el.remove());
   root.querySelectorAll('.card').forEach(el=>{ if (el.querySelector('[data-a="resetSi"]') || /Datos de prueba/.test(el.querySelector('h2')?.textContent||'')) el.remove(); });
   root.querySelectorAll('.kpi').forEach(el=>{ if (/Comisión/.test(el.textContent)) el.remove(); });
   if (S && S.misNegocios && S.misNegocios.length) root.querySelectorAll('[data-a="go"][data-x="vende"], [data-a="irVende"]').forEach(el=>{ const c = el.closest('.card'); if (c && c.querySelectorAll('button').length===1 && /negocio/i.test(c.textContent)) c.remove(); else el.remove(); });
+  // repartidor y negocio se excluyen: quien es repartidor no ve "registrar negocio" (y viceversa, en repTarjetaTienda)
+  if (soyRepVivo()) root.querySelectorAll('[data-a="go"][data-x="vende"], [data-a="irVende"]').forEach(el=>{ const c = el.closest('.card'); if (c && c.querySelectorAll('button').length===1 && /negocio/i.test(c.textContent)) c.remove(); else el.remove(); });
+  if (tieneNegocio() || esMenor(S.personal)) root.querySelectorAll('[data-a="go"][data-x="repalta"]').forEach(el=>el.remove());
   root.querySelectorAll('.verif.bot').forEach(el=>el.title='Cuenta automática (bot)');
   root.querySelectorAll('.vlabel.bot').forEach(el=>el.textContent='Bot · cuenta automática del equipo');
   if (ui.view==='ajustes' && !root.querySelector('#vp-box')){ const d = root.querySelector('details.set'); if (d){ d.insertAdjacentHTML('afterend', `<details class="set"${VPW.paso===2?' open':''}><summary>${ico.shield}<span>Contraseña<small>Cambia tu contraseña (con verificación por correo)</small></span></summary><div class="bd" id="vp-box">${vPassHTML()}</div></details>`); } }
@@ -5044,13 +5051,182 @@ function vLimpiar(root){
 new MutationObserver(()=>vLimpiar($('#app'))).observe($('#app'), {childList:true});
 new MutationObserver(()=>vLimpiar($('#layer'))).observe($('#layer'), {childList:true});
 
+/* ============================================================
+   REPARTO EN VIVO (con el servidor)
+   Mismas pantallas de la demo; el servidor decide todo (funciones reparto_* y rep_*).
+   Interruptor ajustes.reparto.activo: apagado hasta que lo revisen el abogado y el contador.
+   Repartidor y negocio se excluyen. Solo mayores de 18 (lo revisa el servidor).
+   La INE y la cara se revisan EN PERSONA: aquí nunca se suben fotos de INE.
+   ============================================================ */
+const RPV = { app:null, panel:null, admin:null, cargandoAdmin:false };
+const VEH = {moto:'Moto', bici:'Bici', auto:'Auto', pie:'A pie'};
+const rpvRpc = async (fn, args) => { const {data, error} = await RV.sb.rpc(fn, args||{}); if (error) throw error; return data; };
+const soyRepVivo = () => !!(VIVO && RPV.app && RPV.app.soyRep && RPV.app.soyRep!=='rechazado');
+async function vRepEstado(){ if (!RV.sb || !RV.user) return; try { RPV.app = await rpvRpc('reparto_estado_app'); } catch(e){ RPV.app = null; } }
+async function vRepPanel(){ try { RPV.panel = await rpvRpc('rep_panel'); } catch(e){ console.warn(e); } }
+async function vRepAdmin(){ if (RPV.cargandoAdmin) return; RPV.cargandoAdmin = true; try { RPV.admin = await rpvRpc('admin_repartidores'); } catch(e){ toast(vMsgError(e)); } RPV.cargandoAdmin = false; }
+
+/* ---------- Tienda: "¿Quieres ser repartidor?" ---------- */
+function repTarjetaTienda(){
+  if (!VIVO || !RPV.app) return '';
+  if (soyRepVivo()) return `<div class="card" style="flex-direction:row;align-items:center;flex-wrap:wrap;justify-content:space-between"><div><h2>Tu cuenta de repartidor</h2><div class="muted small">${esc({pendiente:'Estamos revisando tu solicitud.',aprobado:'Aprobada. Conéctate para recibir pedidos.',suspendido:'Suspendida mientras el equipo la revisa.'}[RPV.app.soyRep]||'')}</div></div><button class="btn pri" data-a="modo2" data-x="vrep">Abrir modo Repartidor</button></div>`;
+  if (tieneNegocio() || esMenor(S.personal)) return '';
+  return `<div class="card" style="flex-direction:row;align-items:center;flex-wrap:wrap;justify-content:space-between"><div><h2>¿Quieres ser repartidor?</h2><div class="muted small">Lleva pedidos de los negocios de ${esc(S.cfg.ciudad)} en tus horarios. Solo mayores de 18.</div></div><button class="btn acc" data-a="go" data-x="repalta">Quiero ser repartidor</button></div>`;
+}
+
+/* ---------- registro ---------- */
+function vRepAlta(){
+  const ya = RPV.app && RPV.app.soyRep && RPV.app.soyRep!=='rechazado';
+  if (ya) return `<div class="stack" style="max-width:640px;margin:0 auto;width:100%"><button class="btn back" data-a="atras">${ico.back}Volver</button><div class="card"><h1>Ya enviaste tu solicitud</h1><button class="btn pri" data-a="modo2" data-x="vrep">Abrir modo Repartidor</button></div></div>`;
+  const R = ui.ra || {};
+  if (esMenor(S.personal)) return `<div class="stack" style="max-width:640px;margin:0 auto;width:100%"><button class="btn back" data-a="atras">${ico.back}Volver</button><div class="card"><h1>Solo mayores de 18</h1><p class="muted" style="margin:0">Para ser repartidor necesitas ser mayor de 18 años.</p></div></div>`;
+  if (tieneNegocio()) return `<div class="stack" style="max-width:640px;margin:0 auto;width:100%"><button class="btn back" data-a="atras">${ico.back}Volver</button><div class="card"><h1>Tu cuenta tiene un negocio</h1><p class="muted" style="margin:0">Una cuenta no puede ser negocio y repartidor a la vez.</p></div></div>`;
+  return `<div class="stack" style="max-width:640px;margin:0 auto;width:100%"><button class="btn back" data-a="atras">${ico.back}Volver</button>
+  <div class="card"><h1>Quiero ser repartidor</h1>
+   <p class="muted" style="margin:0">Llevas pedidos de los negocios de ${esc(S.cfg.ciudad)} cuando tú quieras. Antes de aprobarte, una persona del equipo revisa <b>en persona</b> tu INE, que seas tú y tu vehículo. No subimos ni guardamos fotos de tu INE.</p>
+   <form class="stack" data-form="repAlta" novalidate>
+    <label class="f" for="ra-nombre">Nombre completo (como en tu INE)<input id="ra-nombre" type="text" maxlength="80" autocomplete="name" value="${esc(R.nombre||'')}"></label>
+    <label class="f" for="ra-nac">Fecha de nacimiento<input id="ra-nac" type="date" value="${esc(R.nacimiento||'')}"></label>
+    <label class="f" for="ra-tel">Teléfono (10 dígitos)<input id="ra-tel" type="tel" maxlength="12" inputmode="numeric" autocomplete="tel" value="${esc(R.telefono||'')}"></label>
+    <span class="small muted" style="margin-top:-8px">Solo lo ve el equipo. Los clientes nunca ven tu teléfono.</span>
+    <label class="f" for="ra-veh">Vehículo<select id="ra-veh" data-ch="repVeh">${[['moto','Moto'],['bici','Bici'],['auto','Auto'],['pie','A pie']].map(([k,l])=>`<option value="${k}" ${R.vehiculo===k?'selected':''}>${l}</option>`).join('')}</select></label>
+    <label class="f" for="ra-placa" id="ra-placa-l" ${['bici','pie'].includes(R.vehiculo)?'style="display:none"':''}>Placa<input id="ra-placa" type="text" maxlength="12" autocapitalize="characters" value="${esc(R.placa||'')}"></label>
+    <label class="f" for="ra-zona">Colonias o zona donde quieres repartir<input id="ra-zona" type="text" maxlength="120" placeholder="Ej.: Centro, Jiquilpan, Scally" value="${esc(R.zona||'')}"></label>
+    <details class="set"><summary style="padding:12px 14px;font-size:14px">Términos del repartidor</summary><div class="bd"><ul class="small" style="margin:0;padding-left:18px;line-height:1.6">
+      <li>Debes ser mayor de 18 años y tener tu INE vigente. La revisamos en persona antes de aprobarte.</li>
+      <li>Eres independiente: tú decides cuándo conectarte. La app no te cobra comisión; el envío es para ti.</li>
+      <li>Mientras la tienda tiene "modo prueba", los pedidos se pagan en efectivo: pagas en la tienda y cobras al cliente.</li>
+      <li>Solo ves el nombre de pila del cliente y su colonia. Su dirección exacta aparece cuando recoges el pedido y se oculta al entregar. Nunca ves su perfil, ni él el tuyo.</li>
+      <li>Sin el código del cliente no se puede marcar "entregado".</li>
+      <li>Si aceptas un pedido y no llegas, o lo dejas por emergencia, cuenta como falta. Con 3 faltas tu cuenta se suspende mientras la revisamos.</li>
+      <li>Tu ubicación se comparte solo mientras llevas un pedido. Nadie te rastrea fuera de turno.</li>
+      <li>Una cuenta no puede ser repartidor y negocio a la vez.</li>
+      <li>Aplican también los términos, las reglas de la comunidad y el aviso de privacidad de ${esc(S.cfg.marca)}.</li></ul></div></details>
+    <label class="chk"><input id="ra-ok" type="checkbox" ${R.acepto?'checked':''}> <span>Leí y acepto los términos del repartidor</span></label>
+    ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}
+    <button class="btn acc lg" type="submit">Enviar solicitud</button></form></div></div>`;
+}
+
+/* ---------- modo Repartidor (en vivo) ---------- */
+function vRepVivo(){
+  const P = RPV.panel; if (!P) return `<div class="rapp"><main class="rbody"><div class="rcentro"><div class="rspin"></div><p class="muted">Cargando…</p></div></main></div>`;
+  const r = P.yo;
+  const it = (ok,t,d) => `<div class="rchk ${ok?'ok':''}"><span>${ok?'✓':'•'}</span><div><b>${t}</b><div class="small muted">${d}</div></div></div>`;
+  const v = r.verif || {};
+  const cuerpo = r.estado!=='aprobado' ? `<div class="stack"><h1>${r.estado==='suspendido'?'Cuenta suspendida':r.estado==='rechazado'?'Solicitud no aprobada':'Verificando tu cuenta'}</h1>
+    ${r.estado==='suspendido'?`<div class="note bad">Tu cuenta está suspendida${r.faltas>=3?' (3 faltas)':''}. ${esc(r.motivo||'El equipo la está revisando.')}</div>`:r.estado==='rechazado'?`<div class="note bad">${esc(r.motivo||'Tu solicitud no fue aprobada.')}</div>`:`<p class="muted" style="margin:0">Antes de recibir pedidos, una persona del equipo revisa en persona tu INE, que seas tú y tu vehículo. Te avisamos por notificación.</p>`}
+    <div class="card">${it(true,'Solicitud enviada','Tus datos llegaron al equipo')}${it(v.ine,'INE vigente','Revisada en persona, sin guardar fotos')}${it(v.selfie,'Eres tú','La persona de la INE es quien se registra')}${it(v.vehiculo||r.vehiculo==='pie'||r.vehiculo==='bici','Vehículo y placas','Tarjeta de circulación y vehículo')}${it(r.estado==='aprobado','Aprobado por el administrador','Lo revisa una persona del equipo')}</div></div>`
+    : repVivoAprobado(P);
+  return `<div class="rapp">
+    <header class="rtop"><div class="rlogo"><span class="mark">${esc(inits(S.cfg.marca))}</span><b>${esc(S.cfg.marca)} <i>Repartidor</i></b></div>
+      ${r.estado==='aprobado'?`<button class="rsw ${r.online?'on':''}" data-a="vRepOnline" aria-pressed="${r.online}"><span></span>${r.online?'Conectado':'Desconectado'}</button>`:''}</header>
+    <main class="rbody">${cuerpo}</main></div>`;
+}
+// (la app completa del repartidor aprobado llega en el siguiente PR)
+function repVivoAprobado(P){
+  const r = P.yo;
+  return `<div class="stack"><div class="rstats"><div><span>Hoy</span><b class="num">${money(Math.round((P.hoy?.ganado||0)*100))}</b></div><div><span>Entregas</span><b class="num">${r.entregas}</b></div><div><span>Calificación</span><b>★ ${r.calif?Number(r.calif).toFixed(1):'Nuevo'}</b></div></div>
+    <div class="empty" style="padding:30px 10px"><h2>${r.online?'Conectado':'Estás desconectado'}</h2><p class="muted">Tu cuenta está aprobada. Los pedidos aparecerán aquí cuando el reparto se abra en ${esc(S.cfg.ciudad)}.</p></div></div>`;
+}
+
+/* ---------- ADMIN → Repartidores (en vivo) ---------- */
+function aRepVivo(){
+  const D = RPV.admin;
+  if (!D){ vRepAdmin().then(()=>{ if (ui.mode==='admin' && ui.aTab==='repartidores') render(); }); return `<div class="rcentro"><div class="rspin"></div><p class="muted">Cargando repartidores…</p></div>`; }
+  const c = D.cfg || {}, rs = D.repartidores || [], k = D.pedidos || {};
+  const listas = c.base!=null && c.porKm!=null && c.seguroPct!=null;
+  const edad = d => { const n = new Date(d+'T12:00:00'), h = new Date(); let a = h.getFullYear()-n.getFullYear(); if (h < new Date(h.getFullYear(), n.getMonth(), n.getDate())) a--; return a; };
+  const fila = r => { const v = r.verif||{}; const pend = r.estado==='pendiente';
+    return `<tr><td><b>${esc(r.nombre)}</b><div class="small muted">@${esc(r.usuarioArroba)} · ${edad(r.nacimiento)} años${v.nac_coincide===false?' · <b style="color:var(--bad)">la fecha no coincide con la de su cuenta</b>':''}</div><div class="small muted">Tel. ${esc(r.telefono)}${r.prueba?' · <span class="pill">prueba</span>':''}</div></td>
+      <td>${esc(VEH[r.vehiculo]||r.vehiculo)}<div class="small muted">${esc(r.placa||'—')}</div><div class="small muted">${esc(r.zona)}</div></td>
+      <td class="small">${pend?`<label class="chk"><input type="checkbox" id="rv-ine-${r.usuario}"> INE vista en persona</label><label class="chk"><input type="checkbox" id="rv-cara-${r.usuario}"> Es la misma persona</label><label class="chk"><input type="checkbox" id="rv-veh-${r.usuario}"> Vehículo y placa</label>`
+        :`INE ${v.ine?'✓':'✗'} · Cara ${v.selfie?'✓':'✗'} · Vehículo ${v.vehiculo?'✓':'✗'}${v.t?`<div class="muted">${fecha(new Date(v.t).getTime())}</div>`:''}`}</td>
+      <td class="r num">${r.entregas}<div class="small muted">★ ${r.calif?Number(r.calif).toFixed(1):'—'}</div></td><td>${r.faltas}/3</td>
+      <td><span class="pill ${r.estado==='aprobado'?'ok':r.estado==='pendiente'?'warn':'bad'}">${r.estado}</span>${r.online?'<div class="small muted">conectado</div>':''}</td>
+      <td><div class="row" style="gap:6px">${pend?`<button class="btn pri sm" data-a="vRepAprobar" data-x="${r.usuario}">Aprobar</button><button class="btn sm" data-a="vRepEstadoAdm" data-x="${r.usuario}" data-o="rechazado">Rechazar</button>`
+        : r.estado==='aprobado'?`<button class="btn sm danger" data-a="vRepEstadoAdm" data-x="${r.usuario}" data-o="suspendido">Suspender</button>`
+        : `<button class="btn sm" data-a="vRepEstadoAdm" data-x="${r.usuario}" data-o="aprobado">Reactivar</button>`}</div></td></tr>`; };
+  return `<div class="stack">
+  <div class="kpis"><div class="kpi"><span>Repartidores activos</span><b class="num">${rs.filter(r=>r.estado==='aprobado').length}</b></div><div class="kpi"><span>Por verificar</span><b class="num">${rs.filter(r=>r.estado==='pendiente').length}</b></div><div class="kpi"><span>Pedidos con repartidor</span><b class="num">${k.total||0}</b></div><div class="kpi"><span>Sin repartidor</span><b class="num">${k.sinRep||0}</b></div><div class="kpi"><span>Fondo de seguro</span><b class="num">${money(Math.round((k.fondoSeguro||0)*100))}</b></div></div>
+  <div class="card"><div class="row between"><h2>Reparto para el público</h2><span class="pill ${c.activo?'ok':'bad'}">${c.activo?'Prendido':'Apagado'}</span></div>
+    <p class="small muted" style="margin:0">Apagado: los repartidores se pueden registrar y solo tú y las cuentas de prueba pueden pedir con repartidor. <b>No lo prendas para el público hasta que lo revisen el abogado y un contador</b> (IMSS de plataformas digitales).</p>
+    <button class="btn ${c.activo?'danger':''}" data-a="vRepInterruptor" style="align-self:flex-start"${!c.activo&&!listas?' disabled':''}>${c.activo?'Apagar el reparto':'Prender el reparto para el público'}</button>${!listas?'<span class="small muted">Primero define las tarifas.</span>':''}</div>
+  <div class="card"><h2>Tarifas del envío</h2>${!listas?'<div class="note warn"><b>Sin tarifas.</b> Las defines tú (pregunta a repartidores de Los Mochis cuánto cobran hoy) y la cuota de seguro con tu contador. Sin tarifas nadie puede pedir con repartidor.</div>':''}
+    <div class="grid2"><label class="f" for="rc-base">Base del envío ($)<input type="number" id="rc-base" min="0" step="1" value="${c.base??''}" placeholder="Tú decides"></label><label class="f" for="rc-km">Por kilómetro ($)<input type="number" id="rc-km" min="0" step="0.5" value="${c.porKm??''}" placeholder="Tú decides"></label>
+    <label class="f" for="rc-seg">Cuota de seguro (% del envío)<input type="number" id="rc-seg" min="0" step="0.5" value="${c.seguroPct??''}" placeholder="Con tu contador"></label><label class="f" for="rc-esp">Minutos para conseguir repartidor<input type="number" id="rc-esp" min="1" max="30" step="1" value="${c.espera??5}"></label>
+    <label class="f" for="rc-ns">Minutos para llegar a la tienda (si no, falta)<input type="number" id="rc-ns" min="5" max="60" step="1" value="${c.noShowMin??15}"></label></div>
+    <span class="small muted">Mínimo = base + precio por km × distancia (en línea recta × 1.3). El cliente puede ofrecer más; el repartidor puede pedir más.</span><button class="btn pri" data-a="vRepCfg" style="align-self:flex-start">Guardar tarifas</button></div>
+  <div class="card"><h2>Cuentas de prueba</h2><p class="small muted" style="margin:0">Pueden pedir con repartidor aunque el reparto esté apagado. Usa cuentas de adultos marcadas como prueba.</p>
+    <div class="row nowrap"><input type="text" id="rp-usr" placeholder="@usuario" autocapitalize="none" style="flex:1"><button class="btn sm" data-a="vRepProbador" data-o="1">Agregar</button></div>
+    ${(D.probadores||[]).length?`<div class="row" style="gap:6px">${D.probadores.map(p=>`<span class="pill">@${esc(p.usuario)} <button class="lk" data-a="vRepProbador" data-x="${esc(p.usuario)}" data-o="0" aria-label="Quitar">✕</button></span>`).join('')}</div>`:''}</div>
+  ${rs.length?`<div class="tbl"><table><thead><tr><th>Repartidor</th><th>Vehículo y zona</th><th>Verificación en persona</th><th class="r">Entregas</th><th>Faltas</th><th>Estado</th><th></th></tr></thead><tbody>${rs.map(fila).join('')}</tbody></table></div>`:'<div class="empty"><h2>Aún no hay solicitudes</h2><p class="muted">Llegan desde Tienda → "Quiero ser repartidor".</p></div>'}
+  <div class="note">La INE y la cara se revisan en persona (lo hace el adulto responsable): no se toman ni se guardan fotos. Antes de abrir al público se conecta un servicio de verificación (Didit).</div></div>`;
+}
+
+// mientras está abierto el modo Repartidor, se actualiza cada 15 s (solo lo del repartidor, no toda la app)
+setInterval(()=>{ if (!VIVO || ui.mode!=='vrep' || document.visibilityState!=='visible' || ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) return;
+  vRepPanel().then(()=>{ if (ui.mode==='vrep') render(); }); }, 15000);
+function registrarAccionesRepVivo(){
+  const repRecargarAdm = async () => { await vRepAdmin(); if (ui.mode==='admin') render(); };
+  Object.assign(F, {
+    repAlta: async () => {
+      const v = id => ($('#'+id)?.value||'').trim();
+      const d = {nombre:v('ra-nombre'), nacimiento:v('ra-nac'), telefono:v('ra-tel').replace(/\D/g,''), vehiculo:v('ra-veh'), placa:v('ra-placa'), zona:v('ra-zona'), acepto:!!$('#ra-ok')?.checked};
+      ui.ra = Object.assign({}, d, {telefono:v('ra-tel')}); // para no perder lo escrito si sale un error
+      if (d.nombre.split(/\s+/).length<2) return fail('Escribe tu nombre completo, como aparece en tu INE.');
+      if (!d.nacimiento) return fail('Escribe tu fecha de nacimiento.');
+      if (d.telefono.length!==10) return fail('El teléfono debe tener 10 dígitos.');
+      if (['moto','auto'].includes(d.vehiculo) && d.placa.length<3) return fail('Escribe la placa de tu vehículo.');
+      if (d.zona.length<2) return fail('Escribe dónde quieres repartir.');
+      if (!d.acepto) return fail('Necesitas aceptar los términos del repartidor.');
+      const btn = $('[data-form="repAlta"] button[type=submit]'); if (btn){ btn.disabled = true; btn.textContent = 'Enviando…'; }
+      try { await rpvRpc('registrar_repartidor', {p:d}); } catch(e){ if (btn){ btn.disabled = false; btn.textContent = 'Enviar solicitud'; } return fail(vMsgError(e)); }
+      ui.err = ''; ui.ra = null; await vRepEstado(); toast('Solicitud enviada. Te avisamos cuando la revisemos.'); A.modo2('vrep'); }
+  });
+  Object.assign(A, {
+    repVeh: v => { const l = $('#ra-placa-l'); if (l) l.style.display = ['moto','auto'].includes(v) ? '' : 'none'; },
+    vRepOnline: async () => { const r = RPV.panel && RPV.panel.yo; if (!r) return;
+      try { r.online = await rpvRpc('rep_conectar', {si:!r.online}); } catch(e){ return toast(vMsgError(e)); }
+      await vRepPanel(); render(); toast(r.online?'Conectado: verás los pedidos disponibles':'Desconectado'); },
+    vRepAprobar: async x => { const ch = k => !!$(`#rv-${k}-${x}`)?.checked; const verif = {ine:ch('ine'), selfie:ch('cara'), vehiculo:ch('veh')};
+      if (!verif.ine || !verif.selfie) return toast('Primero revisa en persona la INE y que sea la misma persona.');
+      try { await rpvRpc('admin_rep_estado', {u:x, p_estado:'aprobado', p_verif:verif}); } catch(e){ return toast(vMsgError(e)); }
+      toast('Repartidor aprobado'); repRecargarAdm(); },
+    vRepEstadoAdm: async (x, el) => { const est = el.dataset.o; let motivo = null;
+      if (est!=='aprobado'){ try { motivo = window.prompt(est==='suspendido'?'Motivo de la suspensión (lo verá el repartidor):':'Motivo (lo verá quien lo pidió):', '') ; } catch(e){} if (motivo===null) return; motivo = motivo.trim().slice(0,200) || null; }
+      try { await rpvRpc('admin_rep_estado', {u:x, p_estado:est, p_motivo:motivo}); } catch(e){ return toast(vMsgError(e)); }
+      toast({aprobado:'Repartidor reactivado', suspendido:'Repartidor suspendido', rechazado:'Solicitud rechazada'}[est]); repRecargarAdm(); },
+    vRepCfg: async () => { const n = id => { const t = ($('#'+id)?.value||'').trim(); return t==='' ? null : +t; };
+      const cfg = {base:n('rc-base'), porKm:n('rc-km'), seguroPct:n('rc-seg'), espera:n('rc-esp')||5, noShowMin:n('rc-ns')||15};
+      try { await rpvRpc('admin_reparto_cfg', {cfg}); } catch(e){ return toast(vMsgError(e)); }
+      toast('Tarifas guardadas'); await vRepEstado(); repRecargarAdm(); },
+    vRepInterruptor: async () => { const on = !(RPV.admin && RPV.admin.cfg && RPV.admin.cfg.activo);
+      if (on && !confirmarSimple('¿Prender el reparto para TODO el público? Hazlo solo después de la revisión del abogado y del contador.')) return;
+      try { await rpvRpc('admin_reparto_cfg', {cfg:{activo:on}}); } catch(e){ return toast(vMsgError(e)); }
+      toast(on?'Reparto prendido para el público':'Reparto apagado'); await vRepEstado(); repRecargarAdm(); },
+    vRepProbador: async (x, el) => { const si = el.dataset.o==='1'; const u = si ? ($('#rp-usr')?.value||'').trim() : x; if (!u) return toast('Escribe el @usuario');
+      try { await rpvRpc('admin_reparto_probador', {usuario_arroba:u, si}); } catch(e){ return toast(vMsgError(e)); }
+      toast(si?'Cuenta de prueba agregada':'Cuenta de prueba quitada'); repRecargarAdm(); }
+  });
+  const atab = A.atab; A.atab = x => { if (VIVO && x==='repartidores') RPV.admin = null; return atab(x); };
+  const modo2 = A.modo2; A.modo2 = x => {
+    if (x==='vrep'){
+      if (!VIVO || !RPV.app || !RPV.app.soyRep) return modo2('real');
+      try { localStorage.setItem('lm-modo','real'); } catch(e){}
+      if (soyNegocio()){ S.yo = S.personal; save(); }
+      ui.mode = 'vrep'; ui.sheet = null; RPV.panel = null; render(); window.scrollTo(0,0);
+      vRepPanel().then(()=>{ if (ui.mode==='vrep') render(); }); return;
+    }
+    return modo2(x);
+  };
+}
 
 /* ---------- render ---------- */
-const VISTAS = {verificar:vVerificar, guardados:vGuardados, home:vHome, buscar:vBuscar, inicio:vInicio, notifs:vNotifs, negocio:vNegocio, carrito:vCarrito, checkout:vCheckout, seguimiento:vSeguimiento, pedidos:vPedidos, vende:vVende, post:vPost, perfil:vPerfil, usuario:vUsuario, mensajes:vMensajes, ajustes:vAjustes, minegocio:vMiNegocio};
+const VISTAS = {verificar:vVerificar, guardados:vGuardados, home:vHome, buscar:vBuscar, inicio:vInicio, notifs:vNotifs, negocio:vNegocio, carrito:vCarrito, checkout:vCheckout, seguimiento:vSeguimiento, pedidos:vPedidos, vende:vVende, repalta:vRepAlta, post:vPost, perfil:vPerfil, usuario:vUsuario, mensajes:vMensajes, ajustes:vAjustes, minegocio:vMiNegocio};
 const historial = [];
 function modosNav(){
-  if (VIVO || ui.mode==='real'){ const act = ui.mode==='admin' ? 'vadmin' : (VIVO && soyNegocio()) ? 'vcomercio' : 'real';
-    const l = [['real','En vivo'],['vcomercio','Mi negocio'],...(VIVO&&S.esAdmin?[['vadmin','Admin']]:[]),['app','Ver demo']];
+  if (VIVO || ui.mode==='real'){ const act = ui.mode==='admin' ? 'vadmin' : ui.mode==='vrep' ? 'vrep' : (VIVO && soyNegocio()) ? 'vcomercio' : 'real';
+    const l = [['real','En vivo'],...(soyRepVivo()?[['vrep','Repartidor']]:[['vcomercio','Mi negocio']]),...(VIVO&&S.esAdmin?[['vadmin','Admin']]:[]),['app','Ver demo']];
     return `<nav class="modes" aria-label="Vista">${l.map(([k,t])=>`<button class="${act===k?'on':''}" data-a="modo2" data-x="${k}">${t}</button>`).join('')}</nav>`; }
   const act = ui.mode==='app' ? (soyNegocio()?'comercio':'app') : ui.mode;
   return `<nav class="modes" aria-label="Vista del prototipo">${[['real','En vivo'],['app','Demo: Cliente'],['comercio','Comercio'],['rep','Repartidor'],['admin','Admin']].map(([k,l])=>`<button class="${act===k?'on':''}" data-a="modo2" data-x="${k}">${l}</button>`).join('')}</nav>`;
@@ -5064,6 +5240,10 @@ function render(){
   if (ui.mode==='real') return renderReal();
   if (ui.mode==='rep'){
     $('#app').innerHTML = `<div class="rwrap">${protoBar()}${vRep()}</div>`; renderLayer(); return;
+  }
+  if (ui.mode==='vrep'){
+    if (!VIVO){ ui.mode = 'real'; return render(); }
+    $('#app').innerHTML = `<div class="rwrap">${protoBar()}${vRepVivo()}</div>`; renderLayer(); return;
   }
   if (ui.mode==='admin'){
     $('#app').innerHTML = `<header class="top"><div class="top-in wrap gut"><button class="logo2" style="padding:0;font-size:20px" data-a="mode" data-x="app"><span class="mark">${esc(inits(S.cfg.marca))}</span><span style="display:inline">${esc(S.cfg.marca)}</span></button>
@@ -5483,7 +5663,7 @@ Object.assign(A, {
   termAdd: () => { const t=$('#term-t').value.trim().toLowerCase(), c=$('#term-c').value; if(t.length<3) return toast('Escribe al menos 3 letras'); S.cfg.terminos.push({t:limpiarTexto(t), cat:c}); CACHE_RE.clear(); log('Admin','Agregó término al Escudo',c); save(); rerender(); },
   termDel: x => { S.cfg.terminos.splice(+x,1); save(); rerender(); }
 });
-registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal(); registrarAccionesV17(); registrarAccionesV18(); registrarAccionesLegal(); registrarAccionesVivo();
+registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal(); registrarAccionesV17(); registrarAccionesV18(); registrarAccionesLegal(); registrarAccionesVivo(); registrarAccionesRepVivo();
 aplicarPref();
 const EN_VIVO_OK = /github\.io$/.test(location.host) || /[?&]vivo=1/.test(location.search);
 try { if (EN_VIVO_OK && (localStorage.getItem('lm-modo')||'real')==='real') ui.mode='real'; } catch(e){ if (EN_VIVO_OK) ui.mode='real'; }
