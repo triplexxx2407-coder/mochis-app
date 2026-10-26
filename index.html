@@ -459,7 +459,7 @@ details.set .bd{padding:0 18px 18px;display:flex;flex-direction:column;gap:12px}
 .codein{font-family:var(--display);font-size:22px;letter-spacing:.35em;text-align:center;max-width:150px;border:1px solid var(--line);border-radius:12px;padding:9px;background:var(--surface);color:var(--fg)}
 .codein.sm{font-size:16px;max-width:170px;letter-spacing:.2em}
 .codebox{display:flex;flex-direction:column;align-items:center;gap:2px;border:2px dashed var(--brand);border-radius:16px;padding:12px;text-align:center;background:var(--brand-soft)}
-.codebox span{font-size:12.5px;font-weight:800;color:var(--brand)}.codebox b{font-family:var(--display);font-size:34px;letter-spacing:.3em}.codebox small{font-size:12px;color:var(--muted);max-width:340px}
+.codebox span{font-size:12.5px;font-weight:800;color:var(--brand)}.codebox>b{font-family:var(--display);font-size:34px;letter-spacing:.3em}.codebox small{font-size:12px;color:var(--muted);max-width:340px}
 .steps{display:flex;gap:4px}.steps span{flex:1;text-align:center;font-size:11px;font-weight:700;padding:6px 2px;border-radius:8px;background:var(--surface-2);color:var(--muted)}.steps span.on{background:var(--brand);color:var(--brand-ink)}
 .mapa{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line)}.mapa svg{display:block;width:100%}
 .m-bg{fill:#E8EEE6}.m-calle line{stroke:#fff;stroke-width:9}.m-ruta{fill:none;stroke:var(--brand);stroke-width:4;stroke-dasharray:8 6;stroke-linecap:round}
@@ -5313,6 +5313,15 @@ function vCkTotales(){ const k = ui.ck, q = k && k.cot; if (!q || q.lejos) retur
 document.addEventListener('input', e => { if (e.target && e.target.id==='rk-oferta') vCkTotales(); });
 
 /* ---------- seguimiento del cliente (en vivo) ---------- */
+// Reportar al repartidor o al cliente (regla 1.2 de Apple). Motivos fijos; llega a Admin → Seguridad.
+const REP_MOTIVOS = [['trato','Trato grosero o agresivo'],['acoso','Acoso o insinuaciones'],['datos','Me pidió datos o contacto fuera de la app'],['cobro','Cobró de más o no dio cambio'],['pedido','Pedido incompleto, dañado o no entregado'],['peligro','Me sentí en peligro']];
+function repReporte(de, x){
+  const otro = de==='cli' ? 'repartidor' : 'cliente';
+  if (ui.repRep!==x) return `<button class="lk" data-a="vRepReportar" data-x="${esc(x)}">Reportar al ${otro}</button>`;
+  return `<div class="card" style="gap:6px"><b>¿Qué pasó con el ${otro}?</b><span class="small muted">Lo revisa una persona del equipo. Si estás en peligro, <a href="tel:911">llama al 911</a>.</span>
+    ${REP_MOTIVOS.filter(([k])=>de==='cli'||k!=='pedido').map(([k,l])=>`<button class="btn sm" style="justify-content:flex-start" data-a="vRepReportarMot" data-x="${esc(x)}" data-de="${de}" data-o="${k}">${esc(l)}</button>`).join('')}
+    <button class="lk" data-a="vRepReportar" data-x="${esc(x)}">Cancelar</button></div>`;
+}
 function repClienteVivo(p){
   const R = p.rep; if (!R) return '';
   if (!R.srv) return enCurso(p) ? `<div class="card"><h2>Repartidor</h2><p class="small muted" style="margin:0">Cargando…</p></div>` : '';
@@ -5333,7 +5342,8 @@ function repClienteVivo(p){
     <div class="steps">${pasos.map(s=>`<span class="${pasos.indexOf(s)<=pasos.indexOf(R.estado)?'on':''}">${esc({asignado:'Va a la tienda',en_tienda:'En tienda',en_camino:'En camino',llego:'Llegó',entregado:'Entregado'}[s])}</span>`).join('')}</div>
     ${R.estado!=='entregado'&&p.codigo?`<div class="codebox"><span>Tu código de entrega</span><b class="num">${esc(p.codigo)}</b><small>Dáselo al repartidor <b>solo cuando tengas tu pedido en la mano</b>. Sin este código no puede marcarlo como entregado.</small></div>`:''}
     ${R.estado!=='entregado'?`${repMsgs(R.msgs,'cliente')}${repBotonesMsg(p.id, MSG_CLI, 'cli')}`:''}
-    <span class="small muted">Por tu seguridad, el repartidor solo ve tu nombre de pila y tu dirección mientras lleva tu pedido. Nunca ve tu perfil, ni tú el suyo. No hay llamadas: usen los mensajes rápidos.</span></div>`;
+    <span class="small muted">Por tu seguridad, el repartidor solo ve tu nombre de pila y tu dirección mientras lleva tu pedido. Nunca ve tu perfil, ni tú el suyo. No hay llamadas: usen los mensajes rápidos. Si estás en peligro, <a href="tel:911">llama al 911</a>.</span>
+    ${repReporte('cli', p.id)}</div>`;
 }
 
 /* ---------- Mi negocio → Perfil y envíos: repartidores de la app ---------- */
@@ -5397,7 +5407,8 @@ function repVivoActivo(a){
     ${paso}
     ${e!=='no_pago'?`<div class="card" style="gap:8px"><b>Mensajes rápidos</b>${repMsgs(a.msgs,'repartidor')}${repBotonesMsg(a.pedido, MSG_REP, 'rep')}</div>`:''}
     ${e!=='no_pago'?`<div class="row between"><button class="lk" data-a="vRepEmergencia" data-x="${a.pedido}" style="color:var(--bad)">Tengo una emergencia</button>${e==='llego'?`<button class="lk" data-a="vRepNoPago" data-x="${a.pedido}">El cliente no quiere pagar</button>`:''}</div>
-    <span class="small muted">No puedes cancelar un pedido aceptado. En una emergencia lo pasamos a otro repartidor (o avisamos al equipo si ya lo recogiste) y cuenta como falta: 3 faltas = suspensión.</span>`:''}</div>`;
+    <span class="small muted">No puedes cancelar un pedido aceptado. En una emergencia lo pasamos a otro repartidor (o avisamos al equipo si ya lo recogiste) y cuenta como falta: 3 faltas = suspensión. Si tu vida o tu salud corren peligro, <a href="tel:911">llama al 911</a> primero.</span>`:''}
+    ${repReporte('rep', a.pedido)}</div>`;
 }
 function repVivoGanancias(){
   const H = RPV.hist;
@@ -5468,11 +5479,15 @@ function registrarAccionesRepVivo3(){
     vRepPaso: async (x, el) => { await ped('rep_avanzar', {pid:x, paso:el.dataset.o}); panel(); },
     vRepEntregar: async x => { const cod = ($('#rcod')?.value||'').replace(/\D/g,''); if (cod.length!==4) return toast('Escribe los 4 números del código');
       await ped('rep_entregar', {pid:x, cod}, r=>toast(r==='ok'?'Entregado. ¡Gracias!':r)); RPV.hist = null; panel(); },
-    vRepEmergencia: async x => { if (!confirmarSimple('¿Seguro? Si aún no lo recoges, se lo pasamos a otro repartidor; si ya lo traes, avisamos al equipo. Cuenta como falta.')) return;
+    vRepEmergencia: async x => { if (!confirmarSimple('Si tu vida o tu salud corren peligro, llama primero al 911.\n\n¿Seguro? Si aún no lo recoges, se lo pasamos a otro repartidor; si ya lo traes, avisamos al equipo. Cuenta como falta.')) return;
       await ped('rep_emergencia', {pid:x}, r=>toast(r==='equipo'?'Avisamos al equipo. Te van a contactar.':'Lo pasamos a otro repartidor. Cuídate.')); panel(); },
     vRepNoPago: async x => { if (!confirmarSimple('¿El cliente no quiere pagar? Guardamos tu ubicación y la hora como prueba, y su cuenta queda en pausa mientras el equipo lo revisa.')) return;
       let g = {lat:null, lng:null}; try { g = await repGeo(); } catch(e){}
       await ped('rep_no_pago', {pid:x, p_lat:g.lat, p_lng:g.lng}, ()=>toast('Reporte enviado. El equipo lo revisa.')); panel(); },
+    vRepReportar: x => { ui.repRep = ui.repRep===x ? null : x; ui.mode==='vrep' ? render() : rerender(); },
+    vRepReportarMot: async (x, el) => { const pid = el.dataset.de==='cli' ? sidDe(x) : x; if (!pid) return;
+      await ped('reparto_reportar', {pid, p_motivo:el.dataset.o}, ()=>{ ui.repRep = null; toast('Reporte enviado. El equipo lo revisa.'); });
+      ui.mode==='vrep' ? render() : rerender(); },
     vRepCalif: async x => { const [pid, n] = x.split('|'); const {error} = await RV.sb.from('calif').insert({pedido:pid, rol:'cli_r', est:+n});
       if (error && !/duplicate/i.test(error.message)) return toast(vMsgError(error)); toast('¡Gracias por calificar!'); panel(); }
   });
