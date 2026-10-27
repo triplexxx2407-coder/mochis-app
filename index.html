@@ -3125,8 +3125,8 @@ function vAdmin(){
   const rep = S.posts.filter(p=>p.estado==='aprobado'&&S.reportes.some(r=>r.post===p.id)).length;
   return `<div class="stack"><div class="row between"><div><span class="small muted">Panel del administrador</span><h1>${esc(S.cfg.marca)}</h1></div><div class="row" style="gap:8px"><span class="pill ${S.cfg.autoMod?'ok':''}">Revisión automática: ${S.cfg.autoMod?'activada':'desactivada'}</span><button class="btn pri sm" data-a="adelantar" title="Simula que pasa un día">⏩ Adelantar 1 día</button><button class="btn danger sm" data-a="reiniciar">↺ Reiniciar</button></div></div>
   ${S.dias?`<div class="note small">Simulación: han pasado <b>${S.dias}</b> día(s). Revisa Pedidos, Comisiones, Repartidores y la App para ver la actividad.</div>`:''}
-  <div class="ptabs">${[['moderacion',`Por revisar (${pend})`],['seguridad',`Seguridad (${S.alertas.filter(a=>a.estado==='nueva').length+rep})`],['automaticas','Decisiones automáticas'],['comercios','Negocios'],['repartidores','Repartidores'],['usuarios','Usuarios'],['pedidos','Pedidos'],['comisiones','Comisiones'],['verificacion',`Verificación (${S.verifs.filter(v=>v.estado==='pendiente').length})`],['apelaciones',`Apelaciones (${S.apelaciones.filter(a=>a.estado==='pendiente').length})`],['bitacora','Bitácora'],['ajustes','Ajustes']].map(([k,l])=>`<button class="${ui.aTab===k?'on':''}" data-a="atab" data-x="${k}">${l}</button>`).join('')}</div>
-  ${ {moderacion:aModeracion, seguridad:aSegReportes, reportes:aSegReportes, automaticas:aAutomaticas, comercios:aComercios, repartidores:aRepartidores, usuarios:aUsuarios, pedidos:aPedidos, comisiones:aComisiones, bitacora:aBitacora, ajustes:aAjustes, verificacion:aVerificacion, apelaciones:aApelaciones}[ui.aTab]() }</div>`;
+  <div class="ptabs">${[['moderacion',`Por revisar (${pend})`],['seguridad',`Seguridad (${S.alertas.filter(a=>a.estado==='nueva').length+rep})`],['automaticas','Decisiones'],['comercios','Negocios'],['repartidores','Repartidores'],['usuarios','Usuarios'],['pedidos','Pedidos'],['comisiones','Comisiones'],['verificacion',`Verificación (${S.verifs.filter(v=>v.estado==='pendiente').length})`],['apelaciones',`Apelaciones (${S.apelaciones.filter(a=>a.estado==='pendiente').length})`],['bitacora','Bitácora'],['ajustes','Ajustes']].map(([k,l])=>`<button class="${ui.aTab===k?'on':''}" data-a="atab" data-x="${k}">${l}</button>`).join('')}</div>
+  ${ {moderacion:aModeracion, seguridad:aSegReportes, reportes:aSegReportes, automaticas:aDecisiones, comercios:aComercios, repartidores:aRepartidores, usuarios:aUsuarios, pedidos:aPedidos, comisiones:aComisiones, bitacora:aBitacora, ajustes:aAjustes, verificacion:aVerificacion, apelaciones:aApelaciones}[ui.aTab]() }</div>`;
 }
 function selMotivo(id, sug){ return `<select id="rej-${id}" aria-label="Motivo" style="width:auto;padding:7px 9px;font-size:13px">${Object.entries(MOTIVOS).map(([k,l])=>`<option value="${k}" ${k===sug?'selected':''}>${esc(l)}</option>`).join('')}</select>`; }
 function modItem(it, tipo, reportado){
@@ -3170,6 +3170,30 @@ function aReportes(){
   ${rep.map(p=>modItem(p,'post',true)).join('') || '<p class="muted">Sin publicaciones reportadas.</p>'}
   <div class="sec-h"><h2>Cuentas reportadas</h2></div>
   ${cuentas.map(r=>{ const a=perfilDe(r.cuenta); return `<div class="srow card" style="flex-direction:row">${avatar(a,38)}<div class="tx"><b>${esc(a.nombre)}</b><span>${esc(MOTIVOS[r.motivo]||r.motivo)} · ${hace(r.t)}</span></div>${esNeg(r.cuenta)?'':`<button class="btn sm" data-a="toggleSubidas" data-x="${r.cuenta}">${usr(r.cuenta).subidas?'Bloquear publicaciones':'Desbloquear'}</button>`}<button class="btn ghost sm" data-a="descartarCuenta" data-x="${r.cuenta}">Descartar</button></div>`; }).join('') || '<p class="muted">Sin cuentas reportadas.</p>'}`;
+}
+// Decisiones: automáticas (filtro y servidor) y manuales (las tuyas). Las del servidor vienen de public.decisiones.
+const DEC_TIPO = {publicacion:'Publicación', historia:'Historia', producto:'Producto', negocio:'Negocio', cuenta:'Cuenta', repartidor:'Repartidor'};
+const DEC_VAL = {aprobado:'Aprobado', rechazado:'Rechazado', pendiente:'En revisión', retirado:'Retirado', pausado:'Pausado', eliminado:'Eliminado', suspendido:'Suspendido'};
+function decValor(d, v){
+  if (d.campo==='suspendido') return v==='true' ? 'Suspendida' : 'Activa';
+  if (d.campo==='subidas') return v==='true' ? 'Puede publicar' : 'No puede publicar';
+  if (d.tipo==='negocio' && v==='rechazado') return 'Anulado';
+  return DEC_VAL[v] || v || '—';
+}
+function tablaDecSrv(l, vacio){
+  return `<div class="tbl"><table><thead><tr><th>Qué</th><th>Cambio</th><th>Cuándo</th><th></th></tr></thead><tbody>
+  ${l.map(d=>`<tr><td><span class="pill">${DEC_TIPO[d.tipo]||d.tipo}</span><div><b>${esc(d.resumen||'')}</b></div>${d.motivo?`<div class="small muted">${esc(d.motivo)}</div>`:''}</td>
+    <td class="small">${esc(decValor(d,d.antes))} → <b>${esc(decValor(d,d.despues))}</b></td><td class="small muted">${fecha(vMs(d.t))}</td>
+    <td>${d.revertida_t?`<span class="small muted">Revertida</span>`:`<button class="btn sm" data-a="vRevertirDec" data-x="${d.id}">Revertir</button>`}</td></tr>`).join('') || `<tr><td colspan="4" class="muted">${vacio}</td></tr>`}</tbody></table></div>`;
+}
+function aDecisiones(){
+  const t = ui.decTab || 'auto', srv = S.decsSrv || [];
+  const man = srv.filter(d=>d.por==='admin'), aut = srv.filter(d=>d.por==='auto');
+  return `<div class="stack"><div class="segs" style="align-self:flex-start">${[['auto','Automáticas'],['manual',`Manuales${man.length?` (${man.length})`:''}`]].map(([k,l])=>`<button class="${t===k?'on':''}" data-a="decTab" data-x="${k}">${l}</button>`).join('')}</div>
+  ${t==='manual'
+    ? `<p class="small muted" style="margin:0">Lo que decidiste tú: aprobar, rechazar, anular, suspender, eliminar… Si te equivocaste, reviértelo. Solo se puede si nadie lo volvió a cambiar después.</p>
+       ${VIVO ? tablaDecSrv(man, 'Aún no hay decisiones manuales guardadas. Se empiezan a guardar desde que se instaló esta función.') : '<p class="muted">Las decisiones manuales se guardan en el modo En vivo.</p>'}`
+    : `${aAutomaticas()}${VIVO && aut.length ? `<div class="sec-h"><h2>Otras decisiones del servidor</h2><span class="muted small">Reportes, suspensiones automáticas…</span></div>${tablaDecSrv(aut, '')}` : ''}`}</div>`;
 }
 function aAutomaticas(){
   const l = S.decisiones.slice(0,60);
@@ -4607,7 +4631,8 @@ async function vCargar(){
         bit: sb.from('bitacora').select('*').order('t',{ascending:false}).limit(300),
         adm: sb.rpc('admin_perfiles2'),
         pendPosts: sb.from('feed2').select('*').eq('estado','pendiente').order('created_at',{ascending:false}).limit(300),
-        repdet: sb.rpc('admin_reportes_detalle')
+        repdet: sb.rpc('admin_reportes_detalle'),
+        decs: sb.from('decisiones').select('*').order('t',{ascending:false}).limit(300)
       } : {})
     };
     const keys = Object.keys(pedir); const vals = await Promise.all(Object.values(pedir));
@@ -4729,7 +4754,7 @@ function vArmar(D, E, admin, conteos, promCli){
   const yoAntes = prev ? prev.yo : (((()=>{ try { return localStorage.getItem('lm-vivo-yo-'+uid); } catch(e){ return null; } })()) || me);
   const misNegIds = misNeg.map(n=>n.id);
   const S2 = {
-    ts:Date.now(), vivo:true, esAdmin:admin, elimReg:admin ? (EL.registro||[]) : [],
+    ts:Date.now(), vivo:true, esAdmin:admin, elimReg:admin ? (EL.registro||[]) : [], decsSrv:admin && Array.isArray(D.decs) ? D.decs : [],
     cfg:{marca:aj.marca||'MOCHI', ciudad:aj.ciudad||'Los Mochis', comisionBps:0, planCents:0, autoMod:aj.auto_mod!==false, revisarNeg:!!aj.revisar_neg, strikesMax:aj.strikes_max||3, umbralReportes:aj.umbral_reportes||3,
       terminos:Array.isArray(aj.terminos)?aj.terminos:[], legal:(aj.legal && typeof aj.legal==='object')?aj.legal:{}, protegidos:(Array.isArray(aj.protegidos)&&aj.protegidos.length)?aj.protegidos:PROTEGIDOS_BASE.slice(), reparto:SDEMO.cfg.reparto},
     negocios, productos, usuarios, yo:(yoAntes===me || misNegIds.includes(yoAntes)) ? yoAntes : me, personal:me, misNegocios:misNegIds, sesion:'correo',
@@ -5708,6 +5733,10 @@ function registrarAccionesRepVivo3(){
   const pedirTexto = (msg, def='') => { try { return window.prompt(msg, def); } catch(e){ return def; } };
   const avisar = msg => { try { window.alert(msg); } catch(e){ toast(msg); } };
   Object.assign(A, {
+    vRevertirDec: async x => { const d = (S.decsSrv||[]).find(r=>r.id===+x); if (!d || !vEsAdmin()) return;
+      if (!confirmarSimple(`¿Revertir esta decisión?\n\n${DEC_TIPO[d.tipo]||d.tipo}: ${d.resumen||''}\nVuelve a: ${decValor(d, d.antes)}`)) return;
+      const {error} = await RV.sb.rpc('admin_revertir', {did:d.id}); if (error) return toast(vMsgError(error));
+      await vRecargar(true); toast('Decisión revertida.'); },
     vNegEliminar: async x => { const n = neg(x); if (!n || !n.sid || !vEsAdmin()) return;
       if (!confirmarSimple(`¿Seguro que quieres eliminar "${n.nombre}"?\n\nSe quita de tu lista y pasa a "Eliminados". Queda guardado en la base y en la bitácora, y lo puedes restaurar.`)) return;
       const m = pedirTexto('Razón (opcional, la verá el dueño):', n.motivo||''); if (m===null) return;
@@ -6155,6 +6184,7 @@ const A = {
   // admin
   atab: x => { ui.aTab=x; ui.delAsk=null; render(); window.scrollTo(0,0); },
   segTab: x => { ui.aTab='seguridad'; ui.segTab=x; render(); },
+  decTab: x => { ui.aTab='automaticas'; ui.decTab=x; render(); },
   autoMod: () => { S.cfg.autoMod=!S.cfg.autoMod; log('Admin','Revisión automática',S.cfg.autoMod?'activada':'desactivada'); save(); rerender(); toast(`Revisión automática ${S.cfg.autoMod?'activada':'desactivada'}`); },
   procesar: () => { const n=procesarPendientes(); save(); rerender(); toast(`${n} decidido(s) automáticamente; lo dudoso sigue aquí.`); },
   aprobar: x => { const [t,id]=x.split(':'); const it=t==='post'?post(id):S.historias.find(h=>h.id===id); aplicarDecision(it,t,{d:'aprobado',razon:'Aprobado a mano'},'admin'); save(); rerender(); toast('Aprobado'); },
