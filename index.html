@@ -1191,7 +1191,8 @@ try { PREF = {...PREF, ...JSON.parse(localStorage.getItem('lm-pref')||'{}')}; } 
 if (!Array.isArray(PREF.paleta)) PREF.paleta = [];
 // Color propio (Configuración → Apariencia): un tono (h, 0-359) y qué tan claro u oscuro (l, 0-100).
 // Menos de 50 = oscuro. La letra se calcula aparte para que siempre se lea.
-// En vivo, la paleta y el color van con la cuenta (tabla preferencias): se ven igual en cualquier dispositivo.
+// En vivo, la paleta, el color y el modo claro/oscuro van con la cuenta (tabla preferencias): se ven igual en cualquier
+// dispositivo y no pasan de una cuenta a otra. Sin sesión, todo queda en blanco (modo claro, sin color).
 const COLOR_VARS = ['--bg','--surface','--surface-2','--surface-3','--line','--fg','--muted'];
 const colorOscuro = c => c.l < 50;
 const colorLuz = c => colorOscuro(c) ? 4 + c.l*0.4 : 70 + (c.l-50)*0.54;
@@ -1214,20 +1215,26 @@ function aplicarPref(){
 }
 // Paleta y color de la cuenta: se bajan al entrar y se suben (sin prisa) cuando cambian
 const PSYNC = {uid:null, timer:null, ultimo:''};
-const prefDatos = () => JSON.stringify({paleta:PREF.paleta, color:PREF.color||null});
+const prefDatos = () => JSON.stringify({paleta:PREF.paleta, color:PREF.color||null, tema:PREF.tema==='oscuro'?'oscuro':PREF.tema==='claro'?'claro':'sistema'});
 function prefSubir(){
-  if (!VIVO || !PSYNC.uid || !RV.user || RV.user.id!==PSYNC.uid || prefDatos()===PSYNC.ultimo) return;
+  if (!PSYNC.uid || !RV.user || RV.user.id!==PSYNC.uid || prefDatos()===PSYNC.ultimo) return;
   clearTimeout(PSYNC.timer);
   PSYNC.timer = setTimeout(async ()=>{ const d = prefDatos(), uid = PSYNC.uid; if (d===PSYNC.ultimo || !RV.user || RV.user.id!==uid) return;
-    const {error} = await RV.sb.from('preferencias').upsert({usuario:uid, ...JSON.parse(d)}, {onConflict:'usuario'}); if (!error) PSYNC.ultimo = d; }, 1500);
+    const fila = {usuario:uid, ...JSON.parse(d)};
+    let {error} = await RV.sb.from('preferencias').upsert(fila, {onConflict:'usuario'});
+    if (error && /tema/.test(error.message||'')){ delete fila.tema; ({error} = await RV.sb.from('preferencias').upsert(fila, {onConflict:'usuario'})); } // falta el SQL 07
+    if (!error) PSYNC.ultimo = d; }, 1500);
 }
+// Al cerrar sesión (o entrar sin sesión) todo vuelve a blanco: modo claro, sin color ni paleta
+function prefCerrar(){ PSYNC.uid = null; clearTimeout(PSYNC.timer); PREF.paleta = []; PREF.color = null; PREF.tema = 'claro'; aplicarPref(); }
 async function prefBajar(uid){
   if (PSYNC.uid===uid) return; PSYNC.uid = null;
-  const {data, error} = await RV.sb.from('preferencias').select('paleta,color').eq('usuario', uid).maybeSingle();
+  let {data, error} = await RV.sb.from('preferencias').select('paleta,color,tema').eq('usuario', uid).maybeSingle();
+  if (error && /tema/.test(error.message||'')) ({data, error} = await RV.sb.from('preferencias').select('paleta,color').eq('usuario', uid).maybeSingle()); // falta el SQL 07
   if (error || !RV.user || RV.user.id!==uid) return;                     // sin el SQL 06 todo sigue como antes, solo en este dispositivo
   let dueno = null; try { dueno = localStorage.getItem('lm-pref-dueno'); } catch(e){}
-  if (data){ PREF.paleta = Array.isArray(data.paleta) ? data.paleta : []; PREF.color = data.color || null; PSYNC.ultimo = prefDatos(); }
-  else if (dueno && dueno!==uid){ PREF.paleta = []; PREF.color = null; } // la paleta de este dispositivo es de otra cuenta: esta empieza limpia
+  if (data){ PREF.paleta = Array.isArray(data.paleta) ? data.paleta : []; PREF.color = data.color || null; if (data.tema) PREF.tema = data.tema; PSYNC.ultimo = prefDatos(); }
+  else if (dueno!==uid){ PREF.paleta = []; PREF.color = null; }          // cuenta sin preferencias: empieza limpia (lo de este dispositivo no se le pasa)
   try { localStorage.setItem('lm-pref-dueno', uid); } catch(e){}
   PSYNC.uid = uid; aplicarPref(); if (typeof rerender==='function') rerender();
 }
@@ -3929,7 +3936,7 @@ async function rIniciar(){
 }
 async function rSesion(ses){
   const uid = ses && ses.user ? ses.user.id : null;
-  if (!uid){ RV.user=null; RV.me=null; RV.fase='login'; if (typeof vSalirVivo==='function') vSalirVivo(); return renderReal(); }
+  if (!uid){ RV.user=null; RV.me=null; RV.fase='login'; if (typeof vSalirVivo==='function') vSalirVivo(); prefCerrar(); return renderReal(); }
   if (RV.user && RV.user.id===uid && RV.me) return;
   RV.user = ses.user; if (location.hash.includes('access_token')) history.replaceState(null,'',location.pathname);
   const { data:me } = await RV.sb.from('profiles').select('id,usuario,nombre').eq('id', uid).maybeSingle();
@@ -3999,7 +4006,7 @@ function registrarAccionesReal(){
   Object.assign(A, {
     rRecargar: () => location.reload(),
     rLTab: x => { RV.ltab=x; RV.err=''; renderReal(); },
-    rSalir: async () => { if (typeof vSalirVivo==='function') vSalirVivo(); await RV.sb.auth.signOut(); RV.user=null; RV.me=null; RV.fase='login'; ui.mode='real'; renderReal(); }
+    rSalir: async () => { if (typeof vSalirVivo==='function') vSalirVivo(); prefCerrar(); await RV.sb.auth.signOut(); RV.user=null; RV.me=null; RV.fase='login'; ui.mode='real'; renderReal(); }
   });
   Object.assign(F, {
     rPassLogin: async () => { const crear = RV.ltab==='crear'; const mail = ($('#rl-mail').value||'').trim().toLowerCase(), pw = $('#rl-pass').value||''; RV.mail = mail; RV.err='';
