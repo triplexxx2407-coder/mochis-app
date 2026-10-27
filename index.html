@@ -1190,7 +1190,8 @@ let PREF = {tema:'sistema', grande:false, color:null, paleta:[]};
 try { PREF = {...PREF, ...JSON.parse(localStorage.getItem('lm-pref')||'{}')}; } catch(e){}
 if (!Array.isArray(PREF.paleta)) PREF.paleta = [];
 // Color propio (Configuración → Apariencia): un tono (h, 0-359) y qué tan claro u oscuro (l, 0-100).
-// Menos de 50 = oscuro. La letra se calcula aparte para que siempre se lea. Solo se guarda en este teléfono.
+// Menos de 50 = oscuro. La letra se calcula aparte para que siempre se lea.
+// En vivo, la paleta y el color van con la cuenta (tabla preferencias): se ven igual en cualquier dispositivo.
 const COLOR_VARS = ['--bg','--surface','--surface-2','--surface-3','--line','--fg','--muted'];
 const colorOscuro = c => c.l < 50;
 const colorLuz = c => colorOscuro(c) ? 4 + c.l*0.4 : 70 + (c.l-50)*0.54;
@@ -1209,6 +1210,26 @@ function aplicarPref(){
     if (PREF.tema==='claro') r.dataset.theme='light'; else if (PREF.tema==='oscuro') r.dataset.theme='dark'; else delete r.dataset.theme; }
   document.body.classList.toggle('big', !!PREF.grande);
   try { localStorage.setItem('lm-pref', JSON.stringify(PREF)); } catch(e){}
+  prefSubir();
+}
+// Paleta y color de la cuenta: se bajan al entrar y se suben (sin prisa) cuando cambian
+const PSYNC = {uid:null, timer:null, ultimo:''};
+const prefDatos = () => JSON.stringify({paleta:PREF.paleta, color:PREF.color||null});
+function prefSubir(){
+  if (!VIVO || !PSYNC.uid || !RV.user || RV.user.id!==PSYNC.uid || prefDatos()===PSYNC.ultimo) return;
+  clearTimeout(PSYNC.timer);
+  PSYNC.timer = setTimeout(async ()=>{ const d = prefDatos(), uid = PSYNC.uid; if (d===PSYNC.ultimo || !RV.user || RV.user.id!==uid) return;
+    const {error} = await RV.sb.from('preferencias').upsert({usuario:uid, ...JSON.parse(d)}, {onConflict:'usuario'}); if (!error) PSYNC.ultimo = d; }, 1500);
+}
+async function prefBajar(uid){
+  if (PSYNC.uid===uid) return; PSYNC.uid = null;
+  const {data, error} = await RV.sb.from('preferencias').select('paleta,color').eq('usuario', uid).maybeSingle();
+  if (error || !RV.user || RV.user.id!==uid) return;                     // sin el SQL 06 todo sigue como antes, solo en este dispositivo
+  let dueno = null; try { dueno = localStorage.getItem('lm-pref-dueno'); } catch(e){}
+  if (data){ PREF.paleta = Array.isArray(data.paleta) ? data.paleta : []; PREF.color = data.color || null; PSYNC.ultimo = prefDatos(); }
+  else if (dueno && dueno!==uid){ PREF.paleta = []; PREF.color = null; } // la paleta de este dispositivo es de otra cuenta: esta empieza limpia
+  try { localStorage.setItem('lm-pref-dueno', uid); } catch(e){}
+  PSYNC.uid = uid; aplicarPref(); if (typeof rerender==='function') rerender();
 }
 const temaActual = () => PREF.color ? (colorOscuro(PREF.color)?'oscuro':'claro') : PREF.tema==='claro'?'claro':PREF.tema==='oscuro'?'oscuro':(matchMedia('(prefers-color-scheme: dark)').matches?'oscuro':'claro');
 
@@ -2097,8 +2118,9 @@ function hojaMas(){
     <button class="lrow" data-a="toggleTema">${temaActual()==='oscuro'?ico.sun:ico.moon}<div class="tx"><b>Cambiar a modo ${temaActual()==='oscuro'?'claro':'oscuro'}</b></div></button>
     <button class="lrow" data-a="grande">${ico.text}<div class="tx"><b>Texto más grande</b></div><span class="switch ${PREF.grande?'on':''}"></span></button>
     <button class="lrow" data-a="misLikes"><span class="ictile like">${ico.heartF}</span><div class="tx"><b>Mis likes</b><div class="small muted">Publicaciones, comentarios y notas que te gustaron · solo tú las ves</div></div></button>
-    <button class="lrow" data-a="verGuardados"><span class="ictile save">${ico.saveF}</span><div class="tx"><b>Guardados</b><div class="small muted">Solo tú los ves · ${S.guardados.filter(g=>g.u===S.yo).length}</div></div></button>
+    <button class="lrow" data-a="verGuardados"><span class="ictile save">${ico.saveF}</span><div class="tx"><b>Guardados</b><div class="small muted">Privados (solo el equipo de MOCHI puede revisarlos) · ${S.guardados.filter(g=>g.u===S.yo).length}</div></div></button>
     <button class="lrow" data-a="go" data-x="pedidos">${ico.list}<div class="tx"><b>Mis pedidos</b></div></button>
+    <button class="lrow" data-a="apelarMenu">${ico.scale}<div class="tx"><b>Apelar una decisión</b><div class="small muted">Si el equipo o el sistema cambió algo tuyo y crees que fue un error</div></div></button>
     <button class="lrow" data-a="legal">${ico.shield}<div class="tx"><b>Privacidad y legal</b><div class="small muted">Aviso de privacidad, términos, reglas y tus datos</div></div></button>
     <button class="lrow" data-a="cuentas">${ico.swap}<div class="tx"><b>Cambiar de cuenta</b></div></button>
     <button class="lrow" data-a="logout" style="color:var(--bad)">${ico.out}<div class="tx"><b>Cerrar sesión</b></div></button>`);
@@ -2480,6 +2502,7 @@ function pPerfil(n){
     <label class="f" for="g-zonas">Costo por colonia (opcional) <span class="h">Una por línea: <code>Scally: 40</code></span><textarea id="g-zonas">${esc((n.zonas||[]).map(z=>`${z.col}: ${z.costo/100}`).join('\n'))}</textarea></label>
     ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}<div class="row"><button class="btn pri" type="submit">Guardar cambios</button></div></form>
   ${['suspendido','rechazado'].includes(n.estado) && n.motivo ? `<div class="card stack" style="max-width:760px;gap:8px"><h2>${n.estado==='suspendido'?'El equipo pausó tu negocio':'El equipo anuló tu negocio'}</h2><p class="small muted" style="margin:0">Motivo: ${esc(n.motivo)}. Si crees que es un error, abre una queja y platícalo con el equipo por chat.</p>${(()=>{ const q = quejaDe('negocio:'+n.id); return q ? `<button class="btn sm" data-a="quejaVer" data-x="${q.id}" style="align-self:flex-start">Ver tu queja</button>` : `<button class="btn pri sm" data-a="apelar" data-x="negocio:${n.id}" style="align-self:flex-start">Abrir una queja</button>`; })()}</div>` : ''}
+  <div class="card stack" style="max-width:760px;gap:8px"><h2>Apelar una decisión</h2><p class="small muted" style="margin:0">Si el equipo o el sistema cambió algo de tu negocio, tus productos o tu cuenta y crees que fue un error, ábrelo aquí y platícalo por chat.</p><button class="btn sm" data-a="apelarMenu" style="align-self:flex-start">Apelar una decisión</button></div>
   ${VIVO?`<div class="card stack" style="max-width:760px;gap:8px"><h2>Eliminar mi negocio</h2><p class="small muted" style="margin:0">Tu negocio deja de aparecer en la tienda y ya no recibe pedidos. Te vamos a pedir que escribas por qué. Por seguridad, sus datos y pedidos se quedan guardados.</p><button class="btn danger sm" data-a="vNegEliminarMio" style="align-self:flex-start">Eliminar mi negocio</button></div>`:''}`;
 }
 function pVentas(n){
@@ -2941,7 +2964,7 @@ const nGuardados = pid => S.guardados.filter(g=>g.post===pid).length;
 function vGuardados(){
   const ids = S.guardados.filter(g=>g.u===S.yo).sort((a,b)=>b.t-a.t).map(g=>post(g.post)).filter(p=>p && p.estado==='aprobado' && !bloq(p.autor));
   return `<div class="perfil-w"><button class="btn back" data-a="atras">${ico.back}Volver</button>
-    <div class="row nowrap" style="gap:12px"><span class="ictile save">${ico.saveF}</span><div><h1 style="margin:0">Guardados</h1><span class="small muted">Solo tú puedes ver esta carpeta. Los demás solo ven cuántas personas guardaron una publicación, nunca quiénes.</span></div></div>
+    <div class="row nowrap" style="gap:12px"><span class="ictile save">${ico.saveF}</span><div><h1 style="margin:0">Guardados</h1><span class="small muted">Nadie más ve esta carpeta. Los demás solo ven cuántas personas guardaron una publicación, nunca quiénes. Solo el equipo de MOCHI puede revisarla si investiga un reporte.</span></div></div>
     ${ids.length?`<div class="pgrid">${ids.map(p=>miniPost(p)).join('')}</div>`:'<div class="empty"><h2>Aún no guardas nada</h2><p class="muted">Toca el ícono de guardar en cualquier publicación para encontrarla aquí después.</p></div>'}</div>`;
 }
 
@@ -2996,8 +3019,24 @@ function hojaSeguidores(){
 }
 
 /* ---------- pestañas del perfil ---------- */
-function tabsPf(t, pubs, comp, etiq, hists, nts){
-  return [['pubs','Publicaciones',pubs.length,ico.list],['comp','Compartidos',comp.length,ico.repost],['etiq','Etiquetas',etiq.length,ico.tag],['hist','Historias',hists.length,ico.clock||I('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>')],['notas','Notas',nts.length,ico.msg]]
+// Likes y guardados de una cuenta (solo el admin). En vivo vienen de admin_actividad; en demo, de los datos locales.
+function actDe(id){
+  if (VIVO){ const a = (ui.act||{})[id]; if (!a && typeof vActividad==='function') setTimeout(()=>vActividad(id), 0); return a || {likes:[], guardados:[], cargando:true}; }
+  const fila = (p, t) => ({tipo:'publicacion', id:p.id, autor:perfilDe(p.autor).handle, texto:p.texto||'', estado:p.estado, t:t||p.t});
+  return {likes: Object.keys(S.likes).filter(k=>S.likes[k] && k.startsWith(id+'|')).map(k=>post(k.slice(id.length+1))).filter(Boolean).map(p=>fila(p)),
+          guardados: S.guardados.filter(g=>g.u===id).map(g=>{ const p = post(g.post); return p ? fila(p, g.t) : null; }).filter(Boolean)};
+}
+const ACT_TIPO = {publicacion:'Publicación', historia:'Historia', comentario:'Comentario'};
+function listaAct(l, cargando, vacio){
+  if (cargando) return '<p class="muted" style="text-align:center;padding:30px 0">Cargando…</p>';
+  return l.length ? `<div class="stack" style="gap:8px">${l.map(a=>{ const [lb,c] = PEST[a.estado]||['',''];
+    return `<div class="card" style="padding:10px 12px;gap:4px"><div class="row" style="gap:6px"><span class="pill">${ACT_TIPO[a.tipo]||a.tipo}</span><b class="small">@${esc(a.autor||'')}</b>${a.estado&&a.estado!=='aprobado'?`<span class="pill ${c}">${lb||esc(a.estado)}</span>`:''}<span class="small muted">${hace(typeof a.t==='number'?a.t:Date.parse(a.t))}</span></div>${a.texto?`<div class="small">${esc(a.texto)}</div>`:''}</div>`; }).join('')}</div>`
+    : `<p class="muted" style="text-align:center;padding:30px 0">${vacio}</p>`;
+}
+function tabsPf(t, pubs, comp, etiq, hists, nts, act){
+  act = act || {likes:[], guardados:[]};
+  return [['pubs','Publicaciones',pubs.length,ico.list],['comp','Compartidos',comp.length,ico.repost],['etiq','Etiquetas',etiq.length,ico.tag],['hist','Historias',hists.length,ico.clock||I('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>')],['notas','Notas',nts.length,ico.msg],
+    ['likes','Likes',act.cargando?'…':act.likes.length,ico.heartF],['guard','Guardados',act.cargando?'…':act.guardados.length,ico.saveF]]
     .map(([k,l,n,ic])=>`<button class="${t===k?'on':''}" data-a="pfTab" data-x="${k}">${ic}<span>${l}</span><small>${n}</small></button>`).join('');
 }
 function tabsPerfil(id){
@@ -3009,11 +3048,15 @@ function tabsPerfil(id){
   const comp = repostsDe(id);
   const etiq = S.posts.filter(p=>p.estado==='aprobado' && (p.etiq||[]).includes(id) && !bloq(p.autor)).sort((a,b)=>b.t-a.t);
   const grid = (l, vacio) => l.length ? `<div class="pgrid">${l.map(p=>{ const [lb,c]=PEST[p.estado]; return miniPost(p, p.estado!=='aprobado'?`<span class="pill ${c} st">${lb}</span>`:''); }).join('')}</div>` : `<p class="muted" style="text-align:center;padding:30px 0">${vacio}</p>`;
-  if (todo && (t==='hist' || t==='notas')) return `<div class="ptabs2">${tabsPf(t, pubs, comp, etiq, hists, nts)}</div>
+  const act = todo ? actDe(id) : null;
+  if (todo && (t==='likes' || t==='guard')) return `<div class="ptabs2">${tabsPf(t, pubs, comp, etiq, hists, nts, act)}</div>
+    <div class="small muted" style="text-align:center">${t==='likes'?'Lo que le gustó a esta cuenta.':'Lo que guardó esta cuenta. Solo lo ve el equipo de MOCHI.'}</div>
+    ${listaAct(t==='likes'?act.likes:act.guardados, act.cargando, t==='likes'?'No le ha dado like a nada.':'No tiene nada guardado.')}`;
+  if (todo && (t==='hist' || t==='notas')) return `<div class="ptabs2">${tabsPf(t, pubs, comp, etiq, hists, nts, act)}</div>
     ${t==='hist' ? (hists.length ? `<div class="pgrid">${hists.map(h=>{ const [lb,c]=PEST[h.estado]||['',''];
         return `<div class="ph">${verFoto(h.foto)}${h.estado!=='aprobado'?`<span class="pill ${c} st">${lb}</span>`:''}<span class="pill st" style="top:auto;bottom:6px">${hace(h.t)}</span></div>`; }).join('')}</div>` : '<p class="muted" style="text-align:center;padding:30px 0">Sin historias recientes.</p>')
       : (nts.length ? `<div class="stack" style="gap:8px">${nts.map(n=>`<div class="card" style="padding:10px 12px"><div>${esc(n.texto)}</div><div class="small muted">${hace(n.t)}</div></div>`).join('')}</div>` : '<p class="muted" style="text-align:center;padding:30px 0">Sin notas activas.</p>')}`;
-  return `<div class="ptabs2">${todo ? tabsPf(t, pubs, comp, etiq, hists, nts) : [['pubs','Publicaciones',pubs.length],['comp','Compartidos',comp.length],['etiq','Etiquetas',etiq.length]].map(([k,l,n])=>`<button class="${t===k?'on':''}" data-a="pfTab" data-x="${k}">${k==='comp'?ico.repost:k==='etiq'?ico.tag:ico.list}<span>${l}</span><small>${n}</small></button>`).join('')}</div>
+  return `<div class="ptabs2">${todo ? tabsPf(t, pubs, comp, etiq, hists, nts, act) : [['pubs','Publicaciones',pubs.length],['comp','Compartidos',comp.length],['etiq','Etiquetas',etiq.length]].map(([k,l,n])=>`<button class="${t===k?'on':''}" data-a="pfTab" data-x="${k}">${k==='comp'?ico.repost:k==='etiq'?ico.tag:ico.list}<span>${l}</span><small>${n}</small></button>`).join('')}</div>
     ${t==='pubs' ? grid(pubs, 'Sin publicaciones.') : t==='comp' ? `<div class="small muted" style="text-align:center">Publicaciones que ${id===S.yo?'compartiste':'compartió'}. Al tocarlas ves la publicación original y a quién la subió.</div>${grid(comp,'Aún no comparte publicaciones.')}` : grid(etiq, 'Nadie lo ha etiquetado todavía.')}`;
 }
 
@@ -3263,14 +3306,22 @@ function aComisiones(){
 // Bitácora con buscador: categoría, tipo, fechas y texto o números. En vivo busca en el servidor (admin_bitacora).
 const BIT_CAT = {negocio:'Negocios', repartidor:'Repartidores', usuario:'Usuarios', admin:'Admin', sistema:'Sistema'};
 const BIT_TIPO = {publicacion:'Publicaciones', historia:'Historias', nota:'Notas', comentario:'Comentarios', mensaje:'Mensajes', pedido:'Pedidos', entrega:'Entregas',
-  ubicacion:'Ubicaciones', producto:'Productos', servicio:'Servicios', etiqueta:'Etiquetas', negocio:'Negocios', repartidor:'Repartidores', cuenta:'Cuentas'};
+  ubicacion:'Ubicaciones', producto:'Productos', servicio:'Servicios', etiqueta:'Etiquetas', negocio:'Negocios', repartidor:'Repartidores', cuenta:'Cuentas', queja:'Quejas'};
 const bitCat = b => b.cat || (/^admin/i.test(b.actor||'') ? 'admin' : /escudo|sistema|bot/i.test(b.actor||'') ? 'sistema'
   : /negocio|producto|pedido|venta/i.test((b.accion||'')+' '+(b.detalle||'')) ? 'negocio' : /repartidor|entrega/i.test((b.accion||'')+' '+(b.detalle||'')) ? 'repartidor' : 'usuario');
+// Cada movimiento se clasifica solo (igual que en el servidor): de qué tipo es y a qué parte de la app pertenece
+const bitTipo = b => b.tipo || (t => /queja|apelaci/i.test(t)?'queja' : /historia/i.test(t)?'historia' : /publicaci/i.test(t)?'publicacion' : /comentario/i.test(t)?'comentario'
+  : /mensaje/i.test(t)?'mensaje' : /\bnota/i.test(t)?'nota' : /producto/i.test(t)?'producto' : /servicio/i.test(t)?'servicio' : /pedido|cliente no pag/i.test(t)?'pedido'
+  : /entrega|reparto|envío/i.test(t)?'entrega' : /repartidor/i.test(t)?'repartidor' : /negocio|comercio|tienda/i.test(t)?'negocio' : /cuenta|usuario|perfil|suspen|verific/i.test(t)?'cuenta' : '')((b.accion||'')+' '+(b.detalle||''));
+const bitArea = b => { if (b.area) return b.area; const t = bitTipo(b), d = b.datos || {};
+  return ['negocio','producto','servicio','pedido'].includes(t) || 'negocio' in d || (d.despues && 'negocio' in d.despues) ? 'negocio'
+    : ['repartidor','entrega'].includes(t) || /^reparto/i.test(b.actor||'') ? 'repartidor' : t ? 'usuario' : ''; };
+const bitEnCat = (b, c) => bitCat(b)===c || bitArea(b)===c;
 const bitDia = t => { const d = new Date(t); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 function bitFiltrar(l, f){
   const q = (f.q||'').trim().toLowerCase();
-  return l.filter(b=>(!f.cat || bitCat(b)===f.cat)
-    && (!f.tipo || b.tipo===f.tipo || (f.tipo==='etiqueta' && /"etiq":\s*\["/.test(JSON.stringify(b.datos||{}))) || (f.tipo==='ubicacion' && b.datos && b.datos.lat!=null))
+  return l.filter(b=>(!f.cat || bitEnCat(b, f.cat))
+    && (!f.tipo || bitTipo(b)===f.tipo || (f.tipo==='etiqueta' && /"etiq":\s*\["/.test(JSON.stringify(b.datos||{}))) || (f.tipo==='ubicacion' && b.datos && b.datos.lat!=null))
     && (!f.desde || bitDia(b.t) >= f.desde) && (!f.hasta || bitDia(b.t) <= f.hasta)
     && (!q || [b.actor, b.accion, b.detalle, b.datos?JSON.stringify(b.datos):''].join(' ').toLowerCase().includes(q)));
 }
@@ -3279,27 +3330,51 @@ function bitDatos(d){
   if (d.antes && d.despues) return Object.keys(d.despues).map(k=>`<div><b>${esc(k)}:</b> ${esc(JSON.stringify(d.antes[k]))} → ${esc(JSON.stringify(d.despues[k]))}</div>`).join('') + (d.lat!=null?`<div><b>Ubicación:</b> ${d.lat}, ${d.lng}</div>`:'');
   return `<pre style="white-space:pre-wrap;overflow-wrap:anywhere;margin:0;font-size:12px">${esc(JSON.stringify(d, null, 1))}</pre>`;
 }
+async function vActividad(id){
+  ui.act = ui.act || {}; ui.actPend = ui.actPend || {}; if (ui.act[id] || ui.actPend[id] || !/^u/.test(id)) return; ui.actPend[id] = true;
+  const {data, error} = await RV.sb.rpc('admin_actividad', {u:id.slice(1)}); ui.actPend[id] = false;
+  ui.act[id] = error ? {likes:[], guardados:[], error:true} : {likes:(data&&data.likes)||[], guardados:(data&&data.guardados)||[]};
+  if (error) toast('Para ver likes y guardados falta pegar el SQL 05.');
+  if (ui.perfil===id) rerender();
+}
+// Cuántos hay en cada opción con los demás filtros puestos
+function bitConteoLocal(f){
+  const cat = {}, tipo = {};
+  bitFiltrar(S.bitacora, {...f, cat:''}).forEach(b=>{ new Set([bitCat(b), bitArea(b)]).forEach(k=>{ if (k) cat[k] = (cat[k]||0) + 1; }); });
+  bitFiltrar(S.bitacora, {...f, tipo:''}).forEach(b=>{ const t = bitTipo(b); if (t) tipo[t] = (tipo[t]||0) + 1; });
+  return {cat, tipo, total:bitFiltrar(S.bitacora, f).length};
+}
+async function bitConteoSrv(){
+  const f = ui.bitF || {}; ui.bitCntPend = true;
+  const {data, error} = await RV.sb.rpc('admin_bitacora_conteo', {p_cat:f.cat||null, p_tipo:f.tipo||null, p_desde:f.desde||null, p_hasta:f.hasta||null, p_texto:f.q||null});
+  ui.bitCntPend = false; ui.bitCnt = error ? {error:true} : data; if (ui.aTab==='bitacora') rerender();
+}
 async function bitBuscarSrv(mas){
   const f = ui.bitF || {}, prev = mas && ui.bitRes ? ui.bitRes.l : [];
   const antes = prev.length ? prev[prev.length-1].sid : null;
   const {data, error} = await RV.sb.rpc('admin_bitacora', {p_cat:f.cat||null, p_tipo:f.tipo||null, p_desde:f.desde||null, p_hasta:f.hasta||null, p_texto:f.q||null, p_antes:antes, p_lim:100});
   if (error){ ui.bitRes = null; toast('El buscador del servidor aún no está listo; busco en lo más reciente.'); return rerender(); }
-  const l = (data||[]).map(b=>({t:vMs(b.t), actor:b.actor, accion:b.accion, detalle:b.detalle, sid:b.id, cat:b.cat, tipo:b.tipo, datos:b.datos}));
-  ui.bitRes = {l:prev.concat(l), mas:l.length===100, srv:true}; rerender();
+  const l = (data||[]).map(b=>({t:vMs(b.t), actor:b.actor, accion:b.accion, detalle:b.detalle, sid:b.id, cat:b.cat, area:b.area, tipo:b.tipo, datos:b.datos}));
+  ui.bitRes = {l:prev.concat(l), mas:l.length===100, srv:true}; if (!mas) return bitConteoSrv(); rerender();
 }
 function aBitacora(){
   const f = ui.bitF || {}, res = ui.bitRes;
   const l = res ? res.l : bitFiltrar(S.bitacora, f);
-  const opt = (o, v, todos) => `<option value="">${todos}</option>` + Object.entries(o).map(([k,t])=>`<option value="${k}" ${v===k?'selected':''}>${t}</option>`).join('');
+  // conteos: en vivo vienen del servidor (admin_bitacora_conteo); en demo se cuentan aquí
+  if (VIVO && !ui.bitCnt && !ui.bitCntPend) setTimeout(bitConteoSrv, 0);
+  const cnt = VIVO ? (ui.bitCnt && !ui.bitCnt.error ? ui.bitCnt : null) : bitConteoLocal(f);
+  const opt = (o, v, todos, n) => `<option value="">${todos}</option>` + Object.entries(o).map(([k,t])=>`<option value="${k}" ${v===k?'selected':''}>${t}${n && !['etiqueta','ubicacion'].includes(k)?` (${n[k]||0})`:''}</option>`).join('');
+  const total = res && res.srv ? (cnt ? cnt.total : l.length) : l.length;
   return `<form class="card" data-form="bitBuscar" novalidate style="gap:10px">
-    <div class="grid2"><label class="f" for="bt-cat">Categoría<select id="bt-cat">${opt(BIT_CAT, f.cat, 'Todas')}</select></label>
-      <label class="f" for="bt-tipo">Tipo<select id="bt-tipo">${opt(BIT_TIPO, f.tipo, 'Todos')}</select></label>
-      <label class="f" for="bt-desde">Desde<input id="bt-desde" type="date" value="${esc(f.desde||'')}"></label>
-      <label class="f" for="bt-hasta">Hasta<input id="bt-hasta" type="date" value="${esc(f.hasta||'')}"></label></div>
+    <span class="small muted">Ningún filtro es obligatorio. Cada uno que elijas reduce la lista; el número junto a cada opción dice cuántos quedarían.</span>
+    <div class="grid2"><label class="f" for="bt-cat">Categoría<select id="bt-cat" data-ch="bitFiltro">${opt(BIT_CAT, f.cat, 'Todas', cnt&&cnt.cat)}</select></label>
+      <label class="f" for="bt-tipo">Tipo<select id="bt-tipo" data-ch="bitFiltro">${opt(BIT_TIPO, f.tipo, 'Todos', cnt&&cnt.tipo)}</select></label>
+      <label class="f" for="bt-desde">Desde<input id="bt-desde" type="date" data-ch="bitFiltro" value="${esc(f.desde||'')}"></label>
+      <label class="f" for="bt-hasta">Hasta<input id="bt-hasta" type="date" data-ch="bitFiltro" value="${esc(f.hasta||'')}"></label></div>
     <label class="f" for="bt-q">Buscar texto o número<input id="bt-q" type="search" value="${esc(f.q||'')}" placeholder="Ej.: @usuario, una palabra, un folio, una placa, un precio…"></label>
-    <div class="row"><button class="btn pri" type="submit">Buscar</button>${Object.values(f).some(Boolean)?'<button class="btn" type="button" data-a="bitLimpiar">Quitar filtros</button>':''}<span class="small muted">${l.length} resultado(s)${res&&res.srv?' del servidor':''}</span></div></form>
+    <div class="row"><button class="btn pri" type="submit">Buscar</button>${Object.values(f).some(Boolean)?'<button class="btn" type="button" data-a="bitLimpiar">Quitar filtros</button>':''}<span class="small muted">${total} resultado(s)</span></div></form>
   <div class="tbl"><table><thead><tr><th>Cuándo</th><th>Quién</th><th>Acción</th><th>Detalle</th></tr></thead><tbody>
-  ${l.slice(0,300).map(b=>`<tr><td class="small">${fecha(b.t)}</td><td>${esc(b.actor||'')}<div><span class="pill">${BIT_CAT[bitCat(b)]||''}</span></div></td><td>${esc(b.accion||'')}</td><td class="small">${esc(b.detalle||'')}${b.datos?`<details><summary class="small muted">Ver datos</summary>${bitDatos(b.datos)}</details>`:''}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">No hay movimientos con esos filtros.</td></tr>'}</tbody></table></div>
+  ${l.slice(0,300).map(b=>`<tr><td class="small">${fecha(b.t)}</td><td>${esc(b.actor||'')}<div><span class="pill">${BIT_CAT[bitCat(b)]||''}</span>${bitArea(b)&&bitArea(b)!==bitCat(b)?` <span class="pill">${BIT_CAT[bitArea(b)]}</span>`:''}</div></td><td>${esc(b.accion||'')}</td><td class="small">${esc(b.detalle||'')}${b.datos?`<details><summary class="small muted">Ver datos</summary>${bitDatos(b.datos)}</details>`:''}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">No hay movimientos con esos filtros.</td></tr>'}</tbody></table></div>
   ${res && res.mas ? '<div class="row"><button class="btn" data-a="bitMas">Cargar más</button></div>' : ''}
   <p class="small muted">Se guarda todo lo que se crea, cambia o borra. Plazos: lo borrado 1 año, la bitácora 2 años, pedidos y repartidores 5 años. De los mensajes privados solo se anota que se borró uno, nunca el texto.</p>`;
 }
@@ -3496,7 +3571,7 @@ function seccionEstado(){
     ${rech.length?`<b>Publicaciones rechazadas</b>${rech.slice(0,6).map(p=>`<div class="srow"><span class="rthumb">${miniFoto(p)}</span><div class="tx"><b>${esc(MOTIVOS[p.motivo]||'Rechazada')}</b><span>${esc((p.texto||'Sin texto').slice(0,60))}</span></div>${ya(p.id)?'<span class="pill warn">En revisión</span>':`<button class="btn sm" data-a="apelar" data-x="${p.id}">Apelar</button>`}</div>`).join('')}`:''}
     ${hrech.length?`<b>Historias quitadas</b>${hrech.slice(0,6).map(h=>`<div class="srow"><span class="rthumb">${verFoto(h.foto)}</span><div class="tx"><b>${esc(MOTIVOS[h.motivo]||'Quitada')}</b><span>${fechaCorta(h.t)}</span></div>${ya('h:'+h.id)?'<span class="pill warn">En revisión</span>':`<button class="btn sm" data-a="apelar" data-x="h:${h.id}">Apelar</button>`}</div>`).join('')}`:''}
     ${mias.length?`<b>Tus quejas</b><span class="small muted">Toca una para ver la conversación con el equipo.</span>${mias.map(a=>filaQueja(a)).join('')}`:''}
-    <div class="row" style="gap:8px"><span class="small muted" style="flex:1">¿Te quitamos algo más, como una nota?</span>${ya('otro')?'':`<button class="btn sm" data-a="apelar" data-x="otro">Abrir una queja</button>`}</div>
+    <div class="row" style="gap:8px"><span class="small muted" style="flex:1">¿El equipo cambió o borró algo más tuyo?</span><button class="btn sm" data-a="apelarMenu">Apelar una decisión</button></div>
     <div class="note small"><b>Cómo funciona:</b> cada publicación rechazada por romper una regla es 1 aviso. Con ${S.cfg.strikesMax} avisos se pausan tus publicaciones 24 horas, con ${S.cfg.strikesMax+1} son 7 días y con más son 30 días. Los avisos se borran solos a los 90 días. Solo el contenido muy grave (riesgo para menores, explotación, venta de drogas o armas) suspende la cuenta, y siempre lo revisa una persona. <b>Nunca se elimina una cuenta sin revisión humana.</b></div>
     ${pc?`<div class="small"><b>Tu calificación como cliente:</b> ★ ${pc.avg.toFixed(1)} (${pc.n}) · solo la ven los negocios y repartidores que te atienden.</div>`:''}
   </div></details>`;
@@ -3507,7 +3582,8 @@ function hojaApelar(){
   else if (ref==='publicar'){ titulo='Apelar la pausa de publicaciones'; det = `${u.strikes} aviso(s) activos`; }
   else if (/^h:/.test(ref)){ const h = S.historias.find(h=>h.id===ref.slice(2)); titulo='Apelar una historia quitada'; det = h ? `Historia del ${fechaCorta(h.t)} · ${MOTIVOS[h.motivo]||h.motivo||''}` : ''; }
   else if (/^negocio:/.test(ref)){ const n = neg(ref.slice(8)); titulo='Queja por mi negocio'; det = n ? `${n.nombre} · ${n.estado==='suspendido'?'pausado':n.estado==='rechazado'?'anulado':n.estado}${n.motivo?' · '+n.motivo:''}` : ''; }
-  else if (ref==='otro'){ titulo='Abrir una queja'; det = 'Cuéntanos qué pasó: por ejemplo, una nota que te borramos o algo que crees injusto.'; }
+  else if (ref==='otro'){ titulo='Abrir una queja'; det = 'Cuéntanos qué pasó.'; }
+  else if (/^[db]:/.test(ref)){ const x = ui.sheet.dec || {}; titulo='Apelar una decisión'; det = [x.titulo, x.det].filter(Boolean).join(' · '); }
   else { const p = post(ref); titulo='Apelar una publicación rechazada'; det = p ? `"${(p.texto||'Sin texto').slice(0,80)}" · ${MOTIVOS[p.motivo]||''}` : ''; }
   return hoja(titulo, `<p class="small muted" style="margin:0">${esc(det)}</p>
     <label class="f" for="ap-txt">¿Por qué crees que fue un error?<textarea id="ap-txt" maxlength="400" placeholder="Explica con tus palabras. Una persona del equipo la leerá y te contestará."></textarea><span class="h">Sin enlaces ni teléfonos. Se abre un chat con el equipo; respondemos normalmente en menos de 48 horas.</span></label>
@@ -3515,7 +3591,7 @@ function hojaApelar(){
     <button class="btn pri block" type="submit">Enviar queja</button>`, 'apelar');
 }
 // Chats de quejas: cada apelación es una conversación entre la persona y el equipo
-const QREF = ref => ref==='suspension' ? 'Cuenta suspendida' : ref==='publicar' ? 'Sin permiso de publicar' : ref==='otro' ? 'Otra cosa' : /^h:/.test(ref) ? 'Historia' : /^negocio:/.test(ref) ? 'Negocio' : 'Publicación';
+const QREF = ref => /^d:/.test(ref) ? 'Decisión de la plataforma' : /^b:/.test(ref) ? 'Algo que borró el equipo' : ref==='suspension' ? 'Cuenta suspendida' : ref==='publicar' ? 'Sin permiso de publicar' : ref==='otro' ? 'Otra cosa' : /^h:/.test(ref) ? 'Historia' : /^negocio:/.test(ref) ? 'Negocio' : 'Publicación';
 const yoQueja = () => soyNegocio() ? (neg(S.yo)?.dueno || S.yo) : S.yo;
 const quejaDe = ref => S.apelaciones.find(a=>a.u===yoQueja() && a.ref===ref && a.estado==='pendiente');
 const estQueja = a => a.estado==='pendiente' ? ['warn','Abierta'] : a.estado==='aceptada' ? ['ok','Te dimos la razón'] : ['bad','Se mantuvo'];
@@ -3529,9 +3605,36 @@ function contextoQueja(a){
   if (ref==='suspension') return `<div class="small muted">${u.eliminado?'Cuenta eliminada por el admin. ':''}${u.susp?`Suspendida por: ${(u.susp.motivo||[]).map(m=>ETIQ[m]||m).join(', ')} · ${u.susp.auto?'automática':'manual'}`:''}</div>`;
   if (ref==='publicar') return `<div class="small muted">Avisos activos: ${u.strikes||0}</div>`;
   if (ref==='otro') return `<div class="small muted">Queja libre: si le das la razón, arréglalo tú a mano (no se restaura nada solo).</div>`;
+  if (/^d:/.test(ref)) return `<div class="small muted">Si le das la razón, esa decisión se revierte sola (si nadie la volvió a cambiar). Está en Decisiones.</div>`;
+  if (/^b:/.test(ref)) return `<div class="small muted">Lo borrado se restaura a mano: la copia está en la Bitácora (busca "${esc(ref.slice(2))}" o el @usuario).</div>`;
   if (/^h:/.test(ref)){ const h = S.historias.find(h=>h.id===ref.slice(2)); return h ? `<div class="row nowrap" style="align-items:flex-start"><span class="rthumb lg">${verFoto(h.foto)}</span><div class="small muted">Historia · ${MOTIVOS[h.motivo]||h.motivo||'—'}</div></div>` : ''; }
   if (/^negocio:/.test(ref)){ const n = neg(ref.slice(8)); return n ? `<div class="small"><b>${esc(n.nombre)}</b> · <span class="muted">${n.estado==='suspendido'?'pausado':n.estado==='rechazado'?'anulado':n.estado}${n.motivo?' · '+esc(n.motivo):''}</span></div>` : ''; }
   const ps = post(ref); return ps ? `<div class="row nowrap" style="align-items:flex-start"><span class="rthumb lg">${miniFoto(ps)}</span><div class="small">${esc(ps.texto||'Sin texto')}<br><span class="muted">Rechazada por: ${esc(MOTIVOS[ps.motivo]||'—')}${ps.mod?.razon?' · '+esc(ps.mod.razon):''}</span></div></div>` : '';
+}
+// Lo que la plataforma cambió en lo mío: solo de eso se puede abrir un chat de quejas
+function decsLocales(){
+  const yo = yoQueja(), u = usr(yo) || {}, l = [];
+  if (u.suspendido) l.push({ref:'suspension', titulo:'Cuenta suspendida', det:u.susp ? (u.susp.motivo||[]).map(m=>ETIQ[m]||m).join(', ') : ''});
+  if (u.subidas===false && !u.suspendido) l.push({ref:'publicar', titulo:'Sin permiso de publicar', det:`${u.strikes||0} aviso(s) activos`});
+  S.posts.filter(p=>p.autor===yo && ['rechazado','retirado'].includes(p.estado)).slice(0,10).forEach(p=>l.push({ref:p.id, titulo:'Publicación quitada', det:(p.texto||'Publicación con foto').slice(0,60)+(p.motivo?' · '+(MOTIVOS[p.motivo]||p.motivo):'')}));
+  S.historias.filter(h=>h.autor===yo && ['rechazado','retirado'].includes(h.estado)).slice(0,10).forEach(h=>l.push({ref:'h:'+h.id, titulo:'Historia quitada', det:fechaCorta(h.t)+(h.motivo?' · '+(MOTIVOS[h.motivo]||h.motivo):'')}));
+  S.negocios.filter(n=>n.dueno===yo && ['suspendido','rechazado'].includes(n.estado) && n.motivo).forEach(n=>l.push({ref:'negocio:'+n.id, titulo:n.estado==='suspendido'?'Negocio pausado por el equipo':'Negocio anulado', det:n.nombre+' · '+n.motivo}));
+  return l;
+}
+function decsSrvLista(){
+  return (ui.misDec||[]).map(d=>({ref:d.ref, titulo: d.ref.startsWith('b:') ? 'El equipo borró algo tuyo' : `${DEC_TIPO[d.tipo]||d.tipo}: ${decValor(d, d.despues)}`,
+    det:[d.resumen, d.motivo].filter(Boolean).join(' · '), por:d.por, t:d.t}));
+}
+function hojaMisDec(){
+  const yo = yoQueja(), mias = S.apelaciones.filter(a=>a.u===yo).sort((a,b)=>b.t-a.t);
+  const cargando = VIVO && ui.misDec===undefined;
+  const l = VIVO ? decsSrvLista().concat(decsLocales().filter(x=>!['suspension','publicar'].includes(x.ref) || !(ui.misDec||[]).some(d=>d.tipo==='cuenta'))) : decsLocales();
+  const vistos = new Set(); const lista = l.filter(x=>!vistos.has(x.ref) && vistos.add(x.ref));
+  return hoja('Apelar una decisión', `<p class="small muted" style="margin:0">Solo puedes abrir un chat de quejas cuando el equipo o el sistema cambió algo tuyo: tu cuenta, tu negocio, tu perfil de repartidor o algo que publicaste.</p>
+    ${cargando ? '<p class="muted">Buscando…</p>' : lista.length ? lista.map(x=>{ const q = quejaDe(x.ref);
+      return `<div class="srow"><div class="tx"><b>${esc(x.titulo)}</b><span>${esc(x.det||'')}${x.por?` · ${x.por==='admin'?'lo decidió el equipo':'lo hizo el sistema'}`:''}${x.t?' · '+fechaCorta(typeof x.t==='number'?x.t:Date.parse(x.t)):''}</span></div>${q?`<button class="btn sm" data-a="quejaVer" data-x="${q.id}">Ver tu queja</button>`:`<button class="btn pri sm" data-a="apelarDec" data-x="${esc(x.ref)}">Apelar</button>`}</div>`; }).join('')
+      : '<div class="cestado"><b>No hay nada que apelar</b><span class="small">La plataforma no ha cambiado nada tuyo en los últimos 90 días.</span></div>'}
+    ${mias.length ? `<b>Tus quejas</b>${mias.map(a=>filaQueja(a)).join('')}` : ''}`);
 }
 function hojaQueja(){
   const a = S.apelaciones.find(x=>x.id===ui.sheet.id); if (!a) return hoja('Queja', '<p class="muted">Esta queja ya no existe.</p>');
@@ -3713,8 +3816,13 @@ function registrarAccionesV12(){
     pgalGo: (x, el) => { const g = $('#pgal'); if (g) g.scrollTo({left:(+el.dataset.o)*g.clientWidth, behavior:'smooth'}); },
     estadoCuenta: () => { ui.abrirEstado = true; ui.sheet = null; go('ajustes'); ui.abrirEstado = false; setTimeout(()=>$('#estado-cuenta')?.scrollIntoView({behavior:'smooth', block:'start'}), 60); },
     apelar: x => { ui.sheet = {t:'apelar', ref:x}; ui.err=''; renderLayer(); },
-    bitLimpiar: () => { ui.bitF = {}; ui.bitRes = null; rerender(); },
+    bitLimpiar: () => { ui.bitF = {}; ui.bitRes = null; ui.bitCnt = null; rerender(); },
+    bitFiltro: () => F.bitBuscar(),
     bitMas: () => bitBuscarSrv(true),
+    apelarMenu: () => { ui.sheet = {t:'misDec'}; ui.err = ''; if (VIVO){ ui.misDec = undefined; renderLayer();
+        RV.sb.rpc('mis_decisiones').then(({data, error})=>{ ui.misDec = error ? [] : (data||[]); if (ui.sheet && ui.sheet.t==='misDec') renderLayer(); }); }
+      else renderLayer(); },
+    apelarDec: x => { const d = (VIVO ? decsSrvLista() : []).concat(decsLocales()).find(d=>d.ref===x); ui.sheet = {t:'apelar', ref:x, dec:d||null}; ui.err = ''; renderLayer(); },
     quejaVer: (x, el) => { ui.sheet = {t:'queja', id:x, adm:el?.dataset?.o==='adm'}; ui.err=''; renderLayer(); setTimeout(()=>{ const c = $('#qchat'); if (c) c.scrollTop = c.scrollHeight; }, 30); },
     apResolver: (x, el) => { const a = S.apelaciones.find(a=>a.id===x); if (!a) return; const u = usr(a.u) || {id:a.u, usuario:perfilDe(a.u)?.handle||''}; a.estado = el.dataset.o; a.resuelta = Date.now();
       if (a.estado==='aceptada'){
@@ -3748,8 +3856,8 @@ function registrarAccionesV12(){
   Object.assign(F, {
     apelar: () => { const t = ($('#ap-txt').value||'').trim(); if (t.length<10){ ui.err = 'Explica un poco más (mínimo 10 letras).'; return renderLayer(); }
       const an = analizarTexto(t,'privado'); if (an.bloqueos.some(b=>['enlace','correo','teléfono','dirección IP'].includes(b))){ ui.err = 'Sin enlaces, correos ni teléfonos, por favor.'; return renderLayer(); }
-      const ref = ui.sheet.ref; if (VIVO && soyNegocio() && !/^negocio:/.test(ref)) return toast('Cambia a tu cuenta personal para hacer esto (Más → Cambiar de cuenta).');
-      const titulo = ref==='suspension' ? 'Queja por suspensión de cuenta' : ref==='publicar' ? 'Queja por pausa de publicaciones' : ref==='otro' ? 'Queja: otra cosa' : /^h:/.test(ref) ? 'Queja por historia quitada'
+      const ref = ui.sheet.ref;
+      const titulo = /^[db]:/.test(ref) ? `Queja: ${(ui.sheet.dec?.titulo||'decisión de la plataforma')}`.slice(0,80) : ref==='suspension' ? 'Queja por suspensión de cuenta' : ref==='publicar' ? 'Queja por pausa de publicaciones' : ref==='otro' ? 'Queja: otra cosa' : /^h:/.test(ref) ? 'Queja por historia quitada'
         : /^negocio:/.test(ref) ? `Queja por mi negocio ${(neg(ref.slice(8))?.nombre||'').slice(0,40)}`.trim() : 'Queja por publicación quitada';
       const u = yoQueja(); S.apelaciones.push({id:'ap'+Date.now().toString(36), u, ref, titulo, texto:t, t:Date.now(), estado:'pendiente', msgs:[]}); log('Escudo','Nueva queja', `@${usr(u)?.usuario||''} · ${titulo}`);
       ui.err = ''; cerrarHoja(); save(); rerender(); toast('Queja enviada. Una persona la revisará y te contestará en el chat.'); },
@@ -4696,6 +4804,7 @@ async function vCargar(){
   VQ.cargando = (async () => {
     await VQ.cola;
     const sb = RV.sb, uid = vUid();
+    prefBajar(uid);
     const est = await sb.rpc('mi_estado2'); const E = est.data || {};
     const admin = E.rol === 'admin';
     const pedir = {
@@ -4857,7 +4966,7 @@ function vArmar(D, E, admin, conteos, promCli){
     msgs:qmsg.filter(m=>m.apelacion===a.id).map(m=>({de:m.de?'u'+m.de:null, admin:!!m.admin, texto:m.texto, t:vMs(m.t)}))}));
   const alertas = (D.alertas||[]).map(a=>({id:'al'+a.id, sid:a.id, t:vMs(a.created_at), quien:a.quien?'u'+a.quien:null, para:a.para?'u'+a.para:null, lugar:a.lugar||'', texto:a.texto||'', cats:(a.cats&&a.cats.length)?a.cats:[a.motivo||'otro'], nivel:a.nivel||1, oculto:!!a.oculto, intentos:a.intentos||1, accion:a.accion||'', estado:a.estado||'nueva'}));
   const reportes = (D.reportes||[]).filter(r=>r.estado!=='revisado').map(r=>({id:'rp'+r.id, sid:r.id, post:r.post?'q'+r.post:undefined, cuenta:r.cuenta?'u'+r.cuenta:undefined, hist:r.hist?'h'+r.hist:undefined, mensaje:r.mensaje?'m'+r.mensaje:undefined, comentario:r.comentario?'k'+r.comentario:undefined, det:(D.repdet||[]).find(d=>d.reporte===r.id)||null, por:'u'+r.quien, motivo:r.motivo, t:vMs(r.created_at)}));
-  const bitacora = (D.bit||[]).map(b=>({t:vMs(b.t), actor:b.actor, accion:b.accion, detalle:b.detalle, sid:b.id, cat:b.cat, tipo:b.tipo, datos:b.datos}));
+  const bitacora = (D.bit||[]).map(b=>({t:vMs(b.t), actor:b.actor, accion:b.accion, detalle:b.detalle, sid:b.id, cat:b.cat, area:b.area, tipo:b.tipo, datos:b.datos}));
   // carrito (solo en este teléfono)
   let carrito = null; try { carrito = JSON.parse(localStorage.getItem('lm-vivo-carrito-'+uid)||'null'); } catch(e){}
   if (carrito && (!carrito.items || !carrito.items.every(it=>productos.some(p=>p.id===it.pid)))) carrito = null;
@@ -5221,7 +5330,7 @@ async function vEntrar(){
   if (!ui.vivoVista){ ui.view = soyNegocio() ? 'minegocio' : 'home'; ui.vivoVista = true; }
   ui.sheet = null; render(); renderLayer();
 }
-function vSalirVivo(){ vCanal(false); clearInterval(VQ.intervalo); VQ.listo = false; SV = null; SNAP = null; ui.vivoVista = false; RPV.app = RPV.panel = RPV.admin = null; if (typeof repGpsSync==='function') repGpsSync(); if (ui.mode==='vrep') ui.mode = 'real';
+function vSalirVivo(){ PSYNC.uid = null; clearTimeout(PSYNC.timer); vCanal(false); clearInterval(VQ.intervalo); VQ.listo = false; SV = null; SNAP = null; ui.vivoVista = false; RPV.app = RPV.panel = RPV.admin = null; if (typeof repGpsSync==='function') repGpsSync(); if (ui.mode==='vrep') ui.mode = 'real';
   if (VIVO){ VIVO = false; S = SDEMO; document.body.classList.remove('vivo'); } }
 async function vRecargar(forzar){
   if (!VQ.listo || !RV.user) return;
@@ -5470,7 +5579,7 @@ function vRepVivo(){
   return `<div class="rapp">
     <header class="rtop"><div class="rlogo"><span class="mark ic"><img src="iconos/icon-192.png" alt="" width="34" height="34" draggable="false"></span><b>${esc(S.cfg.marca)} <i>Repartidor</i></b></div>
       ${r.estado==='aprobado'?`<button class="rsw ${r.online?'on':''}" data-a="vRepOnline" aria-pressed="${r.online}"><span></span>${r.online?'Conectado':'Desconectado'}</button>`:''}</header>
-    <main class="rbody">${cuerpo}${r.estado!=='rechazado'?`<div class="card stack" style="gap:8px;margin-top:16px"><b>Dejar de ser repartidor</b><span class="small muted">Si te das de baja y después quieres volver, tendrás que registrarte y hacer toda la documentación de nuevo.</span><button class="btn danger sm" data-a="vRepBaja" style="align-self:flex-start">Dejar de ser repartidor</button></div>`:''}</main></div>`;
+    <main class="rbody">${cuerpo}<div class="card stack" style="gap:8px;margin-top:16px"><b>Apelar una decisión</b><span class="small muted">Si el equipo o el sistema cambió algo de tu cuenta y crees que fue un error, ábrelo aquí y platícalo por chat.</span><button class="btn sm" data-a="apelarMenu" style="align-self:flex-start">Apelar una decisión</button></div>${r.estado!=='rechazado'?`<div class="card stack" style="gap:8px;margin-top:16px"><b>Dejar de ser repartidor</b><span class="small muted">Si te das de baja y después quieres volver, tendrás que registrarte y hacer toda la documentación de nuevo.</span><button class="btn danger sm" data-a="vRepBaja" style="align-self:flex-start">Dejar de ser repartidor</button></div>`:''}</main></div>`;
 }
 /* ---------- ADMIN → Repartidores (en vivo) ---------- */
 // Placa o teléfono que ya usa otra cuenta, o que está vetado (lo calcula el servidor)
@@ -6114,9 +6223,10 @@ function renderLayer(){
   if (ui.mode==='app'){
     if (ui.pend) h = avisoOtroComercio();
     else if (ui.sel) h = hojaProducto();
-    else if (ui.sheet) h = ({coment:hojaComentarios, compartir:hojaCompartir, opcPost:hojaOpcPost, reportar:hojaReportar, opcPerfil:hojaOpcPerfil, publicar:hojaPublicar, nota:hojaNota, crear:hojaCrear, historia:hojaHistoria, cuentas:hojaCuentas, mas:hojaMas, verNota:hojaVerNota, seguidores:hojaSeguidores, clima:hojaClima, likes:hojaLikes, apelar:hojaApelar, queja:hojaQueja, ...(window.HOJAS_EXTRA||{})}[ui.sheet.t]||(()=>''))();
+    else if (ui.sheet) h = ({coment:hojaComentarios, compartir:hojaCompartir, opcPost:hojaOpcPost, reportar:hojaReportar, opcPerfil:hojaOpcPerfil, publicar:hojaPublicar, nota:hojaNota, crear:hojaCrear, historia:hojaHistoria, cuentas:hojaCuentas, mas:hojaMas, verNota:hojaVerNota, seguidores:hojaSeguidores, clima:hojaClima, likes:hojaLikes, apelar:hojaApelar, queja:hojaQueja, misDec:hojaMisDec, ...(window.HOJAS_EXTRA||{})}[ui.sheet.t]||(()=>''))();
   } else if (ui.sheet && ui.sheet.t==='queja') h = hojaQueja();       // chats de quejas: también desde el panel de admin y el del negocio
   else if (ui.sheet && ui.sheet.t==='apelar') h = hojaApelar();
+  else if (ui.sheet && ui.sheet.t==='misDec') h = hojaMisDec();
   $('#layer').innerHTML = h;
   if (!ui.story) document.body.style.overflow = h ? 'hidden' : '';
 }
