@@ -1204,6 +1204,9 @@ function colorTokens(c){
     ? {'--bg':t(38,L), '--surface':t(38,L+4), '--surface-2':t(38,L+7), '--surface-3':t(38,L+11), '--line':t(38,L+11), '--fg':t(20,93), '--muted':t(14,72)}
     : {'--bg':t(38,L), '--surface':t(38,Math.min(99,L+5)), '--surface-2':t(38,L-5), '--surface-3':t(38,L-10), '--line':t(38,L-12), '--fg':t(30,10), '--muted':t(14,28)};
 }
+// Pantallas de entrar, crear cuenta y crear perfil: siempre este azul (no se cambia). Ya dentro, cada cuenta usa el suyo.
+const COLOR_ENTRADA = {h:234, l:42};
+function temaEntrada(){ const r = document.documentElement; r.dataset.theme = 'dark'; Object.entries(colorTokens(COLOR_ENTRADA)).forEach(([k,v])=>r.style.setProperty(k,v)); }
 function aplicarPref(){
   const r = document.documentElement;
   if (PREF.color){ r.dataset.theme = colorOscuro(PREF.color)?'dark':'light'; Object.entries(colorTokens(PREF.color)).forEach(([k,v])=>r.style.setProperty(k,v)); }
@@ -3946,7 +3949,8 @@ async function rSesion(ses){
 function renderReal(){
   const app = $('#app'); if (!app) return;
   if (!RV.sb && RV.fase==='cargando'){ rIniciar(); }
-  if (RV.fase==='app' && typeof vEntrar==='function') return vEntrar();
+  if (RV.fase==='app' && typeof vEntrar==='function'){ aplicarPref(); return vEntrar(); }
+  temaEntrada();
   const top = '';   // sin sesión no se muestra la barra de vistas (solo el admin la ve, ya dentro)
   let cuerpo = '';
   if (RV.fase==='cargando' || RV.fase==='app') cuerpo = `<div class="rcentro"><div class="rspin"></div><p class="muted">Conectando…</p></div>`;
@@ -3973,7 +3977,7 @@ function rVLogin(){
       ${RV.err?`<div class="err" role="alert">${esc(RV.err)}</div>`:''}
       <button class="btn pri block lg" type="submit">${t==='crear'?'Crear mi cuenta':'Entrar'}</button></form>`;
   return `<div class="rcentro rlogin"><span class="mark big ic"><img src="iconos/icon-192.png" alt="" width="64" height="64" draggable="false"></span><h1>${esc(S.cfg.marca)}</h1>
-    <p class="muted">La red social y tienda de ${esc(S.cfg.ciudad)}.</p>
+    <p class="muted">La Mejor Red Social Y Tienda De Los Mochis Sin.</p>
     <div style="width:100%;max-width:380px" class="stack"><div class="seg rltabs">${tab('entrar','Entrar')}${tab('crear','Crear cuenta')}</div>${form}
     ${t!=='enlace'?`<button type="button" class="btn ghost sm" data-a="rLTab" data-x="enlace">¿Olvidaste tu contraseña? Entrar con enlace al correo</button>`:''}</div>
     <p class="small muted" style="max-width:380px">Debes tener al menos 13 años. Nunca compartas tu contraseña con nadie, ni con el equipo. Al entrar aceptas las reglas: nada de contenido +18, ofensivo, enlaces, teléfonos ni publicidad sin permiso.</p>
@@ -4811,7 +4815,7 @@ async function vCargar(){
   VQ.cargando = (async () => {
     await VQ.cola;
     const sb = RV.sb, uid = vUid();
-    prefBajar(uid);
+    prefBajar(uid); vBorrarCargar(uid);
     const est = await sb.rpc('mi_estado2'); const E = est.data || {};
     const admin = E.rol === 'admin';
     const pedir = {
@@ -5337,7 +5341,7 @@ async function vEntrar(){
   if (!ui.vivoVista){ ui.view = soyNegocio() ? 'minegocio' : 'home'; ui.vivoVista = true; }
   ui.sheet = null; render(); renderLayer();
 }
-function vSalirVivo(){ PSYNC.uid = null; clearTimeout(PSYNC.timer); vCanal(false); clearInterval(VQ.intervalo); VQ.listo = false; SV = null; SNAP = null; ui.vivoVista = false; RPV.app = RPV.panel = RPV.admin = null; if (typeof repGpsSync==='function') repGpsSync(); if (ui.mode==='vrep') ui.mode = 'real';
+function vSalirVivo(){ VBOR.uid = null; VBOR.pendiente = false; vBorrarBarra(); PSYNC.uid = null; clearTimeout(PSYNC.timer); vCanal(false); clearInterval(VQ.intervalo); VQ.listo = false; SV = null; SNAP = null; ui.vivoVista = false; RPV.app = RPV.panel = RPV.admin = null; if (typeof repGpsSync==='function') repGpsSync(); if (ui.mode==='vrep') ui.mode = 'real';
   if (VIVO){ VIVO = false; S = SDEMO; document.body.classList.remove('vivo'); } }
 async function vRecargar(forzar){
   if (!VQ.listo || !RV.user) return;
@@ -5391,7 +5395,9 @@ function registrarAccionesVivo(){
       if (!VIVO){ ui.mode='app'; vEntrar().then(()=>A.modo2(x)); return; }
       if (x==='vadmin'){ if (!vEsAdmin()) return; ui.mode='admin'; ui.sheet=null; render(); window.scrollTo(0,0); return; }
       if (x==='vcomercio'){ ui.mode='app'; if (S.misNegocios.length){ S.yo = S.misNegocios[0]; ui.pTab='pedidos'; save(); go('minegocio',true); toast('Estás como tu negocio: '+perfilDe(S.yo).nombre); } else { if (soyNegocio()) S.yo=S.personal; go('vende',true); } return; }
-      ui.mode='app'; if (soyNegocio()){ S.yo=S.personal; save(); } go('home',true); return;
+      const venia = soyNegocio() || ui.mode==='vrep';
+      ui.mode='app'; if (soyNegocio()){ S.yo=S.personal; save(); } go('home',true);
+      if (venia) toast('Estás como tu usuario: @' + (perfilDe(S.personal)?.handle || usr(S.personal)?.usuario || '')); return;
     }
     if (VIVO){ VIVO=false; S=SDEMO; document.body.classList.remove('vivo'); ui.sheet=null; ui.chat=null; ui.view='home'; renderLayer(); }
     return modo2(x);
@@ -5460,11 +5466,68 @@ function registrarAccionesVivo(){
     vPass2: async () => { const cod = ($('#vp-cod').value||'').replace(/\s/g,'');
       if (!/^\d{6,10}$/.test(cod)) return toast('Escribe el código de 6 dígitos que llegó a tu correo.');
       const {error} = await RV.sb.auth.updateUser({password:VPW.nueva, nonce:cod}); if (error) return toast(pwErr(error));
-      Object.assign(VPW, {paso:1, nueva:'', sin:false, enviado:0}); pwPintar(); toast('Listo: tu contraseña cambió'); } });
+      Object.assign(VPW, {paso:1, nueva:'', sin:false, enviado:0}); pwPintar(); toast('Listo: tu contraseña cambió'); },
+    vMail: async () => { const a = ($('#vm-1').value||'').trim().toLowerCase(), b = ($('#vm-2').value||'').trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(a)) return toast('Escribe un correo válido.'); if (a!==b) return toast('Los correos no coinciden.');
+      if (a===((RV.user&&RV.user.email)||'').toLowerCase()) return toast('Ese ya es tu correo.');
+      if (Date.now() - VMAIL.t < 60000) return toast('Espera un minuto antes de pedir otro cambio.');
+      const {error} = await RV.sb.auth.updateUser({email:a}, {emailRedirectTo: location.origin + location.pathname});
+      if (error) return toast(/already|registered|exists/i.test(error.message||'') ? 'Ese correo ya lo usa otra cuenta.' : pwErr(error));
+      VMAIL.enviado = a; VMAIL.t = Date.now(); const bx = $('#vm-box'); if (bx) bx.innerHTML = vMailHTML(); toast('Te mandamos un enlace para confirmar'); },
+    vBorrar: async () => { if (!$('#vb-ok')?.checked) return toast('Marca la casilla para confirmar que entiendes lo que pasa.');
+      const aviso = VBOR.puede ? '¿Seguro que quieres borrar tu cuenta?\n\nTendrás 5 minutos para deshacerlo (solo 1 vez al día). Pasado ese tiempo, tu cuenta se borra.'
+        : '¿Seguro que quieres borrar tu cuenta?\n\nHoy ya deshiciste un borrado: esta vez se borra AL INSTANTE y NO HAY VUELTA ATRÁS.';
+      if (!confirmarSimple(aviso)) return;
+      const {data, error} = await RV.sb.rpc('cuenta_borrar', {p_motivo:($('#vb-mot')?.value||'').trim().slice(0,500)||null}); if (error) return toast(vMsgError(error));
+      if (data && data.final){ toast('Tu cuenta se borró. Gracias por haber estado en MOCHI.'); return A.rSalir(); }
+      Object.assign(VBOR, {pendiente:true, hasta:Date.parse(data.hasta)}); vBorrarBarra(); const bx = $('#vb-box'); if (bx) bx.innerHTML = vBorrarHTML(); } });
   Object.assign(A, {
     vPassReenviar: async () => { if (Date.now() - VPW.enviado < 60000) return toast('Espera un minuto antes de pedir otro código.'); if (await pwMandar()) toast('Te mandamos otro código'); },
     vPassCancelar: () => { Object.assign(VPW, {paso:1, nueva:'', sin:false, enviado:0}); pwPintar(); },
+    vBorrarDeshacer: async () => { const {error} = await RV.sb.rpc('cuenta_borrar_deshacer'); if (error) return toast(vMsgError(error));
+      Object.assign(VBOR, {pendiente:false, puede:false}); vBorrarBarra(); const bx = $('#vb-box'); if (bx) bx.innerHTML = vBorrarHTML();
+      toast('Listo: tu cuenta sigue activa. Hoy ya no podrás deshacer otro borrado.'); },
     vPassSin: () => { VPW.sin = !!$('#vp-sin')?.checked; const n = $('#vp-pass')?.value||'', n2 = $('#vp-pass2')?.value||''; pwPintar(); $('#vp-pass').value = n; $('#vp-pass2').value = n2; } });
+}
+
+/* ---------- correo de la cuenta ---------- */
+const VMAIL = {enviado:'', t:0};
+function vMailHTML(){
+  const actual = (RV.user && RV.user.email) || '';
+  return `<form class="stack" data-form="vMail" novalidate style="gap:12px"><p class="small muted" style="margin:0">Tu correo ahora: <b>${esc(actual||'sin correo')}</b>. Es con el que entras y donde te llegan los códigos.</p>
+    ${VMAIL.enviado ? `<div class="note">Te mandamos un enlace a <b>${esc(VMAIL.enviado)}</b>. Ábrelo para confirmar el cambio. Si también te llega un aviso a tu correo actual, confírmalo ahí. Hasta entonces sigues entrando con el correo de antes.</div>` : ''}
+    <div class="grid2"><label class="f" for="vm-1">Correo nuevo<input id="vm-1" type="email" autocomplete="email" inputmode="email"></label><label class="f" for="vm-2">Repítelo<input id="vm-2" type="email" autocomplete="email" inputmode="email"></label></div>
+    <div class="row"><button class="btn pri" type="submit">Cambiar correo</button></div></form>`;
+}
+/* ---------- borrar mi cuenta: 5 minutos para arrepentirse, 1 vez al día ---------- */
+const VBOR = {uid:null, cargado:false, pendiente:false, hasta:0, puede:true, timer:null};
+async function vBorrarCargar(uid){
+  if (VBOR.uid===uid && VBOR.cargado) return; VBOR.uid = uid; VBOR.cargado = false;
+  const {data, error} = await RV.sb.rpc('cuenta_borrado_estado'); if (error || VBOR.uid!==uid) return;   // sin el SQL 08 no hay sección
+  Object.assign(VBOR, {cargado:true, pendiente:!!data.pendiente, hasta:data.hasta?Date.parse(data.hasta):0, puede:data.puede_deshacer!==false});
+  vBorrarBarra(); const bx = $('#vb-box'); if (bx) bx.innerHTML = vBorrarHTML();
+}
+function vBorrarHTML(){
+  if (!VBOR.cargado) return '<p class="small muted" style="margin:0">Cargando…</p>';
+  if (VBOR.pendiente) return `<div class="note bad">Tu cuenta se va a borrar. Arriba ves cuánto falta${VBOR.puede?' y el botón para deshacerlo':''}.</div>`;
+  return `<form class="stack" data-form="vBorrar" novalidate style="gap:12px">
+    <p class="small" style="margin:0">Si borras tu cuenta, dejas de aparecer para todos, junto con tu negocio y tu registro de repartidor si tienes. Tus pedidos y lo necesario por ley se quedan guardados el tiempo que marca el aviso de privacidad.</p>
+    ${VBOR.puede ? `<div class="note warn"><b>Tienes 5 minutos para arrepentirte</b>, y solo puedes deshacerlo <b>1 vez al día</b>. Si lo deshaces y la vuelves a borrar el mismo día, se borra al instante y ya no hay vuelta atrás.</div>`
+      : `<div class="note bad"><b>Hoy ya deshiciste un borrado.</b> Si la borras ahora, se borra al instante y <b>ya no hay vuelta atrás</b>.</div>`}
+    <label class="f" for="vb-mot">¿Por qué te vas? (opcional)<textarea id="vb-mot" maxlength="500"></textarea></label>
+    <label class="chk"><input id="vb-ok" type="checkbox"> <span>Entiendo lo que pasa con mi cuenta y quiero borrarla</span></label>
+    <div class="row"><button class="btn danger" type="submit">Borrar mi cuenta</button></div></form>`;
+}
+function vBorrarBarra(){
+  let b = document.getElementById('vborra'); clearInterval(VBOR.timer);
+  if (!VBOR.pendiente){ if (b) b.remove(); return; }
+  if (!b){ b = document.createElement('div'); b.id = 'vborra'; b.setAttribute('role','alert');
+    b.style.cssText = 'position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:200;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:14px;background:var(--bad,#DC2626);color:#fff;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.3)';
+    document.body.appendChild(b); }
+  const pinta = () => { const f = Math.max(0, VBOR.hasta - Date.now()), m = Math.floor(f/60000), sg = Math.floor(f%60000/1000);
+    if (f<=0){ clearInterval(VBOR.timer); b.innerHTML = '<span>Tu cuenta se borró.</span>'; VBOR.pendiente = false; setTimeout(()=>{ toast('Tu cuenta se borró. Gracias por haber estado en MOCHI.'); A.rSalir(); }, 1500); return; }
+    b.innerHTML = `<span>Tu cuenta se borra en ${m}:${String(sg).padStart(2,'0')}</span>${VBOR.puede?'<button class="btn sm" data-a="vBorrarDeshacer" style="background:#fff;color:#B91C1C">Deshacer</button>':''}`; };
+  pinta(); VBOR.timer = setInterval(pinta, 1000);
 }
 
 /* ---------- contraseña con verificación ---------- */
@@ -5499,6 +5562,9 @@ function vLimpiar(root){
   root.querySelectorAll('.verif.bot').forEach(el=>el.title='Cuenta automática (bot)');
   root.querySelectorAll('.vlabel.bot').forEach(el=>el.textContent='Bot · cuenta automática del equipo');
   if (ui.view==='ajustes' && !root.querySelector('#vp-box')){ const d = root.querySelector('details.set'); if (d){ d.insertAdjacentHTML('afterend', `<details class="set"${VPW.paso===2?' open':''}><summary>${ico.shield}<span>Contraseña<small>Cambia tu contraseña (con verificación por correo)</small></span></summary><div class="bd" id="vp-box">${vPassHTML()}</div></details>`); } }
+  if (ui.view==='ajustes' && !root.querySelector('#vm-box')){ const pw = root.querySelector('#vp-box')?.closest('details');
+    if (pw) pw.insertAdjacentHTML('afterend', `<details class="set"><summary>${ico.msg}<span>Correo de tu cuenta<small>Cámbialo por otro correo</small></span></summary><div class="bd" id="vm-box">${vMailHTML()}</div></details>`
+      + (S.esAdmin ? '' : `<details class="set"><summary>${ico.basura}<span>Borrar mi cuenta<small>Con 5 minutos para arrepentirte</small></span></summary><div class="bd" id="vb-box">${vBorrarHTML()}</div></details>`)); }
   root.querySelectorAll('.small.muted').forEach(el=>{ if (/El negocio verá tu nombre, teléfono y dirección/.test(el.textContent)) el.textContent = 'Solo pedimos tu nombre: el negocio lo usa para entregarte tu pedido. Recoges en la tienda y pagas ahí.'; });
 }
 new MutationObserver(()=>vLimpiar($('#app'))).observe($('#app'), {childList:true});
@@ -6294,7 +6360,7 @@ const A = {
   mas: () => { ui.sheet={t:'mas'}; renderLayer(); },
   cuentas: () => { ui.sheet={t:'cuentas'}; renderLayer(); },
   usarCuenta: x => { S.yo=x; if(esNeg(x) && !S.misNegocios.includes(x) && x!==S.personal){ /* prototipo: entrar como cualquier negocio */ }
-    ui.chat=null; ui.sheet=null; ui.pTab='pedidos'; save(); go(esNeg(x)?'minegocio':'home',true); toast(`Ahora usas la cuenta ${perfilDe(x).nombre}`); },
+    ui.chat=null; ui.sheet=null; ui.pTab='pedidos'; save(); go(esNeg(x)?'minegocio':'home',true); toast(esNeg(x) ? `Estás como tu negocio: ${perfilDe(x).nombre}` : `Estás como tu usuario: @${perfilDe(x).handle||usr(x)?.usuario||''}`); },
   cat: x => { ui.cat=x; rerender(); },
   neg: x => { ui.neg=x; ui.secF='todas'; ui.soloDisp=false; ui.estrellas=5; ui.sheet=null; go('negocio'); },
   sec: x => { ui.secF=x; rerender(); },
