@@ -3260,9 +3260,48 @@ function aComisiones(){
   <div class="tbl"><table><thead><tr><th>Negocio</th><th class="r">Pedidos</th><th class="r">Ventas</th><th class="r">Comisión</th><th class="r">Plan</th></tr></thead><tbody>
   ${filas.map(f=>`<tr><td>${esc(f.n.nombre)}</td><td class="r num">${f.k}</td><td class="r num">${money(f.v)}</td><td class="r num">${money(f.c)}</td><td class="r num">${f.plan?money(f.plan):'—'}</td></tr>`).join('')}</tbody></table></div>`;
 }
+// Bitácora con buscador: categoría, tipo, fechas y texto o números. En vivo busca en el servidor (admin_bitacora).
+const BIT_CAT = {negocio:'Negocios', repartidor:'Repartidores', usuario:'Usuarios', admin:'Admin', sistema:'Sistema'};
+const BIT_TIPO = {publicacion:'Publicaciones', historia:'Historias', nota:'Notas', comentario:'Comentarios', mensaje:'Mensajes', pedido:'Pedidos', entrega:'Entregas',
+  ubicacion:'Ubicaciones', producto:'Productos', servicio:'Servicios', etiqueta:'Etiquetas', negocio:'Negocios', repartidor:'Repartidores', cuenta:'Cuentas'};
+const bitCat = b => b.cat || (/^admin/i.test(b.actor||'') ? 'admin' : /escudo|sistema|bot/i.test(b.actor||'') ? 'sistema'
+  : /negocio|producto|pedido|venta/i.test((b.accion||'')+' '+(b.detalle||'')) ? 'negocio' : /repartidor|entrega/i.test((b.accion||'')+' '+(b.detalle||'')) ? 'repartidor' : 'usuario');
+const bitDia = t => { const d = new Date(t); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+function bitFiltrar(l, f){
+  const q = (f.q||'').trim().toLowerCase();
+  return l.filter(b=>(!f.cat || bitCat(b)===f.cat)
+    && (!f.tipo || b.tipo===f.tipo || (f.tipo==='etiqueta' && /"etiq":\s*\["/.test(JSON.stringify(b.datos||{}))) || (f.tipo==='ubicacion' && b.datos && b.datos.lat!=null))
+    && (!f.desde || bitDia(b.t) >= f.desde) && (!f.hasta || bitDia(b.t) <= f.hasta)
+    && (!q || [b.actor, b.accion, b.detalle, b.datos?JSON.stringify(b.datos):''].join(' ').toLowerCase().includes(q)));
+}
+function bitDatos(d){
+  if (!d) return '';
+  if (d.antes && d.despues) return Object.keys(d.despues).map(k=>`<div><b>${esc(k)}:</b> ${esc(JSON.stringify(d.antes[k]))} → ${esc(JSON.stringify(d.despues[k]))}</div>`).join('') + (d.lat!=null?`<div><b>Ubicación:</b> ${d.lat}, ${d.lng}</div>`:'');
+  return `<pre style="white-space:pre-wrap;overflow-wrap:anywhere;margin:0;font-size:12px">${esc(JSON.stringify(d, null, 1))}</pre>`;
+}
+async function bitBuscarSrv(mas){
+  const f = ui.bitF || {}, prev = mas && ui.bitRes ? ui.bitRes.l : [];
+  const antes = prev.length ? prev[prev.length-1].sid : null;
+  const {data, error} = await RV.sb.rpc('admin_bitacora', {p_cat:f.cat||null, p_tipo:f.tipo||null, p_desde:f.desde||null, p_hasta:f.hasta||null, p_texto:f.q||null, p_antes:antes, p_lim:100});
+  if (error){ ui.bitRes = null; toast('El buscador del servidor aún no está listo; busco en lo más reciente.'); return rerender(); }
+  const l = (data||[]).map(b=>({t:vMs(b.t), actor:b.actor, accion:b.accion, detalle:b.detalle, sid:b.id, cat:b.cat, tipo:b.tipo, datos:b.datos}));
+  ui.bitRes = {l:prev.concat(l), mas:l.length===100, srv:true}; rerender();
+}
 function aBitacora(){
-  return `<div class="tbl"><table><thead><tr><th>Cuándo</th><th>Quién</th><th>Acción</th><th>Detalle</th></tr></thead><tbody>
-  ${S.bitacora.slice(0,150).map(b=>`<tr><td class="small">${fecha(b.t)}</td><td>${esc(b.actor)}</td><td>${esc(b.accion)}</td><td class="small">${esc(b.detalle)}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">Sin movimientos todavía.</td></tr>'}</tbody></table></div>`;
+  const f = ui.bitF || {}, res = ui.bitRes;
+  const l = res ? res.l : bitFiltrar(S.bitacora, f);
+  const opt = (o, v, todos) => `<option value="">${todos}</option>` + Object.entries(o).map(([k,t])=>`<option value="${k}" ${v===k?'selected':''}>${t}</option>`).join('');
+  return `<form class="card" data-form="bitBuscar" novalidate style="gap:10px">
+    <div class="grid2"><label class="f" for="bt-cat">Categoría<select id="bt-cat">${opt(BIT_CAT, f.cat, 'Todas')}</select></label>
+      <label class="f" for="bt-tipo">Tipo<select id="bt-tipo">${opt(BIT_TIPO, f.tipo, 'Todos')}</select></label>
+      <label class="f" for="bt-desde">Desde<input id="bt-desde" type="date" value="${esc(f.desde||'')}"></label>
+      <label class="f" for="bt-hasta">Hasta<input id="bt-hasta" type="date" value="${esc(f.hasta||'')}"></label></div>
+    <label class="f" for="bt-q">Buscar texto o número<input id="bt-q" type="search" value="${esc(f.q||'')}" placeholder="Ej.: @usuario, una palabra, un folio, una placa, un precio…"></label>
+    <div class="row"><button class="btn pri" type="submit">Buscar</button>${Object.values(f).some(Boolean)?'<button class="btn" type="button" data-a="bitLimpiar">Quitar filtros</button>':''}<span class="small muted">${l.length} resultado(s)${res&&res.srv?' del servidor':''}</span></div></form>
+  <div class="tbl"><table><thead><tr><th>Cuándo</th><th>Quién</th><th>Acción</th><th>Detalle</th></tr></thead><tbody>
+  ${l.slice(0,300).map(b=>`<tr><td class="small">${fecha(b.t)}</td><td>${esc(b.actor||'')}<div><span class="pill">${BIT_CAT[bitCat(b)]||''}</span></div></td><td>${esc(b.accion||'')}</td><td class="small">${esc(b.detalle||'')}${b.datos?`<details><summary class="small muted">Ver datos</summary>${bitDatos(b.datos)}</details>`:''}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">No hay movimientos con esos filtros.</td></tr>'}</tbody></table></div>
+  ${res && res.mas ? '<div class="row"><button class="btn" data-a="bitMas">Cargar más</button></div>' : ''}
+  <p class="small muted">Se guarda todo lo que se crea, cambia o borra. Plazos: lo borrado 1 año, la bitácora 2 años, pedidos y repartidores 5 años. De los mensajes privados solo se anota que se borró uno, nunca el texto.</p>`;
 }
 function aAjustes(){
   return `<form class="card" data-form="ajustes" novalidate style="max-width:640px"><h2>Ajustes de la plataforma</h2>
@@ -3674,6 +3713,8 @@ function registrarAccionesV12(){
     pgalGo: (x, el) => { const g = $('#pgal'); if (g) g.scrollTo({left:(+el.dataset.o)*g.clientWidth, behavior:'smooth'}); },
     estadoCuenta: () => { ui.abrirEstado = true; ui.sheet = null; go('ajustes'); ui.abrirEstado = false; setTimeout(()=>$('#estado-cuenta')?.scrollIntoView({behavior:'smooth', block:'start'}), 60); },
     apelar: x => { ui.sheet = {t:'apelar', ref:x}; ui.err=''; renderLayer(); },
+    bitLimpiar: () => { ui.bitF = {}; ui.bitRes = null; rerender(); },
+    bitMas: () => bitBuscarSrv(true),
     quejaVer: (x, el) => { ui.sheet = {t:'queja', id:x, adm:el?.dataset?.o==='adm'}; ui.err=''; renderLayer(); setTimeout(()=>{ const c = $('#qchat'); if (c) c.scrollTop = c.scrollHeight; }, 30); },
     apResolver: (x, el) => { const a = S.apelaciones.find(a=>a.id===x); if (!a) return; const u = usr(a.u) || {id:a.u, usuario:perfilDe(a.u)?.handle||''}; a.estado = el.dataset.o; a.resuelta = Date.now();
       if (a.estado==='aceptada'){
@@ -3718,6 +3759,10 @@ function registrarAccionesV12(){
       if (VIVO){ if (!a.sid) return; const {error} = await RV.sb.rpc('queja_escribir', {aid:a.sid, p_texto:t}); if (error){ ui.err = vMsgError(error); return renderLayer(); } ui.err = ''; $('#q-txt').value = ''; await vRecargar(true); }
       else { (a.msgs = a.msgs||[]).push({de:adm?null:a.u, admin:adm, texto:t, t:Date.now()}); if (adm) notif(a.u,'sistema',null,{texto:`Te respondimos en tu queja: "${a.titulo.slice(0,40)}". Ábrela en Más → Estado de tu cuenta.`}); save(); }
       ui.err = ''; renderLayer(); setTimeout(()=>{ const c = $('#qchat'); if (c) c.scrollTop = c.scrollHeight; }, 30); },
+    bitBuscar: () => { const g = id => ($('#'+id)?.value||'').trim();
+      ui.bitF = {cat:g('bt-cat'), tipo:g('bt-tipo'), desde:g('bt-desde'), hasta:g('bt-hasta'), q:g('bt-q')};
+      if (ui.bitF.desde && ui.bitF.hasta && ui.bitF.desde > ui.bitF.hasta) [ui.bitF.desde, ui.bitF.hasta] = [ui.bitF.hasta, ui.bitF.desde];
+      ui.bitRes = null; if (VIVO) return bitBuscarSrv(false); rerender(); },
     verif: () => { const g = id => ($('#'+id)?.value||'').trim(); const d = ui.vf; const fail = m => { ui.err = m; rerender(); };
       ['nom','resp','cargo','mail','sitio','men'].forEach(k=>{ const v = $('#vf-'+k)?.value; if (v!=null) d[k] = v; });
       if (!d.tipo) return fail('Elige el tipo de cuenta.');
@@ -4380,7 +4425,7 @@ document.addEventListener('pointerdown', e => { const t = e.target.closest && e.
    Los datos del responsable se capturan en Admin → Ajustes → Datos legales.
    Nota: es un borrador cuidadoso; conviene que un abogado lo revise antes del lanzamiento público.
    ============================================================ */
-const LEGAL_VERSION = '2026-10-26.2';
+const LEGAL_VERSION = '2026-10-27.1';
 let LEGAL_DATOS = null; // {responsable, domicilio, correo}
 function legalDatos(){
   const d = Object.assign({}, (S && S.cfg && S.cfg.legal) || {}, LEGAL_DATOS || {});
@@ -4389,7 +4434,7 @@ function legalDatos(){
 }
 const LEGAL_DOCS = {
   privacidad: { t:'Aviso de privacidad', d: () => { const {R,D,C} = legalDatos(); return `
-<p class="small muted">Última actualización: 26 de octubre de 2026 · Versión ${LEGAL_VERSION}</p>
+<p class="small muted">Última actualización: 27 de octubre de 2026 · Versión ${LEGAL_VERSION}</p>
 <h3>1. ¿Quién es responsable de tus datos?</h3>
 <p>${R}, con domicilio en ${D}, es responsable del uso y protección de tus datos personales en <b>MOCHI</b> (la app web de red social y tienda local de Los Mochis, Sinaloa). Puedes escribirnos a ${C}.</p>
 <h3>2. ¿Qué datos usamos?</h3>
@@ -4414,7 +4459,15 @@ const LEGAL_DOCS = {
 <h3>6. Menores de edad</h3>
 <p>MOCHI es para personas de <b>13 años o más</b>. Si tienes entre 13 y 17 años, necesitas que tu mamá, papá o tutor lea este aviso y te dé permiso; por eso te lo pedimos al crear tu cuenta. Tu mamá, papá o tutor puede pedirnos en cualquier momento ver, corregir o borrar tus datos, o cerrar tu cuenta.</p>
 <h3>7. ¿Cuánto tiempo guardamos tus datos?</h3>
-<p>Mientras tengas tu cuenta. Si la borras, eliminamos tu información en un plazo razonable, salvo lo que debamos conservar por seguridad o por ley (por ejemplo, registros de alertas graves). Si damos de baja a un repartidor por fraude o por poner en riesgo a alguien, conservamos su placa y su teléfono en una lista de datos vetados, aunque borre su cuenta, para impedir que se registre de nuevo con ellos; solo la ve el equipo de MOCHI. Las copias de respaldo cifradas anteriores a tu baja pueden conservar tus datos; solo se abren para recuperar el servicio si la base se pierde, y nunca para otro fin.</p>
+<p>Mientras tengas tu cuenta, y después solo lo necesario, con estos plazos:</p>
+<ul>
+<li><b>Registro de actividad (bitácora):</b> anotamos lo que se crea, cambia o borra en MOCHI (publicaciones, historias, notas, comentarios, pedidos, productos, negocios, entregas y cambios de cuenta) para atender reportes, quejas y fraudes. Se guarda <b>2 años</b>.</li>
+<li><b>Lo que borras o te quitamos:</b> guardamos una copia bajo llave <b>1 año</b>, por si hay un reporte, una queja o lo pide una autoridad. Solo la ve el equipo de MOCHI y no se vuelve a publicar.</li>
+<li><b>Pedidos y entregas:</b> <b>5 años</b>, porque la ley fiscal (Código Fiscal de la Federación) pide conservar esos registros.</li>
+<li><b>Repartidores:</b> sus datos (nombre, teléfono, vehículo, placa y zona) se guardan <b>5 años después de su última entrega</b>, aunque se den de baja, por seguridad de los clientes y por la ley fiscal. Si vuelve, tiene que registrarse y verificarse de nuevo.</li>
+<li><b>Mensajes privados:</b> nadie los lee. Solo se abren si alguien de la conversación los reporta o si una autoridad lo pide conforme a la ley. Si borras un mensaje, solo anotamos que se borró, nunca su texto.</li>
+</ul>
+<p>Al vencer cada plazo, un proceso automático lo borra. Si borras tu cuenta, eliminamos el resto de tu información en un plazo razonable, salvo lo que debamos conservar por los plazos anteriores, por seguridad o por ley (por ejemplo, registros de alertas graves). Si damos de baja a un repartidor por fraude o por poner en riesgo a alguien, conservamos su placa y su teléfono en una lista de datos vetados, aunque borre su cuenta, para impedir que se registre de nuevo con ellos; solo la ve el equipo de MOCHI. Las copias de respaldo cifradas anteriores a tu baja pueden conservar tus datos; solo se abren para recuperar el servicio si la base se pierde, y nunca para otro fin.</p>
 <h3>8. Tus derechos (ARCO) y cómo ejercerlos</h3>
 <p>Puedes <b>Acceder</b> a tus datos, <b>Rectificarlos</b>, <b>Cancelarlos</b> (borrarlos) u <b>Oponerte</b> a su uso, y también revocar tu consentimiento. Hazlo desde <b>Más → Privacidad y legal → Mis datos</b> (ahí puedes descargar una copia de tus datos o enviar tu solicitud) o escribiendo a ${C}. Indica tu @usuario y qué necesitas. Te respondemos en un máximo de <b>20 días</b> y, si procede, lo aplicamos dentro de los <b>15 días</b> siguientes. Es gratis. Si no estás conforme con la respuesta, puedes acudir a la autoridad de protección de datos personales (Secretaría Anticorrupción y Buen Gobierno).</p>
 <h3>9. Cómo limitar el uso de tus datos</h3>
@@ -4804,7 +4857,7 @@ function vArmar(D, E, admin, conteos, promCli){
     msgs:qmsg.filter(m=>m.apelacion===a.id).map(m=>({de:m.de?'u'+m.de:null, admin:!!m.admin, texto:m.texto, t:vMs(m.t)}))}));
   const alertas = (D.alertas||[]).map(a=>({id:'al'+a.id, sid:a.id, t:vMs(a.created_at), quien:a.quien?'u'+a.quien:null, para:a.para?'u'+a.para:null, lugar:a.lugar||'', texto:a.texto||'', cats:(a.cats&&a.cats.length)?a.cats:[a.motivo||'otro'], nivel:a.nivel||1, oculto:!!a.oculto, intentos:a.intentos||1, accion:a.accion||'', estado:a.estado||'nueva'}));
   const reportes = (D.reportes||[]).filter(r=>r.estado!=='revisado').map(r=>({id:'rp'+r.id, sid:r.id, post:r.post?'q'+r.post:undefined, cuenta:r.cuenta?'u'+r.cuenta:undefined, hist:r.hist?'h'+r.hist:undefined, mensaje:r.mensaje?'m'+r.mensaje:undefined, comentario:r.comentario?'k'+r.comentario:undefined, det:(D.repdet||[]).find(d=>d.reporte===r.id)||null, por:'u'+r.quien, motivo:r.motivo, t:vMs(r.created_at)}));
-  const bitacora = (D.bit||[]).map(b=>({t:vMs(b.t), actor:b.actor, accion:b.accion, detalle:b.detalle, sid:b.id}));
+  const bitacora = (D.bit||[]).map(b=>({t:vMs(b.t), actor:b.actor, accion:b.accion, detalle:b.detalle, sid:b.id, cat:b.cat, tipo:b.tipo, datos:b.datos}));
   // carrito (solo en este teléfono)
   let carrito = null; try { carrito = JSON.parse(localStorage.getItem('lm-vivo-carrito-'+uid)||'null'); } catch(e){}
   if (carrito && (!carrito.items || !carrito.items.every(it=>productos.some(p=>p.id===it.pid)))) carrito = null;
