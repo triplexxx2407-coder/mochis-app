@@ -713,6 +713,13 @@ html,body,button,a,.car,input,textarea,select{touch-action:manipulation}
 .rlogo{display:flex;align-items:center;gap:8px;background:none;border:0;padding:0;font-family:var(--display);font-weight:800;font-size:19px;color:var(--fg)}
 .rlogo .mark,.mark{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--brand),#16a34a);color:#fff;font-size:14px;font-weight:900}
 .mark.big{width:64px;height:64px;border-radius:18px;font-size:24px}
+.rng{-webkit-appearance:none;appearance:none;width:100%;height:28px;border-radius:999px;border:1px solid var(--line);margin-top:6px;padding:0;touch-action:pan-y}
+.rng-h{background:linear-gradient(to right,hsl(0 80% 55%),hsl(60 80% 55%),hsl(120 80% 45%),hsl(180 80% 45%),hsl(240 80% 60%),hsl(300 80% 55%),hsl(359 80% 55%))}
+.rng::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:30px;height:30px;border-radius:50%;background:#fff;border:3px solid #111;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.rng::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid #111}
+.pal{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:8px}
+.pal .sw{aspect-ratio:1/1;border-radius:12px;border:2px solid var(--line);padding:0;display:grid;place-items:center;color:#fff;font-weight:900;font-size:20px;text-shadow:0 0 3px #000}
+.pal .sw.act{border:3px solid var(--fg)}.pal .sw.sel{border:3px solid var(--bad)}
 .mark.ic{background:none;overflow:hidden;padding:0}.mark.ic img{width:100%;height:100%;display:block;object-fit:cover;-webkit-user-drag:none}
 .rnav-top{display:none;margin:0 auto;gap:4px}
 .rnav-top button,.rnav-bot button{position:relative;display:flex;align-items:center;gap:6px;background:none;border:0;color:var(--muted);font-weight:700;padding:8px 12px;border-radius:12px}
@@ -1174,15 +1181,31 @@ if (S && S.cfg && (!S.cfg.marca || S.cfg.marca==='Tu Marca')) S.cfg.marca = 'MOC
   S.chats.forEach(c=>c.msgs.forEach(mv)); S.ts = Date.now();
 })();
 function save(){ if (VIVO) return vGuardar(); try{ S.ts = S.ts||Date.now(); localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast('No se pudo guardar en este navegador'); } }
-let PREF = {tema:'sistema', grande:false};
+let PREF = {tema:'sistema', grande:false, color:null, paleta:[]};
 try { PREF = {...PREF, ...JSON.parse(localStorage.getItem('lm-pref')||'{}')}; } catch(e){}
+if (!Array.isArray(PREF.paleta)) PREF.paleta = [];
+// Color propio (Configuración → Apariencia): un tono (h, 0-359) y qué tan claro u oscuro (l, 0-100).
+// Menos de 50 = oscuro. La letra se calcula aparte para que siempre se lea. Solo se guarda en este teléfono.
+const COLOR_VARS = ['--bg','--surface','--surface-2','--surface-3','--line','--fg','--muted'];
+const colorOscuro = c => c.l < 50;
+const colorLuz = c => colorOscuro(c) ? 4 + c.l*0.4 : 70 + (c.l-50)*0.54;
+const colorHsl = c => `hsl(${Math.round(c.h)} 38% ${colorLuz(c).toFixed(1)}%)`;
+function colorTokens(c){
+  const h = Math.round(c.h), L = colorLuz(c);
+  const t = (sat, l) => `hsl(${h} ${sat}% ${Math.max(0, Math.min(100, l)).toFixed(1)}%)`;
+  return colorOscuro(c)
+    ? {'--bg':t(38,L), '--surface':t(38,L+4), '--surface-2':t(38,L+7), '--surface-3':t(38,L+11), '--line':t(38,L+11), '--fg':t(20,93), '--muted':t(14,72)}
+    : {'--bg':t(38,L), '--surface':t(38,Math.min(99,L+5)), '--surface-2':t(38,L-5), '--surface-3':t(38,L-10), '--line':t(38,L-12), '--fg':t(30,10), '--muted':t(14,28)};
+}
 function aplicarPref(){
   const r = document.documentElement;
-  if (PREF.tema==='claro') r.dataset.theme='light'; else if (PREF.tema==='oscuro') r.dataset.theme='dark'; else delete r.dataset.theme;
+  if (PREF.color){ r.dataset.theme = colorOscuro(PREF.color)?'dark':'light'; Object.entries(colorTokens(PREF.color)).forEach(([k,v])=>r.style.setProperty(k,v)); }
+  else { COLOR_VARS.forEach(k=>r.style.removeProperty(k));
+    if (PREF.tema==='claro') r.dataset.theme='light'; else if (PREF.tema==='oscuro') r.dataset.theme='dark'; else delete r.dataset.theme; }
   document.body.classList.toggle('big', !!PREF.grande);
   try { localStorage.setItem('lm-pref', JSON.stringify(PREF)); } catch(e){}
 }
-const temaActual = () => PREF.tema==='claro'?'claro':PREF.tema==='oscuro'?'oscuro':(matchMedia('(prefers-color-scheme: dark)').matches?'oscuro':'claro');
+const temaActual = () => PREF.color ? (colorOscuro(PREF.color)?'oscuro':'claro') : PREF.tema==='claro'?'claro':PREF.tema==='oscuro'?'oscuro':(matchMedia('(prefers-color-scheme: dark)').matches?'oscuro':'claro');
 
 const ui = {mode:'app', view:'home', neg:null, cat:'todos', q:'', secF:'todas', soloDisp:false, sel:null, pend:null, sheet:null, menu:false,
   pedido:null, pTab:'pedidos', edit:null, delAsk:null, aTab:'moderacion', err:'', toastT:null, story:null,
@@ -1895,6 +1918,20 @@ function vLogin(){
 }
 
 /* ---------- configuración (todo lo "ruidoso" vive aquí, en secciones desplegables) ---------- */
+function bloqueColor(){
+  const c = PREF.color || ui.colorTmp || {h:160, l:85}, sel = ui.palSel;
+  const igual = (a,b) => a && b && Math.round(a.h)===Math.round(b.h) && Math.round(a.l)===Math.round(b.l);
+  return `<div class="stack" style="gap:10px"><div><b>Tu color</b><div class="small muted">Mueve las barras y la app se pinta con ese color. La letra se ajusta sola para que se lea.</div></div>
+    <label class="f">Color<input type="range" class="rng rng-h" min="0" max="359" step="1" value="${Math.round(c.h)}" data-color="h" aria-label="Color"></label>
+    <label class="f">Más oscuro ← → más claro<input type="range" class="rng rng-l" min="0" max="100" step="1" value="${Math.round(c.l)}" data-color="l" aria-label="Qué tan claro u oscuro" style="${rngLuz(c.h)}"></label>
+    <div class="row" style="gap:8px"><button class="btn pri sm" data-a="colorGuardar">Guardar en mi paleta</button><button class="btn sm" data-a="colorQuitar">Quitar mi color</button></div>
+    <div class="row between"><b>Mi paleta <span class="muted small">(${PREF.paleta.length})</span></b>${PREF.paleta.length?(sel?`<span class="row" style="gap:6px"><button class="btn danger sm" data-a="colorBorrar" ${sel.length?'':'disabled'}>Borrar (${sel.length})</button><button class="btn ghost sm" data-a="colorSel">Cancelar</button></span>`:`<button class="btn ghost sm" data-a="colorSel">Seleccionar</button>`):''}</div>
+    ${PREF.paleta.length?`<div class="pal">${PREF.paleta.map((p,i)=>`<button class="sw ${sel&&sel.includes(i)?'sel':''} ${!sel&&igual(p,PREF.color)?'act':''}" style="background:${colorHsl(p)}" data-a="colorPal" data-x="${i}" aria-label="Color ${i+1}${sel&&sel.includes(i)?' (seleccionado)':''}">${sel&&sel.includes(i)?'✓':''}</button>`).join('')}</div>`
+      :'<p class="small muted" style="margin:0">Aún no guardas colores. Cuando te guste uno, toca "Guardar en mi paleta".</p>'}
+    ${sel?'<p class="small muted" style="margin:0">Toca los colores que quieras borrar.</p>':''}</div>`;
+}
+const rngLuz = h => `background:linear-gradient(to right, hsl(${Math.round(h)} 38% 4%), hsl(${Math.round(h)} 38% 24%) 49%, hsl(${Math.round(h)} 38% 70%) 51%, hsl(${Math.round(h)} 38% 97%))`;
+function quitarColorOk(){ return !PREF.color || confirmarSimple('¿Seguro? Se va a quitar tu color personalizado y este botón solo cambiará entre modo claro y oscuro. Los colores de tu paleta se quedan guardados.'); }
 function vAjustes(){
   const u = yo(); const bl = S.bloqueos.filter(b=>b.de===S.yo);
   return `<div class="feed" style="gap:12px"><h1>Configuración</h1>
@@ -1908,8 +1945,9 @@ function vAjustes(){
       ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}
       <div class="row"><button class="btn pri" type="submit">Guardar cambios</button></div></form>`}
   </div></details>
-  <details class="set"><summary>${temaActual()==='oscuro'?ico.moon:ico.sun}<span>Apariencia<small>Modo claro u oscuro y tamaño del texto</small></span></summary><div class="bd">
-    <div class="segs" style="align-self:flex-start">${[['claro','Claro'],['oscuro','Oscuro'],['sistema','Automático']].map(([k,l])=>`<button class="${PREF.tema===k?'on':''}" data-a="tema" data-x="${k}">${l}</button>`).join('')}</div>
+  <details class="set" ${ui.apOpen?'open':''}><summary>${temaActual()==='oscuro'?ico.moon:ico.sun}<span>Apariencia<small>Modo claro u oscuro, tu color y tamaño del texto</small></span></summary><div class="bd">
+    <div class="segs" style="align-self:flex-start">${[['claro','Claro'],['oscuro','Oscuro'],['sistema','Automático']].map(([k,l])=>`<button class="${!PREF.color&&PREF.tema===k?'on':''}" data-a="tema" data-x="${k}">${l}</button>`).join('')}</div>
+    ${bloqueColor()}
     <div class="setrow"><span><b>Texto más grande</b><br><span class="small muted">Recomendado para leer más cómodo</span></span><button class="switch ${PREF.grande?'on':''}" role="switch" aria-checked="${PREF.grande}" data-a="grande" aria-label="Texto más grande"></button></div>
   </div></details>
   <details class="set"><summary>${ico.shield}<span>Privacidad y seguridad<small>Cuentas bloqueadas y protección de mensajes</small></span></summary><div class="bd">
@@ -5902,9 +5940,21 @@ const A = {
   },
   negDemo: v => { S.yo=v; ui.ultNeg=v; ui.pTab='pedidos'; save(); go('minegocio',true); toast(`Ahora eres ${perfilDe(v).nombre}`); },
   mode: x => { ui.mode=x; ui.err=''; ui.edit=null; ui.delAsk=null; ui.sheet=null; render(); window.scrollTo(0,0); },
-  toggleTema: () => { PREF.tema = temaActual()==='oscuro'?'claro':'oscuro'; aplicarPref(); rerender(); },
-  tema: x => { PREF.tema=x; aplicarPref(); rerender(); },
-  grande: () => { PREF.grande=!PREF.grande; aplicarPref(); rerender(); toast(PREF.grande?'Texto más grande activado':'Texto normal'); },
+  toggleTema: () => { if (!quitarColorOk()) return; PREF.tema = temaActual()==='oscuro'?'claro':'oscuro'; PREF.color = null; aplicarPref(); rerender(); },
+  tema: x => { if (!quitarColorOk()) return; PREF.tema=x; PREF.color = null; ui.apOpen = true; aplicarPref(); rerender(); },
+  colorGuardar: () => { const c = PREF.color || ui.colorTmp; ui.apOpen = true; if (!c){ toast('Primero mueve las barras para elegir tu color'); return; }
+    if (PREF.paleta.some(p=>Math.round(p.h)===Math.round(c.h)&&Math.round(p.l)===Math.round(c.l))){ toast('Ese color ya está en tu paleta'); return; }
+    if (PREF.paleta.length>=24){ toast('Tu paleta está llena (24). Borra alguno primero'); return; }
+    PREF.paleta.push({h:Math.round(c.h), l:Math.round(c.l)}); aplicarPref(); rerender(); toast('Color guardado en tu paleta'); },
+  colorQuitar: () => { ui.apOpen = true; if (!PREF.color){ toast('No tienes un color puesto'); return; } ui.colorTmp = PREF.color; PREF.color = null; aplicarPref(); rerender(); toast('Listo: volviste a los colores normales'); },
+  colorPal: x => { const i = +x; ui.apOpen = true;
+    if (ui.palSel){ ui.palSel = ui.palSel.includes(i) ? ui.palSel.filter(k=>k!==i) : [...ui.palSel, i]; rerender(); return; }
+    const p = PREF.paleta[i]; if (!p) return; PREF.color = {h:p.h, l:p.l}; aplicarPref(); rerender(); },
+  colorSel: () => { ui.apOpen = true; ui.palSel = ui.palSel ? null : []; rerender(); },
+  colorBorrar: () => { const sel = ui.palSel||[]; ui.apOpen = true; if (!sel.length) return;
+    if (!confirmarSimple(`¿Borrar ${sel.length} color${sel.length>1?'es':''} de tu paleta?`)) return;
+    PREF.paleta = PREF.paleta.filter((_,i)=>!sel.includes(i)); ui.palSel = null; aplicarPref(); rerender(); toast('Colores borrados'); },
+  grande: () => { ui.apOpen = true; PREF.grande=!PREF.grande; aplicarPref(); rerender(); toast(PREF.grande?'Texto más grande activado':'Texto normal'); },
   mas: () => { ui.sheet={t:'mas'}; renderLayer(); },
   cuentas: () => { ui.sheet={t:'cuentas'}; renderLayer(); },
   usarCuenta: x => { S.yo=x; if(esNeg(x) && !S.misNegocios.includes(x) && x!==S.personal){ /* prototipo: entrar como cualquier negocio */ }
@@ -6200,6 +6250,8 @@ document.addEventListener('dblclick', e => { const c = e.target.closest('[data-d
 document.addEventListener('submit', e => { const f=e.target.dataset.form; if(f){ e.preventDefault(); F[f](); } });
 document.addEventListener('focusin', e => { if(e.target.id==='st-resp' && ui.story) ui.story.paused=true; });
 document.addEventListener('input', e => {
+  const tc = e.target; if (tc && tc.dataset && tc.dataset.color){ const c = {...(PREF.color || ui.colorTmp || {h:160, l:85})}; c[tc.dataset.color] = +tc.value; PREF.color = c; aplicarPref();
+    const rl = document.querySelector('.rng-l'); if (rl) rl.setAttribute('style', rngLuz(c.h)); document.querySelectorAll('.pal .sw.act').forEach(b=>b.classList.remove('act')); return; }
   if (e.target.id==='q'){ ui.q=e.target.value; const r=$('#results'); if(r) r.innerHTML = (ui.view==='buscar' || ui.q.trim()) ? resultados() : ''; }
   if (e.target.id==='qm'){ ui.qm=e.target.value; const busca=!!ui.qm.trim(); const r=$('#dm-res'); if(r) r.innerHTML=resultadosMsg(); document.querySelectorAll('.dm-list .notes, .dm-list .dm-sub:not(.dm-res .dm-sub)').forEach(el=>el.hidden=busca); document.querySelectorAll('.dm-list > .crow').forEach(el=>el.hidden=busca); if(!busca && !document.querySelector('.dm-list > .crow')){ render(); const i=$('#qm'); if(i){ i.focus(); } } }
   if (e.target.id==='sheet-note' && ui.sel) ui.sel.note=e.target.value;
