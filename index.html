@@ -2469,7 +2469,8 @@ function pPerfil(n){
       <label class="f" for="g-min">Pedido mínimo (MXN)<input id="g-min" type="number" min="0" step="1" value="${n.pedidoMin?n.pedidoMin/100:''}"></label>
       <label class="f" for="g-tiempo">Tiempo de entrega<input id="g-tiempo" type="text" value="${esc(n.tiempo)}"></label></div>
     <label class="f" for="g-zonas">Costo por colonia (opcional) <span class="h">Una por línea: <code>Scally: 40</code></span><textarea id="g-zonas">${esc((n.zonas||[]).map(z=>`${z.col}: ${z.costo/100}`).join('\n'))}</textarea></label>
-    ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}<div class="row"><button class="btn pri" type="submit">Guardar cambios</button></div></form>`;
+    ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}<div class="row"><button class="btn pri" type="submit">Guardar cambios</button></div></form>
+  ${VIVO?`<div class="card stack" style="max-width:760px;gap:8px"><h2>Eliminar mi negocio</h2><p class="small muted" style="margin:0">Tu negocio deja de aparecer en la tienda y ya no recibe pedidos. Te vamos a pedir que escribas por qué. Por seguridad, sus datos y pedidos se quedan guardados.</p><button class="btn danger sm" data-a="vNegEliminarMio" style="align-self:flex-start">Eliminar mi negocio</button></div>`:''}`;
 }
 function pVentas(n){
   const ps = S.pedidos.filter(p=>p.neg===n.id), ent = ps.filter(p=>p.estado==='entregado');
@@ -3164,20 +3165,41 @@ function aAutomaticas(){
     <td><span class="pill ${d.d==='aprobado'?'ok':d.d==='rechazado'?'bad':'warn'}">${d.d}</span>${d.revisarFoto&&it.estado==='aprobado'?'<br><span class="pill warn" style="margin-top:4px">revisar foto</span>':''}</td><td class="small">${esc(d.razon)}<div class="muted">${hace(d.t)}</div></td>
     <td>${it.estado===d.d?`<button class="btn sm" data-a="revertir" data-x="${i}">Revertir</button>`:`<span class="small muted">Ya cambió: ${it.estado}</span>`}</td></tr>`; }).join('') || '<tr><td colspan="4" class="muted">Aún no hay decisiones automáticas. Enciende la revisión automática en “Por revisar”.</td></tr>'}</tbody></table></div>`;
 }
+// Último registro de eliminación de un negocio o cuenta (solo en vivo)
+const elimDe = (tipo, sid) => (S.elimReg||[]).find(e=>e.tipo===tipo && e.objeto===sid);
+function filaEliminado(n){
+  const e = elimDe('negocio', n.sid); if (!e) return '<span class="small muted">Eliminado</span>';
+  const cuando = fecha(vMs(e.t));
+  if (e.por==='dueno' && e.estado==='nuevo') return `<div class="note bad small" style="margin:0"><b>El dueño eliminó este negocio</b> · ${cuando}<br>Por qué: ${esc(e.motivo||'(sin razón)')}</div>
+    <div class="row" style="gap:6px;margin-top:6px"><button class="btn sm" data-a="vElim" data-x="${e.id}" data-o="mantener">Mantener</button><button class="btn danger sm" data-a="vElim" data-x="${e.id}" data-o="ocultar">Borrar definitivamente</button></div>`;
+  return `<div class="small muted">Eliminado por ${e.por==='dueno'?'el dueño':'ti'} · ${cuando}${e.motivo?' · '+esc(e.motivo):''}${e.estado==='mantenido'?' · lo mantuviste':''}</div>
+    <div class="row" style="gap:6px;margin-top:6px"><button class="btn sm" data-a="vElim" data-x="${e.id}" data-o="restaurar">Restaurar</button>${e.estado==='mantenido'?`<button class="btn danger sm" data-a="vElim" data-x="${e.id}" data-o="ocultar">Borrar definitivamente</button>`:''}</div>`;
+}
+function seccionEliminados(){
+  const l = (S.elimReg||[]).filter(e=>e.estado==='oculto' && (e.tipo==='negocio' ? S.negocios.some(n=>n.sid===e.objeto && n.estado==='eliminado') : e.tipo==='cuenta' ? S.usuarios.some(u=>u.id==='u'+e.objeto && u.eliminado) : false));
+  const vistos = new Set(), u = l.filter(e=>!vistos.has(e.tipo+e.objeto) && vistos.add(e.tipo+e.objeto));
+  if (!u.length) return '';
+  return `<details class="set"><summary>${ico.trash||''}<span>Eliminados (${u.length})<small>Siguen guardados en la base y en la bitácora. Puedes restaurarlos.</small></span></summary><div class="bd">
+    ${u.map(e=>`<div class="row between nowrap" style="gap:10px;border-top:1px solid var(--line);padding-top:10px"><div style="min-width:0"><b>${esc(e.nombre||'')}</b> <span class="pill">${e.tipo==='negocio'?'Negocio':'Cuenta'}</span>
+      <div class="small muted">Por ${e.por==='dueno'?'el dueño':'ti'} · ${fecha(vMs(e.t))}${e.motivo?' · '+esc(e.motivo):''}</div></div><button class="btn sm" data-a="vElim" data-x="${e.id}" data-o="restaurar">Restaurar</button></div>`).join('')}</div></details>`;
+}
 function aComercios(){
+  const lista = !VIVO ? S.negocios : S.negocios.filter(n=>{ if (n.estado!=='eliminado') return true; const e = elimDe('negocio', n.sid); return e && (e.estado==='nuevo' || e.estado==='mantenido'); });
   return `<div class="kpis"><div class="kpi"><span>Activos</span><b>${activos().length}</b></div><div class="kpi"><span>Por aprobar</span><b>${S.negocios.filter(n=>n.estado==='pendiente').length}</b></div><div class="kpi"><span>Productos</span><b>${S.productos.length}</b></div></div>
   <div class="tbl"><table><thead><tr><th>Negocio</th><th>Estado</th><th>Plan</th><th></th></tr></thead><tbody>
-  ${S.negocios.map(n=>`<tr><td><div class="row nowrap">${avatar(perfilDe(n.id),36)}<div><b>${nombreV(perfilDe(n.id))}</b><div class="small muted">${esc(TIPOS[n.tipo].uno)} · ${S.productos.filter(p=>p.neg===n.id).length} productos · ${seguidores(n.id)} seguidores</div></div></div></td>
+  ${lista.map(n=>`<tr><td><div class="row nowrap">${avatar(perfilDe(n.id),36)}<div><b>${nombreV(perfilDe(n.id))}</b><div class="small muted">${esc(TIPOS[n.tipo].uno)} · ${S.productos.filter(p=>p.neg===n.id).length} productos · ${seguidores(n.id)} seguidores</div></div></div></td>
    <td><span class="pill ${n.estado==='activo'?'ok':n.estado==='pendiente'?'warn':'bad'}">${n.estado}</span></td><td><span class="pill ${n.plan==='al corriente'?'ok':'warn'}">${esc(n.plan)}</span></td>
-   <td><div class="row nowrap">${n.estado==='activo'?(VIVO?'':`<button class="btn danger sm" data-a="nest" data-x="${n.id}" data-o="suspendido">Suspender</button>`):`<button class="btn pri sm" data-a="nest" data-x="${n.id}" data-o="activo">${n.estado==='pendiente'?'Aprobar y verificar':'Reactivar'}</button>`}${n.estado!=='rechazado'?`<button class="btn sm ${n.estado==='activo'?'danger':''}" data-a="nest" data-x="${n.id}" data-o="rechazado">${n.estado==='pendiente'?'Rechazar':'Anular'}</button>`:''}</div>${n.motivo&&n.estado!=='activo'?`<div class="small muted">${esc(n.motivo)}</div>`:''}</td></tr>`).join('')}</tbody></table></div>`;
+   <td>${n.estado==='eliminado'?filaEliminado(n):`<div class="row nowrap">${n.estado==='activo'?(VIVO?'':`<button class="btn danger sm" data-a="nest" data-x="${n.id}" data-o="suspendido">Suspender</button>`):`<button class="btn pri sm" data-a="nest" data-x="${n.id}" data-o="activo">${n.estado==='pendiente'?'Aprobar y verificar':'Reactivar'}</button>`}${n.estado!=='rechazado'?`<button class="btn sm ${n.estado==='activo'?'danger':''}" data-a="nest" data-x="${n.id}" data-o="rechazado">${n.estado==='pendiente'?'Rechazar':'Anular'}</button>`:VIVO?`<button class="btn danger sm" data-a="vNegEliminar" data-x="${n.id}">Eliminar</button>`:''}</div>${n.motivo&&n.estado!=='activo'?`<div class="small muted">${esc(n.motivo)}</div>`:''}`}</td></tr>`).join('')}</tbody></table></div>
+  ${VIVO?seccionEliminados():''}`;
 }
 function aUsuarios(){
-  const l = S.usuarios.slice().sort((a,b)=>b.strikes-a.strikes);
+  const l = S.usuarios.filter(u=>!u.eliminado).sort((a,b)=>b.strikes-a.strikes);
   return `<div class="tbl"><table><thead><tr><th>Usuario</th><th class="r">Publicaciones</th><th class="r">Seguidores</th><th>Avisos</th><th>Puede publicar</th><th></th></tr></thead><tbody>
   ${l.map(u=>`<tr><td><div class="row nowrap">${avatar(u,32)}<div><b>${esc(u.nombre)}</b><div class="small muted">@${esc(u.usuario)}</div></div></div></td>
     <td class="r num">${S.posts.filter(p=>p.autor===u.id).length}</td><td class="r num">${seguidores(u.id)}</td>
     <td>${u.strikes?`<span class="pill ${u.strikes>=S.cfg.strikesMax?'bad':'warn'}">${u.strikes} de ${S.cfg.strikesMax}</span>`:'<span class="pill ok">0</span>'}</td>
-    <td>${u.subidas?'<span class="pill ok">Sí</span>':'<span class="pill bad">Bloqueado</span>'}</td><td><button class="btn sm" data-a="toggleSubidas" data-x="${u.id}">${u.subidas?'Bloquear':'Desbloquear'}</button></td></tr>`).join('')}</tbody></table></div>`;
+    <td>${u.subidas?'<span class="pill ok">Sí</span>':'<span class="pill bad">Bloqueado</span>'}</td><td><div class="row nowrap" style="gap:6px"><button class="btn sm" data-a="toggleSubidas" data-x="${u.id}">${u.subidas?'Bloquear':'Desbloquear'}</button>${VIVO&&u.id!==S.personal&&!u.bot?`<button class="btn danger sm" data-a="vCuentaEliminar" data-x="${u.id}">Eliminar</button>`:''}</div></td></tr>`).join('')}</tbody></table></div>
+  ${VIVO?seccionEliminados():''}`;
 }
 function aPedidos(){
   const ps = S.pedidos; const alertas = S.negocios.map(n=>({n, c:ps.filter(p=>p.neg===n.id&&['rechazado','cancelado'].includes(p.estado)).length})).filter(x=>x.c>=2);
@@ -4507,7 +4529,7 @@ const vSid = x => x ? String(x).slice(1) : null;
 const vMs = s => s ? new Date(s).getTime() : Date.now();
 const vCent = n => Math.round(Number(n||0) * 100);
 const vPesos = c => Math.round(Number(c||0)) / 100;
-const ESTN = {aprobado:'activo', pausado:'suspendido', pendiente:'pendiente', rechazado:'rechazado'};
+const ESTN = {aprobado:'activo', pausado:'suspendido', pendiente:'pendiente', rechazado:'rechazado', eliminado:'eliminado'};
 const ESTN_INV = {activo:'aprobado', suspendido:'pausado', pendiente:'pendiente', rechazado:'rechazado'};
 function vFotoObj(path){ if (!path) return {k:'parque', a:'#ddd', b:'#bbb'}; const k = 's:'+path; if (!MEDIA[k]) MEDIA[k] = rFoto(path); return {m:k}; }
 const vEsAdmin = () => !!(S && S.esAdmin);
@@ -4538,6 +4560,7 @@ async function vCargar(){
       sneg: sb.from('siguen_neg').select('de,negocio').limit(20000),
       blo: sb.from('bloqueos').select('de,a'),
       negs: sb.from('negocios').select('*'),
+      elim: sb.rpc('eliminados_info'),
       prods: sb.from('productos').select('*').limit(3000),
       posts: sb.from('feed2').select('*').order('created_at',{ascending:false}).limit(VPAG.lim + 1),
       misPosts: sb.from('feed2').select('*').eq('autor', uid).order('created_at',{ascending:false}).limit(100),
@@ -4602,11 +4625,16 @@ function vArmar(D, E, admin, conteos, promCli){
   const uid = vUid(), me = 'u'+uid, prev = (S && S!==SDEMO) ? S : null;
   const A0 = Array.isArray(D.aj) ? D.aj[0] : D.aj; const aj = A0 || {};
   const admMap = {}; (Array.isArray(D.adm)?D.adm:[]).forEach(a=>admMap[a.id]=a);
+  // cuentas eliminadas: se esconden para todos menos el admin (el admin las ve aparte)
+  const EL = (D.elim && !Array.isArray(D.elim)) ? D.elim : {cuentas:[], registro:[]};
+  const elimSet = new Set((EL.cuentas||[]).filter(id=>id!==uid));
+  if (!admin && elimSet.size){ const fuera = x => !elimSet.has(x.autor);
+    D.perf = D.perf.filter(p=>!elimSet.has(p.id)); D.posts = D.posts.filter(fuera); D.hist = (D.hist||[]).filter(fuera); D.notas = (D.notas||[]).filter(fuera); }
   // personas
   const usuarios = D.perf.map(p=>{ const a = admMap[p.id]; const mio = p.id===uid;
     const u = {id:'u'+p.id, nombre:p.nombre, usuario:p.usuario, bio:p.bio||'', color:p.color||'#0D6B5B', foto:p.foto?rFoto(p.foto):null, fotoPath:p.foto||null, fu:null,
       priv:Object.assign({etiquetar:true, seguidores:true, seguidos:true}, p.priv||{}), verif:p.verif?{tipo:p.verif, t:vMs(p.verif_t||p.created_at), por:'Equipo'}:null,
-      bot:!!p.ejemplo, grupo:p.ejemplo?'bot':'real', strikes:0, subidas:true, suspendido:false, menor:true, creado:vMs(p.created_at)};
+      bot:!!p.ejemplo, grupo:p.ejemplo?'bot':'real', strikes:0, subidas:true, suspendido:false, menor:true, creado:vMs(p.created_at), eliminado:elimSet.has(p.id)};
     if (mio){ Object.assign(u, {strikes:E.avisos||0, subidas:E.subidas!==false || (E.bloq_hasta && vMs(E.bloq_hasta)<Date.now()), bloqHasta:E.bloq_hasta?vMs(E.bloq_hasta):null, suspendido:!!E.suspendido, suspHasta:E.susp_hasta?vMs(E.susp_hasta):null, menor:!!E.menor, edad:E.edad||null,
       strikeLog:(E.log||[]).map(s=>({t:s.t, motivo:s.motivo, ref:s.ref?('q'+s.ref):null}))}); }
     else if (a){ Object.assign(u, {strikes:a.avisos||0, subidas:a.subidas!==false, bloqHasta:a.bloq_hasta?vMs(a.bloq_hasta):null, suspendido:!!a.suspendido, suspHasta:a.susp_hasta?vMs(a.susp_hasta):null, menor:!!a.menor, strikeLog:Array.from({length:a.avisos||0},()=>({t:Date.now()-DIA, motivo:'otro'}))}); }
@@ -4658,7 +4686,7 @@ function vArmar(D, E, admin, conteos, promCli){
   D.msgs.forEach(m=>{ if (m.estado!=='ok' && m.de!==uid) return; const otro = m.de===uid ? m.para : m.de; const c = chats[otro] = chats[otro] || {id:'c'+otro, p:[me,'u'+otro], msgs:[]};
     c.msgs.push({id:'m'+m.id, resp:m.responde?'m'+m.responde:undefined, borrado:!!m.borrado, oculto:ocultos.has(m.id), histComp:m.hist_comp?'h'+m.hist_comp:undefined, sid:m.id, de:'u'+m.de, texto:m.borrado?'':(m.texto||''), post:m.post?'q'+m.post:undefined, hist:m.hist?'h'+m.hist:undefined, nota:m.nota||undefined, t:vMs(m.created_at), leido:m.de===uid?true:!!m.leido, bloq:m.estado!=='ok'}); });
   // notificaciones
-  const misNeg = negocios.filter(n=>n.dueno===me);
+  const misNeg = negocios.filter(n=>n.dueno===me && n.estado!=='eliminado');
   const notifs = D.notifs.map(n=>{ let para = me; if (n.tipo==='pedido' || n.tipo==='follow_neg') para = misNeg[0] ? misNeg[0].id : me;
     if (n.tipo==='sistema' && /^El cliente canceló/.test(n.texto||'') && misNeg[0]) para = misNeg[0].id;
     return {id:'n'+n.id, sid:n.id, para, tipo:n.tipo==='follow_neg'?'follow':n.tipo, de:n.de?'u'+n.de:null, post:n.post?'q'+n.post:undefined, hist:n.hist?'h'+n.hist:undefined, texto:n.tipo==='follow_neg'?undefined:n.texto, t:vMs(n.created_at), leida:!!n.leida, compartida:!!n.compartida}; });
@@ -4686,7 +4714,7 @@ function vArmar(D, E, admin, conteos, promCli){
   const yoAntes = prev ? prev.yo : (((()=>{ try { return localStorage.getItem('lm-vivo-yo-'+uid); } catch(e){ return null; } })()) || me);
   const misNegIds = misNeg.map(n=>n.id);
   const S2 = {
-    ts:Date.now(), vivo:true, esAdmin:admin,
+    ts:Date.now(), vivo:true, esAdmin:admin, elimReg:admin ? (EL.registro||[]) : [],
     cfg:{marca:aj.marca||'MOCHI', ciudad:aj.ciudad||'Los Mochis', comisionBps:0, planCents:0, autoMod:aj.auto_mod!==false, revisarNeg:!!aj.revisar_neg, strikesMax:aj.strikes_max||3, umbralReportes:aj.umbral_reportes||3,
       terminos:Array.isArray(aj.terminos)?aj.terminos:[], legal:(aj.legal && typeof aj.legal==='object')?aj.legal:{}, protegidos:(Array.isArray(aj.protegidos)&&aj.protegidos.length)?aj.protegidos:PROTEGIDOS_BASE.slice(), reparto:SDEMO.cfg.reparto},
     negocios, productos, usuarios, yo:(yoAntes===me || misNegIds.includes(yoAntes)) ? yoAntes : me, personal:me, misNegocios:misNegIds, sesion:'correo',
@@ -5292,7 +5320,7 @@ function vRepVivo(){
   return `<div class="rapp">
     <header class="rtop"><div class="rlogo"><span class="mark ic"><img src="iconos/icon-192.png" alt="" width="34" height="34" draggable="false"></span><b>${esc(S.cfg.marca)} <i>Repartidor</i></b></div>
       ${r.estado==='aprobado'?`<button class="rsw ${r.online?'on':''}" data-a="vRepOnline" aria-pressed="${r.online}"><span></span>${r.online?'Conectado':'Desconectado'}</button>`:''}</header>
-    <main class="rbody">${cuerpo}</main></div>`;
+    <main class="rbody">${cuerpo}${r.estado!=='rechazado'?`<div class="card stack" style="gap:8px;margin-top:16px"><b>Dejar de ser repartidor</b><span class="small muted">Si te das de baja y después quieres volver, tendrás que registrarte y hacer toda la documentación de nuevo.</span><button class="btn danger sm" data-a="vRepBaja" style="align-self:flex-start">Dejar de ser repartidor</button></div>`:''}</main></div>`;
 }
 /* ---------- ADMIN → Repartidores (en vivo) ---------- */
 // Placa o teléfono que ya usa otra cuenta, o que está vetado (lo calcula el servidor)
@@ -5661,7 +5689,39 @@ function registrarAccionesRepVivo3(){
     await vRecargar(true); await vRepInfos();
     if (f.data){ ui.pedido = 'LM-'+f.data.folio; go('seguimiento'); } else go('pedidos');
     toast('Pedido enviado. Cuando la tienda lo acepte buscamos repartidor.'); };
+  // Eliminar (borrado suave: queda en la base, en "Eliminados" y en la bitácora)
+  const pedirTexto = (msg, def='') => { try { return window.prompt(msg, def); } catch(e){ return def; } };
+  const avisar = msg => { try { window.alert(msg); } catch(e){ toast(msg); } };
   Object.assign(A, {
+    vNegEliminar: async x => { const n = neg(x); if (!n || !n.sid || !vEsAdmin()) return;
+      if (!confirmarSimple(`¿Seguro que quieres eliminar "${n.nombre}"?\n\nSe quita de tu lista y pasa a "Eliminados". Queda guardado en la base y en la bitácora, y lo puedes restaurar.`)) return;
+      const m = pedirTexto('Razón (opcional, la verá el dueño):', n.motivo||''); if (m===null) return;
+      const {error} = await RV.sb.rpc('admin_negocio_eliminar', {nid:n.sid, p_motivo:(m||'').trim().slice(0,500)||null}); if (error) return toast(vMsgError(error));
+      await vRecargar(true); toast('Negocio eliminado. Está en "Eliminados".'); },
+    vElim: async (x, el) => { const id = +x, acc = el.dataset.o, e = (S.elimReg||[]).find(r=>r.id===id); if (!e || !vEsAdmin()) return;
+      const nom = e.nombre || 'esto';
+      if (acc==='ocultar' && !confirmarSimple(`¿Borrar definitivamente "${nom}" de tu lista?\n\nSe va a "Eliminados". Por seguridad sigue guardado en la base y en la bitácora.`)) return;
+      if (acc==='restaurar' && !confirmarSimple(e.tipo==='negocio' ? `¿Restaurar "${nom}"?\n\nVuelve como anulado; luego lo puedes reactivar.` : `¿Restaurar la cuenta "${nom}"?\n\nSe quita la suspensión y vuelve a aparecer.`)) return;
+      const {error} = await RV.sb.rpc('admin_eliminacion', {eid:id, accion:acc}); if (error) return toast(vMsgError(error));
+      await vRecargar(true); toast(acc==='mantener'?'Lo mantienes en tu lista.':acc==='ocultar'?'Listo: está en "Eliminados".':'Restaurado.'); },
+    vCuentaEliminar: async x => { const u = usr(x); if (!u || !vEsAdmin()) return;
+      if (!confirmarSimple(`¿Seguro que quieres eliminar la cuenta de @${u.usuario}?\n\nQueda suspendida y escondida para todos, junto con su negocio y su registro de repartidor si tiene. Todo queda guardado en la base y en la bitácora, y la puedes restaurar.`)) return;
+      const m = pedirTexto('Razón (opcional, solo la ves tú):', ''); if (m===null) return;
+      const {error} = await RV.sb.rpc('admin_cuenta_eliminar', {u:x.slice(1), p_motivo:(m||'').trim().slice(0,500)||null}); if (error) return toast(vMsgError(error));
+      await vRecargar(true); toast('Cuenta eliminada. Está en "Eliminados".'); },
+    vNegEliminarMio: async () => { const n = neg(S.yo); if (!n || !n.sid) return;
+      if (!confirmarSimple(`¿Seguro que quieres eliminar tu negocio "${n.nombre}"?\n\nDeja de aparecer en la tienda y ya no recibe pedidos. Por seguridad, sus datos y pedidos se quedan guardados.`)) return;
+      const m = pedirTexto('Escribe por qué eliminas tu negocio (mínimo 10 letras):', ''); if (m===null) return;
+      if (m.trim().length < 10) return toast('Escribe un poco más: mínimo 10 letras.');
+      const {error} = await RV.sb.rpc('negocio_eliminar', {p_motivo:m.trim().slice(0,500)}); if (error) return toast(vMsgError(error));
+      S.yo = S.personal; save(); await vRecargar(true); go('home', true); toast('Tu negocio se eliminó.'); },
+    vRepBaja: async () => {
+      if (!confirmarSimple('¿Seguro que quieres dejar de ser repartidor?\n\nSi después quieres volver, tendrás que registrarte y hacer TODA la documentación de nuevo. Tus entregas y tus datos se quedan guardados por seguridad.')) return;
+      const m = pedirTexto('¿Por qué te das de baja? (opcional)', ''); if (m===null) return;
+      const {error} = await RV.sb.rpc('rep_baja', {p_motivo:(m||'').trim().slice(0,500)||null}); if (error) return toast(vMsgError(error));
+      await vRepEstado(); if (typeof repGpsSync==='function') repGpsSync();
+      avisar('Listo: ya no eres repartidor de MOCHI.\n\nSi algún día quieres volver, tendrás que registrarte y hacer toda la documentación de nuevo.');
+      ui.mode = 'real'; render(); },
     vProdRevisar: async (x, el) => { const p = S.productos.find(o=>o.id===x); if (!p || !p.sid || !vEsAdmin()) return; const est = el.dataset.o==='aprobado' ? 'aprobado' : 'rechazado';
       let motivo = null; if (est==='rechazado'){ try { motivo = window.prompt('Razón para rechazar el producto (la verá el dueño):', 'No cumple las Reglas para negocios'); } catch(e){} if (motivo===null) return; motivo = motivo.trim().slice(0,200) || 'No cumple las Reglas para negocios'; }
       const {error} = await RV.sb.from('productos').update({estado:est, motivo}).eq('id', p.sid); if (error) return toast(vMsgError(error));
