@@ -3947,7 +3947,7 @@ function renderReal(){
   const app = $('#app'); if (!app) return;
   if (!RV.sb && RV.fase==='cargando'){ rIniciar(); }
   if (RV.fase==='app' && typeof vEntrar==='function') return vEntrar();
-  const top = `<div class="protobar rprotobar"><b>En vivo</b><span>Cuentas reales · tienda en modo prueba (sin pagos)</span>${modosNav()}</div>`;
+  const top = '';   // sin sesión no se muestra la barra de vistas (solo el admin la ve, ya dentro)
   let cuerpo = '';
   if (RV.fase==='cargando' || RV.fase==='app') cuerpo = `<div class="rcentro"><div class="rspin"></div><p class="muted">Conectando…</p></div>`;
   else if (RV.fase==='sinred') cuerpo = `<div class="rcentro"><h2>Sin conexión</h2><p class="muted">No se pudo conectar con el servidor. Revisa tu internet e inténtalo de nuevo.</p><button class="btn pri" data-a="rRecargar">Reintentar</button></div>`;
@@ -5585,7 +5585,7 @@ function vRepVivo(){
     : repVivoAprobado(P);
   return `<div class="rapp">
     <header class="rtop"><div class="rlogo"><span class="mark ic"><img src="iconos/icon-192.png" alt="" width="34" height="34" draggable="false"></span><b>${esc(S.cfg.marca)} <i>Repartidor</i></b></div>
-      ${r.estado==='aprobado'?`<button class="rsw ${r.online?'on':''}" data-a="vRepOnline" aria-pressed="${r.online}"><span></span>${r.online?'Conectado':'Desconectado'}</button>`:''}</header>
+      <div class="row nowrap" style="gap:8px">${r.estado==='aprobado'?`<button class="rsw ${r.online?'on':''}" data-a="vRepOnline" aria-pressed="${r.online}"><span></span>${r.online?'Conectado':'Desconectado'}</button>`:''}<button class="btn sm" data-a="modo2" data-x="real" aria-label="Volver a mi cuenta" title="Volver a mi cuenta">${ico.user}Mi cuenta</button></div></header>
     <main class="rbody">${cuerpo}<div class="card stack" style="gap:8px;margin-top:16px"><b>Apelar una decisión</b><span class="small muted">Si el equipo o el sistema cambió algo de tu cuenta y crees que fue un error, ábrelo aquí y platícalo por chat.</span><button class="btn sm" data-a="apelarMenu" style="align-self:flex-start">Apelar una decisión</button></div>${r.estado!=='rechazado'?`<div class="card stack" style="gap:8px;margin-top:16px"><b>Dejar de ser repartidor</b><span class="small muted">Si te das de baja y después quieres volver, tendrás que registrarte y hacer toda la documentación de nuevo.</span><button class="btn danger sm" data-a="vRepBaja" style="align-self:flex-start">Dejar de ser repartidor</button></div>`:''}</main></div>`;
 }
 /* ---------- ADMIN → Repartidores (en vivo) ---------- */
@@ -6159,6 +6159,7 @@ function modosNav(){
   return `<nav class="modes" aria-label="Vista del prototipo">${[['real','En vivo'],['app','Demo: Cliente'],['comercio','Comercio'],['rep','Repartidor'],['admin','Admin']].map(([k,l])=>`<button class="${act===k?'on':''}" data-a="modo2" data-x="${k}">${l}</button>`).join('')}</nav>`;
 }
 function protoBar(){
+  if (VIVO && !S.esAdmin) return '';   // la barra de vistas solo la ve el admin; los demás cambian de cuenta con los íconos
   if (VIVO) return `<div class="protobar rprotobar"><b>En vivo</b><span>Cuentas reales · tienda en modo prueba (sin pagos) · las cuentas “Bot” son automáticas</span>${modosNav()}</div>`;
   return `<div class="protobar"><b>Prototipo</b><span>Datos de ejemplo · sin pagos ni cuentas reales</span>
     ${modosNav()}</div>`;
@@ -6192,6 +6193,7 @@ function render(){
     ['go','notifs','Notificaciones',ico.bell,['notifs'],nN],
     ['crear','','Crear',ico.plus,[],0],
     ...(soyNegocio()?[['go','minegocio','Mi negocio',ico.biz,['minegocio'],nPed]]:tieneNegocio()?[['irMiNegocio','','Mi negocio',ico.biz,[],0]]:[]),
+    ...(VIVO&&soyNegocio()?[['modo2','real','Mi cuenta personal',ico.user,[],0]]:[]),
     ...(soyRepVivo()?[['modo2','vrep','Repartidor',ico.moto,[],0]]:[]),
     ['go','carrito','Carrito',ico.bag,['carrito','checkout'],cartN],
     ...(soyNegocio()?[]:[['go','pedidos','Mis pedidos',ico.list,['pedidos','seguimiento'],nAct]]),
@@ -6212,6 +6214,7 @@ function render(){
     <button class="ibtn" data-a="go" data-x="notifs" aria-label="Notificaciones">${ico.bell}${badge(nN)}</button>
     ${soyNegocio()?'':`<button class="ibtn ${on(['pedidos','seguimiento'])}" data-a="go" data-x="pedidos" aria-label="Mis pedidos">${ico.list}${badge(nAct)}</button>`}
     ${soyRepVivo()?`<button class="ibtn" data-a="modo2" data-x="vrep" aria-label="Repartidor">${ico.moto}</button>`:!soyNegocio()&&tieneNegocio()?`<button class="ibtn" data-a="irMiNegocio" aria-label="Mi negocio">${ico.biz}</button>`:''}
+    ${VIVO&&soyNegocio()?`<button class="ibtn" data-a="modo2" data-x="real" aria-label="Volver a mi cuenta personal" title="Volver a mi cuenta personal">${ico.user}</button>`:''}
     ${soyNegocio()?`<button class="ibtn ${on(['minegocio'])}" data-a="go" data-x="minegocio" aria-label="Mi negocio">${ico.biz}${badge(nPed)}</button>${cartN?`<button class="ibtn" data-a="go" data-x="carrito" aria-label="Carrito">${ico.bag}${badge(cartN)}</button>`:''}`:`<button class="ibtn ${on(['carrito','checkout'])}" data-a="go" data-x="carrito" aria-label="Carrito">${ico.bag}${badge(cartN)}</button>`}</header>
   <main class="igmain"><div class="igin stack">${protoBar()}${VISTAS[v]()}</div></main>
   ${showBar?`<button class="cartfloat" data-a="go" data-x="carrito"><span>${cartN} producto(s) · ${esc(neg(S.carrito.neg).nombre)}</span><span class="num">${money(subtotalCarrito())} →</span></button>`:''}
