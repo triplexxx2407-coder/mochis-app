@@ -662,6 +662,11 @@ form[data-form="resena"] button[type="submit"]{background:var(--c-star);border-c
 .rthumb svg,.rthumb img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
 .quote{border-left:3px solid var(--brand);padding:6px 12px;background:var(--surface-2);border-radius:0 10px 10px 0;font-size:14px;white-space:pre-line}
 .cbanner{display:flex;align-items:center;gap:12px;text-align:left;border:0;border-radius:16px;padding:12px 14px;background:var(--bad-soft);color:var(--fg);width:100%}
+.qchat{display:flex;flex-direction:column;gap:8px;max-height:44vh;overflow-y:auto;padding:2px}
+.qm{max-width:86%;padding:8px 12px;border-radius:14px;background:var(--surface-2);font-size:14px;line-height:1.35;white-space:pre-line;overflow-wrap:anywhere;align-self:flex-start}
+.qm.yo{align-self:flex-end;background:var(--brand-soft)}.qm small{display:block;font-size:11.5px;color:var(--muted);margin-top:3px}
+.qrow{display:flex;flex-direction:column;align-items:stretch;text-align:left;width:100%;font:inherit;color:inherit;cursor:pointer}
+button.srow{width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
 .cbanner.warn{background:var(--warn-soft)}.cbanner svg{flex:none;color:var(--bad)}.cbanner.warn svg{color:var(--warn)}
 .cbanner span{display:flex;flex-direction:column;gap:2px;min-width:0}.cbanner small{color:var(--muted);font-size:12.5px}
 .note.warn{background:var(--warn-soft)}
@@ -2474,6 +2479,7 @@ function pPerfil(n){
       <label class="f" for="g-tiempo">Tiempo de entrega<input id="g-tiempo" type="text" value="${esc(n.tiempo)}"></label></div>
     <label class="f" for="g-zonas">Costo por colonia (opcional) <span class="h">Una por línea: <code>Scally: 40</code></span><textarea id="g-zonas">${esc((n.zonas||[]).map(z=>`${z.col}: ${z.costo/100}`).join('\n'))}</textarea></label>
     ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}<div class="row"><button class="btn pri" type="submit">Guardar cambios</button></div></form>
+  ${['suspendido','rechazado'].includes(n.estado) && n.motivo ? `<div class="card stack" style="max-width:760px;gap:8px"><h2>${n.estado==='suspendido'?'El equipo pausó tu negocio':'El equipo anuló tu negocio'}</h2><p class="small muted" style="margin:0">Motivo: ${esc(n.motivo)}. Si crees que es un error, abre una queja y platícalo con el equipo por chat.</p>${(()=>{ const q = quejaDe('negocio:'+n.id); return q ? `<button class="btn sm" data-a="quejaVer" data-x="${q.id}" style="align-self:flex-start">Ver tu queja</button>` : `<button class="btn pri sm" data-a="apelar" data-x="negocio:${n.id}" style="align-self:flex-start">Abrir una queja</button>`; })()}</div>` : ''}
   ${VIVO?`<div class="card stack" style="max-width:760px;gap:8px"><h2>Eliminar mi negocio</h2><p class="small muted" style="margin:0">Tu negocio deja de aparecer en la tienda y ya no recibe pedidos. Te vamos a pedir que escribas por qué. Por seguridad, sus datos y pedidos se quedan guardados.</p><button class="btn danger sm" data-a="vNegEliminarMio" style="align-self:flex-start">Eliminar mi negocio</button></div>`:''}`;
 }
 function pVentas(n){
@@ -3125,7 +3131,7 @@ function vAdmin(){
   const rep = S.posts.filter(p=>p.estado==='aprobado'&&S.reportes.some(r=>r.post===p.id)).length;
   return `<div class="stack"><div class="row between"><div><span class="small muted">Panel del administrador</span><h1>${esc(S.cfg.marca)}</h1></div><div class="row" style="gap:8px"><span class="pill ${S.cfg.autoMod?'ok':''}">Revisión automática: ${S.cfg.autoMod?'activada':'desactivada'}</span><button class="btn pri sm" data-a="adelantar" title="Simula que pasa un día">⏩ Adelantar 1 día</button><button class="btn danger sm" data-a="reiniciar">↺ Reiniciar</button></div></div>
   ${S.dias?`<div class="note small">Simulación: han pasado <b>${S.dias}</b> día(s). Revisa Pedidos, Comisiones, Repartidores y la App para ver la actividad.</div>`:''}
-  <div class="ptabs">${[['moderacion',`Por revisar (${pend})`],['seguridad',`Seguridad (${S.alertas.filter(a=>a.estado==='nueva').length+rep})`],['automaticas','Decisiones'],['comercios','Negocios'],['repartidores','Repartidores'],['usuarios','Usuarios'],['pedidos','Pedidos'],['comisiones','Comisiones'],['verificacion',`Verificación (${S.verifs.filter(v=>v.estado==='pendiente').length})`],['apelaciones',`Apelaciones (${S.apelaciones.filter(a=>a.estado==='pendiente').length})`],['bitacora','Bitácora'],['ajustes','Ajustes']].map(([k,l])=>`<button class="${ui.aTab===k?'on':''}" data-a="atab" data-x="${k}">${l}</button>`).join('')}</div>
+  <div class="ptabs">${[['moderacion',`Por revisar (${pend})`],['seguridad',`Seguridad (${S.alertas.filter(a=>a.estado==='nueva').length+rep})`],['automaticas','Decisiones'],['comercios','Negocios'],['repartidores','Repartidores'],['usuarios','Usuarios'],['pedidos','Pedidos'],['comisiones','Comisiones'],['verificacion',`Verificación (${S.verifs.filter(v=>v.estado==='pendiente').length})`],['apelaciones',`Chats de quejas (${S.apelaciones.filter(a=>a.estado==='pendiente').length})`],['bitacora','Bitácora'],['ajustes','Ajustes']].map(([k,l])=>`<button class="${ui.aTab===k?'on':''}" data-a="atab" data-x="${k}">${l}</button>`).join('')}</div>
   ${ {moderacion:aModeracion, seguridad:aSegReportes, reportes:aSegReportes, automaticas:aDecisiones, comercios:aComercios, repartidores:aRepartidores, usuarios:aUsuarios, pedidos:aPedidos, comisiones:aComisiones, bitacora:aBitacora, ajustes:aAjustes, verificacion:aVerificacion, apelaciones:aApelaciones}[ui.aTab]() }</div>`;
 }
 function selMotivo(id, sug){ return `<select id="rej-${id}" aria-label="Motivo" style="width:auto;padding:7px 9px;font-size:13px">${Object.entries(MOTIVOS).map(([k,l])=>`<option value="${k}" ${k===sug?'selected':''}>${esc(l)}</option>`).join('')}</select>`; }
@@ -3440,6 +3446,7 @@ function seccionEstado(){
   if (soyNegocio()) return '';
   const u = revisarSanciones(usr(S.yo)); const e = estadoCuenta(u);
   const rech = S.posts.filter(p=>p.autor===S.yo && p.estado==='rechazado').sort((a,b)=>b.t-a.t);
+  const hrech = S.historias.filter(h=>h.autor===S.yo && h.estado==='rechazado').sort((a,b)=>b.t-a.t);
   const mias = S.apelaciones.filter(a=>a.u===S.yo).sort((a,b)=>b.t-a.t);
   const ya = ref => S.apelaciones.some(a=>a.u===S.yo && a.ref===ref && a.estado==='pendiente');
   const pc = promCliente(S.yo);
@@ -3448,7 +3455,9 @@ function seccionEstado(){
     <b>Avisos activos (${u.strikes})</b>
     ${u.strikeLog.length ? u.strikeLog.slice().reverse().map(s=>`<div class="srow"><span class="avs">!</span><div class="tx"><b>${esc(MOTIVOS[s.motivo]||ETIQ[s.motivo]||'Regla de la comunidad')}</b><span>${fechaCorta(s.t)} · se borra el ${fechaCorta(s.t+90*DIA)}</span></div>${s.ref&&!ya(s.ref)?`<button class="btn sm" data-a="apelar" data-x="${s.ref}">Apelar</button>`:ya(s.ref)?'<span class="pill warn">En revisión</span>':''}</div>`).join('') : '<span class="small muted">Sin avisos.</span>'}
     ${rech.length?`<b>Publicaciones rechazadas</b>${rech.slice(0,6).map(p=>`<div class="srow"><span class="rthumb">${miniFoto(p)}</span><div class="tx"><b>${esc(MOTIVOS[p.motivo]||'Rechazada')}</b><span>${esc((p.texto||'Sin texto').slice(0,60))}</span></div>${ya(p.id)?'<span class="pill warn">En revisión</span>':`<button class="btn sm" data-a="apelar" data-x="${p.id}">Apelar</button>`}</div>`).join('')}`:''}
-    ${mias.length?`<b>Tus apelaciones</b>${mias.map(a=>`<div class="srow"><div class="tx"><b>${esc(a.titulo)}</b><span>${fechaCorta(a.t)} · ${a.estado==='pendiente'?'en revisión':a.estado==='aceptada'?'te dimos la razón':'se mantuvo la decisión'}${a.resp?' · '+esc(a.resp):''}</span></div><span class="pill ${a.estado==='aceptada'?'ok':a.estado==='rechazada'?'bad':'warn'}">${a.estado==='pendiente'?'Pendiente':a.estado==='aceptada'?'Aceptada':'Rechazada'}</span></div>`).join('')}`:''}
+    ${hrech.length?`<b>Historias quitadas</b>${hrech.slice(0,6).map(h=>`<div class="srow"><span class="rthumb">${verFoto(h.foto)}</span><div class="tx"><b>${esc(MOTIVOS[h.motivo]||'Quitada')}</b><span>${fechaCorta(h.t)}</span></div>${ya('h:'+h.id)?'<span class="pill warn">En revisión</span>':`<button class="btn sm" data-a="apelar" data-x="h:${h.id}">Apelar</button>`}</div>`).join('')}`:''}
+    ${mias.length?`<b>Tus quejas</b><span class="small muted">Toca una para ver la conversación con el equipo.</span>${mias.map(a=>filaQueja(a)).join('')}`:''}
+    <div class="row" style="gap:8px"><span class="small muted" style="flex:1">¿Te quitamos algo más, como una nota?</span>${ya('otro')?'':`<button class="btn sm" data-a="apelar" data-x="otro">Abrir una queja</button>`}</div>
     <div class="note small"><b>Cómo funciona:</b> cada publicación rechazada por romper una regla es 1 aviso. Con ${S.cfg.strikesMax} avisos se pausan tus publicaciones 24 horas, con ${S.cfg.strikesMax+1} son 7 días y con más son 30 días. Los avisos se borran solos a los 90 días. Solo el contenido muy grave (riesgo para menores, explotación, venta de drogas o armas) suspende la cuenta, y siempre lo revisa una persona. <b>Nunca se elimina una cuenta sin revisión humana.</b></div>
     ${pc?`<div class="small"><b>Tu calificación como cliente:</b> ★ ${pc.avg.toFixed(1)} (${pc.n}) · solo la ven los negocios y repartidores que te atienden.</div>`:''}
   </div></details>`;
@@ -3457,23 +3466,56 @@ function hojaApelar(){
   const {ref} = ui.sheet; const u = usr(S.yo); let titulo='Apelar', det='';
   if (ref==='suspension'){ titulo='Apelar la suspensión'; det = u.susp ? `Motivo: ${(u.susp.motivo||[]).map(m=>ETIQ[m]||m).join(', ')||'varios avisos'}` : ''; }
   else if (ref==='publicar'){ titulo='Apelar la pausa de publicaciones'; det = `${u.strikes} aviso(s) activos`; }
+  else if (/^h:/.test(ref)){ const h = S.historias.find(h=>h.id===ref.slice(2)); titulo='Apelar una historia quitada'; det = h ? `Historia del ${fechaCorta(h.t)} · ${MOTIVOS[h.motivo]||h.motivo||''}` : ''; }
+  else if (/^negocio:/.test(ref)){ const n = neg(ref.slice(8)); titulo='Queja por mi negocio'; det = n ? `${n.nombre} · ${n.estado==='suspendido'?'pausado':n.estado==='rechazado'?'anulado':n.estado}${n.motivo?' · '+n.motivo:''}` : ''; }
+  else if (ref==='otro'){ titulo='Abrir una queja'; det = 'Cuéntanos qué pasó: por ejemplo, una nota que te borramos o algo que crees injusto.'; }
   else { const p = post(ref); titulo='Apelar una publicación rechazada'; det = p ? `"${(p.texto||'Sin texto').slice(0,80)}" · ${MOTIVOS[p.motivo]||''}` : ''; }
   return hoja(titulo, `<p class="small muted" style="margin:0">${esc(det)}</p>
-    <label class="f" for="ap-txt">¿Por qué crees que fue un error?<textarea id="ap-txt" maxlength="400" placeholder="Explica con tus palabras. Una persona del equipo leerá tu apelación."></textarea><span class="h">Sin enlaces ni teléfonos. Respondemos normalmente en menos de 48 horas.</span></label>
+    <label class="f" for="ap-txt">¿Por qué crees que fue un error?<textarea id="ap-txt" maxlength="400" placeholder="Explica con tus palabras. Una persona del equipo la leerá y te contestará."></textarea><span class="h">Sin enlaces ni teléfonos. Se abre un chat con el equipo; respondemos normalmente en menos de 48 horas.</span></label>
     ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}
-    <button class="btn pri block" type="submit">Enviar apelación</button>`, 'apelar');
+    <button class="btn pri block" type="submit">Enviar queja</button>`, 'apelar');
+}
+// Chats de quejas: cada apelación es una conversación entre la persona y el equipo
+const QREF = ref => ref==='suspension' ? 'Cuenta suspendida' : ref==='publicar' ? 'Sin permiso de publicar' : ref==='otro' ? 'Otra cosa' : /^h:/.test(ref) ? 'Historia' : /^negocio:/.test(ref) ? 'Negocio' : 'Publicación';
+const yoQueja = () => soyNegocio() ? (neg(S.yo)?.dueno || S.yo) : S.yo;
+const quejaDe = ref => S.apelaciones.find(a=>a.u===yoQueja() && a.ref===ref && a.estado==='pendiente');
+const estQueja = a => a.estado==='pendiente' ? ['warn','Abierta'] : a.estado==='aceptada' ? ['ok','Te dimos la razón'] : ['bad','Se mantuvo'];
+function filaQueja(a){
+  const ult = (a.msgs||[]).slice(-1)[0], [c,l] = estQueja(a);
+  return `<button class="srow" data-a="quejaVer" data-x="${a.id}"><div class="tx"><b>${esc(a.titulo)}</b><span>${fechaCorta(a.t)} · ${(a.msgs||[]).length+1} mensaje(s)${ult&&ult.admin&&a.estado==='pendiente'?' · <b>el equipo te contestó</b>':''}</span></div><span class="pill ${c}">${l}</span></button>`;
+}
+// Lo que el admin necesita ver para decidir
+function contextoQueja(a){
+  const u = usr(a.u) || {}, ref = a.ref;
+  if (ref==='suspension') return `<div class="small muted">${u.eliminado?'Cuenta eliminada por el admin. ':''}${u.susp?`Suspendida por: ${(u.susp.motivo||[]).map(m=>ETIQ[m]||m).join(', ')} · ${u.susp.auto?'automática':'manual'}`:''}</div>`;
+  if (ref==='publicar') return `<div class="small muted">Avisos activos: ${u.strikes||0}</div>`;
+  if (ref==='otro') return `<div class="small muted">Queja libre: si le das la razón, arréglalo tú a mano (no se restaura nada solo).</div>`;
+  if (/^h:/.test(ref)){ const h = S.historias.find(h=>h.id===ref.slice(2)); return h ? `<div class="row nowrap" style="align-items:flex-start"><span class="rthumb lg">${verFoto(h.foto)}</span><div class="small muted">Historia · ${MOTIVOS[h.motivo]||h.motivo||'—'}</div></div>` : ''; }
+  if (/^negocio:/.test(ref)){ const n = neg(ref.slice(8)); return n ? `<div class="small"><b>${esc(n.nombre)}</b> · <span class="muted">${n.estado==='suspendido'?'pausado':n.estado==='rechazado'?'anulado':n.estado}${n.motivo?' · '+esc(n.motivo):''}</span></div>` : ''; }
+  const ps = post(ref); return ps ? `<div class="row nowrap" style="align-items:flex-start"><span class="rthumb lg">${miniFoto(ps)}</span><div class="small">${esc(ps.texto||'Sin texto')}<br><span class="muted">Rechazada por: ${esc(MOTIVOS[ps.motivo]||'—')}${ps.mod?.razon?' · '+esc(ps.mod.razon):''}</span></div></div>` : '';
+}
+function hojaQueja(){
+  const a = S.apelaciones.find(x=>x.id===ui.sheet.id); if (!a) return hoja('Queja', '<p class="muted">Esta queja ya no existe.</p>');
+  const adm = !!ui.sheet.adm, p = perfilDe(a.u), abierta = a.estado==='pendiente';
+  const msgs = [{admin:false, texto:a.texto, t:a.t}, ...(a.msgs||[])];
+  const burb = m => `<div class="qm ${m.admin===adm?'yo':''}">${esc(m.texto)}<small>${m.admin?(adm?'Tú (equipo)':'Equipo MOCHI'):(adm?'@'+esc(p.handle):'Tú')} · ${hace(m.t)}</small></div>`;
+  const fin = abierta ? '' : `<div class="cestado ${a.estado==='aceptada'?'':'warn'}"><b>${a.estado==='aceptada'?'Se le dio la razón':'Se mantuvo la decisión'}</b>${a.resp?`<span class="small">${esc(a.resp)}</span>`:''}</div>`;
+  return hoja(esc(a.titulo), `<div class="small muted">${QREF(a.ref)} · abierta el ${fechaCorta(a.t)}${adm?` · ${esc(p.nombre)} @${esc(p.handle)}`:''}</div>
+    ${adm ? contextoQueja(a) : ''}
+    <div class="qchat" id="qchat">${msgs.map(burb).join('')}</div>${fin}
+    ${abierta ? `<label class="f" for="q-txt">${adm?'Responder':'Escribe al equipo'}<textarea id="q-txt" maxlength="400" placeholder="${adm?'Pregunta lo que necesites o explica tu decisión.':'Agrega lo que quieras explicar. Sin enlaces ni teléfonos.'}"></textarea></label>
+      ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}
+      <button class="btn pri block" type="submit" ${VIVO&&!a.sid?'disabled':''}>${VIVO&&!a.sid?'Enviando tu queja…':'Enviar'}</button>
+      ${adm?`<div class="row"><button type="button" class="btn ok sm" data-a="apResolver" data-x="${a.id}" data-o="aceptada">${a.ref==='otro'?'Dar la razón':'Dar la razón y restaurar'}</button><button type="button" class="btn danger sm" data-a="apResolver" data-x="${a.id}" data-o="rechazada">Mantener la decisión</button></div>`:''}`
+    : `<p class="small muted" style="margin:0">Esta queja ya se cerró. Si hace falta, puedes abrir otra.</p>`}`, abierta ? 'queja' : null);
 }
 function aApelaciones(){
   const l = S.apelaciones.slice().sort((a,b)=>(a.estado==='pendiente'?0:1)-(b.estado==='pendiente'?0:1) || b.t-a.t);
-  return `<div class="note small">Aquí llegan las personas que creen que el sistema (o un moderador) se equivocó. Revisa el contexto antes de decidir. Si das la razón, se quita el aviso y se restaura lo que corresponda.</div>
-    ${l.map(a=>{ const p = perfilDe(a.u), u = usr(a.u); const ps = !['suspension','publicar'].includes(a.ref) ? post(a.ref) : null;
-      return `<div class="card" style="gap:8px"><div class="row">${avatar(p,32)}<b>${esc(p.nombre)}</b><span class="small muted">@${esc(p.handle)} · ${hace(a.t)}</span><span class="pill ${a.estado==='pendiente'?'warn':a.estado==='aceptada'?'ok':'bad'}">${a.estado}</span></div>
-        <b>${esc(a.titulo)}</b>
-        ${ps?`<div class="row nowrap" style="align-items:flex-start"><span class="rthumb lg">${miniFoto(ps)}</span><div class="small">${esc(ps.texto||'Sin texto')}<br><span class="muted">Rechazada por: ${esc(MOTIVOS[ps.motivo]||'—')}${ps.mod?.razon?' · '+esc(ps.mod.razon):''}</span></div></div>`:''}
-        ${a.ref==='suspension'&&u.susp?`<div class="small muted">Suspendida por: ${(u.susp.motivo||[]).map(m=>ETIQ[m]||m).join(', ')} · ${u.susp.auto?'automática':'manual'}</div>`:''}
-        <div class="quote">${esc(a.texto)}</div>
-        <div class="small muted">Avisos activos: ${u.strikes}</div>
-        ${a.estado==='pendiente'?`<div class="row"><button class="btn ok sm" data-a="apResolver" data-x="${a.id}" data-o="aceptada">Dar la razón y restaurar</button><button class="btn danger sm" data-a="apResolver" data-x="${a.id}" data-o="rechazada">Mantener la decisión</button></div>`:''}</div>`; }).join('') || '<p class="muted">No hay apelaciones.</p>'}`;
+  return `<div class="note small">Aquí solo aparecen las personas que se quejaron: cuentas suspendidas o eliminadas, negocios pausados o anulados, y publicaciones, historias o notas quitadas. Abre el chat, pregunta lo que necesites y decide. Si das la razón, se restaura solo lo que corresponda.</div>
+    ${l.map(a=>{ const p = perfilDe(a.u), ult = (a.msgs||[]).slice(-1)[0], porContestar = a.estado==='pendiente' && !(ult && ult.admin);
+      const c = a.estado==='pendiente'?'warn':a.estado==='aceptada'?'ok':'bad', lb = a.estado==='pendiente'?'Abierta':a.estado==='aceptada'?'Le diste la razón':'Se mantuvo';
+      return `<button class="card qrow" data-a="quejaVer" data-x="${a.id}" data-o="adm" style="gap:6px"><div class="row">${avatar(p,32)}<b>${esc(p.nombre)}</b><span class="small muted">@${esc(p.handle)} · ${hace(ult?ult.t:a.t)}</span>${porContestar?'<span class="pill warn">Por contestar</span>':''}<span class="pill ${c}">${lb}</span></div>
+        <b>${esc(a.titulo)}</b><span class="small muted">${QREF(a.ref)} · ${(a.msgs||[]).length+1} mensaje(s)</span><div class="small">${esc((ult?ult.texto:a.texto).slice(0,140))}</div></button>`; }).join('') || '<p class="muted">Nadie ha abierto una queja.</p>'}`;
 }
 
 /* ---------- verificación de cuentas oficiales ---------- */
@@ -3632,14 +3674,17 @@ function registrarAccionesV12(){
     pgalGo: (x, el) => { const g = $('#pgal'); if (g) g.scrollTo({left:(+el.dataset.o)*g.clientWidth, behavior:'smooth'}); },
     estadoCuenta: () => { ui.abrirEstado = true; ui.sheet = null; go('ajustes'); ui.abrirEstado = false; setTimeout(()=>$('#estado-cuenta')?.scrollIntoView({behavior:'smooth', block:'start'}), 60); },
     apelar: x => { ui.sheet = {t:'apelar', ref:x}; ui.err=''; renderLayer(); },
-    apResolver: (x, el) => { const a = S.apelaciones.find(a=>a.id===x); if (!a) return; const u = usr(a.u); a.estado = el.dataset.o; a.resuelta = Date.now();
+    quejaVer: (x, el) => { ui.sheet = {t:'queja', id:x, adm:el?.dataset?.o==='adm'}; ui.err=''; renderLayer(); setTimeout(()=>{ const c = $('#qchat'); if (c) c.scrollTop = c.scrollHeight; }, 30); },
+    apResolver: (x, el) => { const a = S.apelaciones.find(a=>a.id===x); if (!a) return; const u = usr(a.u) || {id:a.u, usuario:perfilDe(a.u)?.handle||''}; a.estado = el.dataset.o; a.resuelta = Date.now();
       if (a.estado==='aceptada'){
         if (a.ref==='suspension'){ u.suspendido = false; u.susp = null; u.suspHasta = null; delete S.pausas[u.id]; }
         else if (a.ref==='publicar'){ quitarAviso(u); u.subidas = true; u.bloqHasta = null; }
-        else { const p = post(a.ref); if (p){ p.estado = 'aprobado'; p.t = Date.now(); } quitarAviso(u, a.ref); }
-        a.resp = 'Revisamos tu caso y te damos la razón'; notif(u.id,'sistema',null,{texto:'Aceptamos tu apelación. Ya quitamos el aviso. ¡Gracias por tu paciencia!'});
-      } else { a.resp = 'Revisamos tu caso y la decisión se mantiene'; notif(u.id,'sistema',null,{texto:'Revisamos tu apelación y la decisión se mantiene. Puedes consultar las reglas en Configuración.'}); }
-      log('Admin', `Apelación ${a.estado}`, `@${u.usuario} · ${a.titulo}`); save(); rerender(); toast(a.estado==='aceptada'?'Apelación aceptada: se restauró':'Se mantuvo la decisión'); },
+        else if (/^h:/.test(a.ref)){ const h = S.historias.find(h=>h.id===a.ref.slice(2)); if (h) h.estado = 'aprobado'; quitarAviso(u, a.ref); }
+        else if (/^negocio:/.test(a.ref)){ const n = neg(a.ref.slice(8)); if (n){ n.estado = 'activo'; n.motivo = null; } }
+        else if (a.ref!=='otro'){ const p = post(a.ref); if (p){ p.estado = 'aprobado'; p.t = Date.now(); } quitarAviso(u, a.ref); }
+        a.resp = 'Revisamos tu caso y te damos la razón'; notif(u.id,'sistema',null,{texto:'Revisamos tu queja y te damos la razón. ¡Gracias por tu paciencia!'});
+      } else { a.resp = 'Revisamos tu caso y la decisión se mantiene'; notif(u.id,'sistema',null,{texto:'Revisamos tu queja y la decisión se mantiene. Puedes consultar las reglas en Configuración.'}); }
+      log('Admin', a.estado==='aceptada'?'Dio la razón en una queja':'Mantuvo la decisión en una queja', `@${u.usuario} · ${a.titulo}`); save(); rerender(); toast(a.estado==='aceptada'?'Le diste la razón: se restauró':'Se mantuvo la decisión'); },
     vfTipo: x => { const g = id => $('#'+id)?.value; if (ui.vf){ ['nom','resp','cargo','mail','sitio','men'].forEach(k=>{ const v = g('vf-'+k); if (v!=null) ui.vf[k] = v; }); ui.vf.tipo = x; } rerender(); },
     vfCheck: (x, el) => { const v = S.verifs.find(v=>v.id===x); v.checks[el.dataset.o] = !v.checks[el.dataset.o]; save(); rerender(); },
     vfAprobar: x => { const v = S.verifs.find(v=>v.id===x); if (!VERIF[v.tipo].req.every(k=>v.checks[k])) return toast('Marca todas las revisiones antes de aprobar');
@@ -3662,9 +3707,17 @@ function registrarAccionesV12(){
   Object.assign(F, {
     apelar: () => { const t = ($('#ap-txt').value||'').trim(); if (t.length<10){ ui.err = 'Explica un poco más (mínimo 10 letras).'; return renderLayer(); }
       const an = analizarTexto(t,'privado'); if (an.bloqueos.some(b=>['enlace','correo','teléfono','dirección IP'].includes(b))){ ui.err = 'Sin enlaces, correos ni teléfonos, por favor.'; return renderLayer(); }
-      const ref = ui.sheet.ref; const titulo = ref==='suspension' ? 'Apelación de suspensión' : ref==='publicar' ? 'Apelación de pausa de publicaciones' : 'Apelación de publicación rechazada';
-      S.apelaciones.push({id:'ap'+Date.now().toString(36), u:S.yo, ref, titulo, texto:t, t:Date.now(), estado:'pendiente'}); log('Escudo','Nueva apelación', `@${usr(S.yo).usuario} · ${titulo}`);
-      ui.err = ''; cerrarHoja(); save(); rerender(); toast('Apelación enviada. Una persona la revisará.'); },
+      const ref = ui.sheet.ref; if (VIVO && soyNegocio() && !/^negocio:/.test(ref)) return toast('Cambia a tu cuenta personal para hacer esto (Más → Cambiar de cuenta).');
+      const titulo = ref==='suspension' ? 'Queja por suspensión de cuenta' : ref==='publicar' ? 'Queja por pausa de publicaciones' : ref==='otro' ? 'Queja: otra cosa' : /^h:/.test(ref) ? 'Queja por historia quitada'
+        : /^negocio:/.test(ref) ? `Queja por mi negocio ${(neg(ref.slice(8))?.nombre||'').slice(0,40)}`.trim() : 'Queja por publicación quitada';
+      const u = yoQueja(); S.apelaciones.push({id:'ap'+Date.now().toString(36), u, ref, titulo, texto:t, t:Date.now(), estado:'pendiente', msgs:[]}); log('Escudo','Nueva queja', `@${usr(u)?.usuario||''} · ${titulo}`);
+      ui.err = ''; cerrarHoja(); save(); rerender(); toast('Queja enviada. Una persona la revisará y te contestará en el chat.'); },
+    queja: async () => { const a = S.apelaciones.find(x=>x.id===ui.sheet?.id); if (!a || a.estado!=='pendiente') return; const adm = !!ui.sheet.adm, t = ($('#q-txt')?.value||'').trim();
+      if (!t){ ui.err = 'Escribe tu mensaje.'; return renderLayer(); }
+      if (!adm){ const an = analizarTexto(t,'privado'); if (an.bloqueos.some(b=>['enlace','correo','teléfono','dirección IP'].includes(b))){ ui.err = 'Sin enlaces, correos ni teléfonos, por favor.'; return renderLayer(); } }
+      if (VIVO){ if (!a.sid) return; const {error} = await RV.sb.rpc('queja_escribir', {aid:a.sid, p_texto:t}); if (error){ ui.err = vMsgError(error); return renderLayer(); } ui.err = ''; $('#q-txt').value = ''; await vRecargar(true); }
+      else { (a.msgs = a.msgs||[]).push({de:adm?null:a.u, admin:adm, texto:t, t:Date.now()}); if (adm) notif(a.u,'sistema',null,{texto:`Te respondimos en tu queja: "${a.titulo.slice(0,40)}". Ábrela en Más → Estado de tu cuenta.`}); save(); }
+      ui.err = ''; renderLayer(); setTimeout(()=>{ const c = $('#qchat'); if (c) c.scrollTop = c.scrollHeight; }, 30); },
     verif: () => { const g = id => ($('#'+id)?.value||'').trim(); const d = ui.vf; const fail = m => { ui.err = m; rerender(); };
       ['nom','resp','cargo','mail','sitio','men'].forEach(k=>{ const v = $('#vf-'+k)?.value; if (v!=null) d[k] = v; });
       if (!d.tipo) return fail('Elige el tipo de cuenta.');
@@ -4625,6 +4678,7 @@ async function vCargar(){
       calif: sb.from('calif').select('*'),
       verifs: sb.from('verifs').select('*'),
       apel: sb.from('apelaciones').select('*'),
+      qmsg: sb.from('queja_msgs').select('*').order('t').limit(3000),
       ...(admin ? {
         alertas: sb.from('alertas').select('*').order('created_at',{ascending:false}).limit(300),
         reportes: sb.from('reportes').select('*').order('created_at',{ascending:false}).limit(500),
@@ -4744,7 +4798,10 @@ function vArmar(D, E, admin, conteos, promCli){
   promCli.forEach(pc=>{ const yaN = calif.filter(c=>c.rol==='cli_n' && c.a==='u'+pc.cliente).length; for (let i=yaN;i<pc.n;i++) calif.push({ped:'x'+i, rol:'cli_n', de:'x', a:'u'+pc.cliente, est:Number(pc.avg), t:0, srv:true}); });
   // verificación, apelaciones, alertas, reportes, bitácora
   const verifs = D.verifs.map(v=>({id:'v'+v.id, sid:v.id, cuenta:'u'+v.cuenta, tipo:v.tipo, nombre:v.nombre, resp:v.resp, cargo:v.cargo, correo:v.correo, sitio:v.sitio, menciones:v.menciones, docs:{ine:true, selfie:true, doc:true}, codigo:v.codigo, t:vMs(v.created_at), estado:v.estado, checks:v.checks||{}, motivo:v.motivo}));
-  const apelaciones = D.apel.map(a=>({id:'a'+a.id, sid:a.id, u:'u'+a.usuario, ref:/^[0-9a-f-]{36}$/.test(a.ref)?'q'+a.ref:a.ref, titulo:a.titulo, texto:a.texto, t:vMs(a.created_at), estado:a.estado, resp:a.resp, resuelta:a.resuelta?vMs(a.resuelta):null}));
+  const qmsg = Array.isArray(D.qmsg) ? D.qmsg : [];
+  const apRef = r => /^[0-9a-f-]{36}$/.test(r) ? 'q'+r : /^h:/.test(r) ? 'h:h'+r.slice(2) : /^negocio:/.test(r) ? 'negocio:b'+r.slice(8) : r;
+  const apelaciones = D.apel.map(a=>({id:'a'+a.id, sid:a.id, u:'u'+a.usuario, ref:apRef(a.ref), titulo:a.titulo, texto:a.texto, t:vMs(a.created_at), estado:a.estado, resp:a.resp, resuelta:a.resuelta?vMs(a.resuelta):null,
+    msgs:qmsg.filter(m=>m.apelacion===a.id).map(m=>({de:m.de?'u'+m.de:null, admin:!!m.admin, texto:m.texto, t:vMs(m.t)}))}));
   const alertas = (D.alertas||[]).map(a=>({id:'al'+a.id, sid:a.id, t:vMs(a.created_at), quien:a.quien?'u'+a.quien:null, para:a.para?'u'+a.para:null, lugar:a.lugar||'', texto:a.texto||'', cats:(a.cats&&a.cats.length)?a.cats:[a.motivo||'otro'], nivel:a.nivel||1, oculto:!!a.oculto, intentos:a.intentos||1, accion:a.accion||'', estado:a.estado||'nueva'}));
   const reportes = (D.reportes||[]).filter(r=>r.estado!=='revisado').map(r=>({id:'rp'+r.id, sid:r.id, post:r.post?'q'+r.post:undefined, cuenta:r.cuenta?'u'+r.cuenta:undefined, hist:r.hist?'h'+r.hist:undefined, mensaje:r.mensaje?'m'+r.mensaje:undefined, comentario:r.comentario?'k'+r.comentario:undefined, det:(D.repdet||[]).find(d=>d.reporte===r.id)||null, por:'u'+r.quien, motivo:r.motivo, t:vMs(r.created_at)}));
   const bitacora = (D.bit||[]).map(b=>({t:vMs(b.t), actor:b.actor, accion:b.accion, detalle:b.detalle, sid:b.id}));
@@ -5067,7 +5124,7 @@ function vDiff(A0, B){
   if (admin) S.verifs.filter(v=>v.sid && vfa.get(v.id)).forEach(v=>{ const a = vfa.get(v.id); if (a.estado!==v.estado || JSON.stringify(a.checks)!==JSON.stringify(v.checks)) ops.push(async ()=>{ const {error} = await sb.from('verifs').update({estado:v.estado, checks:v.checks, motivo:v.motivo||null}).eq('id', v.sid); if (error) throw error; }); });
   const apa = vIdx(A0.apelaciones);
   S.apelaciones.filter(a=>!a.sid && !a.enviando && a.u===me).forEach(a=>{ a.enviando = true; ops.push(async ()=>{
-    const ref = /^q[0-9a-f-]{36}$/.test(a.ref) ? a.ref.slice(1) : a.ref;
+    const ref = /^q[0-9a-f-]{36}$/.test(a.ref) ? a.ref.slice(1) : /^h:h/.test(a.ref) ? 'h:'+a.ref.slice(3) : /^negocio:b/.test(a.ref) ? 'negocio:'+a.ref.slice(9) : a.ref;
     const {data, error} = await sb.from('apelaciones').insert({ref, titulo:a.titulo, texto:a.texto}).select('id').single(); a.enviando=false;
     if (error){ S.apelaciones = S.apelaciones.filter(x=>x!==a); throw error; } a.sid = data.id; a.id = 'a'+data.id; }); });
   if (admin) S.apelaciones.filter(a=>a.sid && apa.get(a.id) && apa.get(a.id).estado!==a.estado).forEach(a=>ops.push(async ()=>{ const {error} = await sb.from('apelaciones').update({estado:a.estado}).eq('id', a.sid); if (error) throw error; vRecargarPronto(); }));
@@ -5156,7 +5213,7 @@ function vCanal(on){
 function registrarAccionesVivo(){
   const soloPersonal = (fn, msg) => function(...a){ if (VIVO && soyNegocio()) return toast(msg||'Cambia a tu cuenta personal para hacer esto (Más → Cambiar de cuenta).'); return fn.apply(this, a); };
   ['like','likeHist','coment','compartir','enviarPost','seguir','abrirChat','guardar','repost','bloquear','compartirHist','compartirEtiqueta','verNota'].forEach(k=>{ if (A[k]) A[k] = soloPersonal(A[k]); });
-  ['comentario','msg','respNota','respHist','apelar','verif'].forEach(k=>{ if (F[k]) F[k] = soloPersonal(F[k]); });
+  ['comentario','msg','respNota','respHist','verif'].forEach(k=>{ if (F[k]) F[k] = soloPersonal(F[k]); });
   const modo2 = A.modo2;
   A.modo2 = x => {
     if (x==='real'||x==='vcomercio'||x==='vadmin'){
@@ -6004,8 +6061,9 @@ function renderLayer(){
   if (ui.mode==='app'){
     if (ui.pend) h = avisoOtroComercio();
     else if (ui.sel) h = hojaProducto();
-    else if (ui.sheet) h = ({coment:hojaComentarios, compartir:hojaCompartir, opcPost:hojaOpcPost, reportar:hojaReportar, opcPerfil:hojaOpcPerfil, publicar:hojaPublicar, nota:hojaNota, crear:hojaCrear, historia:hojaHistoria, cuentas:hojaCuentas, mas:hojaMas, verNota:hojaVerNota, seguidores:hojaSeguidores, clima:hojaClima, likes:hojaLikes, apelar:hojaApelar, ...(window.HOJAS_EXTRA||{})}[ui.sheet.t]||(()=>''))();
-  }
+    else if (ui.sheet) h = ({coment:hojaComentarios, compartir:hojaCompartir, opcPost:hojaOpcPost, reportar:hojaReportar, opcPerfil:hojaOpcPerfil, publicar:hojaPublicar, nota:hojaNota, crear:hojaCrear, historia:hojaHistoria, cuentas:hojaCuentas, mas:hojaMas, verNota:hojaVerNota, seguidores:hojaSeguidores, clima:hojaClima, likes:hojaLikes, apelar:hojaApelar, queja:hojaQueja, ...(window.HOJAS_EXTRA||{})}[ui.sheet.t]||(()=>''))();
+  } else if (ui.sheet && ui.sheet.t==='queja') h = hojaQueja();       // chats de quejas: también desde el panel de admin y el del negocio
+  else if (ui.sheet && ui.sheet.t==='apelar') h = hojaApelar();
   $('#layer').innerHTML = h;
   if (!ui.story) document.body.style.overflow = h ? 'hidden' : '';
 }
