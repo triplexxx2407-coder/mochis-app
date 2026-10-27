@@ -713,6 +713,7 @@ html,body,button,a,.car,input,textarea,select{touch-action:manipulation}
 .rlogo{display:flex;align-items:center;gap:8px;background:none;border:0;padding:0;font-family:var(--display);font-weight:800;font-size:19px;color:var(--fg)}
 .rlogo .mark,.mark{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--brand),#16a34a);color:#fff;font-size:14px;font-weight:900}
 .mark.big{width:64px;height:64px;border-radius:18px;font-size:24px}
+.mark.ic{background:none;overflow:hidden;padding:0}.mark.ic img{width:100%;height:100%;display:block;object-fit:cover;-webkit-user-drag:none}
 .rnav-top{display:none;margin:0 auto;gap:4px}
 .rnav-top button,.rnav-bot button{position:relative;display:flex;align-items:center;gap:6px;background:none;border:0;color:var(--muted);font-weight:700;padding:8px 12px;border-radius:12px}
 .rnav-top button.on,.rnav-bot button.on{color:var(--fg);background:var(--surface-2)}
@@ -1844,7 +1845,7 @@ function vNotifs(){
   const l = misNotifs();
   const grupos = [['Hoy',n=>Date.now()-n.t<H24],['Esta semana',n=>{const d=Date.now()-n.t; return d>=H24 && d<7*H24;}],['Antes',n=>Date.now()-n.t>=7*H24]];
   const fila = n => { const a = n.de?perfilDe(n.de):null; const p = n.post?post(n.post):null;
-    return `<div class="nrow ${n.leida?'':'new'}">${a?`<button style="background:none;border:0;padding:0" data-a="verPerfil" data-x="${n.de}">${avatar(a,44)}</button>`:`<span class="mark" style="width:44px;height:44px;border-radius:50%">${esc(inits(S.cfg.marca))}</span>`}
+    return `<div class="nrow ${n.leida?'':'new'}">${a?`<button style="background:none;border:0;padding:0" data-a="verPerfil" data-x="${n.de}">${avatar(a,44)}</button>`:`<span class="mark ic" style="width:44px;height:44px;border-radius:50%"><img src="iconos/icon-192.png" alt="" width="44" height="44" draggable="false"></span>`}
       <div class="tx">${a&&n.tipo!=='pedido'?`<b>${esc(a.handle)}</b> `:''}${n.tipo==='sistema'||n.tipo==='pedido'?esc(n.texto):esc(NTXT[n.tipo]||'')}${['comentario','like_com','like_nota'].includes(n.tipo)&&n.texto?` “${esc(n.texto)}”`:''} <span class="muted small">${hace(n.t)}</span></div>
       ${['etiqueta','etiqueta_hist'].includes(n.tipo)&&!n.compartida?`<button class="btn sm rpbtn" data-a="compartirEtiqueta" data-x="${n.id}">${ico.repost} Compartir</button>`:''}
       ${n.tipo==='follow'&&n.de?botonSeguir(n.de):n.tipo==='pedido'?`<button class="btn sm pri" data-a="go" data-x="minegocio">Ver</button>`:p?`<button style="background:none;border:0;padding:0;width:46px" data-a="verPost" data-x="${p.id}">${miniFoto(p)}</button>`:''}</div>`; };
@@ -1885,7 +1886,7 @@ function vUsuario(){
     ${tabsPerfil(id)}</div>`;
 }
 function vLogin(){
-  return `<div class="card" style="max-width:420px;margin:30px auto;text-align:center"><div class="mark" style="width:56px;height:56px;border-radius:16px;margin:0 auto;font-size:22px">${esc(inits(S.cfg.marca))}</div><h1>Bienvenido a ${esc(S.cfg.marca)}</h1>
+  return `<div class="card" style="max-width:420px;margin:30px auto;text-align:center"><div class="mark ic" style="width:56px;height:56px;border-radius:16px;margin:0 auto;font-size:22px"><img src="iconos/icon-192.png" alt="" width="56" height="56" draggable="false"></div><h1>Bienvenido a ${esc(S.cfg.marca)}</h1>
     <p class="muted" style="margin:0">Comparte fotos de ${esc(S.cfg.ciudad)}, sigue a tus amigos y pide a negocios locales.</p>
     <button class="btn pri lg" data-a="login" data-x="correo">Continuar con correo</button>
     <button class="btn lg" data-a="login" data-x="teléfono">Continuar con número de teléfono</button>
@@ -2644,7 +2645,7 @@ function vRep(){
   const activo = S.pedidos.find(p=>p.modo==='reparto' && p.rep && p.rep.rep===r.id && ['asignado','en_tienda','en_camino','llego'].includes(p.rep.estado));
   const cuerpo = r.estado!=='aprobado' && tab!=='perfil' ? repVerificacion(r) : ({inicio:repInicio, pedido:repPedido, ganancias:repGanancias, perfil:repPerfil}[tab])(r, activo);
   return `<div class="rapp">
-    <header class="rtop"><div class="rlogo"><span class="mark">${esc(inits(S.cfg.marca))}</span><b>${esc(S.cfg.marca)} <i>Repartidor</i></b></div>
+    <header class="rtop"><div class="rlogo"><span class="mark ic"><img src="iconos/icon-192.png" alt="" width="34" height="34" draggable="false"></span><b>${esc(S.cfg.marca)} <i>Repartidor</i></b></div>
       ${r.estado==='aprobado'?`<button class="rsw ${S.repOnline?'on':''}" data-a="repOnline" aria-pressed="${S.repOnline}"><span></span>${S.repOnline?'Conectado':'Desconectado'}</button>`:''}</header>
     <main class="rbody">${cuerpo}</main>
     ${r.estado==='aprobado'?`<nav class="rnav">${[['inicio','Pedidos',ico.home],['pedido',activo?'Activo •':'Activo',ico.list],['ganancias','Ganancias',ico.shop],['perfil','Perfil',ico.user]].map(([k,l,ic])=>`<button class="${tab===k?'on':''}" data-a="rTab" data-x="${k}">${ic}<span>${l}</span></button>`).join('')}</nav>`:''}
@@ -3659,7 +3660,7 @@ function rVLogin(){
       ${t==='crear'?`<label class="f" for="rl-pass2">Repite la contraseña<input id="rl-pass2" type="password" autocomplete="new-password"></label>`:''}
       ${RV.err?`<div class="err" role="alert">${esc(RV.err)}</div>`:''}
       <button class="btn pri block lg" type="submit">${t==='crear'?'Crear mi cuenta':'Entrar'}</button></form>`;
-  return `<div class="rcentro rlogin"><span class="mark big">${esc(inits(S.cfg.marca))}</span><h1>${esc(S.cfg.marca)}</h1>
+  return `<div class="rcentro rlogin"><span class="mark big ic"><img src="iconos/icon-192.png" alt="" width="64" height="64" draggable="false"></span><h1>${esc(S.cfg.marca)}</h1>
     <p class="muted">La red social y tienda de ${esc(S.cfg.ciudad)}.</p>
     <div style="width:100%;max-width:380px" class="stack"><div class="seg rltabs">${tab('entrar','Entrar')}${tab('crear','Crear cuenta')}</div>${form}
     ${t!=='enlace'?`<button type="button" class="btn ghost sm" data-a="rLTab" data-x="enlace">¿Olvidaste tu contraseña? Entrar con enlace al correo</button>`:''}</div>
@@ -5251,7 +5252,7 @@ function vRepVivo(){
     <div class="card">${it(true,'Solicitud enviada','Tus datos llegaron al equipo')}${it(v.ine,'INE vigente','Verificada con Didit, sin guardar fotos en MOCHI')}${it(v.selfie,'Eres tú','Selfie con prueba de vida que coincide con tu INE')}${it(r.estado==='aprobado','Aprobado por el administrador','Lo revisa una persona del equipo')}</div></div>`
     : repVivoAprobado(P);
   return `<div class="rapp">
-    <header class="rtop"><div class="rlogo"><span class="mark">${esc(inits(S.cfg.marca))}</span><b>${esc(S.cfg.marca)} <i>Repartidor</i></b></div>
+    <header class="rtop"><div class="rlogo"><span class="mark ic"><img src="iconos/icon-192.png" alt="" width="34" height="34" draggable="false"></span><b>${esc(S.cfg.marca)} <i>Repartidor</i></b></div>
       ${r.estado==='aprobado'?`<button class="rsw ${r.online?'on':''}" data-a="vRepOnline" aria-pressed="${r.online}"><span></span>${r.online?'Conectado':'Desconectado'}</button>`:''}</header>
     <main class="rbody">${cuerpo}</main></div>`;
 }
@@ -5804,7 +5805,7 @@ function render(){
     $('#app').innerHTML = `<div class="rwrap">${protoBar()}${vRepVivo()}</div>`; renderLayer(); return;
   }
   if (ui.mode==='admin'){
-    $('#app').innerHTML = `<header class="top"><div class="top-in wrap gut"><button class="logo2" style="padding:0;font-size:20px" data-a="mode" data-x="app"><span class="mark">${esc(inits(S.cfg.marca))}</span><span style="display:inline">${esc(S.cfg.marca)}</span></button>
+    $('#app').innerHTML = `<header class="top"><div class="top-in wrap gut"><button class="logo2" style="padding:0;font-size:20px" data-a="mode" data-x="app"><span class="mark ic"><img src="iconos/icon-192.png" alt="" width="34" height="34" draggable="false"></span><span style="display:inline">${esc(S.cfg.marca)}</span></button>
       ${modosNav()}
       <button class="ibtn" data-a="toggleTema" aria-label="Cambiar tema">${temaActual()==='oscuro'?ico.sun:ico.moon}</button></div></header>
       <main class="wrap gut" style="padding-block:18px 60px">${vAdmin()}</main>`;
@@ -5832,13 +5833,13 @@ function render(){
   const showBar = cartN && ['inicio','negocio','home'].includes(v);
   $('#app').innerHTML = `
   <nav class="side" aria-label="Navegación principal">
-    <button class="logo2" data-a="go" data-x="home"><span class="mark">${esc(inits(S.cfg.marca))}</span><span class="txt">${esc(S.cfg.marca)}</span></button>
+    <button class="logo2" data-a="go" data-x="home"><span class="mark ic"><img src="iconos/icon-192.png" alt="" width="34" height="34" draggable="false"></span><span class="txt">${esc(S.cfg.marca)}</span></button>
     ${items.map(([a,x,l,ic,act,n])=>`<button class="nv ${on(act)}" data-a="${a}" data-x="${x}" title="${l}">${ic}${badge(n)}<span class="lbl">${l}</span></button>`).join('')}
     <span class="grow"></span>
     <button class="nv" data-a="toggleTema" title="Cambiar a modo ${temaActual()==='oscuro'?'claro':'oscuro'}">${temaActual()==='oscuro'?ico.sun:ico.moon}<span class="lbl">Modo ${temaActual()==='oscuro'?'claro':'oscuro'}</span></button>
     <button class="nv" data-a="mas" title="Más">${ico.menu}<span class="lbl">Más</span></button>
   </nav>
-  <header class="mtop"><button class="logo2" data-a="go" data-x="home"><span class="mark">${esc(inits(S.cfg.marca))}</span><span class="txt">${esc(S.cfg.marca)}</span></button><span class="sp"></span>
+  <header class="mtop"><button class="logo2" data-a="go" data-x="home"><span class="mark ic"><img src="iconos/icon-192.png" alt="" width="34" height="34" draggable="false"></span><span class="txt">${esc(S.cfg.marca)}</span></button><span class="sp"></span>
     ${VIVO&&S.esAdmin?`<button class="ibtn" data-a="modo2" data-x="vadmin" aria-label="Administrar">${ico.shield}</button>`:`<button class="ibtn" data-a="toggleTema" aria-label="Cambiar tema">${temaActual()==='oscuro'?ico.sun:ico.moon}</button>`}
     <button class="ibtn" data-a="go" data-x="notifs" aria-label="Notificaciones">${ico.bell}${badge(nN)}</button>
     ${soyNegocio()?'':`<button class="ibtn ${on(['pedidos','seguimiento'])}" data-a="go" data-x="pedidos" aria-label="Mis pedidos">${ico.list}${badge(nAct)}</button>`}
