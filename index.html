@@ -1901,11 +1901,15 @@ function vPerfil(){
 }
 function miniPost(p, extra=''){ return `<button data-a="verPost" data-x="${p.id}" aria-label="Ver publicación">${extra}${p.fotos.length>1?`<span class="multi">${p.fotos.length}</span>`:''}${miniFoto(p)}</button>`; }
 function miniFoto(p){ return p.fotos.length ? fotoCuadro(p.fotos[0]) : `<div class="ph txtile"><span>${esc((p.texto||'').slice(0,90))}${(p.texto||'').length>90?'…':''}</span></div>`; }
+// El admin (o quien entró desde el panel) ve todo el perfil: publicaciones en cualquier estado, historias y notas.
+const verTodo = id => id!==S.yo && (vEsAdminG() || !!ui.admVolver);
+const vEsAdminG = () => typeof vEsAdmin==='function' ? vEsAdmin() : false;
+const btnVolverPanel = () => ui.admVolver ? `<button class="btn soft sm" data-a="admVolver">${ico.shield} Volver al panel de admin</button>` : '';
 function vUsuario(){
   const id = ui.perfil; if (id===S.yo) return vPerfil(); if (esNeg(id)){ ui.neg=id; return vNegocio(); }
-  if (bloq(id)) return `<div class="feed"><button class="btn back" data-a="atras">${ico.back}Volver</button><div class="empty"><h2>Cuenta no disponible</h2><p class="muted">${bloqueePor(S.yo,id)?'Bloqueaste esta cuenta. Puedes desbloquearla en Configuración.':'No puedes ver este perfil.'}</p>${bloqueePor(S.yo,id)?`<button class="btn" data-a="desbloquear" data-x="${id}">Desbloquear</button>`:''}</div></div>`;
+  if (bloq(id) && !verTodo(id)) return `<div class="feed"><button class="btn back" data-a="atras">${ico.back}Volver</button><div class="empty"><h2>Cuenta no disponible</h2><p class="muted">${bloqueePor(S.yo,id)?'Bloqueaste esta cuenta. Puedes desbloquearla en Configuración.':'No puedes ver este perfil.'}</p>${bloqueePor(S.yo,id)?`<button class="btn" data-a="desbloquear" data-x="${id}">Desbloquear</button>`:''}</div></div>`;
   const ps = S.posts.filter(p=>p.autor===id&&p.estado==='aprobado').sort((a,b)=>b.t-a.t);
-  return `<div class="perfil-w"><button class="btn back" data-a="atras">${ico.back}Volver</button>${cabPerfil(id)}
+  return `<div class="perfil-w"><div class="row" style="gap:8px"><button class="btn back" data-a="atras">${ico.back}Volver</button>${btnVolverPanel()}</div>${verTodo(id)&&bloq(id)?'<div class="note small">Esta cuenta y tú tienen un bloqueo. Como admin la ves completa.</div>':''}${cabPerfil(id)}
     ${tabsPerfil(id)}</div>`;
 }
 function vLogin(){
@@ -2986,13 +2990,24 @@ function hojaSeguidores(){
 }
 
 /* ---------- pestañas del perfil ---------- */
+function tabsPf(t, pubs, comp, etiq, hists, nts){
+  return [['pubs','Publicaciones',pubs.length,ico.list],['comp','Compartidos',comp.length,ico.repost],['etiq','Etiquetas',etiq.length,ico.tag],['hist','Historias',hists.length,ico.clock||I('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>')],['notas','Notas',nts.length,ico.msg]]
+    .map(([k,l,n,ic])=>`<button class="${t===k?'on':''}" data-a="pfTab" data-x="${k}">${ic}<span>${l}</span><small>${n}</small></button>`).join('');
+}
 function tabsPerfil(id){
   const t = ui.pfTab || 'pubs';
-  const pubs = S.posts.filter(p=>p.autor===id && (id===S.yo || p.estado==='aprobado')).sort((a,b)=>b.t-a.t);
+  const todo = verTodo(id);
+  const pubs = S.posts.filter(p=>p.autor===id && (id===S.yo || todo || p.estado==='aprobado')).sort((a,b)=>b.t-a.t);
+  const hists = todo ? S.historias.filter(h=>h.autor===id).sort((a,b)=>b.t-a.t) : [];
+  const nts = todo ? (S.notas||[]).filter(n=>n.autor===id).sort((a,b)=>b.t-a.t) : [];
   const comp = repostsDe(id);
   const etiq = S.posts.filter(p=>p.estado==='aprobado' && (p.etiq||[]).includes(id) && !bloq(p.autor)).sort((a,b)=>b.t-a.t);
   const grid = (l, vacio) => l.length ? `<div class="pgrid">${l.map(p=>{ const [lb,c]=PEST[p.estado]; return miniPost(p, p.estado!=='aprobado'?`<span class="pill ${c} st">${lb}</span>`:''); }).join('')}</div>` : `<p class="muted" style="text-align:center;padding:30px 0">${vacio}</p>`;
-  return `<div class="ptabs2">${[['pubs','Publicaciones',pubs.length],['comp','Compartidos',comp.length],['etiq','Etiquetas',etiq.length]].map(([k,l,n])=>`<button class="${t===k?'on':''}" data-a="pfTab" data-x="${k}">${k==='comp'?ico.repost:k==='etiq'?ico.tag:ico.list}<span>${l}</span><small>${n}</small></button>`).join('')}</div>
+  if (todo && (t==='hist' || t==='notas')) return `<div class="ptabs2">${tabsPf(t, pubs, comp, etiq, hists, nts)}</div>
+    ${t==='hist' ? (hists.length ? `<div class="pgrid">${hists.map(h=>{ const [lb,c]=PEST[h.estado]||['',''];
+        return `<div class="ph">${verFoto(h.foto)}${h.estado!=='aprobado'?`<span class="pill ${c} st">${lb}</span>`:''}<span class="pill st" style="top:auto;bottom:6px">${hace(h.t)}</span></div>`; }).join('')}</div>` : '<p class="muted" style="text-align:center;padding:30px 0">Sin historias recientes.</p>')
+      : (nts.length ? `<div class="stack" style="gap:8px">${nts.map(n=>`<div class="card" style="padding:10px 12px"><div>${esc(n.texto)}</div><div class="small muted">${hace(n.t)}</div></div>`).join('')}</div>` : '<p class="muted" style="text-align:center;padding:30px 0">Sin notas activas.</p>')}`;
+  return `<div class="ptabs2">${todo ? tabsPf(t, pubs, comp, etiq, hists, nts) : [['pubs','Publicaciones',pubs.length],['comp','Compartidos',comp.length],['etiq','Etiquetas',etiq.length]].map(([k,l,n])=>`<button class="${t===k?'on':''}" data-a="pfTab" data-x="${k}">${k==='comp'?ico.repost:k==='etiq'?ico.tag:ico.list}<span>${l}</span><small>${n}</small></button>`).join('')}</div>
     ${t==='pubs' ? grid(pubs, 'Sin publicaciones.') : t==='comp' ? `<div class="small muted" style="text-align:center">Publicaciones que ${id===S.yo?'compartiste':'compartió'}. Al tocarlas ves la publicación original y a quién la subió.</div>${grid(comp,'Aún no comparte publicaciones.')}` : grid(etiq, 'Nadie lo ha etiquetado todavía.')}`;
 }
 
@@ -3195,7 +3210,7 @@ function aComercios(){
 function aUsuarios(){
   const l = S.usuarios.filter(u=>!u.eliminado).sort((a,b)=>b.strikes-a.strikes);
   return `<div class="tbl"><table><thead><tr><th>Usuario</th><th class="r">Publicaciones</th><th class="r">Seguidores</th><th>Avisos</th><th>Puede publicar</th><th></th></tr></thead><tbody>
-  ${l.map(u=>`<tr><td><div class="row nowrap">${avatar(u,32)}<div><b>${esc(u.nombre)}</b><div class="small muted">@${esc(u.usuario)}</div></div></div></td>
+  ${l.map(u=>`<tr><td><button class="row nowrap" style="background:none;border:0;padding:0;text-align:left;color:inherit" data-a="admVerPerfil" data-x="${u.id}" title="Ver su perfil completo">${avatar(u,32)}<div><b>${esc(u.nombre)}</b><div class="small muted">@${esc(u.usuario)}</div></div></button></td>
     <td class="r num">${S.posts.filter(p=>p.autor===u.id).length}</td><td class="r num">${seguidores(u.id)}</td>
     <td>${u.strikes?`<span class="pill ${u.strikes>=S.cfg.strikesMax?'bad':'warn'}">${u.strikes} de ${S.cfg.strikesMax}</span>`:'<span class="pill ok">0</span>'}</td>
     <td>${u.subidas?'<span class="pill ok">Sí</span>':'<span class="pill bad">Bloqueado</span>'}</td><td><div class="row nowrap" style="gap:6px"><button class="btn sm" data-a="toggleSubidas" data-x="${u.id}">${u.subidas?'Bloquear':'Desbloquear'}</button>${VIVO&&u.id!==S.personal&&!u.bot?`<button class="btn danger sm" data-a="vCuentaEliminar" data-x="${u.id}">Eliminar</button>`:''}</div></td></tr>`).join('')}</tbody></table></div>
@@ -5966,6 +5981,7 @@ function renderLayer(){
   if (!ui.story) document.body.style.overflow = h ? 'hidden' : '';
 }
 function go(view, keep){
+  if (!['usuario','post'].includes(view)) ui.admVolver = false;
   if(!keep && ui.view!==view) historial.push({view:ui.view, post:ui.post, perfil:ui.perfil, neg:ui.neg});
   if (view==='chat') view='mensajes';
   if (ui.view==='home' && view!=='home') ui.homeY = window.scrollY;
@@ -6050,6 +6066,8 @@ const A = {
   feed: x => { ui.feed=x; ui.feedN=12; rerender(); },
   masFeed: () => { ui.feedN+=12; rerender(); },
   verPost: x => { ui.post=x; go('post'); },
+  admVerPerfil: x => { ui.mode='app'; if (soyNegocio()){ S.yo=S.personal; save(); } ui.sheet=null; A.verPerfil(x); ui.admVolver = true; rerender(); window.scrollTo(0,0); },
+  admVolver: () => { ui.admVolver = false; ui.aTab = 'usuarios'; A.modo2(VIVO ? 'vadmin' : 'admin'); },
   verPerfil: x => { ui.sheet=null; ui.pfTab='pubs'; if(esNeg(x)) return A.neg(x); if(x===S.yo) return go('perfil'); ui.perfil=x; go('usuario'); },
   like: (x, el) => { if(necesitaSesion()) return; const k=likeKey(x); S.likes[k]=!S.likes[k]; const p=post(x);
     if (S.likes[k]) notif(p.autor,'like',S.yo,{post:x}); const por = el?.dataset?.o; if (S.likes[k] && por && por!==S.yo && por!==p.autor) notif(por,'like_repost',S.yo,{post:x}); save();
