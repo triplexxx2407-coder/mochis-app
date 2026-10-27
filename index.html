@@ -3285,14 +3285,22 @@ function aComisiones(){
 // Bitácora con buscador: categoría, tipo, fechas y texto o números. En vivo busca en el servidor (admin_bitacora).
 const BIT_CAT = {negocio:'Negocios', repartidor:'Repartidores', usuario:'Usuarios', admin:'Admin', sistema:'Sistema'};
 const BIT_TIPO = {publicacion:'Publicaciones', historia:'Historias', nota:'Notas', comentario:'Comentarios', mensaje:'Mensajes', pedido:'Pedidos', entrega:'Entregas',
-  ubicacion:'Ubicaciones', producto:'Productos', servicio:'Servicios', etiqueta:'Etiquetas', negocio:'Negocios', repartidor:'Repartidores', cuenta:'Cuentas'};
+  ubicacion:'Ubicaciones', producto:'Productos', servicio:'Servicios', etiqueta:'Etiquetas', negocio:'Negocios', repartidor:'Repartidores', cuenta:'Cuentas', queja:'Quejas'};
 const bitCat = b => b.cat || (/^admin/i.test(b.actor||'') ? 'admin' : /escudo|sistema|bot/i.test(b.actor||'') ? 'sistema'
   : /negocio|producto|pedido|venta/i.test((b.accion||'')+' '+(b.detalle||'')) ? 'negocio' : /repartidor|entrega/i.test((b.accion||'')+' '+(b.detalle||'')) ? 'repartidor' : 'usuario');
+// Cada movimiento se clasifica solo (igual que en el servidor): de qué tipo es y a qué parte de la app pertenece
+const bitTipo = b => b.tipo || (t => /queja|apelaci/i.test(t)?'queja' : /historia/i.test(t)?'historia' : /publicaci/i.test(t)?'publicacion' : /comentario/i.test(t)?'comentario'
+  : /mensaje/i.test(t)?'mensaje' : /\bnota/i.test(t)?'nota' : /producto/i.test(t)?'producto' : /servicio/i.test(t)?'servicio' : /pedido|cliente no pag/i.test(t)?'pedido'
+  : /entrega|reparto|envío/i.test(t)?'entrega' : /repartidor/i.test(t)?'repartidor' : /negocio|comercio|tienda/i.test(t)?'negocio' : /cuenta|usuario|perfil|suspen|verific/i.test(t)?'cuenta' : '')((b.accion||'')+' '+(b.detalle||''));
+const bitArea = b => { if (b.area) return b.area; const t = bitTipo(b), d = b.datos || {};
+  return ['negocio','producto','servicio','pedido'].includes(t) || 'negocio' in d || (d.despues && 'negocio' in d.despues) ? 'negocio'
+    : ['repartidor','entrega'].includes(t) || /^reparto/i.test(b.actor||'') ? 'repartidor' : t ? 'usuario' : ''; };
+const bitEnCat = (b, c) => bitCat(b)===c || bitArea(b)===c;
 const bitDia = t => { const d = new Date(t); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 function bitFiltrar(l, f){
   const q = (f.q||'').trim().toLowerCase();
-  return l.filter(b=>(!f.cat || bitCat(b)===f.cat)
-    && (!f.tipo || b.tipo===f.tipo || (f.tipo==='etiqueta' && /"etiq":\s*\["/.test(JSON.stringify(b.datos||{}))) || (f.tipo==='ubicacion' && b.datos && b.datos.lat!=null))
+  return l.filter(b=>(!f.cat || bitEnCat(b, f.cat))
+    && (!f.tipo || bitTipo(b)===f.tipo || (f.tipo==='etiqueta' && /"etiq":\s*\["/.test(JSON.stringify(b.datos||{}))) || (f.tipo==='ubicacion' && b.datos && b.datos.lat!=null))
     && (!f.desde || bitDia(b.t) >= f.desde) && (!f.hasta || bitDia(b.t) <= f.hasta)
     && (!q || [b.actor, b.accion, b.detalle, b.datos?JSON.stringify(b.datos):''].join(' ').toLowerCase().includes(q)));
 }
@@ -3308,27 +3316,44 @@ async function vActividad(id){
   if (error) toast('Para ver likes y guardados falta pegar el SQL 05.');
   if (ui.perfil===id) rerender();
 }
+// Cuántos hay en cada opción con los demás filtros puestos
+function bitConteoLocal(f){
+  const cat = {}, tipo = {};
+  bitFiltrar(S.bitacora, {...f, cat:''}).forEach(b=>{ new Set([bitCat(b), bitArea(b)]).forEach(k=>{ if (k) cat[k] = (cat[k]||0) + 1; }); });
+  bitFiltrar(S.bitacora, {...f, tipo:''}).forEach(b=>{ const t = bitTipo(b); if (t) tipo[t] = (tipo[t]||0) + 1; });
+  return {cat, tipo, total:bitFiltrar(S.bitacora, f).length};
+}
+async function bitConteoSrv(){
+  const f = ui.bitF || {}; ui.bitCntPend = true;
+  const {data, error} = await RV.sb.rpc('admin_bitacora_conteo', {p_cat:f.cat||null, p_tipo:f.tipo||null, p_desde:f.desde||null, p_hasta:f.hasta||null, p_texto:f.q||null});
+  ui.bitCntPend = false; ui.bitCnt = error ? {error:true} : data; if (ui.aTab==='bitacora') rerender();
+}
 async function bitBuscarSrv(mas){
   const f = ui.bitF || {}, prev = mas && ui.bitRes ? ui.bitRes.l : [];
   const antes = prev.length ? prev[prev.length-1].sid : null;
   const {data, error} = await RV.sb.rpc('admin_bitacora', {p_cat:f.cat||null, p_tipo:f.tipo||null, p_desde:f.desde||null, p_hasta:f.hasta||null, p_texto:f.q||null, p_antes:antes, p_lim:100});
   if (error){ ui.bitRes = null; toast('El buscador del servidor aún no está listo; busco en lo más reciente.'); return rerender(); }
-  const l = (data||[]).map(b=>({t:vMs(b.t), actor:b.actor, accion:b.accion, detalle:b.detalle, sid:b.id, cat:b.cat, tipo:b.tipo, datos:b.datos}));
-  ui.bitRes = {l:prev.concat(l), mas:l.length===100, srv:true}; rerender();
+  const l = (data||[]).map(b=>({t:vMs(b.t), actor:b.actor, accion:b.accion, detalle:b.detalle, sid:b.id, cat:b.cat, area:b.area, tipo:b.tipo, datos:b.datos}));
+  ui.bitRes = {l:prev.concat(l), mas:l.length===100, srv:true}; if (!mas) return bitConteoSrv(); rerender();
 }
 function aBitacora(){
   const f = ui.bitF || {}, res = ui.bitRes;
   const l = res ? res.l : bitFiltrar(S.bitacora, f);
-  const opt = (o, v, todos) => `<option value="">${todos}</option>` + Object.entries(o).map(([k,t])=>`<option value="${k}" ${v===k?'selected':''}>${t}</option>`).join('');
+  // conteos: en vivo vienen del servidor (admin_bitacora_conteo); en demo se cuentan aquí
+  if (VIVO && !ui.bitCnt && !ui.bitCntPend) setTimeout(bitConteoSrv, 0);
+  const cnt = VIVO ? (ui.bitCnt && !ui.bitCnt.error ? ui.bitCnt : null) : bitConteoLocal(f);
+  const opt = (o, v, todos, n) => `<option value="">${todos}</option>` + Object.entries(o).map(([k,t])=>`<option value="${k}" ${v===k?'selected':''}>${t}${n && !['etiqueta','ubicacion'].includes(k)?` (${n[k]||0})`:''}</option>`).join('');
+  const total = res && res.srv ? (cnt ? cnt.total : l.length) : l.length;
   return `<form class="card" data-form="bitBuscar" novalidate style="gap:10px">
-    <div class="grid2"><label class="f" for="bt-cat">Categoría<select id="bt-cat">${opt(BIT_CAT, f.cat, 'Todas')}</select></label>
-      <label class="f" for="bt-tipo">Tipo<select id="bt-tipo">${opt(BIT_TIPO, f.tipo, 'Todos')}</select></label>
-      <label class="f" for="bt-desde">Desde<input id="bt-desde" type="date" value="${esc(f.desde||'')}"></label>
-      <label class="f" for="bt-hasta">Hasta<input id="bt-hasta" type="date" value="${esc(f.hasta||'')}"></label></div>
+    <span class="small muted">Ningún filtro es obligatorio. Cada uno que elijas reduce la lista; el número junto a cada opción dice cuántos quedarían.</span>
+    <div class="grid2"><label class="f" for="bt-cat">Categoría<select id="bt-cat" data-ch="bitFiltro">${opt(BIT_CAT, f.cat, 'Todas', cnt&&cnt.cat)}</select></label>
+      <label class="f" for="bt-tipo">Tipo<select id="bt-tipo" data-ch="bitFiltro">${opt(BIT_TIPO, f.tipo, 'Todos', cnt&&cnt.tipo)}</select></label>
+      <label class="f" for="bt-desde">Desde<input id="bt-desde" type="date" data-ch="bitFiltro" value="${esc(f.desde||'')}"></label>
+      <label class="f" for="bt-hasta">Hasta<input id="bt-hasta" type="date" data-ch="bitFiltro" value="${esc(f.hasta||'')}"></label></div>
     <label class="f" for="bt-q">Buscar texto o número<input id="bt-q" type="search" value="${esc(f.q||'')}" placeholder="Ej.: @usuario, una palabra, un folio, una placa, un precio…"></label>
-    <div class="row"><button class="btn pri" type="submit">Buscar</button>${Object.values(f).some(Boolean)?'<button class="btn" type="button" data-a="bitLimpiar">Quitar filtros</button>':''}<span class="small muted">${l.length} resultado(s)${res&&res.srv?' del servidor':''}</span></div></form>
+    <div class="row"><button class="btn pri" type="submit">Buscar</button>${Object.values(f).some(Boolean)?'<button class="btn" type="button" data-a="bitLimpiar">Quitar filtros</button>':''}<span class="small muted">${total} resultado(s)</span></div></form>
   <div class="tbl"><table><thead><tr><th>Cuándo</th><th>Quién</th><th>Acción</th><th>Detalle</th></tr></thead><tbody>
-  ${l.slice(0,300).map(b=>`<tr><td class="small">${fecha(b.t)}</td><td>${esc(b.actor||'')}<div><span class="pill">${BIT_CAT[bitCat(b)]||''}</span></div></td><td>${esc(b.accion||'')}</td><td class="small">${esc(b.detalle||'')}${b.datos?`<details><summary class="small muted">Ver datos</summary>${bitDatos(b.datos)}</details>`:''}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">No hay movimientos con esos filtros.</td></tr>'}</tbody></table></div>
+  ${l.slice(0,300).map(b=>`<tr><td class="small">${fecha(b.t)}</td><td>${esc(b.actor||'')}<div><span class="pill">${BIT_CAT[bitCat(b)]||''}</span>${bitArea(b)&&bitArea(b)!==bitCat(b)?` <span class="pill">${BIT_CAT[bitArea(b)]}</span>`:''}</div></td><td>${esc(b.accion||'')}</td><td class="small">${esc(b.detalle||'')}${b.datos?`<details><summary class="small muted">Ver datos</summary>${bitDatos(b.datos)}</details>`:''}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">No hay movimientos con esos filtros.</td></tr>'}</tbody></table></div>
   ${res && res.mas ? '<div class="row"><button class="btn" data-a="bitMas">Cargar más</button></div>' : ''}
   <p class="small muted">Se guarda todo lo que se crea, cambia o borra. Plazos: lo borrado 1 año, la bitácora 2 años, pedidos y repartidores 5 años. De los mensajes privados solo se anota que se borró uno, nunca el texto.</p>`;
 }
@@ -3770,7 +3795,8 @@ function registrarAccionesV12(){
     pgalGo: (x, el) => { const g = $('#pgal'); if (g) g.scrollTo({left:(+el.dataset.o)*g.clientWidth, behavior:'smooth'}); },
     estadoCuenta: () => { ui.abrirEstado = true; ui.sheet = null; go('ajustes'); ui.abrirEstado = false; setTimeout(()=>$('#estado-cuenta')?.scrollIntoView({behavior:'smooth', block:'start'}), 60); },
     apelar: x => { ui.sheet = {t:'apelar', ref:x}; ui.err=''; renderLayer(); },
-    bitLimpiar: () => { ui.bitF = {}; ui.bitRes = null; rerender(); },
+    bitLimpiar: () => { ui.bitF = {}; ui.bitRes = null; ui.bitCnt = null; rerender(); },
+    bitFiltro: () => F.bitBuscar(),
     bitMas: () => bitBuscarSrv(true),
     apelarMenu: () => { ui.sheet = {t:'misDec'}; ui.err = ''; if (VIVO){ ui.misDec = undefined; renderLayer();
         RV.sb.rpc('mis_decisiones').then(({data, error})=>{ ui.misDec = error ? [] : (data||[]); if (ui.sheet && ui.sheet.t==='misDec') renderLayer(); }); }
@@ -4918,7 +4944,7 @@ function vArmar(D, E, admin, conteos, promCli){
     msgs:qmsg.filter(m=>m.apelacion===a.id).map(m=>({de:m.de?'u'+m.de:null, admin:!!m.admin, texto:m.texto, t:vMs(m.t)}))}));
   const alertas = (D.alertas||[]).map(a=>({id:'al'+a.id, sid:a.id, t:vMs(a.created_at), quien:a.quien?'u'+a.quien:null, para:a.para?'u'+a.para:null, lugar:a.lugar||'', texto:a.texto||'', cats:(a.cats&&a.cats.length)?a.cats:[a.motivo||'otro'], nivel:a.nivel||1, oculto:!!a.oculto, intentos:a.intentos||1, accion:a.accion||'', estado:a.estado||'nueva'}));
   const reportes = (D.reportes||[]).filter(r=>r.estado!=='revisado').map(r=>({id:'rp'+r.id, sid:r.id, post:r.post?'q'+r.post:undefined, cuenta:r.cuenta?'u'+r.cuenta:undefined, hist:r.hist?'h'+r.hist:undefined, mensaje:r.mensaje?'m'+r.mensaje:undefined, comentario:r.comentario?'k'+r.comentario:undefined, det:(D.repdet||[]).find(d=>d.reporte===r.id)||null, por:'u'+r.quien, motivo:r.motivo, t:vMs(r.created_at)}));
-  const bitacora = (D.bit||[]).map(b=>({t:vMs(b.t), actor:b.actor, accion:b.accion, detalle:b.detalle, sid:b.id, cat:b.cat, tipo:b.tipo, datos:b.datos}));
+  const bitacora = (D.bit||[]).map(b=>({t:vMs(b.t), actor:b.actor, accion:b.accion, detalle:b.detalle, sid:b.id, cat:b.cat, area:b.area, tipo:b.tipo, datos:b.datos}));
   // carrito (solo en este teléfono)
   let carrito = null; try { carrito = JSON.parse(localStorage.getItem('lm-vivo-carrito-'+uid)||'null'); } catch(e){}
   if (carrito && (!carrito.items || !carrito.items.every(it=>productos.some(p=>p.id===it.pid)))) carrito = null;
