@@ -2130,9 +2130,11 @@ function hojaVerNota(){
 
 
 /* ---------- TIENDA ---------- */
+// En vivo: un producto nuevo espera la revisión del equipo; solo el dueño y el admin lo ven y nadie lo puede pedir todavía
+const prodRevision = p => !!(p && p.estadoSrv && p.estadoSrv!=='aprobado');
 function prodRow(p, conNeg){
-  const n = neg(p.neg); const off = !p.disp || p.stock===0;
-  const st = !p.disp ? '<span class="pill">No disponible</span>' : p.stock===0 ? '<span class="pill bad">Agotado</span>' : (p.stock!=null && p.stock<=5) ? `<span class="pill warn">Quedan ${p.stock}</span>` : '';
+  const n = neg(p.neg); const off = !p.disp || p.stock===0 || prodRevision(p);
+  const st = prodRevision(p) ? `<span class="pill warn">${p.estadoSrv==='rechazado'?'Rechazado':'En revisión'}</span>` : !p.disp ? '<span class="pill">No disponible</span>' : p.stock===0 ? '<span class="pill bad">Agotado</span>' : (p.stock!=null && p.stock<=5) ? `<span class="pill warn">Quedan ${p.stock}</span>` : '';
   return `<button class="prow ${off?'off':''}" data-a="${conNeg?'pedirProd':'ver'}" data-x="${p.id}"><div class="tx">
     <h4>${esc(p.nombre)}</h4><p>${esc(p.desc)}</p>
     <div class="row" style="gap:8px"><span class="price num">${p.var.some(a=>a.o.some(x=>x.d))?'Desde ':''}${money(p.precio)} <small>/ ${esc(p.unidad)}</small></span>${st}</div>
@@ -2142,7 +2144,7 @@ function prodRow(p, conNeg){
 function vInicio(){
   const l = activosVis().filter(n=>ui.cat==='todos'||n.tipo===ui.cat);
   const tipos = Object.entries(TIPOS).filter(([k])=>activosVis().some(n=>n.tipo===k));
-  const top = S.productos.filter(p=>neg(p.neg)?.estado==='activo'&&!bloq(p.neg)&&p.disp&&p.stock!==0).sort((a,b)=>(calif(b.neg)?.avg||0)-(calif(a.neg)?.avg||0)).slice(0,8);
+  const top = S.productos.filter(p=>neg(p.neg)?.estado==='activo'&&!bloq(p.neg)&&p.disp&&p.stock!==0&&!prodRevision(p)).sort((a,b)=>(calif(b.neg)?.avg||0)-(calif(a.neg)?.avg||0)).slice(0,8);
   return `<div class="stack">
     <section class="shophero"><h1>Pide a los negocios de ${esc(S.cfg.ciudad)}</h1><div style="opacity:.9">A domicilio o para recoger. Pagas al recibir.</div>
       <button class="search" data-a="go" data-x="buscar" style="text-align:left;color:var(--muted)">${ico.search}<span style="padding:10px 0">Busca tacos, flores, cemento…</span></button></section>
@@ -2204,7 +2206,8 @@ function hojaProducto(){
       <div class="opts">${g.o.map(op=>`<button class="opt ${(sel.m[gi]||[]).includes(op.n)?'on':''}" data-a="selm" data-x="${gi}" data-o="${esc(op.n)}">${esc(op.n)}${op.d?` <small>${op.d>0?'+':''}${money(op.d)}</small>`:''}</button>`).join('')}</div></div>`; }).join('')}
     <div class="grp"><label class="f" for="sheet-note">Nota para el negocio <span class="h">Opcional. Por ejemplo: sin cebolla.</span></label><textarea id="sheet-note" maxlength="140">${esc(sel.note||'')}</textarea></div>
     <div class="row between"><div class="step"><button data-a="qty" data-x="-1" aria-label="Menos">−</button><span class="num">${qtyFmt(sel.qty,p.unidad)}</span><button data-a="qty" data-x="1" aria-label="Más">+</button></div>${err?`<span class="err">${esc(err)}</span>`:''}</div>
-    <button class="btn pri block lg" data-a="add" ${err?'disabled':''}>Agregar al carrito · <span class="num">${money(total)}</span></button>
+    ${prodRevision(p)?`<div class="note warn small">${p.estadoSrv==='rechazado'?'El equipo rechazó este producto'+(p.motivoSrv?': '+esc(p.motivoSrv):'')+'. Nadie lo puede pedir.':'Este producto está en revisión. Los clientes lo verán y podrán pedirlo cuando el equipo lo apruebe.'}</div>`:''}
+    <button class="btn pri block lg" data-a="add" ${err||prodRevision(p)?'disabled':''}>Agregar al carrito · <span class="num">${money(total)}</span></button>
   </div></div>`;
 }
 function avisoOtroComercio(){
@@ -3056,7 +3059,7 @@ cargarClima();
 
 /* ---------- PANEL DEL ADMINISTRADOR ---------- */
 function vAdmin(){
-  const pend = S.posts.filter(p=>p.estado==='pendiente').length + S.historias.filter(h=>h.estado==='pendiente').length;
+  const pend = S.posts.filter(p=>p.estado==='pendiente').length + S.historias.filter(h=>h.estado==='pendiente').length + S.productos.filter(p=>p.estadoSrv==='pendiente').length;
   const rep = S.posts.filter(p=>p.estado==='aprobado'&&S.reportes.some(r=>r.post===p.id)).length;
   return `<div class="stack"><div class="row between"><div><span class="small muted">Panel del administrador</span><h1>${esc(S.cfg.marca)}</h1></div><div class="row" style="gap:8px"><span class="pill ${S.cfg.autoMod?'ok':''}">Revisión automática: ${S.cfg.autoMod?'activada':'desactivada'}</span><button class="btn pri sm" data-a="adelantar" title="Simula que pasa un día">⏩ Adelantar 1 día</button><button class="btn danger sm" data-a="reiniciar">↺ Reiniciar</button></div></div>
   ${S.dias?`<div class="note small">Simulación: han pasado <b>${S.dias}</b> día(s). Revisa Pedidos, Comisiones, Repartidores y la App para ver la actividad.</div>`:''}
@@ -3087,7 +3090,16 @@ function aModeracion(){
     ${S.cfg.autoMod&&(pp.length||hh.length)?`<button class="btn sm" data-a="procesar">Procesar pendientes ahora</button>`:''}</div>
   <div class="note small">El análisis automático revisa el <b>texto</b> (+18, ofensivo, enlaces, correos, teléfonos, publicidad, estafas) y el historial del autor. El análisis de <b>imágenes</b> se conectará con el servidor (por ejemplo, Google Cloud Vision o AWS Rekognition); mientras tanto, las fotos subidas que se aprueban solas quedan marcadas para que les eches un vistazo.</div>
   <div class="sec-h"><h2>Publicaciones</h2><span class="muted small">${pp.length}</span></div>${pp.map(p=>modItem(p,'post',false)).join('') || '<p class="muted">Nada pendiente.</p>'}
-  <div class="sec-h"><h2>Historias</h2><span class="muted small">${hh.length}</span></div>${hh.map(h=>modItem(h,'hist',false)).join('') || '<p class="muted">Nada pendiente.</p>'}`;
+  <div class="sec-h"><h2>Historias</h2><span class="muted small">${hh.length}</span></div>${hh.map(h=>modItem(h,'hist',false)).join('') || '<p class="muted">Nada pendiente.</p>'}
+  ${VIVO?modProductos():''}`;
+}
+// Productos nuevos de cada negocio: los primeros 3, los que traen fotos y los dudosos esperan aquí. Hasta aprobarlos nadie los puede pedir.
+function modProductos(){
+  const l = S.productos.filter(p=>p.estadoSrv==='pendiente');
+  return `<div class="sec-h"><h2>Productos</h2><span class="muted small">${l.length}</span></div>
+  ${l.map(p=>{ const n = neg(p.neg)||{nombre:'Negocio'}; return `<div class="card"><div class="row nowrap" style="gap:12px"><div style="width:64px;flex:none">${fotoProd(p)}</div>
+    <div style="flex:1;min-width:0"><b>${esc(p.nombre)}</b> <span class="num">${money(p.precio)}</span><div class="small muted">${esc(n.nombre)}</div>${p.desc?`<div class="small">${esc(p.desc.slice(0,140))}</div>`:''}${p.motivoSrv?`<div class="small"><span class="pill warn">${esc(p.motivoSrv)}</span></div>`:''}</div></div>
+    <div class="row" style="gap:8px;margin-top:10px"><button class="btn pri sm" data-a="vProdRevisar" data-x="${p.id}" data-o="aprobado">Aprobar</button><button class="btn danger sm" data-a="vProdRevisar" data-x="${p.id}" data-o="rechazado">Rechazar</button></div></div>`; }).join('') || '<p class="muted">Nada pendiente.</p>'}`;
 }
 function aReportes(){
   const rep = S.posts.filter(p=>p.estado==='aprobado'&&S.reportes.some(r=>r.post===p.id));
@@ -4555,7 +4567,7 @@ function vArmar(D, E, admin, conteos, promCli){
   // productos
   const productos = D.prods.map(p=>({id:'p'+p.id, sid:p.id, neg:negDe(p.negocio), nombre:p.nombre, desc:p.descripcion||'', sec:p.seccion||'General', precio:vCent(p.precio), unidad:p.unidad||'pieza', paso:Number(p.paso)||1,
     stock:p.stock==null?null:Number(p.stock), disp:!!p.disponible, var:Array.isArray(p.variantes)?p.variantes:[], mods:Array.isArray(p.mods)?p.mods:[], agot:Array.isArray(p.agot)?p.agot:[],
-    fotos:(p.fotos&&p.fotos.length?p.fotos:(p.foto?[p.foto]:[])).map(vFotoObj), estadoSrv:p.estado, k:TIPOS[(D.negs.find(n=>n.id===p.negocio)||{}).categoria]?.k||'tienda'}));
+    fotos:(p.fotos&&p.fotos.length?p.fotos:(p.foto?[p.foto]:[])).map(vFotoObj), estadoSrv:p.estado, motivoSrv:p.motivo||'', k:TIPOS[(D.negs.find(n=>n.id===p.negocio)||{}).categoria]?.k||'tienda'}));
   productos.forEach(p=>{ if (!p.fotos.length) delete p.fotos; });
   // publicaciones, me gusta, comentarios
   const likesDe = {}; D.likes.forEach(l=>likesDe[l.post] = l);
@@ -4919,7 +4931,7 @@ function vDiff(A0, B){
   S.pedidos.filter(p=>!p.sid && !p.enviando && p.cuenta===me).forEach(p=>{ p.enviando = true; const carrito = A0.carrito; ops.push(async ()=>{
     const items = (p._items||[]).map(it=>({producto:(S.productos.find(x=>x.id===it.pid)||{}).sid, cant:it.qty, v:it.sel.v, m:it.sel.m, nota:it.nota||''}));
     const {data, error} = await sb.from('pedidos').insert({negocio:neg2sid(p.neg), items, nota:p.nota||'', nombre:p.cliente.nombre||'', cambio:vPesos(p.cambio), origen:p.origen?post2sid(p.origen):null}).select(PEDCOLS).single(); p.enviando=false;
-    if (error){ S.pedidos = S.pedidos.filter(x=>x!==p); if (carrito){ S.carrito = carrito; } if (ui.view==='seguimiento'){ ui.view='carrito'; } throw error; }
+    if (error){ p.errSrv = vMsgError(error); S.pedidos = S.pedidos.filter(x=>x!==p); if (carrito){ S.carrito = carrito; } if (ui.view==='seguimiento'){ ui.view='carrito'; } throw error; }
     const cod = await sb.from('pedido_codigos').select('codigo').eq('pedido', data.id).maybeSingle();
     const viejo = p.id; p.sid = data.id; p.id = 'LM-'+data.folio; p.total = vCent(data.total); p.subtotal = p.total; p.codigo = cod.data?cod.data.codigo:null; p.hist = (data.hist||[]).map(h=>({s:h.s, t:h.t}));
     p.items = (data.items||[]).map(it=>({nombre:it.nombre, det:it.det||'', nota:it.nota||'', qty:Number(it.cant), unidad:it.unidad, unit:vCent(it.precio), total:vCent(it.total)})); delete p._items;
@@ -5052,14 +5064,21 @@ function registrarAccionesVivo(){
     const {data, error} = await RV.sb.rpc('entregar_pedido', {pid:p.sid, cod:v}); if (error) return toast(rErr(error));
     if (data!=='ok'){ p.intentosTienda = (p.intentosTienda||0)+1; render(); return toast(data); }
     p.estado='entregado'; p.porCodigo=true; p.hist.push({s:'entregado', t:Date.now()}); SNAP = vFoto(S); render(); toast('Entregado'); vRecargarPronto(); };
-  const checkout = F.checkout; F.checkout = () => { if (!VIVO) return checkout();
+  const checkout = F.checkout; let ckEnviando = false; F.checkout = async () => { if (!VIVO) return checkout(); if (ckEnviando) return;
     if (soyNegocio()) return fail('Cambia a tu cuenta personal para hacer pedidos.');
     const v = id => ($('#'+id)?.value||'').trim();
     const d = {nombre:v('f-nombre'), tel:'', modo:'recoger', pago:'efectivo', calle:'', colonia:'', ref:'', nota:v('f-nota'), cambio:v('f-cambio')?Math.round(+v('f-cambio')*100):0, oferta:0};
     if (d.nombre.length<2) return fail('Escribe tu nombre (así te llaman al recoger).');
     for (const t of [d.nombre,d.nota]) { const r=revisar(t,'privado'); if(!r.ok) return fail(msgBloqueo(r)); }
     const items = S.carrito.items.map(it=>({pid:it.pid, sel:{v:[...it.sel.v], m:it.sel.m.map(a=>[...a])}, qty:it.qty, nota:it.nota||''}));
-    try { const p = crearPedido(d); p._items = items; ui.pedido = p.id; save(); go('seguimiento'); toast('Pedido enviado al negocio'); } catch(e){ fail(e.message); } };
+    if (S.carrito.items.some(it=>prodRevision(prod(it.pid)))) return fail('Un producto de tu carrito sigue en revisión del equipo y todavía no se puede pedir. Quítalo del carrito.');
+    // Primero lo confirma el servidor; solo entonces decimos "enviado" (antes se mostraba enviado aunque el servidor lo rechazara)
+    const copia = JSON.parse(JSON.stringify(S.carrito)); let p;
+    try { p = crearPedido(d); p._items = items; } catch(e){ return fail(e.message); }
+    ckEnviando = true; ui.err = ''; toast('Enviando tu pedido…');
+    try { await save(); } finally { ckEnviando = false; }
+    if (!p.sid){ if (!S.carrito) S.carrito = copia; save(); if (ui.view!=='checkout') go('checkout'); return fail(p.errSrv || 'No se pudo enviar tu pedido. Revisa tu conexión e intenta otra vez.'); }
+    ui.pedido = p.id; go('seguimiento'); toast('Pedido enviado al negocio'); };
   const resena = F.resena; F.resena = () => { if (!VIVO) return resena();
     const ped = S.pedidos.find(p=>p.neg===ui.neg && p.estado==='entregado' && p.cuenta===S.yo && !S.resenas.some(r=>r.ped===p.id && r.autor===S.yo));
     if (!ped) return toast('Solo opina quien recibió un pedido de este negocio.');
@@ -5359,6 +5378,11 @@ function repGeo(){ return new Promise((ok, no) => {
   navigator.geolocation.getCurrentPosition(p => ok({lat:p.coords.latitude, lng:p.coords.longitude, prec:Math.round(p.coords.accuracy||0)}),
     e => no(new Error(e && e.code===1 ? 'Da permiso de ubicación a MOCHI en tu navegador (en el candado junto a la dirección de la página).' : 'No pudimos obtener tu ubicación. Intenta de nuevo con buena señal.')),
     {enableHighAccuracy:true, timeout:15000, maximumAge:30000}); }); }
+// Sin GPS, el teléfono o la computadora calculan la ubicación por internet y suele salir en otra ciudad (por ejemplo, CDMX).
+// Por eso revisamos que el punto esté en la zona de Los Mochis y que sea preciso antes de usarlo.
+const ZONA = {lat:25.7905, lng:-108.9860, km:45};
+const kmEntre = (a1, o1, a2, o2) => { const r = Math.PI/180, x = Math.sin((a2-a1)*r/2)**2 + Math.cos(a1*r)*Math.cos(a2*r)*Math.sin((o2-o1)*r/2)**2; return 12742*Math.asin(Math.sqrt(x)); };
+const enZona = g => g && g.lat!=null && kmEntre(g.lat, g.lng, ZONA.lat, ZONA.lng) <= ZONA.km;
 const repMsgs = (lista, propios) => (lista||[]).length ? `<div class="stack" style="gap:4px">${lista.slice(-4).map(m=>`<div class="small"><b>${m.de===propios?'Tú':m.de==='cliente'?'Cliente':'Repartidor'}:</b> ${esc((m.de==='cliente'?MSG_CLI:MSG_REP)[m.clave]||'')} <span class="muted">${hora(vMs(m.t))}</span></div>`).join('')}</div>` : '';
 const repBotonesMsg = (pid, claves, de) => `<div class="row" style="gap:6px">${Object.entries(claves).map(([k,l])=>`<button class="btn sm soft" data-a="vRepMsg" data-x="${pid}" data-o="${k}" data-de="${de}">${esc(l)}</button>`).join('')}</div>`;
 
@@ -5415,7 +5439,7 @@ function vCheckoutVivo(){
         <label class="f" for="rk-calle">Calle y número<input id="rk-calle" type="text" maxlength="120" autocomplete="street-address" value="${esc(k.calle||'')}"></label>
         <label class="f" for="rk-col">Colonia<input id="rk-col" type="text" maxlength="60" value="${esc(k.colonia||'')}"></label>
         <label class="f" for="rk-ref">Referencias <span class="h">Opcional. Sin teléfonos: el repartidor te avisa por la app.</span><input id="rk-ref" type="text" maxlength="120" placeholder="Portón verde, frente a la tienda" value="${esc(k.ref||'')}"></label>
-        <div class="row nowrap"><button type="button" class="btn ${k.lat!=null?'':'pri'}" data-a="vCkUbic">${k.buscando?'Buscando tu ubicación…':k.lat!=null?'Volver a tomar mi ubicación':'Usar mi ubicación actual'}</button>${k.lat!=null?`<span class="small muted">Ubicación lista${k.prec?` (±${k.prec} m)`:''}</span>`:''}</div>
+        <div class="row nowrap"><button type="button" class="btn ${k.lat!=null?'':'pri'}" data-a="vCkUbic">${k.buscando?'Buscando tu ubicación…':k.lat!=null?'Volver a tomar mi ubicación':'Usar mi ubicación actual'}</button>${k.lat!=null?`<span class="small muted">${k.aprox?'Marca tu casa en el mapa':`Ubicación lista${k.prec?` (±${k.prec} m)`:''}`}</span>`:''}</div>
         ${k.lat!=null?`${mapaHTML('ck','ck')}<span class="small muted">Mueve el mapa hasta que el punto verde quede en tu casa. Con él calculamos la distancia y el envío mínimo.</span>`:'<span class="small muted">Tómala estando en el lugar donde recibirás el pedido, o cerca: después puedes acomodar el punto en el mapa.</span>'}
         ${q && q.lejos?'<div class="note bad">Tu ubicación está muy lejos de este negocio.</div>':''}
         ${q && !q.lejos?`<label class="f" for="rk-oferta">¿Cuánto ofreces por el envío? ($)<input id="rk-oferta" type="number" min="${minC/100}" step="1" inputmode="numeric" value="${of/100}"></label>
@@ -5483,7 +5507,7 @@ function repNegocioCard(n){
   return `<div class="card" id="rep-neg"><h2>Repartidores de la app</h2>
     <p class="small muted" style="margin:0">Tus clientes pueden pedir que un repartidor de ${esc(S.cfg.ciudad)} lleve su pedido. Tú solo lo preparas cuando un repartidor lo acepta, y se lo entregas cuando llegue.${A0.activo?'':' <b>Todavía está en pruebas:</b> por ahora solo lo ven las cuentas de prueba.'}</p>
     <label class="chk"><input type="checkbox" data-ch="vNegReparto" ${n.repartoSrv?'checked':''}> <span>Ofrecer envío con repartidores de la app</span></label>
-    <div class="row nowrap"><button class="btn ${n.lat!=null?'':'pri'} sm" data-a="vNegUbic">${n.lat!=null?'Volver a guardar la ubicación':'Guardar la ubicación de mi negocio'}</button><span class="small muted">${n.lat!=null?'Ubicación guardada':'Sin ubicación: el envío no se activa sin ella'}</span></div>
+    <div class="row nowrap"><button class="btn ${n.lat!=null?'':'pri'} sm" data-a="vNegUbic">${n.lat!=null?'Volver a guardar la ubicación':'Guardar la ubicación de mi negocio'}</button><span class="small ${n.lat!=null&&!enZona(n)?'':'muted'}">${n.lat!=null?(enZona(n)?'Ubicación guardada':'⚠️ La ubicación guardada quedó fuera de la ciudad: vuelve a guardarla con el GPS prendido'):'Sin ubicación: el envío no se activa sin ella'}</span></div>
     <span class="small muted">Pícale estando dentro de tu negocio. Con ella se calcula la distancia de cada envío. Es pública, igual que tu dirección.</span></div>`;
 }
 
@@ -5585,10 +5609,21 @@ function registrarAccionesRepVivo3(){
     if (f.data){ ui.pedido = 'LM-'+f.data.folio; go('seguimiento'); } else go('pedidos');
     toast('Pedido enviado. Cuando la tienda lo acepte buscamos repartidor.'); };
   Object.assign(A, {
+    vProdRevisar: async (x, el) => { const p = S.productos.find(o=>o.id===x); if (!p || !p.sid || !vEsAdmin()) return; const est = el.dataset.o==='aprobado' ? 'aprobado' : 'rechazado';
+      let motivo = null; if (est==='rechazado'){ try { motivo = window.prompt('Razón para rechazar el producto (la verá el dueño):', 'No cumple las Reglas para negocios'); } catch(e){} if (motivo===null) return; motivo = motivo.trim().slice(0,200) || 'No cumple las Reglas para negocios'; }
+      const {error} = await RV.sb.from('productos').update({estado:est, motivo}).eq('id', p.sid); if (error) return toast(vMsgError(error));
+      p.estadoSrv = est; p.motivoSrv = motivo||''; rerender(); toast(est==='aprobado'?'Producto aprobado: ya lo pueden pedir.':'Producto rechazado.'); },
     vCkModo: v => { vCkGuardar(); ui.ck.modo = v==='recoger' ? 'recoger' : 'reparto'; ui.err = ''; rerender(); },
     vCkUbic: async () => { vCkGuardar(); const k = ui.ck, n = neg(S.carrito.neg); k.buscando = true; rerender();
-      try { const g = await repGeo(); Object.assign(k, g); k.cot = await rpvRpc('reparto_cotizar', {neg:n.sid, p_lat:g.lat, p_lng:g.lng}); if (!k.cot) toast('Este negocio ya no tiene envío con repartidor.'); }
-      catch(e){ toast(e.message || vMsgError(e)); }
+      let g = null, aviso = '';
+      try { g = await repGeo(); } catch(e){ aviso = e.message; }
+      if (g && (!enZona(g) || g.prec > 800)){ aviso = 'Tu teléfono no dio tu ubicación exacta (salió lejos o muy imprecisa). Mueve el mapa hasta que el punto verde quede en tu casa.'; g = null; }
+      if (!g){ const t = n.lat!=null && enZona(n) ? {lat:n.lat, lng:n.lng} : {lat:ZONA.lat, lng:ZONA.lng}; g = {...t, prec:0, aprox:true}; if (!aviso) aviso = 'Mueve el mapa hasta que el punto verde quede en tu casa.'; }
+      else g.aprox = false;
+      if (MAPA.m.ck){ MAPA.m.ck.listo = false; }
+      Object.assign(k, g);
+      try { k.cot = await rpvRpc('reparto_cotizar', {neg:n.sid, p_lat:g.lat, p_lng:g.lng}); if (!k.cot) toast('Este negocio ya no tiene envío con repartidor.'); else if (aviso) toast(aviso); }
+      catch(e){ toast(vMsgError(e)); }
       k.buscando = false; ui.err = ''; rerender(); },
     vCliSubir: async (x, el) => { const p = S.pedidos.find(o=>o.id===x); if (!p || !p.rep) return; const nuevo = (p.rep.oferta + (+el.dataset.o))/100;
       await ped('cli_subir_oferta', {pid:p.sid, nuevo}, ()=>toast(`Ahora ofreces ${money(nuevo*100)}`)); infoDe(x); },
@@ -5600,7 +5635,10 @@ function registrarAccionesRepVivo3(){
       n.repartoSrv = si; SNAP = vFoto(S); rerender(); toast(si?'Listo: tus clientes podrán pedir con repartidor.':'Ya no ofreces envío con repartidores de la app.'); },
     vNegUbic: async () => { const n = neg(S.yo); if (!n || !n.sid) return;
       if (!confirmarSimple('¿Estás dentro de tu negocio ahora? Guardaremos este punto como su ubicación.')) return;
-      try { const g = await repGeo(); const {error} = await RV.sb.from('negocios').update({lat:g.lat, lng:g.lng}).eq('id', n.sid); if (error) throw error;
+      try { const g = await repGeo();
+        if (!enZona(g)) throw new Error(`Tu teléfono dio una ubicación a ${Math.round(kmEntre(g.lat, g.lng, ZONA.lat, ZONA.lng))} km de ${S.cfg.ciudad||'Los Mochis'}, así que no la guardamos. Prende la ubicación precisa (GPS) del teléfono y vuelve a intentarlo dentro del negocio.`);
+        if (g.prec > 150) throw new Error(`La ubicación salió muy imprecisa (±${g.prec} m), así que no la guardamos. Prende la ubicación precisa (GPS), sal a donde haya señal dentro del negocio y vuelve a intentarlo.`);
+        const {error} = await RV.sb.from('negocios').update({lat:g.lat, lng:g.lng}).eq('id', n.sid); if (error) throw error;
         n.lat = g.lat; n.lng = g.lng; SNAP = vFoto(S); rerender(); toast('Ubicación guardada'); } catch(e){ toast(e.message || vMsgError(e)); } },
     vRepTab: x => { ui.rvTab = x; if (x==='ganancias') RPV.hist = null; render(); window.scrollTo(0,0); },
     vRepAceptar: async x => { await ped('rep_aceptar', {pid:x}, ()=>{ toast('¡Pedido tuyo! Ve a la tienda.'); ui.rvTab = 'inicio'; }); panel(); },
@@ -5650,7 +5688,7 @@ const mapaHTML = (key, cls) => `<div class="lmapa ${cls||''}" data-mapa="${esc(k
 const casaDe = sid => { try { const v = JSON.parse(localStorage.getItem('lm-casa-'+sid)||'null'); return v && v.lat!=null ? [v.lat, v.lng] : null; } catch(e){ return null; } };
 // Qué puntos lleva cada mapa: tienda, casa del cliente y repartidor
 function mapaDatos(key){
-  if (key==='ck'){ const k = ui.ck; return k && k.lat!=null ? {centro:[k.lat, k.lng], ck:true} : null; }
+  if (key==='ck'){ const k = ui.ck; return k && k.lat!=null ? {centro:[k.lat, k.lng], ck:true, zoom:k.aprox?15:17} : null; }
   if (key.startsWith('cli-')){ const sid = key.slice(4), p = S.pedidos.find(o=>o.sid===sid); if (!p) return null; const n = neg(p.neg);
     const u = MAPA.ubic[sid], e = p.rep && p.rep.estado, va = ['en_camino','llego'].includes(e) ? 'casa' : 'tienda';
     return {tienda:n && n.lat!=null ? [n.lat, n.lng] : null, casa:casaDe(sid), rep:u ? [u.lat, u.lng] : null, va,
@@ -5674,7 +5712,7 @@ function mapaLinea(m, nombre, pts, estilo){
 }
 function mapaActualizar(key){
   const m = MAPA.m[key]; if (!m || !window.L) return; const d = mapaDatos(key); if (!d) return;
-  if (d.ck){ if (!m.listo){ m.map.setView(d.centro, 17); m.listo = true; } return; }
+  if (d.ck){ if (!m.listo){ m.map.setView(d.centro, d.zoom||17); m.listo = true; } return; }
   mapaLinea(m, 'ruta', [d.tienda, d.casa], {color:'#9CA3AF', weight:3, dashArray:'2 8', lineCap:'round'});
   mapaLinea(m, 'va', [d.rep, d.va==='casa'?d.casa:d.tienda], {color:'#2563EB', weight:4, dashArray:'1 9', lineCap:'round'});
   mapaPunto(m, 'tienda', d.tienda); mapaPunto(m, 'casa', d.casa); mapaPunto(m, 'rep', d.rep);
@@ -5870,6 +5908,7 @@ const A = {
     renderLayer(); },
   qty: x => { const p=prod(ui.sel.pid); ui.sel.qty = Math.max(p.paso, +(ui.sel.qty + (+x)*p.paso).toFixed(2)); renderLayer(); },
   add: () => { const p=prod(ui.sel.pid);
+    if (prodRevision(p)) return toast('Este producto está en revisión: todavía no se puede pedir.');
     if (p.neg===S.yo) return toast('No puedes pedirle a tu propio negocio. Cambia a tu cuenta personal.');
     if (S.carrito && S.carrito.items.length && S.carrito.neg!==p.neg){ ui.pend={...ui.sel}; renderLayer(); return; }
     agregar(ui.sel); },
