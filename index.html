@@ -151,6 +151,7 @@ textarea{min-height:76px;resize:vertical}
 .mtop .logo2{padding:4px 0;font-size:20px}
 .mtop .sp{flex:1}
 @media (min-width:768px){.mtop{display:none}}
+@media (max-width:767px){.pgear{display:none}}
 .mnav{position:fixed;left:0;right:0;bottom:0;z-index:40;background:color-mix(in srgb,var(--bg) 94%,transparent);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding-top:5px;padding-bottom:calc(5px + env(safe-area-inset-bottom,0px));padding-left:max(4px,env(safe-area-inset-left,0px));padding-right:max(4px,env(safe-area-inset-right,0px))}
 .mnav button{position:relative;background:none;border:0;padding:5px 6px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:700;min-width:58px}
 .mnav button.on{color:var(--fg)}
@@ -712,6 +713,7 @@ html,body,button,a,.car,input,textarea,select{touch-action:manipulation}
 .rlogo{display:flex;align-items:center;gap:8px;background:none;border:0;padding:0;font-family:var(--display);font-weight:800;font-size:19px;color:var(--fg)}
 .rlogo .mark,.mark{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--brand),#16a34a);color:#fff;font-size:14px;font-weight:900}
 .mark.big{width:64px;height:64px;border-radius:18px;font-size:24px}
+.mark.ic{background:none;overflow:hidden;padding:0}.mark.ic img{width:100%;height:100%;display:block;object-fit:cover;-webkit-user-drag:none}
 .rnav-top{display:none;margin:0 auto;gap:4px}
 .rnav-top button,.rnav-bot button{position:relative;display:flex;align-items:center;gap:6px;background:none;border:0;color:var(--muted);font-weight:700;padding:8px 12px;border-radius:12px}
 .rnav-top button.on,.rnav-bot button.on{color:var(--fg);background:var(--surface-2)}
@@ -1702,6 +1704,7 @@ const ico = {
   text:I('<path d="M4 7V5h16v2M9 19h6M12 5v14"/>'),
   help:I('<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.7M12 17h.01"/>'),
   biz:I('<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/>'),
+  moto:I('<circle cx="5.5" cy="17" r="2.5"/><circle cx="18.5" cy="17" r="2.5"/><path d="M8 17h7.5l3-6.5M14 6h3l1.5 4.5M3 13h7l2 4"/>'),
   user:I('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>')
 };
 
@@ -1842,7 +1845,7 @@ function vNotifs(){
   const l = misNotifs();
   const grupos = [['Hoy',n=>Date.now()-n.t<H24],['Esta semana',n=>{const d=Date.now()-n.t; return d>=H24 && d<7*H24;}],['Antes',n=>Date.now()-n.t>=7*H24]];
   const fila = n => { const a = n.de?perfilDe(n.de):null; const p = n.post?post(n.post):null;
-    return `<div class="nrow ${n.leida?'':'new'}">${a?`<button style="background:none;border:0;padding:0" data-a="verPerfil" data-x="${n.de}">${avatar(a,44)}</button>`:`<span class="mark" style="width:44px;height:44px;border-radius:50%">${esc(inits(S.cfg.marca))}</span>`}
+    return `<div class="nrow ${n.leida?'':'new'}">${a?`<button style="background:none;border:0;padding:0" data-a="verPerfil" data-x="${n.de}">${avatar(a,44)}</button>`:`<span class="mark ic" style="width:44px;height:44px;border-radius:50%"><img src="iconos/icon-192.png" alt="" width="44" height="44" draggable="false"></span>`}
       <div class="tx">${a&&n.tipo!=='pedido'?`<b>${esc(a.handle)}</b> `:''}${n.tipo==='sistema'||n.tipo==='pedido'?esc(n.texto):esc(NTXT[n.tipo]||'')}${['comentario','like_com','like_nota'].includes(n.tipo)&&n.texto?` “${esc(n.texto)}”`:''} <span class="muted small">${hace(n.t)}</span></div>
       ${['etiqueta','etiqueta_hist'].includes(n.tipo)&&!n.compartida?`<button class="btn sm rpbtn" data-a="compartirEtiqueta" data-x="${n.id}">${ico.repost} Compartir</button>`:''}
       ${n.tipo==='follow'&&n.de?botonSeguir(n.de):n.tipo==='pedido'?`<button class="btn sm pri" data-a="go" data-x="minegocio">Ver</button>`:p?`<button style="background:none;border:0;padding:0;width:46px" data-a="verPost" data-x="${p.id}">${miniFoto(p)}</button>`:''}</div>`; };
@@ -1856,7 +1859,7 @@ function cabPerfil(id){
   const a = perfilDe(id); const u = esNeg(id)?null:usr(id); const mio = id===S.yo;
   return `<div class="card pcab"><div class="prof">${avatar(a,150)}<div class="stack" style="gap:8px;min-width:0;flex:1">
       <div class="row between nowrap"><div style="min-width:0"><h1 class="pnom">${nombreV(a)}</h1>${typeof a.verificado==='string'?`<div class="vlabel ${a.verificado}">✓ ${esc(VERIF_TXT[a.verificado])}</div>`:''}<div class="muted small">@${esc(a.handle)}${!mio&&sigue(id,S.yo)?' · <span class="pill">Te sigue</span>':''}</div></div>
-        ${mio?`<div class="row nowrap" style="gap:6px"><button class="btn soft sm pmas" data-a="mas" aria-label="Más opciones">${ico.menu}Más</button><button class="ibtn" data-a="go" data-x="ajustes" aria-label="Configuración">${ico.gear}</button></div>`:`<button class="ibtn" data-a="opcPerfil" data-x="${id}" aria-label="Opciones">${ico.dots}</button>`}</div>
+        ${mio?`<div class="row nowrap" style="gap:6px"><button class="btn soft sm pmas" data-a="mas" aria-label="Más opciones">${ico.menu}Más</button><button class="ibtn pgear" data-a="go" data-x="ajustes" aria-label="Configuración">${ico.gear}</button></div>`:`<button class="ibtn" data-a="opcPerfil" data-x="${id}" aria-label="Opciones">${ico.dots}</button>`}</div>
       <div class="stats"><div><b>${npubs(id)}</b><span>publicaciones</span></div><button class="stat" data-a="verSeg" data-x="${id}" data-o="seguidores"><b>${seguidores(id)}</b><span>seguidores${listaVisible(id,'seguidores')?'':' 🔒'}</span></button><button class="stat" data-a="verSeg" data-x="${id}" data-o="seguidos"><b>${siguiendo(id)}</b><span>siguiendo${listaVisible(id,'seguidos')?'':' 🔒'}</span></button></div></div></div>
     ${u&&u.bio?`<div>${esc(u.bio)}</div>`:''}
     ${mio?`<div class="row"><button class="btn soft" data-a="go" data-x="ajustes">Editar perfil y configuración</button><button class="btn soft" data-a="publicar">+ Publicar</button></div>`
@@ -1883,7 +1886,7 @@ function vUsuario(){
     ${tabsPerfil(id)}</div>`;
 }
 function vLogin(){
-  return `<div class="card" style="max-width:420px;margin:30px auto;text-align:center"><div class="mark" style="width:56px;height:56px;border-radius:16px;margin:0 auto;font-size:22px">${esc(inits(S.cfg.marca))}</div><h1>Bienvenido a ${esc(S.cfg.marca)}</h1>
+  return `<div class="card" style="max-width:420px;margin:30px auto;text-align:center"><div class="mark ic" style="width:56px;height:56px;border-radius:16px;margin:0 auto;font-size:22px"><img src="iconos/icon-192.png" alt="" width="56" height="56" draggable="false"></div><h1>Bienvenido a ${esc(S.cfg.marca)}</h1>
     <p class="muted" style="margin:0">Comparte fotos de ${esc(S.cfg.ciudad)}, sigue a tus amigos y pide a negocios locales.</p>
     <button class="btn pri lg" data-a="login" data-x="correo">Continuar con correo</button>
     <button class="btn lg" data-a="login" data-x="teléfono">Continuar con número de teléfono</button>
@@ -2433,8 +2436,8 @@ function pPerfil(n){
 function pVentas(n){
   const ps = S.pedidos.filter(p=>p.neg===n.id), ent = ps.filter(p=>p.estado==='entregado');
   const ventas = ent.reduce((a,p)=>a+p.subtotal,0), com = ent.reduce((a,p)=>a+p.comision,0);
-  return `<div class="kpis"><div class="kpi"><span>Pedidos</span><b class="num">${ps.length}</b></div><div class="kpi"><span>Entregados</span><b class="num">${ent.length}</b></div><div class="kpi"><span>Ventas</span><b class="num">${money(ventas)}</b></div><div class="kpi"><span>Comisión ${S.cfg.comisionBps/100}%</span><b class="num">${money(com)}</b></div></div>
-  <div class="note">Cargos del mes: plan ${money(S.cfg.planCents)} (${esc(n.plan)}) + comisión ${money(com)} + IVA. El envío es tuyo y no paga comisión. En el piloto se paga en efectivo, así que la comisión <b>se calcula pero no se cobra automáticamente</b>.</div>
+  return `<div class="kpis"><div class="kpi"><span>Pedidos</span><b class="num">${ps.length}</b></div><div class="kpi"><span>Entregados</span><b class="num">${ent.length}</b></div><div class="kpi"><span>Ventas</span><b class="num">${money(ventas)}</b></div></div>
+  <div class="note">Cargos del mes: plan ${money(S.cfg.planCents)} (${esc(n.plan)}) + la comisión de cada pedido entregado (en la tabla) + IVA. El envío es tuyo y no paga comisión. En el piloto se paga en efectivo, así que la comisión <b>se calcula pero no se cobra automáticamente</b>.</div>
   <div class="tbl"><table><thead><tr><th>Pedido</th><th>Fecha</th><th>Origen</th><th>Estado</th><th class="r">Productos</th><th class="r">Comisión</th></tr></thead><tbody>
   ${ps.map(p=>`<tr><td>#${esc(p.id)}</td><td>${fecha(p.creado)}</td><td>${p.origen?'Publicación':'Catálogo'}</td><td>${ESTADOS[p.estado].l}</td><td class="r num">${money(p.subtotal)}</td><td class="r num">${p.estado==='entregado'?money(p.comision):'—'}</td></tr>`).join('') || '<tr><td colspan="6" class="muted">Sin pedidos.</td></tr>'}</tbody></table></div>`;
 }
@@ -2642,7 +2645,7 @@ function vRep(){
   const activo = S.pedidos.find(p=>p.modo==='reparto' && p.rep && p.rep.rep===r.id && ['asignado','en_tienda','en_camino','llego'].includes(p.rep.estado));
   const cuerpo = r.estado!=='aprobado' && tab!=='perfil' ? repVerificacion(r) : ({inicio:repInicio, pedido:repPedido, ganancias:repGanancias, perfil:repPerfil}[tab])(r, activo);
   return `<div class="rapp">
-    <header class="rtop"><div class="rlogo"><span class="mark">${esc(inits(S.cfg.marca))}</span><b>${esc(S.cfg.marca)} <i>Repartidor</i></b></div>
+    <header class="rtop"><div class="rlogo"><span class="mark ic"><img src="iconos/icon-192.png" alt="" width="34" height="34" draggable="false"></span><b>${esc(S.cfg.marca)} <i>Repartidor</i></b></div>
       ${r.estado==='aprobado'?`<button class="rsw ${S.repOnline?'on':''}" data-a="repOnline" aria-pressed="${S.repOnline}"><span></span>${S.repOnline?'Conectado':'Desconectado'}</button>`:''}</header>
     <main class="rbody">${cuerpo}</main>
     ${r.estado==='aprobado'?`<nav class="rnav">${[['inicio','Pedidos',ico.home],['pedido',activo?'Activo •':'Activo',ico.list],['ganancias','Ganancias',ico.shop],['perfil','Perfil',ico.user]].map(([k,l,ic])=>`<button class="${tab===k?'on':''}" data-a="rTab" data-x="${k}">${ic}<span>${l}</span></button>`).join('')}</nav>`:''}
@@ -3068,8 +3071,8 @@ function vAdmin(){
   const rep = S.posts.filter(p=>p.estado==='aprobado'&&S.reportes.some(r=>r.post===p.id)).length;
   return `<div class="stack"><div class="row between"><div><span class="small muted">Panel del administrador</span><h1>${esc(S.cfg.marca)}</h1></div><div class="row" style="gap:8px"><span class="pill ${S.cfg.autoMod?'ok':''}">Revisión automática: ${S.cfg.autoMod?'activada':'desactivada'}</span><button class="btn pri sm" data-a="adelantar" title="Simula que pasa un día">⏩ Adelantar 1 día</button><button class="btn danger sm" data-a="reiniciar">↺ Reiniciar</button></div></div>
   ${S.dias?`<div class="note small">Simulación: han pasado <b>${S.dias}</b> día(s). Revisa Pedidos, Comisiones, Repartidores y la App para ver la actividad.</div>`:''}
-  <div class="ptabs">${[['moderacion',`Por revisar (${pend})`],['seguridad',`Seguridad (${S.alertas.filter(a=>a.estado==='nueva').length})`],['reportes',`Reportes (${rep})`],['automaticas','Decisiones automáticas'],['comercios','Negocios'],['repartidores','Repartidores'],['usuarios','Usuarios'],['pedidos','Pedidos'],['comisiones','Comisiones'],['verificacion',`Verificación (${S.verifs.filter(v=>v.estado==='pendiente').length})`],['apelaciones',`Apelaciones (${S.apelaciones.filter(a=>a.estado==='pendiente').length})`],['bitacora','Bitácora'],['ajustes','Ajustes']].map(([k,l])=>`<button class="${ui.aTab===k?'on':''}" data-a="atab" data-x="${k}">${l}</button>`).join('')}</div>
-  ${ {moderacion:aModeracion, seguridad:aSeguridad, reportes:aReportes, automaticas:aAutomaticas, comercios:aComercios, repartidores:aRepartidores, usuarios:aUsuarios, pedidos:aPedidos, comisiones:aComisiones, bitacora:aBitacora, ajustes:aAjustes, verificacion:aVerificacion, apelaciones:aApelaciones}[ui.aTab]() }</div>`;
+  <div class="ptabs">${[['moderacion',`Por revisar (${pend})`],['seguridad',`Seguridad (${S.alertas.filter(a=>a.estado==='nueva').length+rep})`],['automaticas','Decisiones automáticas'],['comercios','Negocios'],['repartidores','Repartidores'],['usuarios','Usuarios'],['pedidos','Pedidos'],['comisiones','Comisiones'],['verificacion',`Verificación (${S.verifs.filter(v=>v.estado==='pendiente').length})`],['apelaciones',`Apelaciones (${S.apelaciones.filter(a=>a.estado==='pendiente').length})`],['bitacora','Bitácora'],['ajustes','Ajustes']].map(([k,l])=>`<button class="${ui.aTab===k?'on':''}" data-a="atab" data-x="${k}">${l}</button>`).join('')}</div>
+  ${ {moderacion:aModeracion, seguridad:aSegReportes, reportes:aSegReportes, automaticas:aAutomaticas, comercios:aComercios, repartidores:aRepartidores, usuarios:aUsuarios, pedidos:aPedidos, comisiones:aComisiones, bitacora:aBitacora, ajustes:aAjustes, verificacion:aVerificacion, apelaciones:aApelaciones}[ui.aTab]() }</div>`;
 }
 function selMotivo(id, sug){ return `<select id="rej-${id}" aria-label="Motivo" style="width:auto;padding:7px 9px;font-size:13px">${Object.entries(MOTIVOS).map(([k,l])=>`<option value="${k}" ${k===sug?'selected':''}>${esc(l)}</option>`).join('')}</select>`; }
 function modItem(it, tipo, reportado){
@@ -3102,7 +3105,7 @@ function aModeracion(){
 function modProductos(){
   const l = S.productos.filter(p=>p.estadoSrv==='pendiente');
   return `<div class="sec-h"><h2>Productos</h2><span class="muted small">${l.length}</span></div>
-  ${l.map(p=>{ const n = neg(p.neg)||{nombre:'Negocio'}; return `<div class="card"><div class="row nowrap" style="gap:12px"><div style="width:64px;flex:none">${fotoProd(p)}</div>
+  ${l.map(p=>{ const n = neg(p.neg)||{nombre:'Negocio'}; return `<div class="card"><div class="row nowrap" style="gap:12px"><div class="ph" style="width:64px;flex:none;border-radius:10px">${fotoProd(p)}</div>
     <div style="flex:1;min-width:0"><b>${esc(p.nombre)}</b> <span class="num">${money(p.precio)}</span><div class="small muted">${esc(n.nombre)}</div>${p.desc?`<div class="small">${esc(p.desc.slice(0,140))}</div>`:''}${p.motivoSrv?`<div class="small"><span class="pill warn">${esc(p.motivoSrv)}</span></div>`:''}</div></div>
     <div class="row" style="gap:8px;margin-top:10px"><button class="btn pri sm" data-a="vProdRevisar" data-x="${p.id}" data-o="aprobado">Aprobar</button><button class="btn danger sm" data-a="vProdRevisar" data-x="${p.id}" data-o="rechazado">Rechazar</button></div></div>`; }).join('') || '<p class="muted">Nada pendiente.</p>'}`;
 }
@@ -3173,6 +3176,13 @@ function aAjustes(){
 
 /* ---------- SEGURIDAD: alertas del Escudo ---------- */
 const NIV_TXT = ['Baja','Baja','Media','Alta','Crítica'], NIV_CLS = ['','','warn','bad','bad'];
+// Seguridad y Reportes viven en una sola pestaña: arriba se elige cuál ver.
+function aSegReportes(){
+  const nAl = S.alertas.filter(a=>a.estado==='nueva').length, nRep = S.posts.filter(p=>p.estado==='aprobado'&&S.reportes.some(r=>r.post===p.id)).length + S.reportes.filter(r=>r.cuenta||r.hist||r.mensaje||r.comentario).length;
+  const t = ui.aTab==='reportes' ? 'reportes' : (ui.segTab||'alertas');
+  return `<div class="stack"><div class="segs" style="align-self:flex-start">${[['alertas',`Alertas (${nAl})`],['reportes',`Reportes (${nRep})`]].map(([k,l])=>`<button class="${t===k?'on':''}" data-a="segTab" data-x="${k}">${l}</button>`).join('')}</div>
+  ${t==='reportes'?aReportes():aSeguridad()}</div>`;
+}
 function aSeguridad(){
   const al = S.alertas, nuevas = al.filter(a=>a.estado==='nueva');
   const susp = S.usuarios.filter(u=>u.suspendido), pausa = Object.entries(S.pausas).filter(([k,v])=>v>Date.now());
@@ -3650,7 +3660,7 @@ function rVLogin(){
       ${t==='crear'?`<label class="f" for="rl-pass2">Repite la contraseña<input id="rl-pass2" type="password" autocomplete="new-password"></label>`:''}
       ${RV.err?`<div class="err" role="alert">${esc(RV.err)}</div>`:''}
       <button class="btn pri block lg" type="submit">${t==='crear'?'Crear mi cuenta':'Entrar'}</button></form>`;
-  return `<div class="rcentro rlogin"><span class="mark big">${esc(inits(S.cfg.marca))}</span><h1>${esc(S.cfg.marca)}</h1>
+  return `<div class="rcentro rlogin"><span class="mark big ic"><img src="iconos/icon-192.png" alt="" width="64" height="64" draggable="false"></span><h1>${esc(S.cfg.marca)}</h1>
     <p class="muted">La red social y tienda de ${esc(S.cfg.ciudad)}.</p>
     <div style="width:100%;max-width:380px" class="stack"><div class="seg rltabs">${tab('entrar','Entrar')}${tab('crear','Crear cuenta')}</div>${form}
     ${t!=='enlace'?`<button type="button" class="btn ghost sm" data-a="rLTab" data-x="enlace">¿Olvidaste tu contraseña? Entrar con enlace al correo</button>`:''}</div>
@@ -5242,7 +5252,7 @@ function vRepVivo(){
     <div class="card">${it(true,'Solicitud enviada','Tus datos llegaron al equipo')}${it(v.ine,'INE vigente','Verificada con Didit, sin guardar fotos en MOCHI')}${it(v.selfie,'Eres tú','Selfie con prueba de vida que coincide con tu INE')}${it(r.estado==='aprobado','Aprobado por el administrador','Lo revisa una persona del equipo')}</div></div>`
     : repVivoAprobado(P);
   return `<div class="rapp">
-    <header class="rtop"><div class="rlogo"><span class="mark">${esc(inits(S.cfg.marca))}</span><b>${esc(S.cfg.marca)} <i>Repartidor</i></b></div>
+    <header class="rtop"><div class="rlogo"><span class="mark ic"><img src="iconos/icon-192.png" alt="" width="34" height="34" draggable="false"></span><b>${esc(S.cfg.marca)} <i>Repartidor</i></b></div>
       ${r.estado==='aprobado'?`<button class="rsw ${r.online?'on':''}" data-a="vRepOnline" aria-pressed="${r.online}"><span></span>${r.online?'Conectado':'Desconectado'}</button>`:''}</header>
     <main class="rbody">${cuerpo}</main></div>`;
 }
@@ -5795,7 +5805,7 @@ function render(){
     $('#app').innerHTML = `<div class="rwrap">${protoBar()}${vRepVivo()}</div>`; renderLayer(); return;
   }
   if (ui.mode==='admin'){
-    $('#app').innerHTML = `<header class="top"><div class="top-in wrap gut"><button class="logo2" style="padding:0;font-size:20px" data-a="mode" data-x="app"><span class="mark">${esc(inits(S.cfg.marca))}</span><span style="display:inline">${esc(S.cfg.marca)}</span></button>
+    $('#app').innerHTML = `<header class="top"><div class="top-in wrap gut"><button class="logo2" style="padding:0;font-size:20px" data-a="mode" data-x="app"><span class="mark ic"><img src="iconos/icon-192.png" alt="" width="34" height="34" draggable="false"></span><span style="display:inline">${esc(S.cfg.marca)}</span></button>
       ${modosNav()}
       <button class="ibtn" data-a="toggleTema" aria-label="Cambiar tema">${temaActual()==='oscuro'?ico.sun:ico.moon}</button></div></header>
       <main class="wrap gut" style="padding-block:18px 60px">${vAdmin()}</main>`;
@@ -5814,6 +5824,7 @@ function render(){
     ['go','notifs','Notificaciones',ico.bell,['notifs'],nN],
     ['crear','','Crear',ico.plus,[],0],
     ...(soyNegocio()?[['go','minegocio','Mi negocio',ico.biz,['minegocio'],nPed]]:tieneNegocio()?[['irMiNegocio','','Mi negocio',ico.biz,[],0]]:[]),
+    ...(soyRepVivo()?[['modo2','vrep','Repartidor',ico.moto,[],0]]:[]),
     ['go','carrito','Carrito',ico.bag,['carrito','checkout'],cartN],
     ...(soyNegocio()?[]:[['go','pedidos','Mis pedidos',ico.list,['pedidos','seguimiento'],nAct]]),
     ['go','perfil','Perfil',avatar(me,26),['perfil','ajustes'],0],
@@ -5822,17 +5833,17 @@ function render(){
   const showBar = cartN && ['inicio','negocio','home'].includes(v);
   $('#app').innerHTML = `
   <nav class="side" aria-label="Navegación principal">
-    <button class="logo2" data-a="go" data-x="home"><span class="mark">${esc(inits(S.cfg.marca))}</span><span class="txt">${esc(S.cfg.marca)}</span></button>
+    <button class="logo2" data-a="go" data-x="home"><span class="mark ic"><img src="iconos/icon-192.png" alt="" width="34" height="34" draggable="false"></span><span class="txt">${esc(S.cfg.marca)}</span></button>
     ${items.map(([a,x,l,ic,act,n])=>`<button class="nv ${on(act)}" data-a="${a}" data-x="${x}" title="${l}">${ic}${badge(n)}<span class="lbl">${l}</span></button>`).join('')}
     <span class="grow"></span>
     <button class="nv" data-a="toggleTema" title="Cambiar a modo ${temaActual()==='oscuro'?'claro':'oscuro'}">${temaActual()==='oscuro'?ico.sun:ico.moon}<span class="lbl">Modo ${temaActual()==='oscuro'?'claro':'oscuro'}</span></button>
     <button class="nv" data-a="mas" title="Más">${ico.menu}<span class="lbl">Más</span></button>
   </nav>
-  <header class="mtop"><button class="logo2" data-a="go" data-x="home"><span class="mark">${esc(inits(S.cfg.marca))}</span><span class="txt">${esc(S.cfg.marca)}</span></button><span class="sp"></span>
+  <header class="mtop"><button class="logo2" data-a="go" data-x="home"><span class="mark ic"><img src="iconos/icon-192.png" alt="" width="34" height="34" draggable="false"></span><span class="txt">${esc(S.cfg.marca)}</span></button><span class="sp"></span>
     ${VIVO&&S.esAdmin?`<button class="ibtn" data-a="modo2" data-x="vadmin" aria-label="Administrar">${ico.shield}</button>`:`<button class="ibtn" data-a="toggleTema" aria-label="Cambiar tema">${temaActual()==='oscuro'?ico.sun:ico.moon}</button>`}
     <button class="ibtn" data-a="go" data-x="notifs" aria-label="Notificaciones">${ico.bell}${badge(nN)}</button>
     ${soyNegocio()?'':`<button class="ibtn ${on(['pedidos','seguimiento'])}" data-a="go" data-x="pedidos" aria-label="Mis pedidos">${ico.list}${badge(nAct)}</button>`}
-    ${!soyNegocio()&&tieneNegocio()?`<button class="ibtn" data-a="irMiNegocio" aria-label="Mi negocio">${ico.biz}</button>`:''}
+    ${soyRepVivo()?`<button class="ibtn" data-a="modo2" data-x="vrep" aria-label="Repartidor">${ico.moto}</button>`:!soyNegocio()&&tieneNegocio()?`<button class="ibtn" data-a="irMiNegocio" aria-label="Mi negocio">${ico.biz}</button>`:''}
     ${soyNegocio()?`<button class="ibtn ${on(['minegocio'])}" data-a="go" data-x="minegocio" aria-label="Mi negocio">${ico.biz}${badge(nPed)}</button>${cartN?`<button class="ibtn" data-a="go" data-x="carrito" aria-label="Carrito">${ico.bag}${badge(cartN)}</button>`:''}`:`<button class="ibtn ${on(['carrito','checkout'])}" data-a="go" data-x="carrito" aria-label="Carrito">${ico.bag}${badge(cartN)}</button>`}</header>
   <main class="igmain"><div class="igin stack">${protoBar()}${VISTAS[v]()}</div></main>
   ${showBar?`<button class="cartfloat" data-a="go" data-x="carrito"><span>${cartN} producto(s) · ${esc(neg(S.carrito.neg).nombre)}</span><span class="num">${money(subtotalCarrito())} →</span></button>`:''}
@@ -6015,6 +6026,7 @@ const A = {
   delSi: x => { const p=prod(x); S.productos=S.productos.filter(q=>q.id!==x); ui.delAsk=null; log(neg(p.neg).nombre,'Producto eliminado',p.nombre); save(); rerender(); toast('Producto eliminado'); },
   // admin
   atab: x => { ui.aTab=x; ui.delAsk=null; render(); window.scrollTo(0,0); },
+  segTab: x => { ui.aTab='seguridad'; ui.segTab=x; render(); },
   autoMod: () => { S.cfg.autoMod=!S.cfg.autoMod; log('Admin','Revisión automática',S.cfg.autoMod?'activada':'desactivada'); save(); rerender(); toast(`Revisión automática ${S.cfg.autoMod?'activada':'desactivada'}`); },
   procesar: () => { const n=procesarPendientes(); save(); rerender(); toast(`${n} decidido(s) automáticamente; lo dudoso sigue aquí.`); },
   aprobar: x => { const [t,id]=x.split(':'); const it=t==='post'?post(id):S.historias.find(h=>h.id===id); aplicarDecision(it,t,{d:'aprobado',razon:'Aprobado a mano'},'admin'); save(); rerender(); toast('Aprobado'); },
