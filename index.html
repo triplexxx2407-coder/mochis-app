@@ -1190,7 +1190,8 @@ let PREF = {tema:'sistema', grande:false, color:null, paleta:[]};
 try { PREF = {...PREF, ...JSON.parse(localStorage.getItem('lm-pref')||'{}')}; } catch(e){}
 if (!Array.isArray(PREF.paleta)) PREF.paleta = [];
 // Color propio (Configuración → Apariencia): un tono (h, 0-359) y qué tan claro u oscuro (l, 0-100).
-// Menos de 50 = oscuro. La letra se calcula aparte para que siempre se lea. Solo se guarda en este teléfono.
+// Menos de 50 = oscuro. La letra se calcula aparte para que siempre se lea.
+// En vivo, la paleta y el color van con la cuenta (tabla preferencias): se ven igual en cualquier dispositivo.
 const COLOR_VARS = ['--bg','--surface','--surface-2','--surface-3','--line','--fg','--muted'];
 const colorOscuro = c => c.l < 50;
 const colorLuz = c => colorOscuro(c) ? 4 + c.l*0.4 : 70 + (c.l-50)*0.54;
@@ -1209,6 +1210,26 @@ function aplicarPref(){
     if (PREF.tema==='claro') r.dataset.theme='light'; else if (PREF.tema==='oscuro') r.dataset.theme='dark'; else delete r.dataset.theme; }
   document.body.classList.toggle('big', !!PREF.grande);
   try { localStorage.setItem('lm-pref', JSON.stringify(PREF)); } catch(e){}
+  prefSubir();
+}
+// Paleta y color de la cuenta: se bajan al entrar y se suben (sin prisa) cuando cambian
+const PSYNC = {uid:null, timer:null, ultimo:''};
+const prefDatos = () => JSON.stringify({paleta:PREF.paleta, color:PREF.color||null});
+function prefSubir(){
+  if (!VIVO || !PSYNC.uid || !RV.user || RV.user.id!==PSYNC.uid || prefDatos()===PSYNC.ultimo) return;
+  clearTimeout(PSYNC.timer);
+  PSYNC.timer = setTimeout(async ()=>{ const d = prefDatos(), uid = PSYNC.uid; if (d===PSYNC.ultimo || !RV.user || RV.user.id!==uid) return;
+    const {error} = await RV.sb.from('preferencias').upsert({usuario:uid, ...JSON.parse(d)}, {onConflict:'usuario'}); if (!error) PSYNC.ultimo = d; }, 1500);
+}
+async function prefBajar(uid){
+  if (PSYNC.uid===uid) return; PSYNC.uid = null;
+  const {data, error} = await RV.sb.from('preferencias').select('paleta,color').eq('usuario', uid).maybeSingle();
+  if (error || !RV.user || RV.user.id!==uid) return;                     // sin el SQL 06 todo sigue como antes, solo en este dispositivo
+  let dueno = null; try { dueno = localStorage.getItem('lm-pref-dueno'); } catch(e){}
+  if (data){ PREF.paleta = Array.isArray(data.paleta) ? data.paleta : []; PREF.color = data.color || null; PSYNC.ultimo = prefDatos(); }
+  else if (dueno && dueno!==uid){ PREF.paleta = []; PREF.color = null; } // la paleta de este dispositivo es de otra cuenta: esta empieza limpia
+  try { localStorage.setItem('lm-pref-dueno', uid); } catch(e){}
+  PSYNC.uid = uid; aplicarPref(); if (typeof rerender==='function') rerender();
 }
 const temaActual = () => PREF.color ? (colorOscuro(PREF.color)?'oscuro':'claro') : PREF.tema==='claro'?'claro':PREF.tema==='oscuro'?'oscuro':(matchMedia('(prefers-color-scheme: dark)').matches?'oscuro':'claro');
 
@@ -4783,6 +4804,7 @@ async function vCargar(){
   VQ.cargando = (async () => {
     await VQ.cola;
     const sb = RV.sb, uid = vUid();
+    prefBajar(uid);
     const est = await sb.rpc('mi_estado2'); const E = est.data || {};
     const admin = E.rol === 'admin';
     const pedir = {
@@ -5308,7 +5330,7 @@ async function vEntrar(){
   if (!ui.vivoVista){ ui.view = soyNegocio() ? 'minegocio' : 'home'; ui.vivoVista = true; }
   ui.sheet = null; render(); renderLayer();
 }
-function vSalirVivo(){ vCanal(false); clearInterval(VQ.intervalo); VQ.listo = false; SV = null; SNAP = null; ui.vivoVista = false; RPV.app = RPV.panel = RPV.admin = null; if (typeof repGpsSync==='function') repGpsSync(); if (ui.mode==='vrep') ui.mode = 'real';
+function vSalirVivo(){ PSYNC.uid = null; clearTimeout(PSYNC.timer); vCanal(false); clearInterval(VQ.intervalo); VQ.listo = false; SV = null; SNAP = null; ui.vivoVista = false; RPV.app = RPV.panel = RPV.admin = null; if (typeof repGpsSync==='function') repGpsSync(); if (ui.mode==='vrep') ui.mode = 'real';
   if (VIVO){ VIVO = false; S = SDEMO; document.body.classList.remove('vivo'); } }
 async function vRecargar(forzar){
   if (!VQ.listo || !RV.user) return;
