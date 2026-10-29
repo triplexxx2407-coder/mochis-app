@@ -3922,6 +3922,9 @@ document.addEventListener('dragstart', e=>{ if (e.target && (e.target.tagName===
    (Las pantallas son las de la demo: ver vivo.js)
    El servidor vuelve a revisar todo (filtro, amigos, edad, suspensiones): esto es solo la pantalla.
    ============================================================ */
+/* Llave pública de los mapas CARTO (va en la página a propósito, como la de Supabase).
+   Se pide gratis en carto.com/basemaps/apikey; sin ella CARTO ya no sirve el mapa. */
+const CARTO_LLAVE = 'cb1_4xjv_1_8a157825e6cd4ef7379347c7';
 const RCFG = { url:'https://vhxisjkmkwgpvuqcbomt.supabase.co', key:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoeGlzamtta3dncHZ1cWNib210Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4MDA0NDksImV4cCI6MjEwODM3NjQ0OX0.i-LPjHWSft5rvi2EXE5yQkZjVyPzFdbkdRp8Z2oPW2Y' };
 const SB_LIB = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.75.1/dist/umd/supabase.js';
 const SB_LIB_SRI = 'sha384-k5kwQoO9McjUumIYX4SkL2QuZrexERcRrE29/CQHjxNo8ODOzsxez5EzLnzyARYj';
@@ -6191,7 +6194,7 @@ function mapasMontar(root){
     mapaLib().then(() => { if (!ph.isConnected || MAPA.m[key]) return;
       ph.innerHTML = '';
       const map = L.map(ph, {zoomControl:false, attributionControl:true, scrollWheelZoom:false});
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {maxZoom:19, subdomains:'abcd', attribution:'© OpenStreetMap · © CARTO'}).addTo(map);
+      L.tileLayer(`https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=${CARTO_LLAVE}`, {maxZoom:19, attribution:'© OpenStreetMap · © CARTO'}).addTo(map);
       ph.insertAdjacentHTML('beforeend', '<div class="mchip"></div>');
       MAPA.m[key] = {el:ph, map, capas:{}, listo:false};
       if (key==='ck') map.on('moveend', () => { const k = ui.ck; if (!k || !MAPA.m.ck || !MAPA.m.ck.listo) return; const c = map.getCenter();
