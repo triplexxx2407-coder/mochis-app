@@ -3097,31 +3097,43 @@ function refrescarInicio(){
   render(); window.scrollTo({top:0, behavior:'smooth'}); toast('Inicio actualizado: publicaciones, historias y negocios nuevos para ti');
 }
 
-/* ---------- clima real de Los Mochis (Open-Meteo, sin llave) ---------- */
-const CLIMA_URL = 'https://api.open-meteo.com/v1/forecast?latitude=25.79&longitude=-108.99&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,is_day&hourly=temperature_2m,weather_code,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset&timezone=America%2FMazatlan&forecast_days=7';
-const WMO = c => c===0?['☀️','Despejado']:c<=2?['🌤️','Poco nublado']:c===3?['☁️','Nublado']:c<=48?['🌫️','Niebla']:c<=57?['🌦️','Llovizna']:c<=67?['🌧️','Lluvia']:c<=77?['🌨️','Nieve']:c<=82?['🌧️','Chubascos']:c<=86?['🌨️','Nevadas']:['⛈️','Tormenta'];
+/* ---------- clima oficial de Los Mochis (SMN · CONAGUA, guardado en nuestra base) ---------- */
+const CIELO = (t, noche) => { const s = String(t||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  return /tormenta|electric/.test(s)?['⛈️','Tormenta']:/lluvia|chubasco|aguacero/.test(s)?['🌧️',t]:/llovizna/.test(s)?['🌦️',t]:/niebla|neblina|bruma/.test(s)?['🌫️',t]
+    :/medio|parcial|poco nub|algo nub|intervalo/.test(s)?[noche?'☁️':'⛅',t]:/nublado|cubierto|nuboso/.test(s)?['☁️',t]:/despejado|soleado|claro/.test(s)?[noche?'🌙':'☀️',t]:['🌡️',t||'Sin dato']; };
 let CLIMA = null, climaEstado = 'cargando';
+const climaHora = h => String(h||'').slice(9,11)+':00';
+const climaLlave = () => { const f = new Intl.DateTimeFormat('en-CA',{timeZone:'America/Mazatlan',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',hourCycle:'h23'}).formatToParts(new Date()), g = t => f.find(x=>x.type===t)?.value||''; return g('year')+g('month')+g('day')+'T'+g('hour'); };
+const climaHoras = () => { const k = climaLlave(); return (CLIMA?.datos?.horas||[]).filter(h=>h.temp!=null && String(h.hora)>=k); };
+const climaDias = () => { const k = climaLlave().slice(0,8), D = CLIMA?.datos?.dias||[]; const f = D.filter(x=>String(x.fecha).slice(0,8)>=k); return f.length?f:D; };
+const climaAhora = () => { if (!CLIMA?.datos) return null; const h = climaHoras()[0], dd = climaDias()[0]||{};
+  if (h && h.temp!=null){ const hr = +String(h.hora).slice(9,11); return {temp:h.temp, cielo:h.cielo||dd.cielo, noche:hr<7||hr>=19, hum:h.humedad, viento:h.viento??dd.viento, lluvia:h.lluvia}; }
+  return dd.max!=null ? {temp:dd.max, cielo:dd.cielo, noche:false, hum:null, viento:dd.viento, lluvia:dd.lluvia, soloMax:true} : null; };
 async function cargarClima(forzar){
-  try { const c = JSON.parse(localStorage.getItem('lm-clima')||'null'); if (!forzar && c && Date.now()-c.t < 30*60000){ CLIMA=c.d; climaEstado='ok'; return; } } catch(e){}
-  try { const r = await fetch(CLIMA_URL); if(!r.ok) throw new Error(r.status); CLIMA = await r.json(); climaEstado='ok'; try{ localStorage.setItem('lm-clima', JSON.stringify({t:Date.now(), d:CLIMA})); }catch(e){} }
-  catch(e){ climaEstado='error'; }
+  try { const c = JSON.parse(localStorage.getItem('lm-clima2')||'null'); if (!forzar && c && Date.now()-c.t < 30*60000){ CLIMA=c.d; climaEstado='ok'; return; } } catch(e){}
+  try { const r = await fetch(`${RCFG.url}/rest/v1/clima_oficial?id=eq.1&select=datos,actualizado`, {headers:{apikey:RCFG.key, Authorization:'Bearer '+RCFG.key}});
+    if(!r.ok) throw new Error(r.status); const [fila] = await r.json(); if (!fila?.datos?.dias?.length) throw new Error('vacío');
+    CLIMA = fila; climaEstado='ok'; try{ localStorage.setItem('lm-clima2', JSON.stringify({t:Date.now(), d:CLIMA})); }catch(e){} }
+  catch(e){ climaEstado = CLIMA ? 'ok' : 'error'; }
   const b = $('#clima-btn'); if (b) b.outerHTML = climaBtn(); if (ui.sheet?.t==='clima') renderLayer();
 }
 function climaBtn(){
-  if (climaEstado==='ok' && CLIMA?.current){ const c=CLIMA.current, [ic,tx]=WMO(c.weather_code); return `<button id="clima-btn" class="clima" data-a="clima" title="${tx} en Los Mochis">${ic}<b>${Math.round(c.temperature_2m)}°</b><small>Los Mochis</small></button>`; }
+  const a = climaEstado==='ok' && climaAhora();
+  if (a){ const [ic,tx]=CIELO(a.cielo,a.noche); return `<button id="clima-btn" class="clima" data-a="clima" title="${esc(tx)} en Los Mochis">${ic}<b>${Math.round(a.temp)}°</b><small>Los Mochis</small></button>`; }
   return `<button id="clima-btn" class="clima" data-a="clima" title="Clima de Los Mochis">${climaEstado==='error'?'🌡️':'⏳'}<b>--°</b><small>Clima</small></button>`;
 }
 function hojaClima(){
-  if (climaEstado!=='ok' || !CLIMA) return hoja('Clima en Los Mochis', `<p class="muted">${climaEstado==='error'?'No se pudo cargar el clima. En la vista previa de Claude se bloquean las conexiones externas; en tu página de GitHub sí funciona.':'Cargando…'}</p><button class="btn" data-a="climaRetry">Reintentar</button>`);
-  const c = CLIMA.current, [ic,tx] = WMO(c.weather_code); const H = CLIMA.hourly, D = CLIMA.daily;
-  const ahora = c.time.slice(0,13); let i0 = H.time.findIndex(t=>t.slice(0,13)===ahora); if (i0<0) i0=0;
-  const horas = H.time.slice(i0, i0+24).map((t,k)=>({h:t.slice(11,16), t:H.temperature_2m[i0+k], w:H.weather_code[i0+k], p:H.precipitation_probability[i0+k]}));
-  const dia = s => { const d = new Date(s+'T12:00:00'); return ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()]+' '+d.getDate(); };
-  const mn = Math.min(...D.temperature_2m_min), mx = Math.max(...D.temperature_2m_max);
-  return hoja('Clima en Los Mochis', `<div class="clhead"><span class="big">${ic}</span><div><b class="num">${Math.round(c.temperature_2m)}°C</b><span>${tx} · se siente ${Math.round(c.apparent_temperature)}°</span><small>Humedad ${c.relative_humidity_2m}% · viento ${Math.round(c.wind_speed_10m)} km/h</small></div></div>
-    <b>Próximas 24 horas</b><div class="clhoras">${horas.map(h=>`<div><small>${h.h}</small><span>${WMO(h.w)[0]}</span><b class="num">${Math.round(h.t)}°</b>${h.p?`<small class="lluv">${h.p}%</small>`:'<small>&nbsp;</small>'}</div>`).join('')}</div>
-    <b>Esta semana</b><div class="cldias">${D.time.map((t,k)=>{ const lo=D.temperature_2m_min[k], hi=D.temperature_2m_max[k]; return `<div class="cld"><span class="d">${k===0?'Hoy':dia(t)}</span><span>${WMO(D.weather_code[k])[0]}</span><small class="lluv">${D.precipitation_probability_max[k]?D.precipitation_probability_max[k]+'%':''}</small><span class="num lo">${Math.round(lo)}°</span><span class="rng"><i style="left:${(lo-mn)/(mx-mn||1)*100}%;right:${100-(hi-mn)/(mx-mn||1)*100}%"></i></span><span class="num">${Math.round(hi)}°</span></div>`; }).join('')}</div>
-    <span class="small muted">Datos en vivo de Open-Meteo · hora de Sinaloa · actualizado ${c.time.slice(11,16)}</span>`);
+  const a = climaEstado==='ok' && climaAhora();
+  if (!a) return hoja('Clima en Los Mochis', `<p class="muted">${climaEstado==='error'?'No se pudo cargar el clima. Revisa tu conexión e inténtalo otra vez.':'Cargando…'}</p><button class="btn" data-a="climaRetry">Reintentar</button>`);
+  const D = climaDias(), H = climaHoras(), hoyK = climaLlave().slice(0,8), [ic,tx] = CIELO(a.cielo,a.noche);
+  const dia = s => { s=String(s||''); const f = new Date(`${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}T12:00:00`); return isNaN(f)?'':['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][f.getDay()]+' '+f.getDate(); };
+  const mins = D.map(x=>x.min).filter(v=>v!=null), maxs = D.map(x=>x.max).filter(v=>v!=null), mn = Math.min(...mins), mx = Math.max(...maxs);
+  const extra = [a.hum!=null?`Humedad ${Math.round(a.hum)}%`:'', a.viento!=null?`viento ${Math.round(a.viento)} km/h`:'', a.lluvia?`lluvia ${Math.round(a.lluvia)}%`:''].filter(Boolean).join(' · ');
+  const act = new Date(CLIMA.actualizado), hace = (Date.now()-act)/3600e3;
+  return hoja('Clima en Los Mochis', `<div class="clhead"><span class="big">${ic}</span><div><b class="num">${Math.round(a.temp)}°C</b><span>${esc(tx)}${a.soloMax?' · máxima de hoy':''}</span>${extra?`<small>${extra}</small>`:''}</div></div>
+    ${H.length?`<b>Próximas horas</b><div class="clhoras">${H.map(h=>{ const hr=+String(h.hora).slice(9,11); return `<div><small>${climaHora(h.hora)}</small><span>${CIELO(h.cielo,hr<7||hr>=19)[0]}</span><b class="num">${Math.round(h.temp)}°</b>${h.lluvia?`<small class="lluv">${Math.round(h.lluvia)}%</small>`:'<small>&nbsp;</small>'}</div>`; }).join('')}</div>`:''}
+    <b>Próximos días</b><div class="cldias">${D.map(x=>{ const lo=x.min, hi=x.max; return `<div class="cld"><span class="d">${String(x.fecha).slice(0,8)===hoyK?'Hoy':dia(x.fecha)}</span><span>${CIELO(x.cielo)[0]}</span><small class="lluv">${x.lluvia?Math.round(x.lluvia)+'%':''}</small><span class="num lo">${lo!=null?Math.round(lo)+'°':''}</span><span class="rng"><i style="left:${(lo-mn)/(mx-mn||1)*100}%;right:${100-(hi-mn)/(mx-mn||1)*100}%"></i></span><span class="num">${hi!=null?Math.round(hi)+'°':''}</span></div>`; }).join('')}</div>
+    <span class="small muted">Pronóstico oficial del Servicio Meteorológico Nacional (CONAGUA) · ${hace>12?'último dato: ':'actualizado '}${act.toLocaleString('es-MX',{timeZone:'America/Mazatlan',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span>`);
 }
 
 /* ---------- tarjetas teñidas con el color de su foto ---------- */
@@ -3175,7 +3187,7 @@ function registrarAccionesExtras(){ Object.assign(A, {
   fotosProdEjemplo: () => { const n = neg(S.yo); const k = TIPOS[n.tipo].k; const pool = POOL[k]||[]; ui.draftPF = pool.slice(0,4).map(([u])=>({k, a:'#F5F5F4', b:'#E7E5E4', c:'#fff', u})); renderConservando(); }
 }); }
 function refrescarPost(x){ const art = $('#post-'+x); if (art){ const tmp=document.createElement('div'); tmp.innerHTML=postCard(post(x), ui.view==='post', art.dataset.por||null); art.replaceWith(tmp.firstElementChild); } else rerender(); }
-cargarClima();
+setTimeout(()=>cargarClima(), 0);
 
 
 /* ---------- PANEL DEL ADMINISTRADOR ---------- */
@@ -4574,7 +4586,7 @@ const LEGAL_DOCS = {
 <h3>4. Revisión automática de seguridad</h3>
 <p>Para proteger a la comunidad, los textos (mensajes, comentarios, publicaciones, notas, perfil y negocio) pasan por filtros automáticos que bloquean teléfonos, enlaces, correos, cuentas de otras apps, contenido sexual, drogas, armas y frases de acoso a menores. Las fotos se revisan en tu propio teléfono antes de subirse (desnudos y texto dentro de la imagen). Si algo se bloquea, queda un registro para que una persona del equipo lo revise, y siempre puedes <b>apelar</b> desde Configuración.</p>
 <h3>5. ¿Con quién compartimos tus datos?</h3>
-<p>Solo con proveedores que nos ayudan a que la app funcione y que actúan por nuestra cuenta: <b>Supabase</b> (base de datos, cuentas y archivos; servidores en Estados Unidos), <b>GitHub</b> (donde se publica la página y donde guardamos una copia de respaldo semanal de la base de datos, <b>cifrada</b> con una clave que solo tiene el responsable; servidores en Estados Unidos) y <b>jsDelivr</b> (entrega de programas de la página). Si quieres ser repartidor, <b>Didit</b> verifica tu identidad como se explica arriba. Los mapas de los pedidos con repartidor se dibujan con <b>OpenStreetMap</b> y <b>CARTO</b>: tu teléfono les pide la imagen de la zona del mapa, sin tus datos de cuenta. La app también carga fotos de ejemplo de <b>Unsplash</b> y el clima de <b>Open-Meteo</b>, sin enviarles tus datos de cuenta. Lo que publicas lo ven las personas según las reglas de la app (por ejemplo, los mensajes solo los ven tú y tu amigo). Podremos entregar información a autoridades cuando la ley lo exija, sobre todo si hay riesgo para un menor.</p>
+<p>Solo con proveedores que nos ayudan a que la app funcione y que actúan por nuestra cuenta: <b>Supabase</b> (base de datos, cuentas y archivos; servidores en Estados Unidos), <b>GitHub</b> (donde se publica la página y donde guardamos una copia de respaldo semanal de la base de datos, <b>cifrada</b> con una clave que solo tiene el responsable; servidores en Estados Unidos) y <b>jsDelivr</b> (entrega de programas de la página). Si quieres ser repartidor, <b>Didit</b> verifica tu identidad como se explica arriba. Los mapas de los pedidos con repartidor se dibujan con <b>OpenStreetMap</b> y <b>CARTO</b>: tu teléfono les pide la imagen de la zona del mapa, sin tus datos de cuenta. La app también carga fotos de ejemplo de <b>Unsplash</b> sin enviarles tus datos de cuenta. El clima es el pronóstico oficial del <b>Servicio Meteorológico Nacional (CONAGUA)</b>, que guardamos en nuestra propia base: tu teléfono no se conecta con nadie más para verlo. Lo que publicas lo ven las personas según las reglas de la app (por ejemplo, los mensajes solo los ven tú y tu amigo). Podremos entregar información a autoridades cuando la ley lo exija, sobre todo si hay riesgo para un menor.</p>
 <h3>6. Menores de edad</h3>
 <p>MOCHI es para personas de <b>13 años o más</b>. Si tienes entre 13 y 17 años, necesitas que tu mamá, papá o tutor lea este aviso y te dé permiso; por eso te lo pedimos al crear tu cuenta. Tu mamá, papá o tutor puede pedirnos en cualquier momento ver, corregir o borrar tus datos, o cerrar tu cuenta.</p>
 <h3>7. ¿Cuánto tiempo guardamos tus datos?</h3>
