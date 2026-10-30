@@ -1971,7 +1971,7 @@ function vNotifs(){
 /* ---------- perfiles ---------- */
 function cabPerfil(id){
   const a = perfilDe(id); const u = esNeg(id)?null:usr(id); const mio = id===S.yo;
-  return `<div class="card pcab">${bannerPerfil(id, mio)}<div class="prof"><div class="avw">${avatar(a,150)}${mio?camAvatar(id):''}</div><div class="stack" style="gap:8px;min-width:0;flex:1">
+  return `<div class="card pcab">${bannerPerfil(id, puedeEditarFoto(id))}<div class="prof"><div class="avw">${avatar(a,150)}${puedeEditarFoto(id)?camAvatar(id):''}</div><div class="stack" style="gap:8px;min-width:0;flex:1">
       <div class="row between nowrap"><div style="min-width:0"><h1 class="pnom">${nombreV(a)}</h1>${typeof a.verificado==='string'?`<div class="vlabel ${a.verificado}">✓ ${esc(VERIF_TXT[a.verificado])}</div>`:''}<div class="muted small">@${esc(a.handle)}${!mio&&sigue(id,S.yo)?' · <span class="pill">Te sigue</span>':''}</div></div>
         ${mio?`<div class="row nowrap" style="gap:6px"><button class="btn soft sm pmas" data-a="mas" aria-label="Más opciones">${ico.menu}Más</button><button class="ibtn pgear" data-a="go" data-x="ajustes" aria-label="Configuración">${ico.gear}</button></div>`:`<button class="ibtn" data-a="opcPerfil" data-x="${id}" aria-label="Opciones">${ico.dots}</button>`}</div>
       <div class="stats"><div><b>${npubs(id)}</b><span>publicaciones</span></div><button class="stat" data-a="verSeg" data-x="${id}" data-o="seguidores"><b>${seguidores(id)}</b><span>seguidores${listaVisible(id,'seguidores')?'':' 🔒'}</span></button><button class="stat" data-a="verSeg" data-x="${id}" data-o="seguidos"><b>${siguiendo(id)}</b><span>siguiendo${listaVisible(id,'seguidos')?'':' 🔒'}</span></button></div></div></div>
@@ -2328,7 +2328,7 @@ function vNegocio(){
   const puede = S.sesion && S.pedidos.some(p=>p.neg===n.id&&p.estado==='entregado'&&p.cuenta===S.yo) && !rs.some(r=>r.autor===S.yo);
   const zonas = (n.zonas||[]).map(z=>`${esc(z.col)} ${money(z.costo)}`).join(', ');
   return `<div class="stack"><button class="btn back" data-a="atras">${ico.back}Volver</button>
-  <div class="bhead"><div class="cv">${portada(n)}${avatar(a,76)}${botonesPortada(n.id, mio, !!fotoSrc(n.portada))}${mio?camAvatar(n.id):''}</div><div class="in">
+  <div class="bhead"><div class="cv">${portada(n)}${avatar(a,76)}${botonesPortada(n.id, puedeEditarFoto(n.id), !!fotoSrc(n.portada))}${puedeEditarFoto(n.id)?camAvatar(n.id):''}</div><div class="in">
     <div class="row between"><div><h1>${nombreV(a)}</h1><div class="small muted">@${esc(a.handle)} · ${esc(TIPOS[n.tipo].uno)}${n.estado!=='activo'?` · <span class="pill warn">${esc(n.estado)}</span>`:''}</div></div>
       <div class="row">${mio?`<button class="btn pri sm" data-a="go" data-x="minegocio">${ico.biz} Mi negocio</button><button class="btn soft sm pmas" data-a="mas" aria-label="Más opciones">${ico.menu}Más</button>`:`${botonSeguir(n.id)}${amigos(S.yo,n.id)?`<button class="btn soft sm" data-a="abrirChat" data-x="${n.id}">Mensaje</button>`:''}<button class="ibtn" data-a="opcPerfil" data-x="${n.id}" aria-label="Opciones">${ico.dots}</button>`}</div></div>
     <div class="stats"><div><b>${npubs(n.id)}</b><span>publicaciones</span></div><div><b>${seguidores(n.id)}</b><span>seguidores</span></div><div><b>${c?c.avg.toFixed(1):'—'}</b><span>${c?c.n+' reseñas':'sin reseñas'}</span></div></div>
@@ -2486,7 +2486,7 @@ function vMiNegocio(){
   if (!soyNegocio()) return `<div class="empty"><h2>No estás usando una cuenta de negocio</h2><button class="btn pri" data-a="cuentas">Cambiar de cuenta</button></div>`;
   const n = neg(S.yo);
   const nuevos = S.pedidos.filter(p=>p.neg===n.id&&!['entregado','rechazado','cancelado'].includes(p.estado)).length;
-  return `<div class="stack"><div class="row between"><div class="row">${avatar(perfilDe(n.id),48)}<div><span class="small muted">Mi negocio</span><h1 style="font-size:24px">${nombreV(perfilDe(n.id))}</h1></div></div><button class="btn soft sm" data-a="neg" data-x="${n.id}">Ver como cliente</button><label class="small muted" style="display:flex;align-items:center;gap:6px">Prototipo: negocio<select data-ch="negDemo" style="width:auto;padding:6px 8px;font-size:13px">${S.negocios.map(x=>`<option value="${x.id}" ${x.id===n.id?'selected':''}>${esc(x.nombre)}</option>`).join('')}</select></label></div>
+  return `<div class="stack"><div class="row between"><div class="row">${avatar(perfilDe(n.id),48)}<div><span class="small muted">Mi negocio</span><h1 style="font-size:24px">${nombreV(perfilDe(n.id))}</h1></div></div><button class="btn soft sm" data-a="neg" data-x="${n.id}">Ver como cliente</button><button class="btn soft sm" data-a="edAbrir" data-x="${n.id}" data-o="portada">${ico.cam} Portada</button><button class="btn soft sm" data-a="edAbrir" data-x="${n.id}" data-o="avatar">${ico.cam} Foto del negocio</button><label class="small muted" style="display:flex;align-items:center;gap:6px">Prototipo: negocio<select data-ch="negDemo" style="width:auto;padding:6px 8px;font-size:13px">${S.negocios.map(x=>`<option value="${x.id}" ${x.id===n.id?'selected':''}>${esc(x.nombre)}</option>`).join('')}</select></label></div>
   ${n.estado!=='activo'?`<div class="note warn">Tu negocio está <b>${esc(n.estado)}</b>. Puedes preparar tu catálogo, pero los clientes aún no lo ven.${n.motivo&&n.estado!=='pendiente'?`<br><b>Razón:</b> ${esc(n.motivo)}`:''}</div>`:''}
   <div class="ptabs">${[['pedidos',`Pedidos${nuevos?` (${nuevos})`:''}`],['catalogo','Catálogo'],['publicaciones','Publicaciones'],['seguidores','Seguidores'],['perfil','Perfil y envíos'],['ventas','Ventas y cargos']].map(([k,l])=>`<button class="${ui.pTab===k?'on':''}" data-a="bizTab" data-x="${k}">${l}</button>`).join('')}</div>
   ${ {pedidos:pPedidos, catalogo:pCatalogo, publicaciones:pPublicaciones, seguidores:pSeguidores, perfil:pPerfil, ventas:pVentas}[ui.pTab](n) }</div>`;
@@ -6627,6 +6627,8 @@ async function guardarFoto(d){ if(!d.m) return d; const id='f'+Date.now().toStri
    Un solo editor para las dos: se elige la foto, pasa por el escudo, se acomoda con botones
    (sin arrastrar, sin zoom ni animaciones) y se recorta en el teléfono antes de subirla. */
 const EDF = {portada:{r:3, w:1200, q:.8, carpeta:'portada-'}, avatar:{r:1, w:400, q:.85}};
+// Puede cambiar portada/foto: su cuenta personal y sus negocios, sin importar con qué cuenta esté navegando
+const puedeEditarFoto = id => !!id && (id===S.yo || id===S.personal || (S.misNegocios||[]).includes(id));
 function portadaDe(id){ const x = esNeg(id) ? neg(id) : usr(id); return x && x.portada || null; }
 function fotoPerfilDe(id){ if (esNeg(id)){ const n = neg(id); return n && n.fotoUrl || ''; } const u = usr(id); return u && u.foto || ''; }
 function bannerPerfil(id, mio){
@@ -6648,7 +6650,7 @@ function abrirEditorFoto(id, tipo, src, dim, nueva){
   renderLayer();
 }
 function hojaEditorFoto(){
-  const s = ui.sheet, cov = s.tipo==='portada', mio = s.id===S.yo;
+  const s = ui.sheet, cov = s.tipo==='portada', mio = puedeEditarFoto(s.id);
   if (!mio) return '';
   const tiene = cov ? !!fotoSrc(portadaDe(s.id)) : !!fotoPerfilDe(s.id);
   const otra = selFotos({id:'ed-'+s.tipo, titulo: s.nueva||tiene ? 'Elegir otra foto' : 'Elegir foto', cam: cov ? 'environment' : 'user'});
@@ -6695,7 +6697,7 @@ function puedeSubirFotos(){ const u = usr(S.personal); if (u && u.subidas===fals
 function registrarAccionesPortadas(){
   window.HOJAS_EXTRA = Object.assign(window.HOJAS_EXTRA||{}, {edFoto:hojaEditorFoto});
   Object.assign(A, {
-    edAbrir: (id, el) => { if (id!==S.yo) return; const tipo = el.dataset.o==='avatar' ? 'avatar' : 'portada';
+    edAbrir: (id, el) => { if (!puedeEditarFoto(id)) return; const tipo = el.dataset.o==='avatar' ? 'avatar' : 'portada';
       const src = tipo==='portada' ? fotoSrc(portadaDe(id)) : fotoPerfilDe(id);
       ui.sheet = {t:'edFoto', id, tipo, src, nueva:false, x:50, y:50, mueve:'', err:''}; renderLayer(); },
     edMover: x => { const s = ui.sheet; if (!s || s.t!=='edFoto' || !s.mueve) return; const k = s.mueve; s[k] = Math.max(0, Math.min(100, s[k] + 25*(+x))); renderLayer(); },
@@ -6718,7 +6720,7 @@ function registrarAccionesPortadas(){
     if (pid!=='ed-portada' && pid!=='ed-avatar') return;
     const s = ui.sheet; if (!s || s.t!=='edFoto') return;
     const tipo = pid.slice(3), id = s.id, f = t.files && t.files[0];
-    if (!f || id!==S.yo) return;
+    if (!f || !puedeEditarFoto(id)) return;
     if (!f.type.startsWith('image/')){ try { t.value=''; } catch(_){} return toast('Elige una foto.'); }
     if (f.size > 25*1024*1024){ try { t.value=''; } catch(_){} return toast('Esa foto pesa demasiado.'); }
     if (!puedeSubirFotos()){ try { t.value=''; } catch(_){} return; }
