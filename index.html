@@ -80,6 +80,21 @@ label.f span.h{font-weight:400;color:var(--muted);font-size:12.5px}
 input[type=text],input[type=tel],input[type=email],input[type=password],input[type=number],input[type=search],select,textarea{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 13px;font-size:15px;transition:border-color .15s}
 input:focus,select:focus,textarea:focus{border-color:var(--brand);outline:none}
 input[type=file]{font-size:13.5px;max-width:100%}
+/* selector único de fotos (perfil, publicaciones, historias, productos) */
+.fpick{display:flex;flex-direction:column;gap:8px}
+.fpick-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-weight:700;font-size:14px}
+.fpick-h small{font-weight:600;color:var(--muted);font-size:12.5px}
+.fpick-row{display:flex;gap:8px;align-items:stretch}
+.fpick-b{position:relative;flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:12px;border:1.5px dashed var(--brand);border-radius:14px;background:var(--brand-soft);color:var(--fg);cursor:pointer;font-weight:400;-webkit-tap-highlight-color:transparent}
+.fpick-b:focus-within{outline:2px solid var(--brand);outline-offset:2px}
+.fpick-b .ic{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--brand);color:var(--brand-ink)}
+.fpick-b .ic svg{width:20px;height:20px}
+.fpick-b .tx{display:flex;flex-direction:column;min-width:0;line-height:1.25}.fpick-b .tx b{font-size:14.5px}
+.fpick-b .tx small{color:var(--muted);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fpick-in{position:absolute;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none}
+.fpick .h{font-weight:400;color:var(--muted);font-size:12.5px}
+.fpick-av{display:flex;align-items:center;gap:12px}.fpick-av .fpick-row{flex:1;min-width:0;flex-direction:column}.fpick-av .fpick-b{padding:8px 12px}
+.fpick-full{font-size:13px;color:var(--muted);padding:10px 12px;border:1.5px dashed var(--line);border-radius:14px}
 input[type=checkbox],input[type=radio]{accent-color:var(--brand);width:18px;height:18px;flex:none}
 textarea{min-height:76px;resize:vertical}
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
@@ -1764,6 +1779,8 @@ const ico = {
   help:I('<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.7M12 17h.01"/>'),
   biz:I('<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/>'),
   moto:I('<circle cx="5.5" cy="17" r="2.5"/><circle cx="18.5" cy="17" r="2.5"/><path d="M8 17h7.5l3-6.5M14 6h3l1.5 4.5M3 13h7l2 4"/>'),
+  img:I('<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/>'),
+  cam:I('<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/>'),
   user:I('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>')
 };
 
@@ -1981,7 +1998,7 @@ function vAjustes(){
       <div class="grid2"><label class="f" for="u-nom">Nombre<input id="u-nom" type="text" maxlength="40" value="${esc(u.nombre)}"></label>
       <label class="f" for="u-usr">Usuario<input id="u-usr" type="text" maxlength="24" value="${esc(u.usuario)}"><span class="h">Letras, números, punto y guion bajo.</span></label></div>
       <label class="f" for="u-bio">Descripción<textarea id="u-bio" maxlength="150">${esc(u.bio)}</textarea><span class="h">Sin enlaces, correos ni teléfonos.</span></label>
-      <label class="f" for="u-foto">Foto de perfil<input id="u-foto" type="file" accept="image/*"></label>
+      ${selFotos({id:'u-foto', titulo:'Foto de perfil', cam:'user', previa: ui.draftU ? `<span class="avatar" style="--s:64px"><img src="${esc(ui.draftU)}" alt="Nueva foto de perfil"></span>` : avatar(u,64), ayuda: ui.draftU?'Esta es tu nueva foto. Se guarda al tocar <b>Guardar cambios</b>.':''})}
       ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}
       <div class="row"><button class="btn pri" type="submit">Guardar cambios</button></div></form>`}
   </div></details>
@@ -2083,12 +2100,28 @@ function hojaCrear(){
     <button class="lrow" data-a="nuevaHist">${I('<circle cx="12" cy="12" r="9" stroke-dasharray="3 3"/><path d="M12 8v8M8 12h8"/>')}<div class="tx"><b>Historia</b><div class="small muted">Una foto que ven tus seguidores durante 24 horas</div></div></button>
     <button class="lrow" data-a="nota">${ico.msg}<div class="tx"><b>Nota</b><div class="small muted">Un texto corto en tus mensajes durante 20 horas</div></div></button>`);
 }
+/* Selector único de fotos. Todo lo que pide fotos (perfil, publicaciones, historias, productos) usa este.
+   En celular ofrece Galería y Cámara; en computadora solo Galería. Cuando haya cámara propia o filtros,
+   se conectan aquí y en el manejador de 'change' (busca data-pick). */
+const esTactil = () => { try { return matchMedia('(pointer:coarse)').matches; } catch(e){ return false; } };
+function selFotos(o){ // o: {id, titulo, ayuda, multi, n, max, cam:'environment'|'user', previa}
+  const lleno = o.max && o.n >= o.max;
+  const cuenta = o.max>1 ? `<small>${o.n||0} de ${o.max}</small>` : '';
+  const inp = (id, extra) => `<input id="${id}" class="fpick-in" type="file" accept="image/*"${extra}>`;
+  const boton = lleno ? `<div class="fpick-full">Ya tienes ${o.max} fotos, el máximo. Quita una para agregar otra.</div>`
+    : `<div class="fpick-row"><label class="fpick-b" for="${o.id}"><span class="ic">${ico.img}</span><span class="tx"><b>Galería</b><small>${o.multi?'Elegir fotos':'Elegir una foto'}</small></span>${inp(o.id, o.multi?' multiple':'')}</label>`
+      + (esTactil() ? `<label class="fpick-b" for="${o.id}-cam"><span class="ic">${ico.cam}</span><span class="tx"><b>Cámara</b><small>Tomar foto</small></span>${inp(o.id+'-cam', ` capture="${o.cam||'environment'}" data-pick="${o.id}"`)}</label>` : '')
+      + `</div>`;
+  return `<div class="fpick">${o.titulo?`<div class="fpick-h"><span>${o.titulo}</span>${cuenta}</div>`:''}
+    ${o.previa?`<div class="fpick-av">${o.previa}${boton}</div>`:boton}
+    ${o.ayuda?`<span class="h">${o.ayuda}</span>`:''}</div>`;
+}
 function hojaPublicar(){
   const u = yo();
   if (!soyNegocio()) revisarSanciones(u);
   if (!u.subidas) return hoja('Tus publicaciones están en pausa', bloqueoPublicarHTML(u));
   const n = soyNegocio()?neg(S.yo):null;
-  return hoja('Nueva publicación', `<label class="f" for="pub-files">Fotos (opcional, hasta 10)<input id="pub-files" type="file" accept="image/*" multiple><span class="h">Sin fotos se publica como <b>post</b> de solo texto.</span></label>
+  return hoja('Nueva publicación', `${selFotos({id:'pub-files', titulo:'Fotos <span class="h">(opcional)</span>', multi:true, n:ui.draft.length, max:10, ayuda: ui.draft.length?'':'Sin fotos se publica como <b>post</b> de solo texto.'})}
     ${ui.draft.length?`<div class="drafts">${ui.draft.map((d,i)=>`<div class="ph">${d.m?`<img src="${esc(d.m)}" alt="">`:escena(d)}<button type="button" data-a="quitarFoto" data-x="${i}" aria-label="Quitar foto">×</button></div>`).join('')}</div>`
       :VIVO?'':`<button type="button" class="btn soft sm" data-a="fotosEjemplo">Sin fotos a la mano: usar fotos de ejemplo</button>`}
     <label class="f" for="pub-txt">Texto<textarea id="pub-txt" maxlength="300" placeholder="¿Qué está pasando? Usa @ para etiquetar personas o negocios">${esc(ui.draftTxt)}</textarea><span class="h">Escribe <b>@</b> y las primeras letras: te sugerimos cuentas para etiquetar.</span></label>
@@ -2101,7 +2134,7 @@ function hojaPublicar(){
 }
 function hojaHistoria(){
   const d = ui.draftH;
-  return hoja('Nueva historia', `<label class="f" for="hist-file">Foto<input id="hist-file" type="file" accept="image/*"></label>
+  return hoja('Nueva historia', `${selFotos({id:'hist-file', titulo: d?'Cambiar foto':'Foto'})}
     ${d?`<div class="ph" style="aspect-ratio:9/16;max-height:300px;width:auto;border-radius:12px">${d.m?`<img src="${esc(d.m)}" alt="">`:escena(d)}</div>`:`<button type="button" class="btn soft sm" data-a="histEjemplo">Sin foto a la mano: usar una de ejemplo</button>`}
     <label class="f" for="ht-q">Etiquetar personas o negocios <span class="h">Opcional. Aparecen a un costado de tu historia.</span><input id="ht-q" type="text" placeholder="Escribe un nombre…" autocomplete="off"></label>
     <div id="ht-sug"></div>
@@ -2477,9 +2510,10 @@ function editorProducto(n){
     <label class="f" for="e-var">Variantes (una por línea) <span class="h">Ejemplo: <code>Talla: CH, M, G</code> · con precio extra: <code>Tamaño: Chica, Grande +25</code></span><textarea id="e-var">${esc(varTxt(p))}</textarea></label>
     <label class="f" for="e-mods">Complementos (una línea por grupo) <span class="h">Ejemplo: <code>Extras (0-3): Queso +15, Aguacate +20</code> · (1-1) = elegir uno obligatorio</span><textarea id="e-mods">${esc(modTxt(p))}</textarea></label></div></details>
     <label class="chk"><input id="e-disp" type="checkbox" ${p.disp?'checked':''}> Visible para los clientes</label>
-    <div class="f"><b>Fotos del producto (hasta 4)</b><span class="h">Varias fotos ayudan al cliente a decidir: de frente, de cerca, el tamaño, cómo se entrega.</span>
+    <div class="stack" style="gap:8px">
+      ${selFotos({id:'e-fotos', titulo:'Fotos del producto', multi:true, n:(ui.draftPF||[]).length, max:4, ayuda:'Varias fotos ayudan al cliente a decidir: de frente, de cerca, el tamaño, cómo se entrega.'})}
       <div class="drafts">${(ui.draftPF||[]).map((d,i)=>`<div class="ph">${verFoto(d)}<button type="button" data-a="quitarFotoProd" data-x="${i}" aria-label="Quitar foto">×</button></div>`).join('')}</div>
-      ${(ui.draftPF||[]).length<4?`<div class="row"><input id="e-fotos" type="file" accept="image/*" multiple><button type="button" class="btn soft sm" data-a="fotosProdEjemplo">Usar fotos de ejemplo</button></div>`:'<span class="small muted">Ya tienes 4 fotos (el máximo).</span>'}</div>
+      ${(ui.draftPF||[]).length<4?`<button type="button" class="btn soft sm" style="align-self:flex-start" data-a="fotosProdEjemplo">Usar fotos de ejemplo</button>`:''}</div>
     ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}<div class="row"><button class="btn pri" type="submit">Guardar producto</button></div></form>`;
 }
 function pPublicaciones(n){
@@ -5380,7 +5414,7 @@ function vRefrescar(forzar){
   const a = document.activeElement; const escribiendo = a && (a.tagName==='INPUT' || a.tagName==='TEXTAREA') && a.type!=='checkbox' && a.type!=='radio' && a.value;
   // nunca borrar un formulario a medio llenar (producto, publicación, historia, nota, mensaje…)
   const conDatos = [...document.querySelectorAll('#app form input, #app form textarea, #layer form input, #layer form textarea')].some(e=>e.type!=='checkbox' && e.type!=='radio' && e.type!=='hidden' && (e.type==='file' ? e.files && e.files.length : e.value));
-  const formAbierto = ui.edit || (ui.sheet && ['publicar','historia','nota','apelar','enviarHist','reportar','verNota','compartir'].includes(ui.sheet.t)) || (ui.draft && ui.draft.length) || ui.draftH || (ui.draftPF && ui.draftPF.length && ui.edit);
+  const formAbierto = ui.edit || (ui.sheet && ['publicar','historia','nota','apelar','enviarHist','reportar','verNota','compartir'].includes(ui.sheet.t)) || (ui.draft && ui.draft.length) || ui.draftH || ui.draftU || (ui.draftPF && ui.draftPF.length && ui.edit);
   if ((escribiendo || conDatos || formAbierto) && !forzar){ vRefrescar.pendiente = true; clearTimeout(vRefrescar.t); vRefrescar.t = setTimeout(()=>{ if (vRefrescar.pendiente) vRefrescar(); }, 8000); return; }
   vRefrescar.pendiente = false;
   if (ui.story){ renderStory(); return; }
@@ -6322,6 +6356,7 @@ function renderLayer(){
   if (!ui.story) document.body.style.overflow = h ? 'hidden' : '';
 }
 function go(view, keep){
+  ui.draftU = null;
   if (!['usuario','post'].includes(view)) ui.admVolver = false;
   if(!keep && ui.view!==view) historial.push({view:ui.view, post:ui.post, perfil:ui.perfil, neg:ui.neg});
   if (view==='chat') view='mensajes';
@@ -6623,7 +6658,7 @@ const F = {
     if (S.usuarios.some(x=>x.id!==u.id && x.usuario.toLowerCase()===us.toLowerCase())) return fail('Ese usuario ya existe.');
     const ns = nombreSeguro(nom,us); if (ns) return fail(ns);
     const r=revisar(nom+' '+us+' '+bio,'publico'); if(!r.ok) return fail(msgBloqueo(r));
-    const f=$('#u-foto').files[0]; if (f){ try { u.foto = await redimensionar(f,200,true); } catch(e){ return fail(e&&e.escudo?e.message:'No se pudo leer la imagen.'); } }
+    if (ui.draftU){ u.foto = ui.draftU; ui.draftU = null; }
     const perdio = u.verif && (u.nombre!==nom || u.usuario!==us); if (perdio) u.verif = null;
     Object.assign(u,{nombre:nom, usuario:us, bio}); ui.err=''; save(); rerender(); toast(perdio?'Perfil guardado. Como cambiaste tu nombre, la insignia de verificación se quitó hasta revisarte de nuevo.':'Perfil guardado');
   },
@@ -6684,9 +6719,11 @@ document.addEventListener('change', async e => {
   if (t.id==='solo-disp'){ ui.soloDisp=t.checked; rerender(); }
   if (t.dataset && t.dataset.ch && A[t.dataset.ch]) A[t.dataset.ch](t.value);
   if (t.name==='modo' || t.id==='f-col' || t.id==='f-oferta') actualizarTotales();
-  if (t.id==='pub-files'){ guardarBorrador(); try { const nuevas = await leerFotos(t, 10-ui.draft.length); ui.draft.push(...nuevas.slice(0,10-ui.draft.length)); ui.err=leerFotos.err||''; } catch(err){ ui.err='No se pudo leer una de las fotos.'; } renderLayer(); }
-  if (t.id==='e-fotos'){ try { const nuevas = await leerFotos(t, 4-(ui.draftPF||[]).length); ui.draftPF = (ui.draftPF||[]).concat(nuevas).slice(0,4); ui.err=leerFotos.err||''; if (ui.err) toast(ui.err); } catch(err){ ui.err='No se pudieron leer las fotos.'; } renderConservando(); }
-  if (t.id==='hist-file' && t.files[0]){ try { ui.draftH={m:await redimensionar(t.files[0],1080,false)}; ui.err=''; } catch(err){ ui.err=err&&err.escudo?err.message:'No se pudo leer la foto.'; try { t.value=''; } catch(e){} } renderLayer(); }
+  const pid = (t.dataset && t.dataset.pick) || t.id; // la cámara llega con data-pick = id de su galería
+  if (pid==='u-foto' && t.files && t.files[0]){ try { ui.draftU = await redimensionar(t.files[0],200,true); ui.err=''; } catch(err){ ui.err=err&&err.escudo?err.message:'No se pudo leer la imagen.'; } try { t.value=''; } catch(e){} renderConservando(); }
+  if (pid==='pub-files'){ guardarBorrador(); try { const nuevas = await leerFotos(t, 10-ui.draft.length); ui.draft.push(...nuevas.slice(0,10-ui.draft.length)); ui.err=leerFotos.err||''; } catch(err){ ui.err='No se pudo leer una de las fotos.'; } renderLayer(); }
+  if (pid==='e-fotos'){ try { const nuevas = await leerFotos(t, 4-(ui.draftPF||[]).length); ui.draftPF = (ui.draftPF||[]).concat(nuevas).slice(0,4); ui.err=leerFotos.err||''; if (ui.err) toast(ui.err); } catch(err){ ui.err='No se pudieron leer las fotos.'; } renderConservando(); }
+  if (pid==='hist-file' && t.files[0]){ try { ui.draftH={m:await redimensionar(t.files[0],1080,false)}; ui.err=''; } catch(err){ ui.err=err&&err.escudo?err.message:'No se pudo leer la foto.'; try { t.value=''; } catch(e){} } renderLayer(); }
 });
 document.addEventListener('scroll', e => {
   const tr = e.target; if (!(tr instanceof Element) || !tr.dataset || !tr.dataset.car) return;
