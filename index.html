@@ -521,7 +521,7 @@ details.set .bd{padding:0 18px 18px;display:flex;flex-direction:column;gap:12px}
 .perfil-w{max-width:935px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:18px}
 .pcab{padding:26px}
 .pcab .prof{gap:44px}
-.prof>.avatar{--s:clamp(86px,15vw,150px)!important}
+.prof>.avatar,.prof>.avw>.avatar{--s:clamp(86px,15vw,150px)!important}
 .pnom{font-size:clamp(22px,2.4vw,30px)}
 .pcab .stats{gap:34px}.pcab .stats b{font-size:22px}.pcab .stats span{font-size:14px}
 .perfil-w .pgrid{gap:4px;border-radius:14px}
@@ -720,8 +720,8 @@ button.pill.star{cursor:pointer;position:static}
 h1,h2,h3,p,.note,.expl,.small,.muted,td{overflow-wrap:break-word}
 @media (max-width:767px){input,textarea,select{font-size:16px}}
 @media (max-width:520px){.pcab .stats{gap:12px;flex-wrap:wrap}.pnom{font-size:22px}.ptabs2 button{padding:9px 10px;font-size:13px}.ptabs2 button span{display:none}.ptabs2 button.on span{display:inline}.row.between{flex-wrap:wrap;gap:8px}.cols{grid-template-columns:1fr!important}.line{gap:10px}.line>span:first-child{min-width:0;overflow-wrap:anywhere}}
-@media (max-width:520px){.prof>.avatar{--s:86px!important}}
-@media (max-width:520px){.pcab .prof{flex-direction:column;align-items:stretch;gap:12px}.pcab .prof>.avatar{align-self:flex-start}.pcab .stats{flex-wrap:nowrap!important;justify-content:space-between;gap:8px}.pcab .stats>*{flex:1;text-align:center}.pcab .stats span{font-size:12.5px}}
+@media (max-width:520px){.prof>.avatar,.prof>.avw>.avatar{--s:86px!important}}
+@media (max-width:520px){.pcab .prof{flex-direction:column;align-items:stretch;gap:12px}.pcab .prof>.avatar,.pcab .prof>.avw{align-self:flex-start}.pcab .stats{flex-wrap:nowrap!important;justify-content:space-between;gap:8px}.pcab .stats>*{flex:1;text-align:center}.pcab .stats span{font-size:12.5px}}
 /* iPhone: sin "fantasmas" al mantener presionado, sin zoom por doble toque */
 img,svg{-webkit-user-drag:none;user-select:none;-webkit-user-select:none}
 button,.btn,.car,.bcard2,.pgal,.post-a,.mnav,.side,.stv{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
@@ -838,6 +838,29 @@ body.vivo .todo{display:none!important}
 .legal-body .chk{margin:10px 0}.lph{background:#fde68a;color:#111;border-radius:4px;padding:0 3px}
 .leglinks a{color:inherit;text-decoration:underline;cursor:pointer}
 .rltabs{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--line)}.rltabs button{flex:1;border:0;background:none;padding:9px;border-radius:9px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer}.rltabs button.on{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}.rlogin form{text-align:left}
+/* portadas (banner) y foto de perfil: sin animaciones ni zoom */
+.pcov{position:relative;margin:-26px -26px 0;height:clamp(120px,30vw,300px);border-radius:17px 17px 0 0;overflow:hidden;background:linear-gradient(135deg,var(--c1),var(--c2))}
+.pcov>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.pcab{--ov:60px}
+.pcab .pcov+.prof{margin-top:calc(-1 * var(--ov))}
+.pcab .pcov+.prof>.avw{z-index:1}
+.pcab .pcov+.prof>.stack{padding-top:calc(var(--ov) + 6px)}
+.avw{position:relative;flex:none;line-height:0}
+.pcab .pcov+.prof>.avw>.avatar{border:4px solid var(--surface);box-sizing:content-box}
+.covbtn{position:absolute;right:12px;bottom:12px;z-index:2;display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:7px 12px;border-radius:10px;border:0;background:var(--surface);color:var(--fg);font:inherit;font-weight:700;font-size:13.5px;box-shadow:0 1px 6px rgba(0,0,0,.25);cursor:pointer}
+.covbtn svg,.bhead .cv .covbtn svg{position:static;width:18px;height:18px;flex:none}
+.avcam{position:absolute;right:2px;bottom:2px;z-index:2;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);color:var(--fg);border:2px solid var(--surface);box-shadow:0 1px 4px rgba(0,0,0,.2);cursor:pointer;padding:0}
+.avcam svg,.bhead .cv .avcam svg{position:static;width:18px;height:18px}
+.bhead .cv{height:clamp(140px,28vw,320px)}
+.bhead .cv .avcam{left:76px;right:auto;bottom:-34px}
+.edprev{position:relative;overflow:hidden;background:var(--surface-2);margin:0 auto}
+.edprev img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.edprev.cov{width:100%;aspect-ratio:3/1;border-radius:12px}
+.edprev.av{width:160px;height:160px;border-radius:50%}.edprev.av.biz{border-radius:28%}
+.edmov{justify-content:center}
+@media (max-width:767px){.pcab{--ov:40px}}
+@media (max-width:620px){.pcov{margin:-16px -16px 0;border-radius:17px 17px 0 0}}
+@media (max-width:520px){.pcab{--ov:44px}.pcab .pcov+.prof>.stack{padding-top:0}.covbtn{right:8px;bottom:8px;padding:6px 10px;font-size:13px}}
 </style>
 </head>
 <body>
@@ -1272,7 +1295,7 @@ const IDB = {
 };
 async function cargarFotos(){
   try { await IDB.open(); } catch(e){ return; }
-  let n=0; const todas=[...S.posts.flatMap(p=>p.fotos), ...S.historias.map(h=>h.foto)];
+  let n=0; const todas=[...S.posts.flatMap(p=>p.fotos), ...S.historias.map(h=>h.foto), ...S.usuarios.map(u=>u.portada), ...S.negocios.map(n=>n.portada)];
   for (const f of todas) if (f && f.m && !MEDIA[f.m]){ const d=await IDB.get(f.m); if(d){ MEDIA[f.m]=d; n++; } }
   if (n) rerender();
 }
@@ -1523,7 +1546,8 @@ const BIZK = {b2:'coctel', b7:'pizza', b14:'tenis', b15:'pastel'};
 const kNeg = n => BIZK[n.id] || TIPOS[n.tipo].k;
 const fotoCuadro = (f, grande) => `<div class="ph">${verFoto(f, grande)}</div>`;
 const fotoProd = (p, i=0) => { const f = p.fotos && p.fotos[i]; if (f) return verFoto(f); const k=p.k||TIPOS[neg(p.neg).tipo].k; return verFoto({k, a:'#F5F5F4', b:'#E7E5E4', c:'#FFFFFF', l:p.nombre, u:p.foto?null:fotoU(k,p.id)}); };
-const portada = n => verFoto({k:kNeg(n), a:color2(n.color,.25), b:color2(n.color,.55), l:n.nombre, u:fotoU(kNeg(n), n.id+'c')});
+const portada = n => { const src = fotoSrc(n.portada); return src ? `<img src="${esc(src)}" alt="" loading="lazy">` : verFoto({k:kNeg(n), a:color2(n.color,.25), b:color2(n.color,.55), l:n.nombre, u:fotoU(kNeg(n), n.id+'c')}); };
+const fotoSrc = f => f && f.m ? (MEDIA[f.m] || '') : '';
 function color2(hex, k){ const h=hex.replace('#',''); const r=parseInt(h.slice(0,2),16), g=parseInt(h.slice(2,4),16), b=parseInt(h.slice(4,6),16); const m=v=>Math.round(v+(255-v)*(1-k)); return `rgb(${m(r)},${m(g)},${m(b)})`; }
 
 /* ============================================================
@@ -1933,7 +1957,7 @@ function vNotifs(){
 /* ---------- perfiles ---------- */
 function cabPerfil(id){
   const a = perfilDe(id); const u = esNeg(id)?null:usr(id); const mio = id===S.yo;
-  return `<div class="card pcab"><div class="prof">${avatar(a,150)}<div class="stack" style="gap:8px;min-width:0;flex:1">
+  return `<div class="card pcab">${bannerPerfil(id, mio)}<div class="prof"><div class="avw">${avatar(a,150)}${mio?camAvatar(id):''}</div><div class="stack" style="gap:8px;min-width:0;flex:1">
       <div class="row between nowrap"><div style="min-width:0"><h1 class="pnom">${nombreV(a)}</h1>${typeof a.verificado==='string'?`<div class="vlabel ${a.verificado}">✓ ${esc(VERIF_TXT[a.verificado])}</div>`:''}<div class="muted small">@${esc(a.handle)}${!mio&&sigue(id,S.yo)?' · <span class="pill">Te sigue</span>':''}</div></div>
         ${mio?`<div class="row nowrap" style="gap:6px"><button class="btn soft sm pmas" data-a="mas" aria-label="Más opciones">${ico.menu}Más</button><button class="ibtn pgear" data-a="go" data-x="ajustes" aria-label="Configuración">${ico.gear}</button></div>`:`<button class="ibtn" data-a="opcPerfil" data-x="${id}" aria-label="Opciones">${ico.dots}</button>`}</div>
       <div class="stats"><div><b>${npubs(id)}</b><span>publicaciones</span></div><button class="stat" data-a="verSeg" data-x="${id}" data-o="seguidores"><b>${seguidores(id)}</b><span>seguidores${listaVisible(id,'seguidores')?'':' 🔒'}</span></button><button class="stat" data-a="verSeg" data-x="${id}" data-o="seguidos"><b>${siguiendo(id)}</b><span>siguiendo${listaVisible(id,'seguidos')?'':' 🔒'}</span></button></div></div></div>
@@ -2290,7 +2314,7 @@ function vNegocio(){
   const puede = S.sesion && S.pedidos.some(p=>p.neg===n.id&&p.estado==='entregado'&&p.cuenta===S.yo) && !rs.some(r=>r.autor===S.yo);
   const zonas = (n.zonas||[]).map(z=>`${esc(z.col)} ${money(z.costo)}`).join(', ');
   return `<div class="stack"><button class="btn back" data-a="atras">${ico.back}Volver</button>
-  <div class="bhead"><div class="cv">${portada(n)}${avatar(a,76)}</div><div class="in">
+  <div class="bhead"><div class="cv">${portada(n)}${avatar(a,76)}${botonesPortada(n.id, mio, !!fotoSrc(n.portada))}${mio?camAvatar(n.id):''}</div><div class="in">
     <div class="row between"><div><h1>${nombreV(a)}</h1><div class="small muted">@${esc(a.handle)} · ${esc(TIPOS[n.tipo].uno)}${n.estado!=='activo'?` · <span class="pill warn">${esc(n.estado)}</span>`:''}</div></div>
       <div class="row">${mio?`<button class="btn pri sm" data-a="go" data-x="minegocio">${ico.biz} Mi negocio</button><button class="btn soft sm pmas" data-a="mas" aria-label="Más opciones">${ico.menu}Más</button>`:`${botonSeguir(n.id)}${amigos(S.yo,n.id)?`<button class="btn soft sm" data-a="abrirChat" data-x="${n.id}">Mensaje</button>`:''}<button class="ibtn" data-a="opcPerfil" data-x="${n.id}" aria-label="Opciones">${ico.dots}</button>`}</div></div>
     <div class="stats"><div><b>${npubs(n.id)}</b><span>publicaciones</span></div><div><b>${seguidores(n.id)}</b><span>seguidores</span></div><div><b>${c?c.avg.toFixed(1):'—'}</b><span>${c?c.n+' reseñas':'sin reseñas'}</span></div></div>
@@ -4870,6 +4894,7 @@ async function vCargar(){
     const pedir = {
       aj: sb.from('ajustes').select('*').eq('id',1).maybeSingle(),
       perf: sb.from('profiles').select(PCOLS).limit(2000),
+      port: sb.from('profiles').select('id,portada').not('portada', 'is', null).limit(2000),
       fol: vTodo(() => sb.from('follows').select('de,a').order('de').order('a')),
       sneg: sb.from('siguen_neg').select('de,negocio').limit(20000),
       blo: sb.from('bloqueos').select('de,a'),
@@ -4947,8 +4972,9 @@ function vArmar(D, E, admin, conteos, promCli){
   if (!admin && elimSet.size){ const fuera = x => !elimSet.has(x.autor);
     D.perf = D.perf.filter(p=>!elimSet.has(p.id)); D.posts = D.posts.filter(fuera); D.hist = (D.hist||[]).filter(fuera); D.notas = (D.notas||[]).filter(fuera); }
   // personas
+  const portadas = {}; (D.port||[]).forEach(r=>{ if (r.portada) portadas[r.id] = r.portada; });
   const usuarios = D.perf.map(p=>{ const a = admMap[p.id]; const mio = p.id===uid;
-    const u = {id:'u'+p.id, nombre:p.nombre, usuario:p.usuario, bio:p.bio||'', color:p.color||'#0D6B5B', foto:p.foto?rFoto(p.foto):null, fotoPath:p.foto||null, fu:null,
+    const u = {id:'u'+p.id, nombre:p.nombre, usuario:p.usuario, bio:p.bio||'', color:p.color||'#0D6B5B', foto:p.foto?rFoto(p.foto):null, fotoPath:p.foto||null, fu:null, portada:portadas[p.id]?vFotoObj(portadas[p.id]):null,
       priv:Object.assign({etiquetar:true, seguidores:true, seguidos:true}, p.priv||{}), verif:p.verif?{tipo:p.verif, t:vMs(p.verif_t||p.created_at), por:'Equipo'}:null,
       bot:!!p.ejemplo, grupo:p.ejemplo?'bot':'real', strikes:0, subidas:true, suspendido:false, menor:true, creado:vMs(p.created_at), eliminado:elimSet.has(p.id)};
     if (mio){ Object.assign(u, {strikes:E.avisos||0, subidas:E.subidas!==false || (E.bloq_hasta && vMs(E.bloq_hasta)<Date.now()), bloqHasta:E.bloq_hasta?vMs(E.bloq_hasta):null, suspendido:!!E.suspendido, suspHasta:E.susp_hasta?vMs(E.susp_hasta):null, menor:!!E.menor, edad:E.edad||null,
@@ -4959,7 +4985,7 @@ function vArmar(D, E, admin, conteos, promCli){
   // negocios
   const negocios = D.negs.map(n=>({id:'b'+n.id, sid:n.id, dueno:'u'+n.dueno, nombre:n.nombre, tipo:TIPOS[n.categoria]?n.categoria:'abarrotes', estado:ESTN[n.estado]||n.estado, motivo:n.motivo, verificado:!!n.verificado,
     color:n.color||'#C2410C', desc:n.descripcion||'', horario:n.horario||'', telefono:n.telefono||'', direccion:n.direccion||'', zona:n.zona||'', entrega:false, recoger:true, envio:0, envioGratis:0,
-    pedidoMin:vCent(n.pedido_min), zonas:[], tiempo:n.tiempo||'', secciones:(n.secciones&&n.secciones.length)?n.secciones:['General'], plan:'prueba gratis', fotoUrl:n.foto?rFoto(n.foto):null, fotoPath:n.foto||null, repartoApp:false}));
+    pedidoMin:vCent(n.pedido_min), zonas:[], tiempo:n.tiempo||'', secciones:(n.secciones&&n.secciones.length)?n.secciones:['General'], plan:'prueba gratis', fotoUrl:n.foto?rFoto(n.foto):null, fotoPath:n.foto||null, portada:n.portada?vFotoObj(n.portada):null, repartoApp:false}));
   const negDe = sid => 'b'+sid;
   // productos
   const productos = D.prods.map(p=>({id:'p'+p.id, sid:p.id, neg:negDe(p.negocio), nombre:p.nombre, desc:p.descripcion||'', sec:p.seccion||'General', precio:vCent(p.precio), unidad:p.unidad||'pieza', paso:Number(p.paso)||1,
@@ -6572,6 +6598,112 @@ async function redimensionar(file, max, cuadrado){ const d = await redimensionar
 async function leerFotos(input, limite){ leerFotos.err=''; const files=[...(input.files||[])].filter(f=>f.type.startsWith('image/')).slice(0,limite); const out=[]; for (const f of files){ if (f.size>25*1024*1024) continue; try { out.push({m:await redimensionar(f,1080,false)}); } catch(e){ if (e && e.escudo){ leerFotos.err=e.message; continue; } throw e; } } try { input.value=''; } catch(e){} return out; }
 async function guardarFoto(d){ if(!d.m) return d; const id='f'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); if(!IDB.db) await IDB.open(); await IDB.put(id,d.m); MEDIA[id]=d.m; return {m:id}; }
 
+/* ---------- portadas (banner) y foto de perfil / logo ----------
+   Un solo editor para las dos: se elige la foto, pasa por el escudo, se acomoda con botones
+   (sin arrastrar, sin zoom ni animaciones) y se recorta en el teléfono antes de subirla. */
+const EDF = {portada:{r:3, w:1200, q:.8, carpeta:'portada-'}, avatar:{r:1, w:400, q:.85}};
+function portadaDe(id){ const x = esNeg(id) ? neg(id) : usr(id); return x && x.portada || null; }
+function fotoPerfilDe(id){ if (esNeg(id)){ const n = neg(id); return n && n.fotoUrl || ''; } const u = usr(id); return u && u.foto || ''; }
+function bannerPerfil(id, mio){
+  const a = perfilDe(id), src = fotoSrc(portadaDe(id));
+  return `<div class="pcov" style="--c1:${color2(a.color||'#0D6B5B',.3)};--c2:${color2(a.color||'#0D6B5B',.7)}">${src?`<img src="${esc(src)}" alt="Foto de portada">`:''}${botonesPortada(id, mio, !!src)}</div>`;
+}
+function botonesPortada(id, mio, tiene){
+  if (mio) return `<button type="button" class="covbtn" data-a="edAbrir" data-x="${esc(id)}" data-o="portada">${ico.cam}<span>${tiene?'Editar portada':'Agregar portada'}</span></button>`;
+  if (VIVO && vEsAdminG() && tiene) return `<button type="button" class="covbtn" data-a="admQuitarPortada" data-x="${esc(id)}">Quitar portada (admin)</button>`;
+  return '';
+}
+function camAvatar(id){
+  return `<button type="button" class="avcam" data-a="edAbrir" data-x="${esc(id)}" data-o="avatar" aria-label="${fotoPerfilDe(id)?'Cambiar':'Agregar'} foto de perfil">${ico.cam}</button>`;
+}
+function medirFoto(src){ return new Promise((res, rej) => { const im = new Image(); im.onload = () => res({w:im.naturalWidth, h:im.naturalHeight}); im.onerror = () => rej(new Error('img')); im.src = src; }); }
+function abrirEditorFoto(id, tipo, src, dim, nueva){
+  const r = EDF[tipo].r, k = dim.w / dim.h;
+  ui.sheet = {t:'edFoto', id, tipo, src, nueva, x:50, y:50, mueve: !nueva ? '' : k > r*1.02 ? 'x' : k < r/1.02 ? 'y' : '', err:''};
+  renderLayer();
+}
+function hojaEditorFoto(){
+  const s = ui.sheet, cov = s.tipo==='portada', mio = s.id===S.yo;
+  if (!mio) return '';
+  const tiene = cov ? !!fotoSrc(portadaDe(s.id)) : !!fotoPerfilDe(s.id);
+  const otra = selFotos({id:'ed-'+s.tipo, titulo: s.nueva||tiene ? 'Elegir otra foto' : 'Elegir foto', cam: cov ? 'environment' : 'user'});
+  return hoja(cov?'Foto de portada':(esNeg(s.id)?'Foto del negocio':'Foto de perfil'), `
+    <div class="edprev ${cov?'cov':'av'+(esNeg(s.id)?' biz':'')}">${s.src?`<img src="${esc(s.src)}" alt="Vista previa" style="object-position:${s.x}% ${s.y}%">`:''}</div>
+    ${s.mueve?`<div class="row edmov"><button type="button" class="btn soft sm" data-a="edMover" data-x="-1">${s.mueve==='y'?'↑ Subir':'← Izquierda'}</button><button type="button" class="btn soft sm" data-a="edMover" data-x="1">${s.mueve==='y'?'↓ Bajar':'Derecha →'}</button></div>
+      <p class="small muted" style="margin:0;text-align:center">Mueve la foto para elegir qué parte se ve.</p>`:''}
+    ${s.err?`<div class="note bad small">${esc(s.err)}</div>`:''}
+    ${s.nueva?`<button type="button" class="btn pri" data-a="edGuardar" ${s.guardando?'disabled':''}>${s.guardando?'Guardando…':'Guardar'}</button>`:''}
+    ${s.guardando?'':otra}
+    ${!s.nueva && tiene && !s.guardando?`<button type="button" class="btn ghost" style="align-self:flex-start" data-a="edQuitar">Quitar ${cov?'portada':'foto'}</button>`:''}
+    <p class="small muted" style="margin:0">${cov?'Todos pueden ver tu portada. Las fotos pasan por el escudo de seguridad antes de subirse.':'Las fotos pasan por el escudo de seguridad antes de subirse.'}</p>`);
+}
+// Recorta en el teléfono la parte elegida (misma cuenta que object-position) y la achica
+function recortarFoto(src, tipo, x, y){ return new Promise((res, rej) => { const im = new Image(); im.onload = () => {
+  const {r, w, q} = EDF[tipo], iw = im.naturalWidth, ih = im.naturalHeight;
+  let sw = iw, sh = ih; if (iw/ih > r) sw = ih*r; else sh = iw/r;
+  const sx = (iw-sw)*x/100, sy = (ih-sh)*y/100, W = Math.round(Math.min(w, sw)), H = Math.round(W/r);
+  const c = document.createElement('canvas'); c.width = W; c.height = H; c.getContext('2d').drawImage(im, sx, sy, sw, sh, 0, 0, W, H);
+  res(c.toDataURL('image/jpeg', q)); }; im.onerror = () => rej(new Error('img')); im.src = src; }); }
+// Guarda (o quita, con d = null) la portada o la foto de perfil de la cuenta actual
+async function aplicarFotoCuenta(id, tipo, d){
+  const negocio = esNeg(id), n = negocio ? neg(id) : null, u = negocio ? null : usr(id);
+  if (!VIVO){
+    if (tipo==='portada'){ const f = d ? await guardarFoto({m:d}) : null; (n||u).portada = f; }
+    else if (negocio) n.fotoUrl = d; else u.foto = d;
+    save(); return;
+  }
+  await VQ.cola;
+  const tabla = negocio ? 'negocios' : 'profiles', sid = negocio ? n.sid : vUid();
+  if (!sid) throw new Error('Espera a que tu negocio termine de guardarse e intenta otra vez.');
+  const campo = tipo==='portada' ? 'portada' : 'foto';
+  const vieja = tipo==='portada' ? (((n||u).portada||{}).m||'').replace(/^s:/,'') : (n||u).fotoPath || '';
+  let ruta = null;
+  if (d){ const k = 'tmp'+Date.now(); MEDIA[k] = d; ruta = await vSubir({m:k}, tipo==='portada' ? 'portada-' : negocio ? 'logo-' : 'perfil-'); }
+  const {error} = await RV.sb.from(tabla).update({[campo]:ruta}).eq('id', sid); if (error) throw error;
+  if (tipo==='portada') (n||u).portada = ruta ? {m:'s:'+ruta} : null;
+  else if (negocio){ n.fotoUrl = ruta ? rFoto(ruta) : null; n.fotoPath = ruta; }
+  else { u.foto = ruta ? rFoto(ruta) : null; u.fotoPath = ruta; }
+  // la foto anterior ya no se usa: se borra de Storage (si falla no pasa nada)
+  if (vieja && vieja!==ruta && vieja.startsWith(vUid()+'/') && !vieja.startsWith('u:')) RV.sb.storage.from('fotos').remove([vieja]).catch(()=>{});
+}
+function puedeSubirFotos(){ const u = usr(S.personal); if (u && u.subidas===false){ toast('Tus publicaciones están en pausa; por ahora no puedes subir fotos.'); return false; } return true; }
+function registrarAccionesPortadas(){
+  window.HOJAS_EXTRA = Object.assign(window.HOJAS_EXTRA||{}, {edFoto:hojaEditorFoto});
+  Object.assign(A, {
+    edAbrir: (id, el) => { if (id!==S.yo) return; const tipo = el.dataset.o==='avatar' ? 'avatar' : 'portada';
+      const src = tipo==='portada' ? fotoSrc(portadaDe(id)) : fotoPerfilDe(id);
+      ui.sheet = {t:'edFoto', id, tipo, src, nueva:false, x:50, y:50, mueve:'', err:''}; renderLayer(); },
+    edMover: x => { const s = ui.sheet; if (!s || s.t!=='edFoto' || !s.mueve) return; const k = s.mueve; s[k] = Math.max(0, Math.min(100, s[k] + 25*(+x))); renderLayer(); },
+    edGuardar: async () => { const s = ui.sheet; if (!s || s.t!=='edFoto' || s.guardando) return; if (!puedeSubirFotos()) return;
+      s.guardando = true; s.err = ''; renderLayer();
+      try { const d = await recortarFoto(s.src, s.tipo, s.x, s.y); await aplicarFotoCuenta(s.id, s.tipo, d);
+        if (ui.sheet===s) ui.sheet = null; renderLayer(); rerender(); toast(s.tipo==='portada' ? 'Portada guardada' : 'Foto guardada'); }
+      catch(e){ console.warn('foto', e); s.guardando = false; s.err = e && e.escudo ? e.message : VIVO ? vMsgError(e) : 'No se pudo guardar la foto en este navegador.'; if (ui.sheet===s) renderLayer(); } },
+    edQuitar: async () => { const s = ui.sheet; if (!s || s.t!=='edFoto' || s.guardando) return;
+      s.guardando = true; s.err = ''; renderLayer();
+      try { await aplicarFotoCuenta(s.id, s.tipo, null); if (ui.sheet===s) ui.sheet = null; renderLayer(); rerender(); toast(s.tipo==='portada' ? 'Portada quitada' : 'Foto quitada'); }
+      catch(e){ s.guardando = false; s.err = VIVO ? vMsgError(e) : 'No se pudo quitar.'; if (ui.sheet===s) renderLayer(); } },
+    admQuitarPortada: async id => { if (!VIVO || !vEsAdminG()) return; if (!confirm('¿Quitar la portada de esta cuenta?')) return;
+      const negocio = esNeg(id), x = negocio ? neg(id) : usr(id); if (!x) return;
+      const {error} = await RV.sb.from(negocio ? 'negocios' : 'profiles').update({portada:null}).eq('id', negocio ? x.sid : vSid(id));
+      if (error) return toast(vMsgError(error)); x.portada = null; rerender(); toast('Portada quitada'); }
+  });
+  document.addEventListener('change', async e => {
+    const t = e.target, pid = (t.dataset && t.dataset.pick) || t.id; // mismo selector de fotos que el resto de la app
+    if (pid!=='ed-portada' && pid!=='ed-avatar') return;
+    const s = ui.sheet; if (!s || s.t!=='edFoto') return;
+    const tipo = pid.slice(3), id = s.id, f = t.files && t.files[0];
+    if (!f || id!==S.yo) return;
+    if (!f.type.startsWith('image/')){ try { t.value=''; } catch(_){} return toast('Elige una foto.'); }
+    if (f.size > 25*1024*1024){ try { t.value=''; } catch(_){} return toast('Esa foto pesa demasiado.'); }
+    if (!puedeSubirFotos()){ try { t.value=''; } catch(_){} return; }
+    toast('Revisando la foto…');
+    try { const src = await redimensionar(f, 1800, false); const dim = await medirFoto(src); abrirEditorFoto(id, tipo, src, dim, true); }
+    catch(err){ toast(err && err.escudo ? err.message : 'No se pudo leer la foto.'); }
+    finally { try { t.value=''; } catch(_){} }
+  });
+}
+
 /* ---------- formularios ---------- */
 function fail(m){ ui.err=m; rerender(); setTimeout(()=>document.querySelector('[role=alert]')?.scrollIntoView({block:'center'}),0); }
 const F = {
@@ -6745,7 +6877,7 @@ Object.assign(A, {
   termAdd: () => { const t=$('#term-t').value.trim().toLowerCase(), c=$('#term-c').value; if(t.length<3) return toast('Escribe al menos 3 letras'); S.cfg.terminos.push({t:limpiarTexto(t), cat:c}); CACHE_RE.clear(); log('Admin','Agregó término al Escudo',c); save(); rerender(); },
   termDel: x => { S.cfg.terminos.splice(+x,1); save(); rerender(); }
 });
-registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal(); registrarAccionesV17(); registrarAccionesV18(); registrarAccionesLegal(); registrarAccionesVivo(); registrarAccionesRepVivo(); registrarAccionesRepVivo3();
+registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal(); registrarAccionesV17(); registrarAccionesV18(); registrarAccionesLegal(); registrarAccionesVivo(); registrarAccionesRepVivo(); registrarAccionesRepVivo3(); registrarAccionesPortadas();
 aplicarPref();
 const EN_VIVO_OK = /github\.io$/.test(location.host) || /[?&]vivo=1/.test(location.search);
 try { if (EN_VIVO_OK && (localStorage.getItem('lm-modo')||'real')==='real') ui.mode='real'; } catch(e){ if (EN_VIVO_OK) ui.mode='real'; }
