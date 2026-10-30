@@ -823,6 +823,20 @@ body.vivo .todo{display:none!important}
 .legal-body .chk{margin:10px 0}.lph{background:#fde68a;color:#111;border-radius:4px;padding:0 3px}
 .leglinks a{color:inherit;text-decoration:underline;cursor:pointer}
 .rltabs{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--line)}.rltabs button{flex:1;border:0;background:none;padding:9px;border-radius:9px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer}.rltabs button.on{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}.rlogin form{text-align:left}
+/* reacciones con emoji (comentarios y mensajes) — sin animaciones */
+.reacs{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.rchip{display:inline-flex;align-items:center;gap:3px;min-height:26px;padding:1px 8px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font-size:14px;line-height:1.2;cursor:pointer;font-style:normal}
+.rchip b{font-size:11.5px;font-weight:700}
+.rchip.on{border-color:var(--brand);background:var(--brand-soft)}
+.msg .reacs{margin-top:6px}
+.reacbar{display:flex;align-items:center;gap:4px;padding:5px;border-radius:999px;background:var(--surface-2)}
+.reacbar button{flex:1;min-width:0;height:46px;border:0;border-radius:999px;background:none;font-size:27px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--fg)}
+.reacbar button.on{background:var(--surface);box-shadow:inset 0 0 0 2px var(--brand)}
+.reacbar .mas{font-size:24px;font-weight:700;color:var(--muted);background:var(--surface)}
+.emcat{margin:6px 0 0;font-size:13px;font-weight:700;color:var(--muted)}
+.emgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:2px}
+.emgrid button{height:46px;border:0;border-radius:12px;background:none;font-size:27px;line-height:1;cursor:pointer;padding:0}
+.emgrid button.on{background:var(--surface-2);box-shadow:inset 0 0 0 2px var(--brand)}
 </style>
 </head>
 <body>
@@ -4102,14 +4116,14 @@ function panelChat(id){
       ${h?`<div class="rep">${yoM?'Respondiste a su historia':'Respondió a tu historia'}</div>`:''}${m.nota?`<div class="rep">${yoM?'Respondiste a su nota':'Respondió a tu nota'}: “${esc(m.nota)}”</div>`:''}
       ${m.histComp?tarjetaHistComp(m.histComp):''}
       ${m.texto?esc(m.texto):''}${p&&!bloq(p.autor)?`<button class="shared" data-a="verPost" data-x="${p.id}">${miniFoto(p)}<div class="tx"><b>${esc(perfilDe(p.autor).handle)}</b><br>${esc(cortar(p.texto,50))}</div></button>`:''}
-      ${!yoM&&m.texto?alertaMsg(m.texto):''}<time>${hora(m.t)}</time></div>`; };
+      ${!yoM&&m.texto?alertaMsg(m.texto):''}${chipsReac('m', m)}<time>${hora(m.t)}</time></div>`; };
   return `<div class="chat-h"><button class="ibtn" data-a="cerrarChat" aria-label="Volver">←</button><button class="row nowrap" style="background:none;border:0;padding:0;color:var(--fg);flex:1;min-width:0" data-a="verPerfil" data-x="${id}">${avatar(a,40)}<span style="text-align:left;min-width:0"><b>${nombreV(a)}</b><br><span class="small muted">@${esc(a.handle)}</span></span></button><button class="ibtn" data-a="opcPerfil" data-x="${id}" aria-label="Opciones">${ico.dots}</button></div>
   <div class="chat-b" id="chat-b"><div class="safety">${ico.shield.replace('width="24" height="24"','width="14" height="14"')} Nunca compartas contraseñas ni códigos. ${esc(S.cfg.marca)} nunca te los pedirá.${esMenor(S.yo)?' Nunca mandes fotos tuyas ni tu dirección, y no aceptes verte con alguien que solo conoces por internet.':''}</div>
     ${c.msgs.map(burbuja).join('') || '<p class="muted small" style="text-align:center">Escribe el primer mensaje.</p>'}</div>
   <div class="chat-f">${resp?`<div class="resp-bar">${ico.responder}<span>Respondiendo a <b>${resp.m.de===S.yo?'ti':esc(perfilDe(resp.m.de).handle)}</b>: ${esc(textoMsgCorto(resp.m))}</span><button type="button" class="x" data-a="cancelarResp" aria-label="Cancelar respuesta">×</button></div>`:''}
     <form data-form="msg" novalidate><input id="m-txt" type="text" maxlength="500" placeholder="${resp?'Escribe tu respuesta…':'Escribe un mensaje…'}" aria-label="Mensaje" autocomplete="off"><button class="btn pri sm" type="submit">Enviar</button></form>
     ${ui.err?`<div class="err" role="alert">${esc(ui.err)}</div>`:''}
-    <span class="small muted">Mantén presionado un mensaje para responder, reportar o borrar. Sin enlaces, correos, fotos ni audios.</span></div>`;
+    <span class="small muted">Mantén presionado un mensaje para reaccionar, responder, reportar o borrar. Sin enlaces, correos, fotos ni audios.</span></div>`;
 }
 function tarjetaHistComp(hid){
   const h = S.historias.find(x=>x.id===hid);
@@ -4125,7 +4139,7 @@ function filaCom(c){ const u = perfilDe(c.autor);
     const r = c.resp ? comPorId(c.resp) : null;
     return `<div class="cm" data-lp="k:${c.id}"><button class="cav" data-a="verPerfil" data-x="${c.autor}" aria-label="Ver perfil">${avatar(u,36)}</button><div class="tx">
       ${r?`<div class="resp-q"><b>@${esc(perfilDe(r.autor).handle)}</b><span>${r.eliminado?'Comentario eliminado':esc(cortar(r.texto,60))}</span></div>`:''}
-      <b>${esc(u.handle)}</b> <span class="small muted">${hace(c.t)}</span><div>${esc(c.texto)}</div>
+      <b>${esc(u.handle)}</b> <span class="small muted">${hace(c.t)}</span><div>${esc(c.texto)}</div>${chipsReac('k', c)}
       <button class="lk small cresp" data-a="responderCom" data-x="${c.id}">Responder</button></div>${botonLikeCom(c)}</div>`;
 }
 function hojaComentarios(){
@@ -4138,7 +4152,7 @@ function hojaComentarios(){
     <div class="comh"><span class="grab" aria-hidden="true"></span><h2>Comentarios <span class="muted">${vivos}</span></h2><button type="button" class="x" data-a="closeSheet" aria-label="Cerrar">×</button></div>
     <div class="comlist" id="comlist">${p.texto&&p.fotos.length?`<div class="cm cap">${avatar(a,36)}<div class="tx"><b>${esc(a.handle)}</b> ${textoConEtiquetas(p.texto)}<div class="small muted">${hace(p.t)}</div></div></div>`:''}
       ${cs.map(fila).join('') || '<div class="comvacio"><b>Aún no hay comentarios</b><span class="small muted">Sé el primero en comentar.</span></div>'}
-      ${cs.length?'<p class="small muted" style="text-align:center;margin:0">Mantén presionado un comentario para más opciones.</p>':''}</div>
+      ${cs.length?'<p class="small muted" style="text-align:center;margin:0">Mantén presionado un comentario para reaccionar y más opciones.</p>':''}</div>
     ${ui.err?`<div class="err" role="alert" style="margin:0 16px 8px">${esc(ui.err)}</div>`:''}
     ${resp?`<div class="resp-bar" style="margin:0 16px">${ico.responder}<span>Respondiendo a <b>@${esc(perfilDe(resp.autor).handle)}</b>: ${esc(cortar(resp.texto,50))}</span><button type="button" class="x" data-a="cancelarRespCom" aria-label="Cancelar respuesta">×</button></div>`:''}
     <form class="comform" data-form="comentario" novalidate>${avatar(perfilDe(S.yo),36)}<input id="c-txt" type="text" maxlength="200" placeholder="${resp?'Escribe tu respuesta…':'Agrega un comentario…'}" aria-label="Comentario" autocomplete="off" enterkeyhint="send"><button class="btn pri" type="submit">Publicar</button></form>
@@ -4153,7 +4167,7 @@ function hojaOpcMsg(){
     ${mio&&!m.borrado?(dentro10?`<button class="lrow" data-a="borrarMsgTodos" data-x="${m.id}" style="color:var(--bad)">${ico.basura}<div class="tx"><b>Eliminar para todos</b><div class="small muted">Desaparece también para la otra persona. Te quedan ${Math.max(1,Math.ceil((MSG_10MIN-(Date.now()-m.t))/60e3))} min.</div></div></button>`
       :`<div class="note small">Ya pasaron más de 10 minutos: solo puedes eliminarlo para ti.</div>`):''}
     <button class="lrow" data-a="borrarMsgYo" data-x="${m.id}">${ico.basura}<div class="tx"><b>Eliminar para mí</b><div class="small muted">Solo desaparece de tu chat.</div></div></button>`);
-  return hoja('Mensaje', `<div class="quote small">${esc(textoMsgCorto(m))||'—'}</div>
+  return hoja('Mensaje', `${m.borrado?'':barraReac('m', m)}<div class="quote small">${esc(textoMsgCorto(m))||'—'}</div>
     ${m.borrado?'':`<button class="lrow" data-a="responderMsg" data-x="${m.id}">${ico.responder}<div class="tx"><b>Responder</b></div></button>`}
     ${!mio&&!m.borrado?`<button class="lrow" data-a="reportarMsg" data-x="${m.id}"><span class="strep-ic">${ico.megafono}</span><div class="tx"><b>Reportar</b><div class="small muted">Nadie sabrá que fuiste tú</div></div></button>`:''}
     <button class="lrow" data-a="borrarMsgPaso" data-x="${m.id}" style="color:var(--bad)">${ico.basura}<div class="tx"><b>Borrar</b></div></button>`);
@@ -4162,7 +4176,7 @@ function hojaOpcCom(){
   const c = comPorId(ui.sheet.id); if (!c) return '';
   const mio = c.autor===S.yo;
   if (c.eliminado) return hoja('Comentario', `<p class="muted" style="margin:0">Este comentario fue eliminado por su dueño.</p>`);
-  return hoja('Comentario', `<div class="quote small">${esc(cortar(c.texto,120))}</div>
+  return hoja('Comentario', `${barraReac('k', c)}<div class="quote small">${esc(cortar(c.texto,120))}</div>
     <button class="lrow" data-a="responderCom" data-x="${c.id}">${ico.responder}<div class="tx"><b>Responder</b></div></button>
     ${mio?`<button class="lrow" data-a="borrarCom" data-x="${c.id}" style="color:var(--bad)">${ico.basura}<div class="tx"><b>Eliminar para todos</b><div class="small muted">Todos verán que eliminaste un comentario, pero no lo que decía.</div></div></button>`
       :`<button class="lrow" data-a="reportarCom" data-x="${c.id}"><span class="strep-ic">${ico.megafono}</span><div class="tx"><b>Reportar</b><div class="small muted">Nadie sabrá que fuiste tú</div></div></button>`}`);
@@ -4854,6 +4868,7 @@ async function vCargar(){
       guard: sb.from('guardados').select('post,created_at'),
       msgs: sb.from('messages').select('id,de,para,texto,post,hist,nota,estado,leido,created_at,responde,borrado,hist_comp').order('created_at').limit(3000),
       ocultos: sb.from('msg_ocultos').select('mensaje').limit(5000),
+      mreac: sb.from('msg_reacciones').select('mensaje,usuario,emoji').not('emoji', 'is', null).limit(6000),
       clikes: sb.from('comment_likes').select('comentario').eq('activo', true).limit(5000),
       clc: sb.rpc('likes_comentarios2'),
       nlikes: sb.from('nota_likes').select('cuenta,nota_t,usuario').eq('activo', true).limit(3000),
@@ -4886,15 +4901,18 @@ async function vCargar(){
     const faltan = [...new Set([...D.guard.map(g=>g.post), ...D.msgs.map(m=>m.post), ...D.notifs.map(n=>n.post), ...(D.reportes||[]).map(r=>r.post)].filter(id=>id && !vistos.has(id)))].slice(0, 150);
     if (faltan.length){ const fx = await sb.from('feed2').select('*').in('id', faltan); if (fx.error) console.warn('vivo', 'posts sueltos', fx.error.message); D.posts = D.posts.concat(unir(fx.data||[])); }
     const postIds = (D.posts||[]).map(p=>p.id);
+    const pSet = new Set(postIds), comIds = (D.coms||[]).filter(c=>pSet.has(c.post) && c.estado==='ok' && !c.eliminado).map(c=>c.id).slice(-3000);
     // Los totales de "me gusta" los cuenta el servidor; solo bajan los reposts de las publicaciones cargadas
-    const [cg, cl, rp] = postIds.length ? await Promise.all([
+    const [cg, cl, rp, rcom] = postIds.length ? await Promise.all([
       sb.rpc('conteo_guardados', {ids: postIds}),
       sb.rpc('conteo_likes', {ids: postIds}),
-      vTodo(() => sb.rpc('reposts_de', {ids: postIds}).order('usuario').order('post'))
-    ]) : [{data:[]},{data:[]},{data:[]}];
+      vTodo(() => sb.rpc('reposts_de', {ids: postIds}).order('usuario').order('post')),
+      comIds.length ? sb.rpc('reacciones_com', {ids: comIds}) : {data:[]}
+    ]) : [{data:[]},{data:[]},{data:[]},{data:[]}];
     if (cl.error) console.warn('vivo', 'conteo_likes', cl.error.message);
     if (rp.error) console.warn('vivo', 'reposts_de', rp.error.message);
     D.likes = cl.data || []; D.reps = rp.data || [];
+    if (rcom.error) console.warn('vivo', 'reacciones_com', rcom.error.message); D.rcom = rcom.data || [];
     const pedClientes = [...new Set((D.peds||[]).map(p=>p.cliente))];
     const pc = pedClientes.length ? await sb.rpc('prom_clientes', {ids: pedClientes}) : {data:[]};
     vArmar(D, E, admin, cg.data||[], pc.data||[]);
@@ -4967,6 +4985,7 @@ function vArmar(D, E, admin, conteos, promCli){
   const ocultos = new Set((D.ocultos||[]).map(o=>o.mensaje));
   D.msgs.forEach(m=>{ if (m.estado!=='ok' && m.de!==uid) return; const otro = m.de===uid ? m.para : m.de; const c = chats[otro] = chats[otro] || {id:'c'+otro, p:[me,'u'+otro], msgs:[]};
     c.msgs.push({id:'m'+m.id, resp:m.responde?'m'+m.responde:undefined, borrado:!!m.borrado, oculto:ocultos.has(m.id), histComp:m.hist_comp?'h'+m.hist_comp:undefined, sid:m.id, de:'u'+m.de, texto:m.borrado?'':(m.texto||''), post:m.post?'q'+m.post:undefined, hist:m.hist?'h'+m.hist:undefined, nota:m.nota||undefined, t:vMs(m.created_at), leido:m.de===uid?true:!!m.leido, bloq:m.estado!=='ok'}); });
+  vPonerReac(comentarios, chats, D.rcom, D.mreac);
   // notificaciones
   const misNeg = negocios.filter(n=>n.dueno===me && n.estado!=='eliminado');
   const notifs = D.notifs.map(n=>{ let para = me; if (n.tipo==='pedido' || n.tipo==='follow_neg') para = misNeg[0] ? misNeg[0].id : me;
@@ -5389,7 +5408,13 @@ function vRefrescar(forzar){
 document.addEventListener('focusout', ()=>{ if (vRefrescar.pendiente) setTimeout(()=>vRefrescar(), 300); });
 function vCanal(on){
   if (VQ.canal){ try { RV.sb.removeChannel(VQ.canal); } catch(e){} VQ.canal = null; }
+  if (VQ.canalReac){ try { RV.sb.removeChannel(VQ.canalReac); } catch(e){} VQ.canalReac = null; }
   if (!on || !RV.sb || !RV.user) return; const uid = vUid();
+  // reacciones a mis mensajes: canal aparte, para que si falla no afecte los mensajes ni los avisos
+  VQ.canalReac = RV.sb.channel('reac-'+uid)
+    .on('postgres_changes', {event:'INSERT', schema:'public', table:'msg_reacciones', filter:`para=eq.${uid}`}, p=>reacEnVivo(p.new))
+    .on('postgres_changes', {event:'UPDATE', schema:'public', table:'msg_reacciones', filter:`para=eq.${uid}`}, p=>reacEnVivo(p.new))
+    .subscribe();
   VQ.canal = RV.sb.channel('vivo-'+uid)
     .on('postgres_changes', {event:'UPDATE', schema:'public', table:'messages', filter:`para=eq.${uid}`}, ()=>vRecargarPronto())
     .on('postgres_changes', {event:'INSERT', schema:'public', table:'messages', filter:`para=eq.${uid}`}, p=>{ const m = p.new; if (m.estado==='ok' && !(ui.view==='mensajes' && ui.chat==='u'+m.de)) toast('💬 Nuevo mensaje'); vRecargarPronto(); })
@@ -6664,6 +6689,110 @@ const F = {
   }
 };
 
+/* ============================================================
+   v20 — reacciones con emoji en comentarios y mensajes.
+   Mantener presionado → 5 reacciones rápidas y "+" para elegir cualquier emoji.
+   Una reacción por persona; tocar la misma otra vez la quita. Sin animaciones.
+   ============================================================ */
+const REAC_RAPIDAS = ['❤️','😂','😮','😢','👍'];
+// Solo emojis que se ven en celulares de hace años; sin gestos groseros, alcohol ni dobles sentidos (hay menores en la app)
+const REAC_CATS = [
+  ['Caras', '😀 😃 😄 😁 😆 😅 🤣 😂 🙂 🙃 😉 😊 😇 🥰 😍 🤩 😘 😋 😛 😜 🤪 😝 🤑 🤗 🤭 🤫 🤔 🤐 🤨 😐 😑 😶 😏 😒 🙄 😬 😌 😔 😪 🤤 😴 😷 🤒 🤕 🤢 🤮 🥵 🥶 🥴 😵 🤯 🤠 🥳 🥲 😎 🤓 🧐 😕 😟 🙁 😮 😯 😲 😳 🥺 😦 😧 😨 😰 😥 😢 😭 😱 😖 😣 😞 😓 😩 😫 🥱 😤 😡 😠 😈 💀 🤡 👻 👽 🤖 😺 😸 😹 😻 😼 🙀 😿 😾'],
+  ['Manos', '👍 👎 👌 🤌 ✌️ 🤞 🤟 🤘 🤙 👈 👉 👆 👇 ☝️ ✋ 🤚 🖐️ 🖖 👋 🤝 🙏 👏 🙌 👐 🤲 💪 ✍️ 👀 🧠'],
+  ['Corazones', '❤️ 🧡 💛 💚 💙 💜 🖤 🤍 🤎 💔 ❣️ 💕 💞 💓 💗 💖 💘 💝 💯 💢 💥 💫 ✨ 🔥 ⭐ 🌟'],
+  ['Comida', '🌮 🌯 🍕 🍔 🌭 🍟 🍗 🍖 🥩 🍤 🍣 🍜 🍝 🥗 🥑 🌶️ 🌽 🍉 🍓 🍎 🍌 🍍 🥭 🍋 🍩 🍪 🎂 🍰 🧁 🍫 🍬 🍦 ☕ 🧃 🥤'],
+  ['Cosas', '🎉 🎊 🎁 🎈 🏆 🥇 ⚽ 🏀 🏈 ⚾ 🎮 🎵 🎶 🎤 🎧 📸 💡 📌 ✅ ❌ ❓ ❗ 💰 🛍️ 🛒 🚗 🛵 🏠 🌎 ☀️ 🌧️ 🌈 🌊 🌴 🌵 🌹 🌻 🌸'],
+  ['Animales', '🐶 🐱 🐭 🐰 🦊 🐻 🐼 🐨 🐯 🦁 🐮 🐷 🐸 🐵 🙈 🙉 🙊 🐔 🐧 🐦 🦅 🦋 🐢 🐍 🦎 🐬 🐳 🦈 🐙']
+];
+function reacRecientes(){ try { const l = JSON.parse(localStorage.getItem('lm-reac-rec')||'[]'); return Array.isArray(l) ? l.filter(e=>typeof e==='string' && e.length<=16).slice(0,16) : []; } catch(e){ return []; } }
+function reacRecordar(e){ try { localStorage.setItem('lm-reac-rec', JSON.stringify([e, ...reacRecientes().filter(x=>x!==e)].slice(0,16))); } catch(err){} }
+// ref = "m:<id de mensaje>" o "k:<id de comentario>"
+function reacObj(ref){ ref = String(ref||''); const i = ref.indexOf(':'); if (i<1) return null; const t = ref.slice(0,i), id = ref.slice(i+1);
+  if (t==='m'){ const f = buscarMsg(id); return f ? {t, o:f.m} : null; }
+  if (t==='k'){ const c = comPorId(id); return c ? {t, o:c} : null; }
+  return null; }
+// comentarios: c.reac = {emoji: cuántos} y c.miReac; mensajes: m.reacU = {cuenta: emoji} (son solo dos personas)
+const reacMia = (t, o) => t==='m' ? ((o.reacU||{})[S.yo] || null) : (o.miReac || null);
+function reacLista(t, o){
+  if (t==='m'){ const cu = {}; Object.entries(o.reacU||{}).forEach(([u, e])=>{ if (!e || bloq(u)) return; const r = cu[e] = cu[e] || {e, n:0, mia:false}; r.n++; if (u===S.yo) r.mia = true; }); return Object.values(cu); }
+  return Object.entries(o.reac||{}).filter(([e, n])=>n>0).map(([e, n])=>({e, n, mia:o.miReac===e}));
+}
+function chipsReac(t, o){
+  if (!o || o.borrado || o.eliminado) return '';
+  const l = reacLista(t, o); if (!l.length) return '';
+  const ref = esc(t+':'+o.id);
+  return `<div class="reacs">${l.sort((a,b)=>b.n-a.n).map(r=>`<button type="button" class="rchip ${r.mia?'on':''}" data-a="reac" data-x="${ref}" data-e="${esc(r.e)}" aria-pressed="${r.mia}" aria-label="${esc(r.e)} ${r.n}${r.mia?', tu reacción':''}">${esc(r.e)}${t==='k'||r.n>1?`<b>${r.n}</b>`:''}</button>`).join('')}</div>`;
+}
+function barraReac(t, o){
+  if (!o || o.borrado || o.eliminado) return '';
+  const ref = esc(t+':'+o.id), mia = reacMia(t, o);
+  const rap = !mia || REAC_RAPIDAS.includes(mia) ? REAC_RAPIDAS : [...REAC_RAPIDAS.slice(0,4), mia]; // si elegiste otro, se ve marcado
+  return `<div class="reacbar" role="group" aria-label="Reaccionar">${rap.map(e=>`<button type="button" class="${e===mia?'on':''}" data-a="reac" data-x="${ref}" data-e="${esc(e)}" aria-pressed="${e===mia}" aria-label="Reaccionar con ${esc(e)}">${esc(e)}</button>`).join('')}<button type="button" class="mas" data-a="reacMas" data-x="${ref}" aria-label="Elegir otro emoji">+</button></div>`;
+}
+function hojaReacEmoji(){
+  const sh = ui.sheet, r = reacObj(sh.ref); if (!r) return '';
+  const mia = reacMia(r.t, r.o), ref = esc(sh.ref), rec = reacRecientes();
+  const btn = e => `<button type="button" class="${e===mia?'on':''}" data-a="reac" data-x="${ref}" data-e="${esc(e)}" aria-label="${esc(e)}">${esc(e)}</button>`;
+  return hoja('Elige una reacción', `${mia?'<p class="small muted" style="margin:0">Toca tu reacción otra vez para quitarla.</p>':''}
+    ${rec.length?`<div class="emcat">Recientes</div><div class="emgrid">${rec.map(btn).join('')}</div>`:''}
+    ${REAC_CATS.map(([n, l])=>`<div class="emcat">${n}</div><div class="emgrid">${l.split(' ').map(btn).join('')}</div>`).join('')}`);
+}
+function reacAplicar(t, o, u, antes, nueva){
+  if (t==='m'){ o.reacU = Object.assign({}, o.reacU); if (nueva) o.reacU[u] = nueva; else delete o.reacU[u]; return; }
+  o.reac = Object.assign({}, o.reac);
+  if (antes){ o.reac[antes] = Math.max(0, (o.reac[antes]||1) - 1); if (!o.reac[antes]) delete o.reac[antes]; }
+  if (nueva) o.reac[nueva] = (o.reac[nueva]||0) + 1;
+  o.miReac = nueva || null;
+}
+// repinta solo la burbuja o el comentario (sin mover el chat ni borrar lo que estás escribiendo)
+function reacPintar(t, o){
+  const sel = `[data-lp="${CSS.escape(t+':'+o.id)}"]`;
+  if (t==='m'){ document.querySelectorAll(sel).forEach(el=>{ el.querySelectorAll(':scope > .reacs').forEach(x=>x.remove()); const h = chipsReac('m', o); if (!h) return;
+      const tm = el.querySelector(':scope > time'); if (tm) tm.insertAdjacentHTML('beforebegin', h); else el.insertAdjacentHTML('beforeend', h); }); return; }
+  const els = document.querySelectorAll(sel); if (els.length) els.forEach(el=>{ el.outerHTML = filaCom(o); }); else if (ui.sheet) renderLayer();
+}
+async function reaccionar(ref, e){
+  const r = reacObj(ref); if (!r || !e) return; const {t, o} = r;
+  if (o.borrado || o.eliminado) return toast(t==='m'?'Este mensaje ya no está disponible.':'Este comentario ya no está disponible.');
+  if (typeof necesitaSesion==='function' && necesitaSesion()) return;
+  if (soyNegocio()) return toast('Cambia a tu cuenta personal para reaccionar.');
+  if (VIVO && !o.sid) return toast('Espera un momento, aún se está enviando.');
+  const antes = reacMia(t, o), nueva = antes===e ? null : e;
+  reacAplicar(t, o, S.yo, antes, nueva); if (nueva) reacRecordar(nueva);
+  if (ui.sheet && ['opcMsg','opcCom','reacEmoji'].includes(ui.sheet.t)){
+    // si los comentarios estaban en la hoja, vuelve a ella; si estaban en la publicación, solo cierra
+    const enHoja = t==='k' && !document.querySelector(`#app [data-lp="${CSS.escape('k:'+o.id)}"]`);
+    ui.sheet = enHoja ? {t:'coment', post:o.post} : null; ui.err = ''; renderLayer();
+  }
+  reacPintar(t, o);
+  if (!VIVO) return save();
+  const {error} = await RV.sb.rpc(t==='m'?'reaccionar_msg':'reaccionar_com', t==='m'?{p_msg:o.sid, p_emoji:nueva}:{p_com:o.sid, p_emoji:nueva});
+  if (error){ if (reacMia(t, o)===nueva){ reacAplicar(t, o, S.yo, nueva, antes); reacPintar(t, o); }
+    toast(/reaccionar_|schema cache|does not exist/i.test(error.message||'') ? 'Las reacciones todavía no están activas.' : vMsgError(error)); }
+}
+// en vivo: lo que baja del servidor se pega a comentarios y mensajes
+function vPonerReac(comentarios, chats, rcom, mreac){
+  const rk = {}; (rcom||[]).forEach(r=>{ const o = rk['k'+r.comentario] = rk['k'+r.comentario] || {reac:{}, mia:null}; o.reac[r.emoji] = r.n; if (r.yo) o.mia = r.emoji; });
+  comentarios.forEach(c=>{ const o = rk[c.id]; if (o){ c.reac = o.reac; c.miReac = o.mia; } });
+  const rm = {}; (mreac||[]).forEach(r=>{ if (r.emoji) (rm['m'+r.mensaje] = rm['m'+r.mensaje] || {})['u'+r.usuario] = r.emoji; });
+  Object.values(chats).forEach(c=>c.msgs.forEach(m=>{ if (rm[m.id]) m.reacU = rm[m.id]; }));
+}
+// en vivo: la otra persona reaccionó a un mensaje del chat
+function reacEnVivo(row){
+  if (!row || !row.mensaje || !S || !S.chats) return;
+  const f = buscarMsg('m'+row.mensaje); if (!f) return;
+  const u = 'u'+row.usuario; if (u===S.yo) return;
+  f.m.reacU = Object.assign({}, f.m.reacU); if (row.emoji) f.m.reacU[u] = row.emoji; else delete f.m.reacU[u];
+  reacPintar('m', f.m);
+}
+function registrarAccionesReac(){
+  window.HOJAS_EXTRA = Object.assign(window.HOJAS_EXTRA||{}, {reacEmoji:hojaReacEmoji});
+  Object.assign(A, {
+    reac: (x, el) => reaccionar(x, el && el.dataset ? el.dataset.e : ''),
+    reacMas: x => { if (!reacObj(x)) return; ui.sheet = {t:'reacEmoji', ref:x}; renderLayer(); }
+  });
+}
+
 /* ---------- eventos ---------- */
 document.addEventListener('click', e => { const el = e.target.closest('[data-a]'); if(!el) return; const fn = A[el.dataset.a]; if(fn) fn(el.dataset.x, el, e); });
 document.addEventListener('dblclick', e => { const c = e.target.closest('[data-dbl]'); if(!c) return; const id=c.dataset.dbl; if(!leGusta(id)) A.like(id, {dataset:{o:c.closest('article')?.dataset.por||''}}); else { const bh=$('#bh-'+id); if(bh){ bh.classList.remove('go'); void bh.offsetWidth; bh.classList.add('go'); } } });
@@ -6708,7 +6837,7 @@ Object.assign(A, {
   termAdd: () => { const t=$('#term-t').value.trim().toLowerCase(), c=$('#term-c').value; if(t.length<3) return toast('Escribe al menos 3 letras'); S.cfg.terminos.push({t:limpiarTexto(t), cat:c}); CACHE_RE.clear(); log('Admin','Agregó término al Escudo',c); save(); rerender(); },
   termDel: x => { S.cfg.terminos.splice(+x,1); save(); rerender(); }
 });
-registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal(); registrarAccionesV17(); registrarAccionesV18(); registrarAccionesLegal(); registrarAccionesVivo(); registrarAccionesRepVivo(); registrarAccionesRepVivo3();
+registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal(); registrarAccionesV17(); registrarAccionesV18(); registrarAccionesLegal(); registrarAccionesVivo(); registrarAccionesRepVivo(); registrarAccionesRepVivo3(); registrarAccionesReac();
 aplicarPref();
 const EN_VIVO_OK = /github\.io$/.test(location.host) || /[?&]vivo=1/.test(location.search);
 try { if (EN_VIVO_OK && (localStorage.getItem('lm-modo')||'real')==='real') ui.mode='real'; } catch(e){ if (EN_VIVO_OK) ui.mode='real'; }
