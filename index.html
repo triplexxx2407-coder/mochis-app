@@ -2199,7 +2199,7 @@ function hojaMas(){
     <button class="lrow" data-a="toggleTema">${temaActual()==='oscuro'?ico.sun:ico.moon}<div class="tx"><b>Cambiar a modo ${temaActual()==='oscuro'?'claro':'oscuro'}</b></div></button>
     <button class="lrow" data-a="grande">${ico.text}<div class="tx"><b>Texto más grande</b></div><span class="switch ${PREF.grande?'on':''}"></span></button>
     <button class="lrow" data-a="misLikes"><span class="ictile like">${ico.heartF}</span><div class="tx"><b>Mis likes</b><div class="small muted">Publicaciones, comentarios y notas que te gustaron · solo tú las ves</div></div></button>
-    <button class="lrow" data-a="verGuardados"><span class="ictile save">${ico.saveF}</span><div class="tx"><b>Guardados</b><div class="small muted">Privados (solo el equipo de MOCHI puede revisarlos) · ${S.guardados.filter(g=>g.u===S.yo).length}</div></div></button>
+    <button class="lrow" data-a="verGuardados"><span class="ictile save">${ico.saveF}</span><div class="tx"><b>Guardados</b><div class="small muted">Privados (nadie más los ve) · ${S.guardados.filter(g=>g.u===S.yo).length}</div></div></button>
     <button class="lrow" data-a="go" data-x="pedidos">${ico.list}<div class="tx"><b>Mis pedidos</b></div></button>
     <button class="lrow" data-a="apelarMenu">${ico.scale}<div class="tx"><b>Apelar una decisión</b><div class="small muted">Si el equipo o el sistema cambió algo tuyo y crees que fue un error</div></div></button>
     <button class="lrow" data-a="legal">${ico.shield}<div class="tx"><b>Privacidad y legal</b><div class="small muted">Aviso de privacidad, términos, reglas y tus datos</div></div></button>
@@ -3046,7 +3046,7 @@ const nGuardados = pid => S.guardados.filter(g=>g.post===pid).length;
 function vGuardados(){
   const ids = S.guardados.filter(g=>g.u===S.yo).sort((a,b)=>b.t-a.t).map(g=>post(g.post)).filter(p=>p && p.estado==='aprobado' && !bloq(p.autor));
   return `<div class="perfil-w"><button class="btn back" data-a="atras">${ico.back}Volver</button>
-    <div class="row nowrap" style="gap:12px"><span class="ictile save">${ico.saveF}</span><div><h1 style="margin:0">Guardados</h1><span class="small muted">Nadie más ve esta carpeta. Los demás solo ven cuántas personas guardaron una publicación, nunca quiénes. Solo el equipo de MOCHI puede revisarla si investiga un reporte.</span></div></div>
+    <div class="row nowrap" style="gap:12px"><span class="ictile save">${ico.saveF}</span><div><h1 style="margin:0">Guardados</h1><span class="small muted">Nadie más ve esta carpeta, tampoco el equipo de MOCHI. Los demás solo ven cuántas personas guardaron una publicación, nunca quiénes.</span></div></div>
     ${ids.length?`<div class="pgrid">${ids.map(p=>miniPost(p)).join('')}</div>`:'<div class="empty"><h2>Aún no guardas nada</h2><p class="muted">Toca el ícono de guardar en cualquier publicación para encontrarla aquí después.</p></div>'}</div>`;
 }
 
@@ -3101,24 +3101,8 @@ function hojaSeguidores(){
 }
 
 /* ---------- pestañas del perfil ---------- */
-// Likes y guardados de una cuenta (solo el admin). En vivo vienen de admin_actividad; en demo, de los datos locales.
-function actDe(id){
-  if (VIVO){ const a = (ui.act||{})[id]; if (!a && typeof vActividad==='function') setTimeout(()=>vActividad(id), 0); return a || {likes:[], guardados:[], cargando:true}; }
-  const fila = (p, t) => ({tipo:'publicacion', id:p.id, autor:perfilDe(p.autor).handle, texto:p.texto||'', estado:p.estado, t:t||p.t});
-  return {likes: Object.keys(S.likes).filter(k=>S.likes[k] && k.startsWith(id+'|')).map(k=>post(k.slice(id.length+1))).filter(Boolean).map(p=>fila(p)),
-          guardados: S.guardados.filter(g=>g.u===id).map(g=>{ const p = post(g.post); return p ? fila(p, g.t) : null; }).filter(Boolean)};
-}
-const ACT_TIPO = {publicacion:'Publicación', historia:'Historia', comentario:'Comentario'};
-function listaAct(l, cargando, vacio){
-  if (cargando) return '<p class="muted" style="text-align:center;padding:30px 0">Cargando…</p>';
-  return l.length ? `<div class="stack" style="gap:8px">${l.map(a=>{ const [lb,c] = PEST[a.estado]||['',''];
-    return `<div class="card" style="padding:10px 12px;gap:4px"><div class="row" style="gap:6px"><span class="pill">${ACT_TIPO[a.tipo]||a.tipo}</span><b class="small">@${esc(a.autor||'')}</b>${a.estado&&a.estado!=='aprobado'?`<span class="pill ${c}">${lb||esc(a.estado)}</span>`:''}<span class="small muted">${hace(typeof a.t==='number'?a.t:Date.parse(a.t))}</span></div>${a.texto?`<div class="small">${esc(a.texto)}</div>`:''}</div>`; }).join('')}</div>`
-    : `<p class="muted" style="text-align:center;padding:30px 0">${vacio}</p>`;
-}
-function tabsPf(t, pubs, comp, etiq, hists, nts, act){
-  act = act || {likes:[], guardados:[]};
-  return [['pubs','Publicaciones',pubs.length,ico.list],['comp','Compartidos',comp.length,ico.repost],['etiq','Etiquetas',etiq.length,ico.tag],['hist','Historias',hists.length,ico.clock||I('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>')],['notas','Notas',nts.length,ico.msg],
-    ['likes','Likes',act.cargando?'…':act.likes.length,ico.heartF],['guard','Guardados',act.cargando?'…':act.guardados.length,ico.saveF]]
+function tabsPf(t, pubs, comp, etiq, hists, nts){
+  return [['pubs','Publicaciones',pubs.length,ico.list],['comp','Compartidos',comp.length,ico.repost],['etiq','Etiquetas',etiq.length,ico.tag],['hist','Historias',hists.length,ico.clock||I('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>')],['notas','Notas',nts.length,ico.msg]]
     .map(([k,l,n,ic])=>`<button class="${t===k?'on':''}" data-a="pfTab" data-x="${k}">${ic}<span>${l}</span><small>${n}</small></button>`).join('');
 }
 function tabsPerfil(id){
@@ -3130,15 +3114,11 @@ function tabsPerfil(id){
   const comp = repostsDe(id);
   const etiq = S.posts.filter(p=>p.estado==='aprobado' && (p.etiq||[]).includes(id) && !bloq(p.autor)).sort((a,b)=>b.t-a.t);
   const grid = (l, vacio) => l.length ? `<div class="pgrid">${l.map(p=>{ const [lb,c]=PEST[p.estado]; return miniPost(p, p.estado!=='aprobado'?`<span class="pill ${c} st">${lb}</span>`:''); }).join('')}</div>` : `<p class="muted" style="text-align:center;padding:30px 0">${vacio}</p>`;
-  const act = todo ? actDe(id) : null;
-  if (todo && (t==='likes' || t==='guard')) return `<div class="ptabs2">${tabsPf(t, pubs, comp, etiq, hists, nts, act)}</div>
-    <div class="small muted" style="text-align:center">${t==='likes'?'Lo que le gustó a esta cuenta.':'Lo que guardó esta cuenta. Solo lo ve el equipo de MOCHI.'}</div>
-    ${listaAct(t==='likes'?act.likes:act.guardados, act.cargando, t==='likes'?'No le ha dado like a nada.':'No tiene nada guardado.')}`;
-  if (todo && (t==='hist' || t==='notas')) return `<div class="ptabs2">${tabsPf(t, pubs, comp, etiq, hists, nts, act)}</div>
+  if (todo && (t==='hist' || t==='notas')) return `<div class="ptabs2">${tabsPf(t, pubs, comp, etiq, hists, nts)}</div>
     ${t==='hist' ? (hists.length ? `<div class="pgrid">${hists.map(h=>{ const [lb,c]=PEST[h.estado]||['',''];
         return `<div class="ph">${verFoto(h.foto)}${h.estado!=='aprobado'?`<span class="pill ${c} st">${lb}</span>`:''}<span class="pill st" style="top:auto;bottom:6px">${hace(h.t)}</span></div>`; }).join('')}</div>` : '<p class="muted" style="text-align:center;padding:30px 0">Sin historias recientes.</p>')
       : (nts.length ? `<div class="stack" style="gap:8px">${nts.map(n=>`<div class="card" style="padding:10px 12px"><div>${esc(n.texto)}</div><div class="small muted">${hace(n.t)}</div></div>`).join('')}</div>` : '<p class="muted" style="text-align:center;padding:30px 0">Sin notas activas.</p>')}`;
-  return `<div class="ptabs2">${todo ? tabsPf(t, pubs, comp, etiq, hists, nts, act) : [['pubs','Publicaciones',pubs.length],['comp','Compartidos',comp.length],['etiq','Etiquetas',etiq.length]].map(([k,l,n])=>`<button class="${t===k?'on':''}" data-a="pfTab" data-x="${k}">${k==='comp'?ico.repost:k==='etiq'?ico.tag:ico.list}<span>${l}</span><small>${n}</small></button>`).join('')}</div>
+  return `<div class="ptabs2">${todo ? tabsPf(t, pubs, comp, etiq, hists, nts) : [['pubs','Publicaciones',pubs.length],['comp','Compartidos',comp.length],['etiq','Etiquetas',etiq.length]].map(([k,l,n])=>`<button class="${t===k?'on':''}" data-a="pfTab" data-x="${k}">${k==='comp'?ico.repost:k==='etiq'?ico.tag:ico.list}<span>${l}</span><small>${n}</small></button>`).join('')}</div>
     ${t==='pubs' ? grid(pubs, 'Sin publicaciones.') : t==='comp' ? `<div class="small muted" style="text-align:center">Publicaciones que ${id===S.yo?'compartiste':'compartió'}. Al tocarlas ves la publicación original y a quién la subió.</div>${grid(comp,'Aún no comparte publicaciones.')}` : grid(etiq, 'Nadie lo ha etiquetado todavía.')}`;
 }
 
@@ -3423,13 +3403,6 @@ function bitDatos(d){
   if (!d) return '';
   if (d.antes && d.despues) return Object.keys(d.despues).map(k=>`<div><b>${esc(k)}:</b> ${esc(JSON.stringify(d.antes[k]))} → ${esc(JSON.stringify(d.despues[k]))}</div>`).join('') + (d.lat!=null?`<div><b>Ubicación:</b> ${d.lat}, ${d.lng}</div>`:'');
   return `<pre style="white-space:pre-wrap;overflow-wrap:anywhere;margin:0;font-size:12px">${esc(JSON.stringify(d, null, 1))}</pre>`;
-}
-async function vActividad(id){
-  ui.act = ui.act || {}; ui.actPend = ui.actPend || {}; if (ui.act[id] || ui.actPend[id] || !/^u/.test(id)) return; ui.actPend[id] = true;
-  const {data, error} = await RV.sb.rpc('admin_actividad', {u:id.slice(1)}); ui.actPend[id] = false;
-  ui.act[id] = error ? {likes:[], guardados:[], error:true} : {likes:(data&&data.likes)||[], guardados:(data&&data.guardados)||[]};
-  if (error) toast('Para ver likes y guardados falta pegar el SQL 05.');
-  if (ui.perfil===id) rerender();
 }
 // Cuántos hay en cada opción con los demás filtros puestos
 function bitConteoLocal(f){
