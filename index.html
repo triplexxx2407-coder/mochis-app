@@ -9,6 +9,8 @@
 <link rel="icon" type="image/png" sizes="32x32" href="iconos/favicon-32.png">
 <link rel="apple-touch-icon" href="iconos/apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
+<!-- Muro de pruebas privadas: que Google no muestre MOCHI en búsquedas. Quitar esta línea el día del lanzamiento público. -->
+<meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#1C93D6">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -3981,7 +3983,7 @@ const rAv = (id, s=40) => { const p = rPerfil(id); return avatar({nombre:p.nombr
 const rHandle = id => { const p = rPerfil(id); return `${esc(p.usuario)}${p.verif?`<span class="verif ${p.verif}" title="Cuenta verificada">✓</span>`:''}${p.ejemplo?' <span class="pill ejm" title="Cuenta de ejemplo creada por el equipo para que la app no se vea vacía">Ejemplo</span>':''}`; };
 const rT = s => new Date(s).getTime();
 const rAmigo = id => RV.sigo.has(id) && RV.meSiguen.has(id);
-const rErr = e => { const m = (e && (e.message || e.error_description)) || String(e||''); if (/duplicate key.*usuario/i.test(m)) return 'Ese usuario ya existe. Elige otro.'; if (/JWT|session/i.test(m)) return 'Tu sesión venció. Vuelve a entrar.'; if (/Failed to fetch|NetworkError/i.test(m)) return 'Sin conexión. Revisa tu internet.'; return m.replace(/^.*?ERROR:\s*/,''); };
+const rErr = e => { const m = (e && (e.message || e.error_description)) || String(e||''); if (/duplicate key.*usuario/i.test(m)) return 'Ese usuario ya existe. Elige otro.'; if (/JWT|session/i.test(m)) return 'Tu sesión venció. Vuelve a entrar.'; if (/Failed to fetch|NetworkError/i.test(m)) return 'Sin conexión. Revisa tu internet.'; if (/signups? not allowed|signup_disabled|otp_disabled/i.test(m)) return 'Por ahora MOCHI es solo por invitación (pruebas privadas). Si ya tienes cuenta, entra con tu correo y contraseña.'; return m.replace(/^.*?ERROR:\s*/,''); };
 function rTextoOk(t, lugar){ // filtro rápido en el teléfono (el servidor revisa otra vez)
   const limpio = (' '+t).replace(/(\s)@[a-zA-Z0-9._]{2,30}/g, '$1 ');
   try { const r = analizarTexto(limpio, lugar, {}); if (r.bloqueos && r.bloqueos.length) return msgBloqueo(r); } catch(e){}
@@ -6983,7 +6985,7 @@ Object.assign(A, {
 });
 registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal(); registrarAccionesV17(); registrarAccionesV18(); registrarAccionesLegal(); registrarAccionesVivo(); registrarAccionesRepVivo(); registrarAccionesRepVivo3(); registrarAccionesReac(); registrarAccionesPortadas();
 aplicarPref();
-const EN_VIVO_OK = /github\.io$/.test(location.host) || /[?&]vivo=1/.test(location.search);
+const EN_VIVO_OK = /(github\.io|mochimx\.com)$/.test(location.host) || /[?&]vivo=1/.test(location.search);
 try { if (EN_VIVO_OK && (localStorage.getItem('lm-modo')||'real')==='real') ui.mode='real'; } catch(e){ if (EN_VIVO_OK) ui.mode='real'; }
 render();
 cargarFotos();
