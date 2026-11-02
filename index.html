@@ -877,6 +877,46 @@ body.vivo .todo{display:none!important}
 .emgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:2px}
 .emgrid button{height:46px;border:0;border-radius:12px;background:none;font-size:27px;line-height:1;cursor:pointer;padding:0}
 .emgrid button.on{background:var(--surface-2);box-shadow:inset 0 0 0 2px var(--brand)}
+
+/* ---------- v21: botones compactos, contraseñas, buscador e identidad propia ---------- */
+.btn{padding:7px 13px;border-radius:10px;font-size:13.5px}
+.btn.sm{padding:5px 10px;font-size:12.5px;border-radius:9px}
+.btn.lg{padding:11px 16px;font-size:15px}
+.btn.block{padding:11px}
+.ibtn{padding:7px;border-radius:10px}
+.segs{border-radius:10px;padding:3px}
+.segs button{border-radius:8px;padding:6px 13px;font-size:13.5px}
+.search{border-radius:12px}
+.pwin{display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding-right:4px}
+.pwin:focus-within{border-color:var(--brand)}
+.pwin input{flex:1;min-width:0;border:0;background:none;padding:10px 12px;font-size:16px;outline:none;color:var(--fg);border-radius:10px}
+.pweye{background:none;border:0;padding:6px;border-radius:8px;color:var(--muted);display:grid;place-items:center}
+.pweye[aria-pressed="true"]{color:var(--brand)}
+.pwmed{display:flex;flex-direction:column;gap:4px;margin-top:5px}
+.pwbar{display:flex;gap:3px}
+.pwbar i{height:4px;flex:1;border-radius:999px;background:var(--surface-2)}
+.pwbar.s1 i:nth-child(1){background:#DC2626}
+.pwbar.s2 i:nth-child(-n+2){background:#D97706}
+.pwbar.s3 i:nth-child(-n+3){background:#2563EB}
+.pwbar.s4 i{background:#15803D}
+.pwtx{color:var(--muted);font-weight:400}
+.mnav button{font-size:10.5px}
+.mnav button.on::before{content:"";position:absolute;top:-5px;left:50%;transform:translateX(-50%);width:24px;height:3px;border-radius:0 0 3px 3px;background:var(--brand)}
+.bsc{display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:5;background:var(--bg);padding:2px 0 8px}
+.bsc .search{flex:1;min-width:0}
+.chips::-webkit-scrollbar{display:none}
+.bch{gap:6px}
+.bch .chip{border-radius:9px;padding:5px 11px;font-size:12.5px;color:var(--muted)}
+.bch .chip.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.home-feed .segs{align-self:stretch}
+.home-feed .segs button{flex:1}
+.mtop .logo2{letter-spacing:-.3px}
+.codin{display:flex;justify-content:center}
+.codin input{text-align:center;letter-spacing:.42em;font-size:22px;font-weight:800;padding:12px 10px;max-width:220px}
+.sesrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.sesrow .tx{flex:1;min-width:0}
+.sesrow .tx b{display:block;font-size:14px}
+.sesrow .tx span{color:var(--muted);font-size:12.5px}
 </style>
 </head>
 <body>
@@ -1922,8 +1962,7 @@ function vHome(){
   let html = ''; vis.forEach((p,i)=>{ html += postCard(p,false,amigoQueCompartio(p.id)); if (ui.feed!=='negocios' && i%5===3) html += recomendacion(Math.floor(i/5)); });
   const activos = pedidosActivos();
   return `<div class="home"><div class="home-feed">
-    <div class="toprow">${climaBtn()}<label class="search hsearch">${ico.search}<input id="q" type="search" placeholder="Buscar personas, negocios o productos" value="${esc(ui.q)}" aria-label="Buscar" autocomplete="off">${ui.q?'<button type="button" class="lk" data-a="limpiarQ" aria-label="Borrar búsqueda">✕</button>':''}</label></div>
-    <div id="results" class="stack">${ui.q.trim()?resultados():''}</div>
+    <div class="toprow">${climaBtn()}<span style="flex:1"></span><button class="ibtn" data-a="go" data-x="buscar" aria-label="Buscar" title="Buscar">${ico.search}</button></div>
     ${bannerCuenta()}
     ${activos.length?activos.slice(0,2).map(p=>bannerPedido(p)).join(''):''}
     ${filaHistorias()}
@@ -1942,18 +1981,23 @@ function vPost(){
 }
 function resultados(){
   const q = limpiarTexto(ui.q).trim();
+  const bf = ui.bf || 'todo', ver = k => bf==='todo' || bf===k;
   const ns = activosVis().filter(n=>!q || limpiarTexto(n.nombre+' '+n.desc+' '+TIPOS[n.tipo].label).includes(q));
   if (!q) return `<div class="sec-h"><h2>Negocios</h2></div><div class="bizgrid">${ns.slice(0,6).map(bizCard2).join('')}</div>`;
   const ps = S.productos.filter(p=>neg(p.neg)?.estado==='activo' && !bloq(p.neg) && limpiarTexto(p.nombre+' '+p.desc+' '+p.sec).includes(q));
   const us = S.usuarios.filter(u=>u.id!==S.yo && !bloq(u.id) && limpiarTexto(u.nombre+' '+u.usuario).includes(q));
-  if(!ns.length && !ps.length && !us.length) return `<div class="empty"><h2>Sin resultados para “${esc(ui.q)}”</h2><p class="muted">Prueba con otra palabra, por ejemplo “pizza”, “cable” o “karla”.</p></div>`;
-  return `${ns.length?`<div class="sec-h"><h2>Negocios</h2><span class="muted small">${ns.length}</span></div><div class="bizgrid">${ns.map(bizCard2).join('')}</div>`:''}
-    ${us.length?`<div class="sec-h"><h2>Personas</h2><span class="muted small">${us.length}</span></div><div class="stack" style="gap:8px">${us.slice(0,12).map(u=>personaRow(u.id)).join('')}</div>`:''}
-    ${ps.length?`<div class="sec-h"><h2>Productos</h2><span class="muted small">${ps.length}</span></div><div class="plist">${ps.map(p=>prodRow(p,true)).join('')}</div>`:''}`;
+  if((!ns.length||!ver('negocios')) && (!ps.length||!ver('productos')) && (!us.length||!ver('personas'))) return `<div class="empty"><h2>Sin resultados para “${esc(ui.q)}”</h2><p class="muted">Prueba con otra palabra, por ejemplo “pizza”, “cable” o “karla”.</p></div>`;
+  return `${ns.length&&ver('negocios')?`<div class="sec-h"><h2>Negocios</h2><span class="muted small">${ns.length}</span></div><div class="bizgrid">${ns.map(bizCard2).join('')}</div>`:''}
+    ${us.length&&ver('personas')?`<div class="sec-h"><h2>Personas</h2><span class="muted small">${us.length}</span></div><div class="stack" style="gap:8px">${us.slice(0,12).map(u=>personaRow(u.id)).join('')}</div>`:''}
+    ${ps.length&&ver('productos')?`<div class="sec-h"><h2>Productos</h2><span class="muted small">${ps.length}</span></div><div class="plist">${ps.map(p=>prodRow(p,true)).join('')}</div>`:''}`;
 }
 function vBuscar(){
-  return `<div class="stack"><h1>Buscar</h1>
-    <label class="search">${ico.search}<input id="q" type="search" placeholder="Personas, negocios o productos" value="${esc(ui.q)}" aria-label="Buscar" autocomplete="off"></label>
+  const f = ui.bf || 'todo';
+  const chip = (k,l) => `<button type="button" class="chip ${f===k?'on':''}" data-a="bFiltro" data-x="${k}">${l}</button>`;
+  return `<div class="stack" style="gap:10px">
+    <div class="bsc"><button class="ibtn" data-a="atras" aria-label="Volver">${ico.back}</button>
+      <label class="search">${ico.search}<input id="q" type="search" placeholder="Busca personas, negocios o productos" value="${esc(ui.q)}" aria-label="Buscar" autocomplete="off" enterkeyhint="search">${ui.q?'<button type="button" class="lk" data-a="limpiarQ" aria-label="Borrar búsqueda">✕</button>':''}</label></div>
+    <div class="chips bch">${chip('todo','Todo')}${chip('personas','Personas')}${chip('negocios','Negocios')}${chip('productos','Productos')}</div>
     <div id="results" class="stack">${resultados()}</div></div>`;
 }
 const NTXT = {like_nota:'le gustó tu nota:', like_com:'le gustó tu comentario:', follow:'comenzó a seguirte.', like:'le gustó tu publicación.', like_hist:'le gustó tu historia.', comentario:'comentó:', resp_hist:'respondió a tu historia.', pedido:''};
@@ -2198,6 +2242,10 @@ function hojaCuentas(){
 }
 function hojaMas(){
   return hoja('Más', `<button class="lrow" data-a="go" data-x="ajustes">${ico.gear}<div class="tx"><b>Configuración</b></div></button>
+    ${soyRepVivo()?`<button class="lrow" data-a="modo2" data-x="vrep">${ico.moto}<div class="tx"><b>Modo repartidor</b></div></button>`:''}
+    ${VIVO&&soyNegocio()?`<button class="lrow" data-a="modo2" data-x="real">${ico.user}<div class="tx"><b>Volver a mi cuenta personal</b></div></button>`:(!soyNegocio()&&tieneNegocio()?`<button class="lrow" data-a="irMiNegocio">${ico.biz}<div class="tx"><b>Mi negocio</b></div></button>`:'')}
+    ${VIVO&&S.esAdmin?`<button class="lrow" data-a="modo2" data-x="vadmin">${ico.shield}<div class="tx"><b>Administrar</b></div></button>`:''}
+    <button class="lrow" data-a="go" data-x="buscar">${ico.search}<div class="tx"><b>Buscar</b></div></button>
     <button class="lrow" data-a="toggleTema">${temaActual()==='oscuro'?ico.sun:ico.moon}<div class="tx"><b>Cambiar a modo ${temaActual()==='oscuro'?'claro':'oscuro'}</b></div></button>
     <button class="lrow" data-a="grande">${ico.text}<div class="tx"><b>Texto más grande</b></div><span class="switch ${PREF.grande?'on':''}"></span></button>
     <button class="lrow" data-a="misLikes"><span class="ictile like">${ico.heartF}</span><div class="tx"><b>Mis likes</b><div class="small muted">Publicaciones, comentarios y notas que te gustaron · solo tú las ves</div></div></button>
@@ -3976,7 +4024,7 @@ const RCFG = { url:'https://vhxisjkmkwgpvuqcbomt.supabase.co', key:'eyJhbGciOiJI
 const SB_LIB = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.75.1/dist/umd/supabase.js';
 const SB_LIB_SRI = 'sha384-k5kwQoO9McjUumIYX4SkL2QuZrexERcRrE29/CQHjxNo8ODOzsxez5EzLnzyARYj';
 const RV = { sb:null, fase:'cargando', user:null, me:null, est:null, view:'feed', feed:'parati', posts:[], perfiles:{}, misLikes:new Set(), guardados:new Set(),
-  sigo:new Set(), meSiguen:new Set(), sheet:null, err:'', perfil:null, chat:null, msgs:[], chats:[], noLeidos:0, notifs:[], nNotifs:0, q:'', res:[], adm:'revisar', canal:null, cargandoFeed:false, draft:[], enviado:0 };
+  sigo:new Set(), meSiguen:new Set(), sheet:null, err:'', perfil:null, chat:null, msgs:[], chats:[], noLeidos:0, notifs:[], nNotifs:0, q:'', res:[], adm:'revisar', canal:null, cargandoFeed:false, draft:[], enviado:0, ltab:'entrar', otp:{paso:0, mail:'', tipo:'email', enviado:0}, nuevoLogin:false };
 const rFoto = path => !path ? null : path.startsWith('u:') ? urlU(path.slice(2), 1080) : `${RCFG.url}/storage/v1/object/public/fotos/${path}`;
 const rPerfil = id => RV.perfiles[id] || {id, usuario:'…', nombre:'…', color:'#6B7280'};
 const rAv = (id, s=40) => { const p = rPerfil(id); return avatar({nombre:p.nombre, color:p.color, foto:rFoto(p.foto), negocio:false}, s); };
@@ -4006,7 +4054,7 @@ async function rSesion(ses){
   RV.user = ses.user; if (location.hash.includes('access_token')) history.replaceState(null,'',location.pathname);
   const { data:me } = await RV.sb.from('profiles').select('id,usuario,nombre').eq('id', uid).maybeSingle();
   if (!me){ RV.fase='registro'; return renderReal(); }
-  RV.me = me; RV.fase='app'; renderReal();
+  RV.me = me; RV.fase='app'; if (typeof sesArrancar==='function') sesArrancar(); renderReal();
 }
 function renderReal(){
   const app = $('#app'); if (!app) return;
@@ -4022,27 +4070,78 @@ function renderReal(){
   app.innerHTML = `<div class="rwrapv">${top}${cuerpo}</div>`;
   $('#layer').innerHTML=''; document.body.style.overflow='';
 }
+/* ============================================================
+   v21 — ENTRAR MÁS SEGURO (2-nov-2026)
+   · Código de 6 dígitos por correo en lugar de enlace (el enlace solo servía
+     en el aparato donde se abría el correo).
+   · Reglas de contraseña, barra de fuerza y botón de ojo.
+   · Dispositivos con sesión abierta (se ven y se cierran en Configuración).
+   ============================================================ */
+Object.assign(ico, {
+  ojo: I('<path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.8"/>', 20),
+  ojoNo: I('<path d="M4 4l16 16"/><path d="M9.6 5.8A9.9 9.9 0 0 1 12 5.5c6.4 0 10 6.5 10 6.5a18 18 0 0 1-3.3 4"/><path d="M6.4 7.8A17 17 0 0 0 2 12s3.6 6.5 10 6.5c1.5 0 2.8-.3 4-.9"/><path d="M9.6 9.9a3 3 0 0 0 4.3 4.2"/>', 20),
+  disp: I('<rect x="4" y="3" width="11" height="18" rx="2"/><path d="M8 18.5h3"/><path d="M17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-3"/>', 20),
+  llave: I('<circle cx="8" cy="15" r="4"/><path d="m11 12 8-8"/><path d="m16 4 4 4"/><path d="m14 6 3 3"/>', 20)
+});
+const PW_MIN = 8;
+function pwChecks(pw){ pw = pw||''; return {largo: pw.length>=PW_MIN, letra:/[a-zA-Z]/.test(pw), num:/[0-9]/.test(pw), sim:/[^a-zA-Z0-9]/.test(pw)}; }
+function pwFalta(pw){ const c = pwChecks(pw);
+  if (!c.largo) return 'La contraseña debe tener al menos 8 caracteres.';
+  if (!c.letra) return 'La contraseña debe llevar al menos una letra.';
+  if (!c.num) return 'La contraseña debe llevar al menos un número.';
+  if (!c.sim) return 'La contraseña debe llevar al menos un símbolo, como . - _ ! ? * # @';
+  return ''; }
+function pwFuerza(pw){ pw = pw||''; if (!pw) return 0; const c = pwChecks(pw);
+  const var2 = (c.letra?1:0)+(c.num?1:0)+(c.sim?1:0)+((/[A-Z]/.test(pw)&&/[a-z]/.test(pw))?1:0);
+  const lar = pw.length>=14 ? 3 : pw.length>=11 ? 2 : pw.length>=8 ? 1 : 0;
+  let f = Math.max(1, Math.min(4, Math.round((var2 + lar) / 1.75)));
+  if (!c.largo) f = 1;
+  if (!pwFalta(pw) && pw.length>=12 && var2>=4) f = 4;
+  return f; }
+const PW_ET = ['', 'Muy débil', 'Débil', 'Buena', 'Fuerte'];
+function pwMedidorHTML(pw){ pw = pw||''; const f = pwFuerza(pw), c = pwChecks(pw);
+  const falta = [[c.largo,'8 caracteres'],[c.letra,'una letra'],[c.num,'un número'],[c.sim,'un símbolo']].filter(x=>!x[0]).map(x=>x[1]);
+  return `<span class="pwbar s${f}" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="pwtx small">${pw?`<b>${PW_ET[f]}</b>${falta.length?' · falta '+falta.join(', '):' · ya cumple todo'}`:'Mínimo 8 caracteres, con una letra, un número y un símbolo.'}</span>`; }
+function campoPw(o){
+  return `<label class="f" for="${o.id}">${o.label}<span class="pwin"><input id="${o.id}" type="password" autocomplete="${o.auto||'new-password'}"${o.medidor?` data-pwm="${o.id}"`:''} placeholder="${esc(o.ph||'')}" aria-describedby="${o.medidor?'pwm-'+o.id:''}">
+    <button type="button" class="pweye" data-a="verPw" data-x="${o.id}" aria-label="Ver u ocultar la contraseña" aria-pressed="false">${ico.ojo}</button></span>${o.medidor?`<span class="pwmed" id="pwm-${o.id}">${pwMedidorHTML('')}</span>`:''}${o.ayuda?`<span class="h">${o.ayuda}</span>`:''}</label>`; }
+function pwPintarMedidor(input){ const b = document.getElementById('pwm-'+input.id); if (b) b.innerHTML = pwMedidorHTML(input.value||''); }
+
 function rVLogin(){
-  const t = RV.ltab||'entrar', env = RV.enviado && Date.now()-RV.enviado < 60000;
+  const t = RV.ltab||'entrar';
+  if (t==='codigo') return rVCodigo();
+  const crear = t==='crear';
   const tab = (k,l)=>`<button type="button" class="${t===k?'on':''}" data-a="rLTab" data-x="${k}" aria-pressed="${t===k}">${l}</button>`;
-  let form;
-  if (t==='enlace') form = `${env?`<div class="note ok"><b>¡Listo! Revisa tu correo</b><br>Ábrelo <b>en este mismo teléfono o computadora</b>. Si no lo ves, busca en "Spam".</div>`:''}
-    <form class="stack" data-form="rLogin" novalidate style="gap:10px">
+  const form = `<form class="stack" data-form="rPassLogin" novalidate style="gap:10px">
       <label class="f" for="rl-mail">Tu correo<input id="rl-mail" type="email" autocomplete="email" inputmode="email" placeholder="tucorreo@gmail.com" value="${esc(RV.mail||'')}"></label>
+      ${campoPw({id:'rl-pass', label:'Contraseña', auto: crear?'new-password':'current-password', ph: crear?'Mínimo 8 caracteres':'Tu contraseña', medidor:crear})}
+      ${crear?campoPw({id:'rl-pass2', label:'Repite la contraseña'}):''}
       ${RV.err?`<div class="err" role="alert">${esc(RV.err)}</div>`:''}
-      <button class="btn pri block lg" type="submit" ${env?'disabled':''}>${env?'Enlace enviado':'Mandarme el enlace'}</button>
-      <p class="small muted" style="margin:0">Úsalo si olvidaste tu contraseña: entras con el enlace y luego pones una nueva en "Editar perfil".</p></form>`;
-  else form = `<form class="stack" data-form="rPassLogin" novalidate style="gap:10px">
-      <label class="f" for="rl-mail">Tu correo<input id="rl-mail" type="email" autocomplete="email" inputmode="email" placeholder="tucorreo@gmail.com" value="${esc(RV.mail||'')}"></label>
-      <label class="f" for="rl-pass">Contraseña<input id="rl-pass" type="password" autocomplete="${t==='crear'?'new-password':'current-password'}" minlength="8" placeholder="${t==='crear'?'Mínimo 8 caracteres':'Tu contraseña'}"></label>
-      ${t==='crear'?`<label class="f" for="rl-pass2">Repite la contraseña<input id="rl-pass2" type="password" autocomplete="new-password"></label>`:''}
-      ${RV.err?`<div class="err" role="alert">${esc(RV.err)}</div>`:''}
-      <button class="btn pri block lg" type="submit">${t==='crear'?'Crear mi cuenta':'Entrar'}</button></form>`;
+      <button class="btn pri block lg" type="submit">${crear?'Crear mi cuenta':'Entrar'}</button></form>`;
   return `<div class="rcentro rlogin"><span class="mark big ic"><img src="iconos/icon-192.png" alt="" width="64" height="64" draggable="false"></span><h1>${esc(S.cfg.marca)}</h1>
     <p class="muted">La Mejor Red Social Y Tienda De Los Mochis Sin.</p>
     <div style="width:100%;max-width:380px" class="stack"><div class="seg rltabs">${tab('entrar','Entrar')}${tab('crear','Crear cuenta')}</div>${form}
-    ${t!=='enlace'?`<button type="button" class="btn ghost sm" data-a="rLTab" data-x="enlace">¿Olvidaste tu contraseña? Entrar con enlace al correo</button>`:''}</div>
-    <p class="small muted" style="max-width:380px">Debes tener al menos 13 años. Nunca compartas tu contraseña con nadie, ni con el equipo. Al entrar aceptas las reglas: nada de contenido +18, ofensivo, enlaces, teléfonos ni publicidad sin permiso.</p>
+    <button type="button" class="btn ghost sm" data-a="rLTab" data-x="codigo">${crear?'Ya tengo cuenta: entrar con un código al correo':'¿Olvidaste tu contraseña? Entra con un código'}</button></div>
+    <p class="small muted" style="max-width:380px">Debes tener al menos 13 años. Nunca compartas tu contraseña ni los códigos con nadie, ni con el equipo. Al entrar aceptas las reglas: nada de contenido +18, ofensivo, enlaces, teléfonos ni publicidad sin permiso.</p>
+    <p class="small" style="max-width:380px">${linksLegales()}</p></div>`;
+}
+function rVCodigo(){
+  const o = RV.otp, espera = o.enviado && Date.now()-o.enviado < 60000;
+  const cuerpo = o.paso===2 ? `<form class="stack" data-form="rCodVerificar" novalidate style="gap:12px">
+      <div class="note ok"><b>Te mandamos un código a tu correo</b><br>Es un número de <b>6 dígitos</b> para <b>${esc(o.mail)}</b>. Escríbelo aquí, en <b>este</b> aparato. Si no lo ves, busca en "Spam" o "Promociones". Si en el correo viene un enlace y no un número, ábrelo en este mismo aparato.</div>
+      <label class="f" for="rl-cod">Código de 6 dígitos<span class="codin"><input id="rl-cod" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="------" aria-label="Código de 6 dígitos"></span></label>
+      ${RV.err?`<div class="err" role="alert">${esc(RV.err)}</div>`:''}
+      <button class="btn pri block lg" type="submit">Entrar</button>
+      <div class="row" style="gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn sm" type="button" data-a="rCodReenviar" ${espera?'disabled':''}>${espera?'Espera un momento…':'Reenviar código'}</button><button class="btn ghost sm" type="button" data-a="rCodOtro">Cambiar de correo</button></div></form>`
+    : `<form class="stack" data-form="rCodPedir" novalidate style="gap:12px">
+      <p class="small muted" style="margin:0">Te mandamos un <b>código de 6 dígitos</b> a tu correo. Como es un número y no un enlace, puedes leerlo en el teléfono y escribirlo aquí, en la computadora: la sesión se abre <b>aquí</b>.</p>
+      <label class="f" for="rl-mail">Tu correo<input id="rl-mail" type="email" autocomplete="email" inputmode="email" placeholder="tucorreo@gmail.com" value="${esc(RV.mail||'')}"></label>
+      ${RV.err?`<div class="err" role="alert">${esc(RV.err)}</div>`:''}
+      <button class="btn pri block lg" type="submit">Mandarme el código</button>
+      <p class="small muted" style="margin:0">Sirve también si olvidaste tu contraseña: entras con el código y luego pones una nueva en <b>Configuración → Contraseña</b>.</p></form>`;
+  return `<div class="rcentro rlogin"><span class="mark big ic"><img src="iconos/icon-192.png" alt="" width="64" height="64" draggable="false"></span><h1>${esc(S.cfg.marca)}</h1>
+    <div style="width:100%;max-width:380px" class="stack">${cuerpo}
+    <button type="button" class="btn ghost sm" data-a="rLTab" data-x="entrar">← Volver a entrar con contraseña</button></div>
     <p class="small" style="max-width:380px">${linksLegales()}</p></div>`;
 }
 function rVRegistro(){
@@ -4068,18 +4167,46 @@ async function rComprimir(file, max=1280){
 
 /* ---------- acciones ---------- */
 /* ---------- acciones de inicio de sesión ---------- */
+async function rCodMandar(mail, reenvio){
+  const tipo = (RV.otp && RV.otp.tipo==='signup') ? 'signup' : 'email';
+  let error = null;
+  try {
+    if (tipo==='signup'){ const r = await RV.sb.auth.resend({type:'signup', email:mail}); error = r.error; }
+    else { const r = await RV.sb.auth.signInWithOtp({email:mail, options:{shouldCreateUser:false}}); error = r.error; }
+  } catch(e){ error = e; }
+  if (error){ const m = (error && error.message) || '';
+    RV.err = /signups not allowed|not allowed for otp|user not found|no user|invalid login/i.test(m)
+        ? 'No encontramos una cuenta con ese correo. Revisa que esté bien escrito, o crea tu cuenta.'
+      : /rate|seconds|security purposes|too many|email rate/i.test(m)
+        ? 'Ya se mandaron varios correos seguidos. Espera unos minutos y vuelve a intentar.'
+      : /sending|smtp|email/i.test(m) ? 'No pudimos mandar el correo. Inténtalo otra vez en un momento.' : rErr(error);
+    return false; }
+  return true;
+}
 function registrarAccionesReal(){
   Object.assign(A, {
     rRecargar: () => location.reload(),
-    rLTab: x => { RV.ltab=x; RV.err=''; renderReal(); },
+    rLTab: x => { RV.ltab=x; RV.err='';
+      if (x!=='codigo') RV.otp = {paso:0, mail:'', tipo:'email', enviado:0};
+      else if (RV.otp.paso!==2) RV.otp = {paso:1, mail:'', tipo:'email', enviado:0};
+      renderReal(); },
+    verPw: (x, el) => { const i = document.getElementById(x); if (!i) return;
+      const ver = i.type==='password'; i.type = ver ? 'text' : 'password';
+      if (el){ el.setAttribute('aria-pressed', ver?'true':'false'); el.innerHTML = ver ? ico.ojoNo : ico.ojo; }
+      try { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } catch(e){} },
+    rCodReenviar: async () => { if (Date.now() - (RV.otp.enviado||0) < 60000) return; RV.err='';
+      if (await rCodMandar(RV.otp.mail, true)) RV.otp.enviado = Date.now();
+      renderReal(); if (!RV.err) toast('Te mandamos otro código'); },
+    rCodOtro: () => { RV.otp = {paso:1, mail:RV.otp.mail||'', tipo:'email', enviado:0}; RV.err=''; renderReal(); },
     rSalir: async () => { if (typeof vSalirVivo==='function') vSalirVivo(); prefCerrar(); await RV.sb.auth.signOut(); RV.user=null; RV.me=null; RV.fase='login'; ui.mode='real'; renderReal(); }
   });
   Object.assign(F, {
     rPassLogin: async () => { const crear = RV.ltab==='crear'; const mail = ($('#rl-mail').value||'').trim().toLowerCase(), pw = $('#rl-pass').value||''; RV.mail = mail; RV.err='';
       const fail = m => { RV.err=m; renderReal(); };
       if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(mail)) return fail('Escribe un correo válido.');
-      if (pw.length<8) return fail('La contraseña debe tener al menos 8 caracteres.');
+      if (crear){ const f = pwFalta(pw); if (f) return fail(f); } else if (!pw) return fail('Escribe tu contraseña.');
       if (crear && pw !== $('#rl-pass2').value) return fail('Las contraseñas no coinciden.');
+      RV.nuevoLogin = true;
       const btn = $('[data-form="rPassLogin"] button[type=submit]'); if (btn){ btn.disabled=true; btn.textContent='Un momento…'; }
       const r = crear ? await RV.sb.auth.signUp({email:mail, password:pw, options:{emailRedirectTo: location.origin + location.pathname}}) : await RV.sb.auth.signInWithPassword({email:mail, password:pw});
       if (r.error){ const m = r.error.message||'';
@@ -4089,18 +4216,29 @@ function registrarAccionesReal(){
         if (/rate|seconds|security purposes/i.test(m)) return fail('Demasiados intentos. Espera un momento y vuelve a intentar.');
         if (/weak|pwned|leaked/i.test(m)) return fail('Esa contraseña es muy fácil de adivinar. Usa otra más larga.');
         return fail(rErr(r.error)); }
-      if (crear && !r.data.session){ RV.ltab='entrar'; return fail('Cuenta creada. Revisa tu correo para confirmarla y luego entra.'); }
+      if (crear && !r.data.session){ RV.ltab='codigo'; RV.otp = {paso:2, mail:mail, tipo:'signup', enviado:Date.now()}; RV.err=''; return renderReal(); }
     },
     rPass: async () => { const pw=$('#rp-pass').value||''; RV.errp='';
       if (pw.length<8){ RV.errp='Mínimo 8 caracteres.'; return renderReal(); }
       if (pw!==$('#rp-pass2').value){ RV.errp='Las contraseñas no coinciden.'; return renderReal(); }
       const {error} = await RV.sb.auth.updateUser({password:pw}); if (error){ RV.errp = /weak|pwned|leaked/i.test(error.message)?'Esa contraseña es muy fácil de adivinar.':rErr(error); return renderReal(); }
       RV.errp=''; $('#rp-pass').value=''; $('#rp-pass2').value=''; toast('Contraseña guardada'); },
-    rLogin: async () => { const mail = ($('#rl-mail').value||'').trim().toLowerCase(); RV.mail = mail; RV.err='';
+    rCodPedir: async () => { const mail = ($('#rl-mail').value||'').trim().toLowerCase(); RV.mail = mail; RV.err='';
       if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(mail)){ RV.err='Escribe un correo válido.'; return renderReal(); }
-      const {error} = await RV.sb.auth.signInWithOtp({email:mail, options:{emailRedirectTo: location.origin + location.pathname, shouldCreateUser:true}});
-      if (error){ RV.err = /rate|seconds|security purposes/i.test(error.message) ? 'Espera un momento antes de pedir otro enlace (hay un límite de correos por hora).' : rErr(error); return renderReal(); }
-      RV.enviado = Date.now(); renderReal(); },
+      const btn = $('[data-form="rCodPedir"] button[type=submit]'); if (btn){ btn.disabled=true; btn.textContent='Mandando…'; }
+      if (!(await rCodMandar(mail, false))) return renderReal();
+      RV.otp = {paso:2, mail:mail, tipo:'email', enviado:Date.now()}; RV.err=''; renderReal(); setTimeout(()=>$('#rl-cod')?.focus(), 60); },
+    rCodVerificar: async () => { const cod = ($('#rl-cod').value||'').replace(/\D/g,''); RV.err='';
+      if (cod.length<6){ RV.err='Escribe los 6 dígitos que llegaron a tu correo.'; return renderReal(); }
+      const btn = $('[data-form="rCodVerificar"] button[type=submit]'); if (btn){ btn.disabled=true; btn.textContent='Un momento…'; }
+      RV.nuevoLogin = true;
+      let r = await RV.sb.auth.verifyOtp({email:RV.otp.mail, token:cod, type:RV.otp.tipo});
+      if (r.error && RV.otp.tipo!=='email') r = await RV.sb.auth.verifyOtp({email:RV.otp.mail, token:cod, type:'email'});
+      if (r.error){ const m = r.error.message||'';
+        RV.err = /expired|invalid|incorrect|not found/i.test(m) ? 'Ese código no es correcto o ya venció. Revisa el correo más reciente o pide otro.'
+          : /rate|seconds|security purposes|too many/i.test(m) ? 'Demasiados intentos. Espera unos minutos y vuelve a intentar.' : rErr(r.error);
+        return renderReal(); }
+      RV.err=''; RV.otp = {paso:0, mail:'', tipo:'email', enviado:0}; RV.ltab='entrar'; },
     rRegistro: async () => { const nom=$('#rr-nom').value.trim(), usr=$('#rr-usr').value.trim().toLowerCase().replace(/^@/,''), nac=$('#rr-nac').value; RV.err='';
       const fail = m => { RV.err=m; renderReal(); };
       if (nom.length<2) return fail('Escribe tu nombre.'); if (!/^[a-z0-9._]{3,24}$/.test(usr)) return fail('El usuario debe tener de 3 a 24 letras minúsculas, números, punto o guion bajo.');
@@ -5531,7 +5669,7 @@ function registrarAccionesVivo(){
     vPass: async () => { const old = $('#vp-old')?.value||'', pw = $('#vp-pass').value||'';
       VPW.sin = !!$('#vp-sin')?.checked;
       if (!VPW.sin && !old) return toast('Escribe tu contraseña actual.');
-      if (pw.length<8) return toast('La nueva contraseña debe tener mínimo 8 caracteres.'); if (pw!==$('#vp-pass2').value) return toast('Las contraseñas nuevas no coinciden.');
+      const falta = pwFalta(pw); if (falta) return toast(falta); if (pw!==$('#vp-pass2').value) return toast('Las contraseñas nuevas no coinciden.');
       if (!VPW.sin && old===pw) return toast('La nueva contraseña debe ser distinta a la actual.');
       const mail = RV.user && RV.user.email; if (!mail) return toast('Tu cuenta no tiene correo. Escríbenos desde Privacidad y legal.');
       if (!VPW.sin){ const r = await RV.sb.auth.signInWithPassword({email:mail, password:old});
@@ -5541,7 +5679,12 @@ function registrarAccionesVivo(){
     vPass2: async () => { const cod = ($('#vp-cod').value||'').replace(/\s/g,'');
       if (!/^\d{6,10}$/.test(cod)) return toast('Escribe el código de 6 dígitos que llegó a tu correo.');
       const {error} = await RV.sb.auth.updateUser({password:VPW.nueva, nonce:cod}); if (error) return toast(pwErr(error));
-      Object.assign(VPW, {paso:1, nueva:'', sin:false, enviado:0}); pwPintar(); toast('Listo: tu contraseña cambió'); },
+      Object.assign(VPW, {paso:1, nueva:'', sin:false, enviado:0}); pwPintar();
+      let otras = 0;
+      try { const r = await RV.sb.rpc('ses_cerrar_otras', {p_disp: sesDisp()}); otras = r.data||0; } catch(e){}
+      try { await RV.sb.auth.signOut({scope:'others'}); } catch(e){}
+      VSES.lista = null; vSesCargar();
+      toast(otras ? 'Listo: tu contraseña cambió y se cerró la sesión en los demás dispositivos' : 'Listo: tu contraseña cambió'); },
     vMail: async () => { const a = ($('#vm-1').value||'').trim().toLowerCase(), b = ($('#vm-2').value||'').trim().toLowerCase();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(a)) return toast('Escribe un correo válido.'); if (a!==b) return toast('Los correos no coinciden.');
       if (a===((RV.user&&RV.user.email)||'').toLowerCase()) return toast('Ese ya es tu correo.');
@@ -5614,8 +5757,9 @@ function vPassHTML(){
     <p class="small muted" style="margin:0">Si no llega en unos minutos, revisa spam o promociones. El código vence pronto.</p>
     <div class="row" style="flex-wrap:wrap;gap:8px"><button class="btn pri" type="submit">Cambiar contraseña</button><button class="btn" type="button" data-a="vPassReenviar">Reenviar código</button><button class="btn ghost" type="button" data-a="vPassCancelar">Cancelar</button></div></form>`;
   return `<form class="stack" data-form="vPass" novalidate style="gap:12px"><p class="small muted" style="margin:0">Paso 1 de 2 · Por seguridad te pedimos tu contraseña actual y luego un código que llega al correo de tu cuenta. No se la digas a nadie, ni al equipo.</p>
-    ${VPW.sin ? '' : `<label class="f" for="vp-old">Contraseña actual<input id="vp-old" type="password" autocomplete="current-password"></label>`}
-    <div class="grid2"><label class="f" for="vp-pass">Nueva contraseña<input id="vp-pass" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres"></label><label class="f" for="vp-pass2">Repítela<input id="vp-pass2" type="password" autocomplete="new-password"></label></div>
+    ${VPW.sin ? '' : campoPw({id:'vp-old', label:'Contraseña actual', auto:'current-password', ph:'Tu contraseña de ahora'})}
+    <div class="grid2">${campoPw({id:'vp-pass', label:'Nueva contraseña', ph:'Mínimo 8 caracteres', medidor:true})}${campoPw({id:'vp-pass2', label:'Repítela'})}</div>
+    <p class="small muted" style="margin:0">Al cambiarla se cierra la sesión en todos los demás dispositivos.</p>
     <label class="chk"><input id="vp-sin" type="checkbox" data-ch="vPassSin"${VPW.sin?' checked':''}> <span>No tengo contraseña o no recuerdo la actual (solo con el código del correo)</span></label>
     <div class="row"><button class="btn pri" type="submit">Continuar</button></div></form>`;
 }
@@ -5637,6 +5781,9 @@ function vLimpiar(root){
   root.querySelectorAll('.verif.bot').forEach(el=>el.title='Cuenta automática (bot)');
   root.querySelectorAll('.vlabel.bot').forEach(el=>el.textContent='Bot · cuenta automática del equipo');
   if (ui.view==='ajustes' && !root.querySelector('#vp-box')){ const d = root.querySelector('details.set'); if (d){ d.insertAdjacentHTML('afterend', `<details class="set"${VPW.paso===2?' open':''}><summary>${ico.shield}<span>Contraseña<small>Cambia tu contraseña (con verificación por correo)</small></span></summary><div class="bd" id="vp-box">${vPassHTML()}</div></details>`); } }
+  if (ui.view==='ajustes' && !root.querySelector('#vs-box')){ const pw = root.querySelector('#vp-box')?.closest('details');
+    if (pw){ pw.insertAdjacentHTML('afterend', `<details class="set"><summary>${ico.disp}<span>Dispositivos y sesiones<small>Mira dónde está abierta tu cuenta y ciérrala a distancia</small></span></summary><div class="bd" id="vs-box">${vSesHTML()}</div></details>`);
+      if (!VSES.lista) vSesCargar(); } }
   if (ui.view==='ajustes' && !root.querySelector('#vm-box')){ const pw = root.querySelector('#vp-box')?.closest('details');
     if (pw) pw.insertAdjacentHTML('afterend', `<details class="set"><summary>${ico.msg}<span>Correo de tu cuenta<small>Cámbialo por otro correo</small></span></summary><div class="bd" id="vm-box">${vMailHTML()}</div></details>`
       + (S.esAdmin ? '' : `<details class="set"><summary>${ico.basura}<span>Borrar mi cuenta<small>Con 5 minutos para arrepentirte</small></span></summary><div class="bd" id="vb-box">${vBorrarHTML()}</div></details>`)); }
@@ -5727,7 +5874,7 @@ function vRepVivo(){
   return `<div class="rapp">
     <header class="rtop"><div class="rlogo"><span class="mark ic"><img src="iconos/icon-192.png" alt="" width="34" height="34" draggable="false"></span><b>${esc(S.cfg.marca)} <i>Repartidor</i></b></div>
       <div class="row nowrap" style="gap:8px">${r.estado==='aprobado'?`<button class="rsw ${r.online?'on':''}" data-a="vRepOnline" aria-pressed="${r.online}"><span></span>${r.online?'Conectado':'Desconectado'}</button>`:''}<button class="btn sm" data-a="modo2" data-x="real" aria-label="Volver a mi cuenta" title="Volver a mi cuenta">${ico.user}Mi cuenta</button></div></header>
-    <main class="rbody">${cuerpo}<div class="card stack" style="gap:8px;margin-top:16px"><b>Apelar una decisión</b><span class="small muted">Si el equipo o el sistema cambió algo de tu cuenta y crees que fue un error, ábrelo aquí y platícalo por chat.</span><button class="btn sm" data-a="apelarMenu" style="align-self:flex-start">Apelar una decisión</button></div>${r.estado!=='rechazado'?`<div class="card stack" style="gap:8px;margin-top:16px"><b>Dejar de ser repartidor</b><span class="small muted">Si te das de baja y después quieres volver, tendrás que registrarte y hacer toda la documentación de nuevo.</span><button class="btn danger sm" data-a="vRepBaja" style="align-self:flex-start">Dejar de ser repartidor</button></div>`:''}</main></div>`;
+    <main class="rbody">${cuerpo}<div class="card stack" style="gap:8px;margin-top:16px"><b>Tu cuenta y tus sesiones</b><span class="small muted">Contraseña, correo y los dispositivos donde tienes la sesión abierta.</span><button class="btn sm" data-a="vSesIrAjustes" style="align-self:flex-start">Abrir Configuración</button></div><div class="card stack" style="gap:8px;margin-top:16px"><b>Apelar una decisión</b><span class="small muted">Si el equipo o el sistema cambió algo de tu cuenta y crees que fue un error, ábrelo aquí y platícalo por chat.</span><button class="btn sm" data-a="apelarMenu" style="align-self:flex-start">Apelar una decisión</button></div>${r.estado!=='rechazado'?`<div class="card stack" style="gap:8px;margin-top:16px"><b>Dejar de ser repartidor</b><span class="small muted">Si te das de baja y después quieres volver, tendrás que registrarte y hacer toda la documentación de nuevo.</span><button class="btn danger sm" data-a="vRepBaja" style="align-self:flex-start">Dejar de ser repartidor</button></div>`:''}</main></div>`;
 }
 /* ---------- ADMIN → Repartidores (en vivo) ---------- */
 // Placa o teléfono que ya usa otra cuenta, o que está vetado (lo calcula el servidor)
@@ -6330,6 +6477,7 @@ function render(){
   const items = [
     ['go','home','Inicio',ico.home,['home','post','usuario'],0],
     ['go','inicio','Tienda',ico.shop,['inicio','negocio','vende'],0],
+    ['go','buscar','Buscar',ico.search,['buscar'],0],
     ['go','mensajes','Mensajes',ico.msg,['mensajes'],nMsg],
     ['go','notifs','Notificaciones',ico.bell,['notifs'],nN],
     ['crear','','Crear',ico.plus,[],0],
@@ -6351,12 +6499,11 @@ function render(){
     <button class="nv" data-a="mas" title="Más">${ico.menu}<span class="lbl">Más</span></button>
   </nav>
   <header class="mtop"><button class="logo2" data-a="go" data-x="home"><span class="mark ic"><img src="iconos/icon-192.png" alt="" width="34" height="34" draggable="false"></span><span class="txt">${esc(S.cfg.marca)}</span></button><span class="sp"></span>
-    ${VIVO&&S.esAdmin?`<button class="ibtn" data-a="modo2" data-x="vadmin" aria-label="Administrar">${ico.shield}</button>`:`<button class="ibtn" data-a="toggleTema" aria-label="Cambiar tema">${temaActual()==='oscuro'?ico.sun:ico.moon}</button>`}
+    <button class="ibtn ${on(['buscar'])}" data-a="go" data-x="buscar" aria-label="Buscar">${ico.search}</button>
     <button class="ibtn" data-a="go" data-x="notifs" aria-label="Notificaciones">${ico.bell}${badge(nN)}</button>
-    ${soyNegocio()?'':`<button class="ibtn ${on(['pedidos','seguimiento'])}" data-a="go" data-x="pedidos" aria-label="Mis pedidos">${ico.list}${badge(nAct)}</button>`}
-    ${soyRepVivo()?`<button class="ibtn" data-a="modo2" data-x="vrep" aria-label="Repartidor">${ico.moto}</button>`:!soyNegocio()&&tieneNegocio()?`<button class="ibtn" data-a="irMiNegocio" aria-label="Mi negocio">${ico.biz}</button>`:''}
-    ${VIVO&&soyNegocio()?`<button class="ibtn" data-a="modo2" data-x="real" aria-label="Volver a mi cuenta personal" title="Volver a mi cuenta personal">${ico.user}</button>`:''}
-    ${soyNegocio()?`<button class="ibtn ${on(['minegocio'])}" data-a="go" data-x="minegocio" aria-label="Mi negocio">${ico.biz}${badge(nPed)}</button>${cartN?`<button class="ibtn" data-a="go" data-x="carrito" aria-label="Carrito">${ico.bag}${badge(cartN)}</button>`:''}`:`<button class="ibtn ${on(['carrito','checkout'])}" data-a="go" data-x="carrito" aria-label="Carrito">${ico.bag}${badge(cartN)}</button>`}</header>
+    ${soyNegocio()?`<button class="ibtn ${on(['minegocio'])}" data-a="go" data-x="minegocio" aria-label="Mi negocio">${ico.biz}${badge(nPed)}</button>`:''}
+    <button class="ibtn ${on(['carrito','checkout'])}" data-a="go" data-x="carrito" aria-label="Carrito">${ico.bag}${badge(cartN)}</button>
+    <button class="ibtn" data-a="mas" aria-label="Más opciones" title="Más">${ico.dots}</button></header>
   <main class="igmain"><div class="igin stack">${protoBar()}${VISTAS[v]()}</div></main>
   ${showBar?`<button class="cartfloat" data-a="go" data-x="carrito"><span>${cartN} producto(s) · ${esc(neg(S.carrito.neg).nombre)}</span><span class="num">${money(subtotalCarrito())} →</span></button>`:''}
   <nav class="mnav" aria-label="Navegación">
@@ -6389,6 +6536,7 @@ function go(view, keep){
   if (ui.view==='home' && view!=='home') ui.homeY = window.scrollY;
   const aHome = view==='home' && ui.view!=='home';
   ui.view=view; ui.err=''; ui.sel=null; ui.sheet=null; render(); window.scrollTo(0, aHome ? (ui.homeY||0) : 0);
+  if (view==='buscar'){ const i=$('#q'); if (i) try { i.focus(); } catch(e){} }
 }
 function rerender(){ const y=window.scrollY; render(); window.scrollTo(0,y); }
 const cerrarHoja = () => { ui.sheet=null; ui.err=''; renderLayer(); };
@@ -6401,7 +6549,10 @@ const A = {
     go(x); if(x==='notifs'){ misNotifs().forEach(n=>n.leida=true); save(); } },
   atras: () => { const h=historial.pop(); if(!h) return go('home',true); Object.assign(ui,{post:h.post, perfil:h.perfil, neg:h.neg}); go(h.view,true); },
   verNota: x => { ui.err=''; ui.sheet={t:'verNota', id:x}; renderLayer(); setTimeout(()=>$('#nr-txt')?.focus(),30); },
-  limpiarQ: () => { ui.q=''; rerender(); },
+  limpiarQ: () => { ui.q=''; rerender(); if (ui.view==='buscar'){ const i=$('#q'); if (i) i.focus(); } },
+  bFiltro: x => { ui.bf = x;
+    document.querySelectorAll('.chips .chip').forEach(b=>b.classList.toggle('on', b.dataset.x===x));
+    const r = $('#results'); if (r) r.innerHTML = resultados(); },
   cancelarPedido: x => { const p=S.pedidos.find(o=>o.id===x); if(!p||!puedeCancelar(p)) return toast('Este pedido ya no se puede cancelar');
     if (!confirmarSimple('¿Cancelar el pedido #'+p.id+'? No se te cobrará nada.')) return;
     p.estado='cancelado'; p.canceladoPor='cliente'; p.hist.push({s:'cancelado',t:Date.now()}); if(p.rep){ repEvento(p,'cancelado_cliente'); }
@@ -6937,6 +7088,93 @@ function registrarAccionesReac(){
   });
 }
 
+/* ============================================================
+   v21 — DISPOSITIVOS Y SESIONES (2-nov-2026)
+   Servidor: priv.sesiones + ses_tocar / ses_lista / ses_cerrar /
+   ses_cerrar_otras / ses_salir (ver knowledge/claude/sesiones-sql/).
+   Cada navegador guarda un id de dispositivo (no identifica a la persona,
+   solo a este navegador) y avisa al servidor que sigue abierto.
+   Si otro dispositivo cierra esta sesión, aquí se sale solo.
+   ============================================================ */
+const VSES = {lista:null, cargando:false, timer:0, ult:0};
+function sesDisp(){ let d = '';
+  try { d = localStorage.getItem('lm-disp') || ''; } catch(e){}
+  if (!/^[a-z0-9]{10,40}$/.test(d)){ d = Math.random().toString(36).slice(2,10) + Date.now().toString(36); try { localStorage.setItem('lm-disp', d); } catch(e){} }
+  return d; }
+function sesNombre(){ const u = navigator.userAgent || '';
+  const so = /iPhone/.test(u) ? 'iPhone' : /iPad/.test(u) ? 'iPad' : /Android/.test(u) ? 'Android'
+    : /Windows/.test(u) ? 'Windows' : /Mac OS X|Macintosh/.test(u) ? 'Mac' : /Linux/.test(u) ? 'Linux' : 'Dispositivo';
+  const nv = /Edg\//.test(u) ? 'Edge' : /OPR\/|Opera/.test(u) ? 'Opera' : /SamsungBrowser/.test(u) ? 'Samsung Internet'
+    : /CriOS/.test(u) ? 'Chrome' : /FxiOS|Firefox/.test(u) ? 'Firefox' : /Chrome\//.test(u) ? 'Chrome' : /Safari/.test(u) ? 'Safari' : 'Navegador';
+  return so + ' · ' + nv; }
+async function sesTocar(nuevo){ if (!RV.sb || !RV.user) return;
+  try { const {data, error} = await RV.sb.rpc('ses_tocar', {p_disp:sesDisp(), p_nombre:sesNombre(), p_nuevo:!!nuevo});
+    if (error) return; VSES.ult = Date.now();
+    if (data && data.revocada) return sesExpulsar();
+  } catch(e){} }
+async function sesExpulsar(){ sesParar();
+  try { if (typeof vSalirVivo==='function') vSalirVivo(); prefCerrar(); } catch(e){}
+  try { await RV.sb.auth.signOut({scope:'local'}); } catch(e){ try { await RV.sb.auth.signOut(); } catch(e2){} }
+  RV.user=null; RV.me=null; RV.fase='login'; ui.mode='real'; VSES.lista=null; renderReal();
+  toast('Esta sesión se cerró desde otro dispositivo.'); }
+function sesParar(){ if (VSES.timer) clearInterval(VSES.timer); VSES.timer = 0; }
+function sesArrancar(){ sesParar(); const nuevo = !!RV.nuevoLogin; RV.nuevoLogin = false; sesTocar(nuevo);
+  VSES.timer = setInterval(()=>{ if (document.visibilityState !== 'hidden') sesTocar(false); }, 10*60000); }
+document.addEventListener('visibilitychange', ()=>{ if (document.visibilityState==='visible' && RV.user && Date.now()-VSES.ult > 5*60000) sesTocar(false); });
+function vSesHTML(){
+  if (!VSES.lista) return '<p class="small muted" style="margin:0">Cargando…</p>';
+  const yo = sesDisp();
+  const otras = VSES.lista.filter(x=>x.disp!==yo).length;
+  const fila = x => { const mio = x.disp===yo; const t = Date.parse(x.vista)||Date.now();
+    return `<div class="sesrow">${ico.disp}<div class="tx"><b>${esc(x.nombre||'Dispositivo')}${mio?' · este dispositivo':''}</b><span>${mio?'En uso ahora':'Última vez ' + hace(t)}</span></div>${mio?'<span class="pill ok">Aquí</span>':`<button class="btn danger sm" type="button" data-a="vSesCerrar" data-x="${esc(x.id)}">Cerrar</button>`}</div>`; };
+  return `<div class="stack" style="gap:10px">
+    <p class="small muted" style="margin:0">Aquí ves en qué aparatos está abierta tu cuenta. Si ves uno que no reconoces, ciérralo y cambia tu contraseña.</p>
+    ${VSES.lista.length ? VSES.lista.map(fila).join('') : '<p class="small muted" style="margin:0">Solo este dispositivo.</p>'}
+    ${campoPw({id:'vs-pw', label:'Tu contraseña (para confirmar que eres tú)', auto:'current-password', ph:'Tu contraseña'})}
+    <div class="row" style="flex-wrap:wrap;gap:8px">
+      <button class="btn danger sm" type="button" data-a="vSesOtras"${otras?'':' disabled'}>Cerrar las demás (${otras})</button>
+      <button class="btn sm" type="button" data-a="vSesTodas">Cerrar en todas, también aquí</button>
+      <button class="btn ghost sm" type="button" data-a="vSesRefrescar">Actualizar</button></div>
+    <p class="small muted" style="margin:0">Un aparato apagado puede tardar hasta 10 minutos en salirse cuando lo vuelvan a abrir. Al cambiar tu contraseña se cierran solas todas las demás sesiones.</p></div>`; }
+async function vSesCargar(){ if (!RV.sb || !RV.user || VSES.cargando) return; VSES.cargando = true;
+  try { const {data, error} = await RV.sb.rpc('ses_lista'); if (!error) VSES.lista = Array.isArray(data) ? data : []; } catch(e){} finally { VSES.cargando = false; }
+  const bx = $('#vs-box'); if (bx) bx.innerHTML = vSesHTML(); }
+async function sesClave(){ const pw = ($('#vs-pw')?.value) || ''; const mail = RV.user && RV.user.email;
+  if (!pw){ toast('Escribe tu contraseña para confirmar.'); $('#vs-pw')?.focus(); return false; }
+  if (!mail){ toast('Tu cuenta no tiene correo. Escríbenos desde Privacidad y legal.'); return false; }
+  const r = await RV.sb.auth.signInWithPassword({email:mail, password:pw});
+  if (r.error){ const m = r.error.message||'';
+    toast(/invalid login/i.test(m) ? 'Esa no es tu contraseña. Si no la recuerdas, cámbiala en la sección "Contraseña".'
+      : /rate|seconds|too many/i.test(m) ? 'Demasiados intentos. Espera unos minutos.' : rErr(r.error));
+    return false; }
+  const i = $('#vs-pw'); if (i) i.value = ''; return true; }
+function registrarAccionesSes(){
+  Object.assign(A, {
+    vSesIrAjustes: () => { ui.mode='app'; ui.sheet=null; if (typeof soyNegocio==='function' && soyNegocio() && S.personal){ S.yo = S.personal; try { save(); } catch(e){} } go('ajustes'); },
+    vSesRefrescar: () => { VSES.lista = null; const bx = $('#vs-box'); if (bx) bx.innerHTML = vSesHTML(); vSesCargar(); },
+    vSesCerrar: async x => { if (!(await sesClave())) return;
+      try { const {error} = await RV.sb.rpc('ses_cerrar', {p_id:x}); if (error) return toast(rErr(error)); } catch(e){ return toast('No se pudo cerrar esa sesión.'); }
+      VSES.lista = null; await vSesCargar(); toast('Sesión cerrada en ese dispositivo'); },
+    vSesOtras: async () => { if (!(await sesClave())) return;
+      let n = 0; try { const r = await RV.sb.rpc('ses_cerrar_otras', {p_disp:sesDisp()}); if (r.error) return toast(rErr(r.error)); n = r.data||0; } catch(e){ return toast('No se pudo cerrar las demás sesiones.'); }
+      try { await RV.sb.auth.signOut({scope:'others'}); } catch(e){}
+      VSES.lista = null; await vSesCargar(); toast(n ? 'Listo: cerramos ' + n + ' sesión(es)' : 'No había otras sesiones abiertas'); },
+    vSesTodas: async () => { if (!confirmarSimple('¿Cerrar la sesión en TODOS los dispositivos, incluido este? Tendrás que volver a entrar.')) return;
+      if (!(await sesClave())) return;
+      try { await RV.sb.rpc('ses_cerrar_otras', {p_disp:'x'}); } catch(e){}
+      sesParar();
+      try { if (typeof vSalirVivo==='function') vSalirVivo(); prefCerrar(); } catch(e){}
+      try { await RV.sb.auth.signOut({scope:'global'}); } catch(e){ try { await RV.sb.auth.signOut(); } catch(e2){} }
+      RV.user=null; RV.me=null; RV.fase='login'; ui.mode='real'; VSES.lista=null; renderReal(); toast('Cerramos la sesión en todos tus dispositivos'); },
+    rSalir: async () => {
+      try { if (RV.sb && RV.user) await RV.sb.rpc('ses_salir', {p_disp:sesDisp()}); } catch(e){}
+      sesParar();
+      try { if (typeof vSalirVivo==='function') vSalirVivo(); prefCerrar(); } catch(e){}
+      try { await RV.sb.auth.signOut({scope:'local'}); } catch(e){ try { await RV.sb.auth.signOut(); } catch(e2){} }
+      RV.user=null; RV.me=null; RV.fase='login'; ui.mode='real'; VSES.lista=null; renderReal(); }
+  });
+}
+
 /* ---------- eventos ---------- */
 document.addEventListener('click', e => { const el = e.target.closest('[data-a]'); if(!el) return; const fn = A[el.dataset.a]; if(fn) fn(el.dataset.x, el, e); });
 document.addEventListener('dblclick', e => { const c = e.target.closest('[data-dbl]'); if(!c) return; const id=c.dataset.dbl; if(!leGusta(id)) A.like(id, {dataset:{o:c.closest('article')?.dataset.por||''}}); else { const bh=$('#bh-'+id); if(bh){ bh.classList.remove('go'); void bh.offsetWidth; bh.classList.add('go'); } } });
@@ -6945,6 +7183,8 @@ document.addEventListener('focusin', e => { if(e.target.id==='st-resp' && ui.sto
 document.addEventListener('input', e => {
   const tc = e.target; if (tc && tc.dataset && tc.dataset.color){ const c = {...(PREF.color || ui.colorTmp || {h:160, l:85})}; c[tc.dataset.color] = +tc.value; PREF.color = c; aplicarPref();
     const rl = document.querySelector('.rng-l'); if (rl) rl.setAttribute('style', rngLuz(c.h)); document.querySelectorAll('.pal .sw.act').forEach(b=>b.classList.remove('act')); return; }
+  if (e.target.dataset && e.target.dataset.pwm){ pwPintarMedidor(e.target); }
+  if (e.target.id==='rl-cod' || e.target.id==='vp-cod'){ const v = (e.target.value||'').replace(/\D/g,'').slice(0,6); if (v !== e.target.value) e.target.value = v; }
   if (e.target.id==='q'){ ui.q=e.target.value; const r=$('#results'); if(r) r.innerHTML = (ui.view==='buscar' || ui.q.trim()) ? resultados() : ''; }
   if (e.target.id==='qm'){ ui.qm=e.target.value; const busca=!!ui.qm.trim(); const r=$('#dm-res'); if(r) r.innerHTML=resultadosMsg(); document.querySelectorAll('.dm-list .notes, .dm-list .dm-sub:not(.dm-res .dm-sub)').forEach(el=>el.hidden=busca); document.querySelectorAll('.dm-list > .crow').forEach(el=>el.hidden=busca); if(!busca && !document.querySelector('.dm-list > .crow')){ render(); const i=$('#qm'); if(i){ i.focus(); } } }
   if (e.target.id==='sheet-note' && ui.sel) ui.sel.note=e.target.value;
@@ -6983,7 +7223,7 @@ Object.assign(A, {
   termAdd: () => { const t=$('#term-t').value.trim().toLowerCase(), c=$('#term-c').value; if(t.length<3) return toast('Escribe al menos 3 letras'); S.cfg.terminos.push({t:limpiarTexto(t), cat:c}); CACHE_RE.clear(); log('Admin','Agregó término al Escudo',c); save(); rerender(); },
   termDel: x => { S.cfg.terminos.splice(+x,1); save(); rerender(); }
 });
-registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal(); registrarAccionesV17(); registrarAccionesV18(); registrarAccionesLegal(); registrarAccionesVivo(); registrarAccionesRepVivo(); registrarAccionesRepVivo3(); registrarAccionesReac(); registrarAccionesPortadas();
+registrarAccionesReparto(); registrarAccionesExtras(); registrarAccionesV12(); registrarAccionesReal(); registrarAccionesV17(); registrarAccionesV18(); registrarAccionesLegal(); registrarAccionesVivo(); registrarAccionesRepVivo(); registrarAccionesRepVivo3(); registrarAccionesReac(); registrarAccionesPortadas(); registrarAccionesSes();
 aplicarPref();
 const EN_VIVO_OK = /(github\.io|mochimx\.com)$/.test(location.host) || /[?&]vivo=1/.test(location.search);
 try { if (EN_VIVO_OK && (localStorage.getItem('lm-modo')||'real')==='real') ui.mode='real'; } catch(e){ if (EN_VIVO_OK) ui.mode='real'; }
